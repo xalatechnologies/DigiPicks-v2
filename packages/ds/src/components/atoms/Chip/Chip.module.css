@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 34px;
+  height: var(--control-md);
   padding: 0 var(--space-4);
   border-radius: var(--r-pill);
   background: var(--bg-2);
@@ -46,7 +46,7 @@
 .count {
   background: var(--bg-3);
   color: var(--t-3);
-  padding: 1px 6px;
+  padding: 1px var(--space-2);
   border-radius: var(--r-pill);
   font-family: var(--f-mono);
   font-size: var(--text-2xs);
@@ -56,6 +56,6 @@
 
 .active .count,
 .greenActive .count {
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, currentColor 16%, transparent);
   color: currentColor;
 }

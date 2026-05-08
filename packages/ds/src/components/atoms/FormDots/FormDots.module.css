@@ -4,8 +4,8 @@
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
+  width: var(--size-xs);
+  height: var(--size-xs);
   border-radius: 2px;
   background: var(--t-3);
 }

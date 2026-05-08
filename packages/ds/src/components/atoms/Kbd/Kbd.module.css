@@ -2,9 +2,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 20px;
-  min-width: 20px;
-  padding: 0 5px;
+  height: var(--size-xl);
+  min-width: var(--size-xl);
+  padding: 0 var(--space-1);
   border: 1px solid var(--line);
   border-radius: var(--r-xs);
   background: var(--bg-3);

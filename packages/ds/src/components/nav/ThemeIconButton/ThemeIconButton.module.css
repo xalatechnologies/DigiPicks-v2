@@ -1,7 +1,7 @@
 .btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill, 999px);
+  width: var(--size-8xl);
+  height: var(--size-8xl);
+  border-radius: var(--r-pill);
   border: 0;
   background: transparent;
   color: var(--t-2);

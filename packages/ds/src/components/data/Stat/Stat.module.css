@@ -19,7 +19,7 @@
   color: var(--t-1);
   letter-spacing: var(--tracking-tight);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: var(--leading-tight);
 }
 .accent {
   color: var(--blue);

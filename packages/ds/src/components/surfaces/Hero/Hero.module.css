@@ -34,7 +34,7 @@
     );
   background-size: 200% 200%, 200% 200%, 200% 200%;
   background-position: 0% 0%, 100% 100%, 50% 50%;
-  animation: dp-aurora 22s var(--ease-in-out) infinite;
+  animation: dp-aurora var(--dur-ambient-aurora) var(--ease-in-out) infinite;
   pointer-events: none;
   filter: saturate(115%);
 }
@@ -45,7 +45,7 @@
   background-image:
     linear-gradient(to right, color-mix(in srgb, var(--t-1) 6%, transparent) 1px, transparent 1px),
     linear-gradient(to bottom, color-mix(in srgb, var(--t-1) 6%, transparent) 1px, transparent 1px);
-  background-size: 56px 56px;
+  background-size: var(--size-12xl) var(--size-12xl);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 0%, transparent 75%);
   pointer-events: none;
@@ -83,7 +83,7 @@
 .inner:not(.split) .content {
   align-items: center;
   text-align: center;
-  max-width: 920px;
+  max-width: var(--measure-2xl);
   margin: 0 auto;
 }
 
@@ -101,7 +101,7 @@
   font-weight: var(--weight-medium);
   color: var(--t-1);
   letter-spacing: var(--tracking-tightest);
-  line-height: 1.02;
+  line-height: var(--leading-display);
 }
 .title em,
 .title :global(em) {
@@ -116,7 +116,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  padding-right: 0.06em;
+  padding-right: 0.06em; /* optical compensation for italic ascender */
 }
 
 .subtitle {
@@ -156,7 +156,7 @@
 .panel {
   position: relative;
   animation: dp-fade-in-up var(--dur-slower) var(--ease-out) both;
-  animation-delay: 80ms;
+  animation-delay: var(--dur-instant);
 }
 
 /* ── Bottom marquee (single-column hero only) ────────────────────────── */

@@ -47,8 +47,8 @@
 .chev {
   color: var(--t-3);
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: var(--size-5xl);
+  height: var(--size-5xl);
   display: inline-flex;
   align-items: center;
   justify-content: center;

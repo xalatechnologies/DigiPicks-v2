@@ -98,6 +98,7 @@
   --font-serif: var(--f-serif);
 
   /* type scale — modern 16px base, every step is comfortable on hi-dpi */
+  --text-3xs: 10px;
   --text-2xs: 12px;
   --text-xs: 13px;
   --text-sm: 14px;
@@ -114,6 +115,7 @@
   --text-8xl: 104px;
 
   /* line heights */
+  --leading-display: 1.02;
   --leading-tight: 1.1;
   --leading-snug: 1.25;
   --leading-normal: 1.45;
@@ -125,6 +127,7 @@
   --tracking-tight: -0.02em;
   --tracking-snug: -0.01em;
   --tracking-normal: 0em;
+  --tracking-loose: 0.02em;
   --tracking-wide: 0.04em;
   --tracking-wider: 0.08em;
   --tracking-widest: 0.14em;
@@ -200,6 +203,23 @@
   --dur-base: 200ms;
   --dur-slow: 320ms;
   --dur-slower: 520ms;
+  /* ambient animations (continuous loops — atmospheric, not UI feedback) */
+  --dur-ambient-pulse: 1.6s;
+  --dur-ambient-aurora: 22s;
+  --dur-ambient-aurora-fast: 18s;
+  --dur-ambient-marquee: 40s;
+
+  /* backdrop & decorative filter tokens */
+  --blur-xs: 6px;
+  --blur-sm: 8px;
+  --blur-md: 20px;
+  --blur-lg: 24px;
+  --blur-xl: 40px;
+  --backdrop-glass: blur(var(--blur-md)) saturate(140%);
+  --backdrop-glass-strong: blur(var(--blur-lg)) saturate(140%);
+
+  /* overlays (modal/drawer scrim) — theme-independent */
+  --overlay-scrim: rgba(0, 0, 0, 0.55);
 
   /* ─────────────────────────────────────────────────────────────────────────
      Z-index
@@ -226,6 +246,60 @@
   /* selection / focus */
   --focus-ring: 2px solid var(--ring);
   --focus-offset: 2px;
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Sizing — atom & control dimensions
+     Use these for any width/height of a UI primitive instead of raw px.
+     ───────────────────────────────────────────────────────────────────────── */
+  /* generic square sizes (icons, dots, decorative chips, tick circles, etc.) */
+  --size-2xs: 6px;
+  --size-xs: 8px;
+  --size-sm: 10px;
+  --size-md: 16px;
+  --size-lg: 18px;
+  --size-xl: 20px;
+  --size-2xl: 22px;
+  --size-3xl: 24px;
+  --size-4xl: 26px;
+  --size-5xl: 28px;
+  --size-6xl: 32px;
+  --size-7xl: 36px;
+  --size-8xl: 40px;
+  --size-9xl: 44px;
+  --size-10xl: 48px;
+  --size-11xl: 52px;
+  --size-12xl: 56px;
+  --size-13xl: 64px;
+  --size-14xl: 88px;
+  --size-15xl: 100px;
+
+  /* control heights (input, select, button) */
+  --control-xs: 22px;
+  --control-sm: 30px;
+  --control-md: 36px;
+  --control-base: 44px;
+  --control-lg: 56px;
+  --control-xl: 64px;
+  --input-h: 48px;
+  --tab-h: 40px;
+
+  /* common widths used in chrome */
+  --drawer-w: 420px;
+  --modal-max-w: 520px;
+  --search-w: 320px;
+  --search-max-w: 640px;
+
+  /* prose / column widths (max-widths for text & narrow columns) */
+  --measure-xs: 360px;
+  --measure-sm: 420px;
+  --measure-md: 520px;
+  --measure-lg: 640px;
+  --measure-xl: 720px;
+  --measure-2xl: 920px;
+
+  /* decorative heights for atmospheric panels */
+  --decor-sm: 200px;
+  --decor-md: 320px;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

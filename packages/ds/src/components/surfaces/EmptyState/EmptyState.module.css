@@ -13,8 +13,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: var(--size-12xl);
+  height: var(--size-12xl);
   border-radius: var(--r-md);
   background: var(--bg-2);
   border: 1px solid var(--line-soft);
@@ -32,7 +32,7 @@
   margin: 0;
   font-size: var(--text-sm);
   color: var(--t-3);
-  max-width: 360px;
+  max-width: var(--measure-xs);
   line-height: var(--leading-relaxed);
 }
 .action {

@@ -1,9 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(var(--blur-xs));
+  -webkit-backdrop-filter: blur(var(--blur-xs));
   z-index: var(--z-modal);
   display: flex;
   justify-content: flex-end;
@@ -11,12 +11,12 @@
 }
 
 .drawer {
-  width: 420px;
+  width: var(--drawer-w);
   max-width: 100vw;
   height: 100%;
   background: var(--bg-1);
   border-left: 1px solid var(--line);
-  box-shadow: var(--shadow-2xl, var(--shadow-lg));
+  box-shadow: var(--shadow-2xl);
   display: flex;
   flex-direction: column;
   animation: slideRight var(--dur-base) var(--ease-out);
@@ -40,8 +40,8 @@
 }
 
 .close {
-  width: 32px;
-  height: 32px;
+  width: var(--size-6xl);
+  height: var(--size-6xl);
   border-radius: var(--r-xs);
   border: 0;
   background: transparent;

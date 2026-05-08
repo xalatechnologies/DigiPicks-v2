@@ -31,11 +31,11 @@
     radial-gradient(30% 30% at 80% 20%, color-mix(in srgb, var(--violet) 18%, transparent) 0%, transparent 60%),
     radial-gradient(35% 35% at 60% 80%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 60%);
   background-size: 200% 200%, 200% 200%, 200% 200%;
-  filter: blur(40px);
+  filter: blur(var(--blur-xl));
   opacity: 0.85;
   pointer-events: none;
   z-index: 0;
-  animation: dp-aurora 18s var(--ease-in-out) infinite;
+  animation: dp-aurora var(--dur-ambient-aurora-fast) var(--ease-in-out) infinite;
 }
 
 .shine {
@@ -197,8 +197,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 26px;
-  min-width: 26px;
+  height: var(--size-4xl);
+  min-width: var(--size-4xl);
   padding: 0 var(--space-2);
   border-radius: var(--r-pill);
   background: var(--bg-3);
@@ -207,5 +207,5 @@
   font-family: var(--f-mono);
   font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  margin-left: -6px;
+  margin-left: calc(var(--space-2) * -1);
 }

@@ -11,8 +11,8 @@
     );
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: var(--backdrop-glass);
+  -webkit-backdrop-filter: var(--backdrop-glass);
   box-shadow:
     var(--shadow-lg),
     inset 0 1px 0 color-mix(in srgb, var(--t-1) 5%, transparent);
@@ -55,12 +55,12 @@
   gap: var(--space-2);
 }
 .liveDot {
-  width: 8px;
-  height: 8px;
+  width: var(--size-xs);
+  height: var(--size-xs);
   border-radius: 50%;
   background: var(--green);
   color: var(--green);
-  animation: dp-pulse-dot 1.6s var(--ease-in-out) infinite;
+  animation: dp-pulse-dot var(--dur-ambient-pulse) var(--ease-in-out) infinite;
 }
 .liveLabel {
   font-family: var(--f-mono);

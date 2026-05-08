@@ -48,7 +48,7 @@
   display: inline-flex;
   gap: var(--space-10);
   padding-right: var(--space-10);
-  animation: dp-marquee 40s linear infinite;
+  animation: dp-marquee var(--dur-ambient-marquee) linear infinite;
   white-space: nowrap;
   width: max-content;
 }

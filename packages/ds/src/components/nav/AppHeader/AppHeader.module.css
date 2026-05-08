@@ -1,14 +1,14 @@
 .header {
   display: grid;
-  grid-template-columns: var(--sidebar-w, 296px) 1fr auto;
+  grid-template-columns: var(--sidebar-w) 1fr auto;
   align-items: center;
   gap: var(--space-6);
   padding: 0 var(--space-6) 0 0;
   background: color-mix(in srgb, var(--bg-1) 70%, transparent);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: var(--backdrop-glass);
+  -webkit-backdrop-filter: var(--backdrop-glass);
   border-bottom: 1px solid var(--line-soft);
-  height: var(--header-h, 72px);
+  height: var(--header-h);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  line-height: 1.05;
+  line-height: var(--leading-tight);
 }
 .brandName {
   font-size: var(--text-lg);
@@ -44,7 +44,7 @@
 }
 
 .searchWrap {
-  max-width: 640px;
+  max-width: var(--search-max-w);
   width: 100%;
   justify-self: center;
   padding: 0 var(--space-3);
@@ -62,10 +62,10 @@
   pointer-events: none;
 }
 .searchInput {
-  height: 44px;
+  height: var(--control-base);
   width: 100%;
-  border-radius: var(--r-pill, 999px);
-  padding: 0 56px 0 44px;
+  border-radius: var(--r-pill);
+  padding: 0 var(--size-12xl) 0 var(--control-base);
   background: var(--bg-2);
   border: 1px solid var(--line-soft);
   color: var(--t-1);
@@ -103,9 +103,9 @@
 }
 
 .iconBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill, 999px);
+  width: var(--size-8xl);
+  height: var(--size-8xl);
+  border-radius: var(--r-pill);
   border: 0;
   background: transparent;
   color: var(--t-2);
@@ -132,7 +132,7 @@
   gap: var(--space-3);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
   margin-left: var(--space-2);
-  border-radius: var(--r-pill, 999px);
+  border-radius: var(--r-pill);
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -149,8 +149,8 @@
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: var(--size-6xl);
+  height: var(--size-6xl);
   border-radius: 50%;
   background: var(--bg-3);
   border: 1px solid var(--line);
@@ -166,7 +166,7 @@
 .userText {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
+  line-height: var(--leading-snug);
   text-align: left;
 }
 .userName {

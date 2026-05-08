@@ -6,8 +6,8 @@
   border-bottom: 1px solid var(--line-soft);
 }
 .icon {
-  width: 36px;
-  height: 36px;
+  width: var(--size-7xl);
+  height: var(--size-7xl);
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;

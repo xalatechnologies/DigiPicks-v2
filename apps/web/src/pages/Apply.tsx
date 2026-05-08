@@ -24,7 +24,7 @@ export function Apply() {
 
   return (
     <main>
-      <Container size="lg">
+      <Container size="xl">
         <PageHead
           eyebrow="Creator application"
           title="Apply to publish on DigiPicks."

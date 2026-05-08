@@ -1,5 +1,5 @@
 .bar {
-  height: 6px;
+  height: var(--size-2xs);
   background: var(--bg-2);
   border-radius: var(--r-pill);
   overflow: hidden;
@@ -7,11 +7,11 @@
 }
 
 .thin {
-  height: 4px;
+  height: var(--space-1);
 }
 
 .thick {
-  height: 10px;
+  height: var(--size-sm);
 }
 
 .fill {

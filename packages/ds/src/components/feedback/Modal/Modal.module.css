@@ -1,9 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
   z-index: var(--z-modal);
   display: flex;
   align-items: center;
@@ -14,12 +14,12 @@
 
 .modal {
   width: 100%;
-  max-width: 520px;
+  max-width: var(--modal-max-w);
   max-height: calc(100vh - var(--space-12));
   background: var(--bg-1);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-2xl, var(--shadow-lg));
+  box-shadow: var(--shadow-2xl);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -44,8 +44,8 @@
 }
 
 .close {
-  width: 32px;
-  height: 32px;
+  width: var(--size-6xl);
+  height: var(--size-6xl);
   border-radius: var(--r-xs);
   border: 0;
   background: transparent;
@@ -92,6 +92,6 @@
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  from { opacity: 0; transform: translateY(var(--space-2)) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }

@@ -1,13 +1,13 @@
 .ph {
   position: relative;
   width: 100%;
-  height: var(--ph-height, 140px);
+  height: var(--ph-height, calc(var(--space-32) + var(--space-3)));
   border-radius: var(--ph-radius, var(--r-md));
   background-color: var(--bg-2);
   background-image: repeating-linear-gradient(
     -45deg,
-    transparent 0 12px,
-    rgba(255, 255, 255, 0.02) 12px 24px
+    transparent 0 var(--space-3),
+    rgba(255, 255, 255, 0.02) var(--space-3) var(--space-6)
   );
   overflow: hidden;
 }

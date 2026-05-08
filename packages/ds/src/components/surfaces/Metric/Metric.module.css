@@ -109,7 +109,7 @@
   font-variant-numeric: tabular-nums;
 }
 .arrow {
-  font-size: var(--text-3xs, 9px);
+  font-size: var(--text-3xs);
   line-height: 1;
 }
 .up {

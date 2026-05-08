@@ -30,8 +30,8 @@
 }
 
 .iconCircle {
-  width: 24px;
-  height: 24px;
+  width: var(--size-3xl);
+  height: var(--size-3xl);
   border-radius: 50%;
   background: var(--bg-3);
   display: flex;
@@ -53,8 +53,8 @@
   color: var(--t-2);
   font-family: var(--f-mono);
   font-size: var(--text-2xs);
-  padding: 3px 8px;
-  border-radius: var(--r-pill, 999px);
+  padding: 3px var(--space-2);
+  border-radius: var(--r-pill);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   font-weight: var(--weight-semibold);

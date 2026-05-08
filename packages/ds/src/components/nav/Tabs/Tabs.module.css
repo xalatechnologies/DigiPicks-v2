@@ -6,7 +6,7 @@
 
 .tab {
   position: relative;
-  height: 40px;
+  height: var(--tab-h);
   padding: 0 var(--space-4);
   background: transparent;
   border: 0;

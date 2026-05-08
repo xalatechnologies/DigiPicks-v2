@@ -25,7 +25,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: var(--space-1);
   background: linear-gradient(
     90deg,
     var(--av-color, var(--primary)) 0%,
@@ -120,7 +120,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 26px;
+  height: var(--size-4xl);
   padding: 0 var(--space-3);
   border-radius: var(--r-pill);
   background: var(--green-soft);
@@ -207,11 +207,11 @@
 }
 .formDots {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .formDot {
-  width: 10px;
-  height: 10px;
+  width: var(--size-sm);
+  height: var(--size-sm);
   border-radius: 3px;
   background: var(--bg-3);
 }
@@ -252,7 +252,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 26px;
+  height: var(--size-4xl);
   padding: 0 var(--space-3);
   background: var(--bg-3);
   border: 1px solid var(--line-soft);
@@ -277,8 +277,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-7xl);
+  height: var(--size-7xl);
   border-radius: var(--r-pill);
   background: var(--bg-2);
   border: 1px solid var(--line-soft);

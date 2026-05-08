@@ -31,7 +31,7 @@
   content: '';
   position: absolute;
   inset: -50% -10% auto -20%;
-  height: 200px;
+  height: var(--decor-sm);
   z-index: -1;
   background: radial-gradient(
     ellipse at 0% 100%,
@@ -43,8 +43,8 @@
 }
 
 .iconWrap {
-  width: 56px;
-  height: 56px;
+  width: var(--size-12xl);
+  height: var(--size-12xl);
   border-radius: var(--r-md);
   background: linear-gradient(
     135deg,

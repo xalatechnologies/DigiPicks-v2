@@ -95,8 +95,8 @@
 
 .number {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: var(--size-12xl);
+  height: var(--size-12xl);
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -121,8 +121,8 @@
 .number::before {
   content: '';
   position: absolute;
-  inset: -6px;
-  border-radius: calc(var(--r-md) + 6px);
+  inset: calc(var(--space-2) * -1);
+  border-radius: calc(var(--r-md) + var(--space-2));
   border: 1px solid color-mix(in srgb, var(--step-color, var(--primary)) 40%, transparent);
   opacity: 0.5;
   pointer-events: none;
@@ -133,8 +133,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-7xl);
+  height: var(--size-7xl);
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--step-color, var(--primary)) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--step-color, var(--primary)) 30%, transparent);

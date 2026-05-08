@@ -29,7 +29,7 @@
   color: var(--primary);
   opacity: 0.18;
   font-family: var(--f-serif);
-  font-size: 88px;
+  font-size: var(--text-7xl);
   line-height: 1;
   font-weight: var(--weight-bold);
   pointer-events: none;

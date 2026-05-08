@@ -1,7 +1,7 @@
 .input {
   display: block;
   width: 100%;
-  height: 48px;
+  height: var(--input-h);
   padding: 0 var(--space-5);
   border-radius: var(--r-sm);
   background: var(--bg-2);

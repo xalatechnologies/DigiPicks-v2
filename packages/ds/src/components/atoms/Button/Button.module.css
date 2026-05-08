@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: 44px;
+  height: var(--control-base);
   padding: 0 var(--space-6);
   border: 1px solid transparent;
   border-radius: var(--r-sm);
@@ -106,38 +106,38 @@
 }
 
 .sm {
-  height: 36px;
+  height: var(--control-md);
   padding: 0 var(--space-4);
   font-size: var(--text-sm);
   gap: var(--space-1);
   border-radius: var(--r-xs);
 }
 .lg {
-  height: 56px;
+  height: var(--control-lg);
   padding: 0 var(--space-8);
   font-size: var(--text-md);
   border-radius: var(--r-md);
   gap: var(--space-3);
 }
 .xl {
-  height: 64px;
+  height: var(--control-xl);
   padding: 0 var(--space-10);
   font-size: var(--text-lg);
   border-radius: var(--r-md);
 }
 
 .icon {
-  width: 44px;
+  width: var(--control-base);
   padding: 0;
 }
 .sm.icon {
-  width: 36px;
+  width: var(--control-md);
 }
 .lg.icon {
-  width: 56px;
+  width: var(--control-lg);
 }
 .xl.icon {
-  width: 64px;
+  width: var(--control-xl);
 }
 .block {
   width: 100%;

@@ -2,8 +2,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--size-3xl);
+  height: var(--size-3xl);
   border-radius: var(--r-sm);
   background: var(--bg-3);
   border: 1px solid var(--line-soft);
@@ -16,8 +16,8 @@
 }
 
 .lg {
-  width: 32px;
-  height: 32px;
+  width: var(--size-6xl);
+  height: var(--size-6xl);
   font-size: var(--text-xs);
   border-radius: var(--r-md);
 }

@@ -23,8 +23,8 @@
 }
 
 .check {
-  width: 16px;
-  height: 16px;
+  width: var(--size-md);
+  height: var(--size-md);
   border-radius: var(--r-xs);
   background: var(--bg-2);
   border: 1px solid var(--line);

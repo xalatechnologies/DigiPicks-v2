@@ -27,8 +27,8 @@
 /* atmospheric glow at the top edge */
 .glow {
   position: absolute;
-  inset: -180px 0 auto;
-  height: 320px;
+  inset: calc(var(--decor-md) * -0.6) 0 auto;
+  height: var(--decor-md);
   z-index: -1;
   background: radial-gradient(
       50% 60% at 30% 100%,
@@ -53,7 +53,7 @@
     color-mix(in srgb, var(--t-1) 8%, transparent) 1px,
     transparent 1px
   );
-  background-size: 24px 24px;
+  background-size: var(--space-6) var(--space-6);
   mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
   -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
   pointer-events: none;
@@ -84,8 +84,8 @@
       transparent 55%
     ),
     var(--bg-elev);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: var(--backdrop-glass-strong);
+  -webkit-backdrop-filter: var(--backdrop-glass-strong);
   /* Lift the card so it straddles the body/footer boundary —
      a portion above the footer's top edge, the rest below. The reduced
      lift leaves visible breathing room above the card so it doesn't
@@ -164,7 +164,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  max-width: 360px;
+  max-width: var(--measure-xs);
 }
 .brandTagline {
   color: var(--t-3);
@@ -178,8 +178,8 @@
   margin-top: var(--space-2);
 }
 .brandSocialBtn {
-  width: 40px;
-  height: 40px;
+  width: var(--size-8xl);
+  height: var(--size-8xl);
   display: inline-flex;
   align-items: center;
   justify-content: center;

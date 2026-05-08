@@ -246,6 +246,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 16, ...rest }) => {
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...rest}>
           <path d="M12 1.5l2.6 1.9 3.2-.4 1.4 2.9 2.9 1.5-.4 3.2 1.9 2.6-1.9 2.6.4 3.2-2.9 1.5-1.4 2.9-3.2-.4L12 22.5l-2.6-1.9-3.2.4-1.4-2.9-2.9-1.5.4-3.2L.4 10.8l1.9-2.6-.4-3.2 2.9-1.5 1.4-2.9 3.2.4L12 1.5z" />
+          {/* The inner check sits on top of the brand-blue verified shield;
+              it must always be near-black for contrast regardless of theme. */}
           <path
             d="M8 12l3 3 5-6"
             stroke="#08090B"

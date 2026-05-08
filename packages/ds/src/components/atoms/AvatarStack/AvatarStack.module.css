@@ -3,6 +3,6 @@
 }
 
 .stack > * + * {
-  margin-left: -8px;
+  margin-left: calc(var(--space-2) * -1);
   box-shadow: 0 0 0 2px var(--bg-1);
 }

@@ -70,7 +70,6 @@ export default defineSchema({
     isActive: v.boolean(),
     createdAt: v.number(),
   })
-    .index('by_tenant', ['tenantId'])
     .index('by_user', ['userId'])
     .index('by_tenant_and_user', ['tenantId', 'userId']),
 
@@ -309,7 +308,6 @@ export default defineSchema({
     cancelledAt: v.optional(v.number()),
     stripeSubscriptionId: v.optional(v.string()),
   })
-    .index('by_subscriber', ['subscriberId'])
     .index('by_creator', ['creatorId'])
     .index('by_subscriber_and_creator', ['subscriberId', 'creatorId']),
 

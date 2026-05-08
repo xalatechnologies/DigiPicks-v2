@@ -100,8 +100,8 @@
 }
 
 .lockIcon {
-  width: 28px;
-  height: 28px;
+  width: var(--size-5xl);
+  height: var(--size-5xl);
   border-radius: var(--r-xs);
   background: var(--gold-soft);
   border: 1px solid var(--gold-line);

@@ -23,8 +23,8 @@
 }
 
 .radio {
-  width: 16px;
-  height: 16px;
+  width: var(--size-md);
+  height: var(--size-md);
   border-radius: 50%;
   background: var(--bg-2);
   border: 1px solid var(--line);
@@ -53,8 +53,8 @@
 
 .on::after {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: var(--size-xs);
+  height: var(--size-xs);
   border-radius: 50%;
   background: var(--primary);
   box-shadow: 0 0 6px color-mix(in srgb, var(--primary) 60%, transparent);

@@ -1,7 +1,7 @@
 .textarea {
   display: block;
   width: 100%;
-  min-height: 100px;
+  min-height: var(--size-15xl);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--r-sm);
   background: var(--bg-2);

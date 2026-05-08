@@ -46,7 +46,7 @@
   font-family: var(--f-mono);
   font-weight: var(--weight-bold);
   font-size: calc(var(--logo-size) * 0.5);
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking-tightest);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 4px 14px -4px color-mix(in srgb, var(--primary) 50%, transparent);
@@ -64,14 +64,14 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  line-height: 1.05;
+  line-height: var(--leading-tight);
 }
 
 .logoName {
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   color: var(--t-1);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-snug);
 }
 
 .logoTag {
