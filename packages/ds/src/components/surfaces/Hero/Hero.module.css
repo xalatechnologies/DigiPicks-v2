@@ -1,7 +1,7 @@
 /* ── Outer hero band ──────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  padding: var(--space-24) var(--space-7) var(--space-20);
+  padding: var(--space-20) var(--space-7) var(--space-18);
   overflow: hidden;
   isolation: isolate;
   border-bottom: 1px solid var(--line-soft);
@@ -62,8 +62,8 @@
   align-items: center;
 }
 .inner.split {
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: var(--space-16);
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: var(--space-12);
 }
 @media (max-width: 1024px) {
   .inner.split {
@@ -157,6 +157,9 @@
   position: relative;
   animation: dp-fade-in-up var(--dur-slower) var(--ease-out) both;
   animation-delay: var(--dur-instant);
+  justify-self: end;
+  max-width: 380px;
+  width: 100%;
 }
 
 /* ── Bottom marquee (single-column hero only) ────────────────────────── */

@@ -20,7 +20,7 @@ import {
   Eyebrow,
   Divider,
 } from '@digipicks/ds';
-import { CREATORS, SPORTS, creatorById } from '../data/mock';
+import { CREATORS, SPORTS, creatorById } from '../data/studio';
 
 type PickAccess = 'free' | 'premium' | 'vip';
 
@@ -75,7 +75,7 @@ export function CreatePick() {
         ]}
         actions={
           <Row gap={2}>
-            <Button variant="secondary" size="sm" onClick={() => navigate('/picks')}>
+            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard/picks')}>
               Cancel
             </Button>
             <Button variant="outline" size="sm">

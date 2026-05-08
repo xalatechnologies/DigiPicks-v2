@@ -25,7 +25,7 @@ import {
   FilterChips,
   TitleSub,
 } from '@digipicks/ds';
-import { STUDIO_PICKS, SPORTS } from '../data/mock';
+import { STUDIO_PICKS, SPORTS } from '../data/studio';
 
 const TABS = [
   { label: 'All', value: 'all' },
@@ -61,7 +61,7 @@ export function Picks() {
         title="Posts & Picks"
         crumbs={[{ label: 'Studio' }, { label: 'Posts & Picks' }]}
         actions={
-          <Button variant="primary" size="sm" onClick={() => navigate('/create')}>
+          <Button variant="primary" size="sm" onClick={() => navigate('/dashboard/create')}>
             <Icon name="plus" size={13} />
             Create pick
           </Button>
@@ -80,7 +80,7 @@ export function Picks() {
                   <Icon name="filter" size={13} />
                   Filters
                 </Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/create')}>
+                <Button variant="primary" size="sm" onClick={() => navigate('/dashboard/create')}>
                   <Icon name="plus" size={13} />
                   Create pick
                 </Button>

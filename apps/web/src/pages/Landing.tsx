@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import {
   Container,
   Section,
@@ -27,7 +29,6 @@ import {
   SplitCTA,
   ResponsibleSection,
 } from '@digipicks/ds';
-import { CREATORS, EVENTS_TODAY } from '@/data/mock';
 
 const TRUST_BRANDS = [
   'Action Network',
@@ -188,32 +189,29 @@ const PRICING_TIERS = [
 
 export function Landing() {
   const navigate = useNavigate();
-  const featuredEvent = EVENTS_TODAY.find((e) => e.featured) ?? EVENTS_TODAY[0];
-  const otherEvents = EVENTS_TODAY.filter((e) => e.id !== featuredEvent.id).slice(0, 6);
-  const heroCreators = CREATORS.slice(0, 4).map((c) => ({
-    mono: c.avatar.mono,
-    color: c.avatar.color,
+  const creators = useQuery(api.creators.list, {});
+  const allEvents = useQuery(api.events.today, {});
+  const featuredEvents = useQuery(api.events.featured, {});
+
+  const topCreators = (creators ?? []).slice(0, 4);
+  const heroCreators = topCreators.map((c) => ({
+    mono: c.avatarMono,
+    color: c.avatarColor,
   }));
+  const featuredEvent = (featuredEvents ?? [])[0] ?? (allEvents ?? [])[0];
+  const otherEvents = (allEvents ?? []).filter((e) => e._id !== featuredEvent?._id).slice(0, 6);
 
   return (
     <main>
       {/* ── 01 · Hero — single confident lead-in with live signal ──────── */}
       <Hero
-        eyebrow={
-          <Row gap={2}>
-            <Badge tone="green" dot>
-              Now onboarding · Spring '26 cohort
-            </Badge>
-            <Muted>142 verified creators</Muted>
-          </Row>
-        }
         title={
           <>
-            Follow verified <em>sports creators</em>.<br />
+            Follow verified <em>sports creators.</em><br />
             Track every play.
           </>
         }
-        subtitle="A curated network for sports betting creators and the subscribers who back their edge."
+        subtitle="The first curated network where every pick is graded by the platform, every record is real, and every creator is vetted before they publish. No screenshots. No parlays-as-content. Just edge."
         actions={
           <>
             <Button
@@ -230,9 +228,9 @@ export function Landing() {
           </>
         }
         trust={[
-          { icon: <Icon name="verified" size={14} />, label: 'Manual verification' },
-          { icon: <Icon name="chart" size={14} />, label: 'Independent grading' },
-          { icon: <Icon name="shield" size={14} />, label: 'Stripe-backed billing' },
+          { icon: <Icon name="verified" size={14} />, label: '142 verified creators' },
+          { icon: <Icon name="chart" size={14} />, label: '58.4% network win rate' },
+          { icon: <Icon name="shield" size={14} />, label: 'Stripe-backed · 21+ only' },
         ]}
         panel={
           <HeroLivePanel
@@ -334,25 +332,25 @@ export function Landing() {
           }
         >
           <Grid cols={2} gap={6}>
-            {CREATORS.slice(0, 2).map((c) => (
+            {(creators ?? []).slice(0, 2).map((c) => (
               <CreatorCard
-                key={c.id}
+                key={c._id}
                 name={c.name}
                 handle={c.handle}
-                mono={c.avatar.mono}
-                color={c.avatar.color}
+                mono={c.avatarMono}
+                color={c.avatarColor}
                 verified={c.verified}
                 bio={c.bio}
                 winRate={c.winRate}
                 record={c.record}
                 units={c.units}
-                subs={c.subs}
+                subs={c.subscriberCount}
                 last10={c.last10}
                 streak={c.streak}
                 trending={c.trending}
                 startingPrice={c.startingPrice}
                 tags={c.tags}
-                onClick={() => navigate(`/creators/${c.id}`)}
+                onClick={() => navigate(`/creators/${c.handle}`)}
               />
             ))}
           </Grid>
@@ -374,32 +372,31 @@ export function Landing() {
           }
         >
           <Stack gap={4}>
-            <FeaturedEventCard
-              sport={featuredEvent.sport}
-              league={featuredEvent.league}
-              time={featuredEvent.time}
-              home={featuredEvent.home}
-              away={featuredEvent.away}
-              creators={featuredEvent.creators}
-              picks={featuredEvent.picks}
-              creatorsAvatars={CREATORS.slice(0, 4).map((c) => ({
-                mono: c.avatar.mono,
-                color: c.avatar.color,
-              }))}
-              onClick={() => navigate('/events')}
-            />
+            {featuredEvent && (
+              <FeaturedEventCard
+                sport={featuredEvent.sport}
+                league={featuredEvent.league}
+                time={featuredEvent.time}
+                home={featuredEvent.home}
+                away={featuredEvent.away}
+                creators={featuredEvent.creatorCount}
+                picks={featuredEvent.pickCount}
+                creatorsAvatars={heroCreators}
+                onClick={() => navigate('/events')}
+              />
+            )}
 
             <Grid cols={3} gap={4}>
               {otherEvents.map((ev) => (
                 <EventCard
-                  key={ev.id}
+                  key={ev._id}
                   sport={ev.sport}
                   league={ev.league}
                   time={ev.time}
                   home={ev.home}
                   away={ev.away}
-                  creators={ev.creators}
-                  picks={ev.picks}
+                  creators={ev.creatorCount}
+                  picks={ev.pickCount}
                   onClick={() => navigate('/events')}
                 />
               ))}

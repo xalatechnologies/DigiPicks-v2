@@ -21,7 +21,7 @@ import {
   TitleSub,
   PickCard,
 } from '@digipicks/ds';
-import { FEED_PICKS, CREATORS, STUDIO_SUBSCRIBERS, creatorById } from '../data/mock';
+import { FEED_PICKS, CREATORS, STUDIO_SUBSCRIBERS, creatorById } from '../data/studio';
 
 export function Overview() {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export function Overview() {
               <Icon name="message" size={13} />
               Message subscribers
             </Button>
-            <Button variant="primary" size="sm" onClick={() => navigate('/create')}>
+            <Button variant="primary" size="sm" onClick={() => navigate('/dashboard/create')}>
               <Icon name="plus" size={13} />
               Create pick
             </Button>
@@ -96,7 +96,7 @@ export function Overview() {
                   title="Recent picks"
                   sub="Drafts, scheduled, and pending grade"
                   action={
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/picks')}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/picks')}>
                       Open manager
                       <Icon name="arrow-right" size={12} />
                     </Button>
@@ -142,21 +142,21 @@ export function Overview() {
                     title="Create a pick"
                     sub="Publish or schedule"
                     cta="Start"
-                    onClick={() => navigate('/create')}
+                    onClick={() => navigate('/dashboard/create')}
                   />
                   <QuickAction
                     icon="card"
                     title="Smart pricing"
                     sub="Try $54/mo (recommended)"
                     cta="Review"
-                    onClick={() => navigate('/products')}
+                    onClick={() => navigate('/dashboard/products')}
                   />
                   <QuickAction
                     icon="megaphone"
                     title="Growth manager"
                     sub="3 new opportunities"
                     cta="View"
-                    onClick={() => navigate('/growth')}
+                    onClick={() => navigate('/dashboard/growth')}
                   />
                 </Stack>
               </Card>
@@ -166,7 +166,7 @@ export function Overview() {
                   title="Recent subscribers"
                   sub="Newest joins and trial conversions"
                   action={
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/subscribers')}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/subscribers')}>
                       All subs
                       <Icon name="arrow-right" size={12} />
                     </Button>

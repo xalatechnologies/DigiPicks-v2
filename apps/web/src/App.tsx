@@ -19,6 +19,7 @@ import { Creators } from './pages/Creators';
 import { CreatorDetail } from './pages/CreatorDetail';
 import { Apply } from './pages/Apply';
 import { Auth } from './pages/Auth';
+import { DashboardRoutes } from './dashboard/Routes';
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/', label: 'Home' },
@@ -195,6 +196,7 @@ export function App() {
         <Route path="/apply" element={<Apply />} />
       </Route>
       <Route path="/auth" element={<Auth />} />
+      <Route path="/dashboard/*" element={<DashboardRoutes />} />
     </Routes>
   );
 }

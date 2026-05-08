@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import {
   Container,
   Section,
@@ -12,10 +14,10 @@ import {
   CreatorCard,
   ResponsibleSection,
 } from '@digipicks/ds';
-import { CREATORS } from '@/data/mock';
 
 export function Creators() {
   const navigate = useNavigate();
+  const creators = useQuery(api.creators.list, {});
 
   return (
     <main>
@@ -45,25 +47,25 @@ export function Creators() {
             <Search placeholder="Search creators by name, handle, sport, or niche..." />
 
             <Grid cols={2} gap={5}>
-              {CREATORS.map((c) => (
+              {(creators ?? []).map((c) => (
                 <CreatorCard
-                  key={c.id}
+                  key={c._id}
                   name={c.name}
                   handle={c.handle}
-                  mono={c.avatar.mono}
-                  color={c.avatar.color}
+                  mono={c.avatarMono}
+                  color={c.avatarColor}
                   verified={c.verified}
                   bio={c.bio}
                   winRate={c.winRate}
                   record={c.record}
                   units={c.units}
-                  subs={c.subs}
+                  subs={c.subscriberCount}
                   last10={c.last10}
                   streak={c.streak}
                   trending={c.trending}
                   startingPrice={c.startingPrice}
                   tags={c.tags}
-                  onClick={() => navigate(`/creators/${c.id}`)}
+                  onClick={() => navigate(`/creators/${c.handle}`)}
                 />
               ))}
             </Grid>

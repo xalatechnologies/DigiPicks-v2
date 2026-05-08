@@ -1,0 +1,75 @@
+.methodBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--bg-1) 60%, transparent);
+  color: var(--t-1);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+  text-align: left;
+}
+.methodBtn:hover {
+  background: var(--bg-2);
+  border-color: var(--line-hard);
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-xl);
+  height: var(--size-xl);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  color: var(--t-2);
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0);
+  min-width: 0;
+  flex: 1;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+  line-height: var(--leading-tight);
+}
+
+.desc {
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  line-height: var(--leading-normal);
+}
+
+.arrow {
+  color: var(--t-3);
+  flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.methodBtn:hover .arrow {
+  transform: translateX(var(--space-1));
+}
+
+/* ── Compact saved-email variant ─────────────────────────────────────── */
+.savedGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.savedLabel {
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  font-weight: var(--weight-medium);
+  padding-left: var(--space-1);
+}

@@ -158,8 +158,9 @@ export const Foo = React.forwardRef<HTMLDivElement, FooProps>(function Foo(
 ## 6. Adding a page (the recipe)
 
 1. Create `apps/<app>/src/pages/<Page>.tsx`.
-2. Wrap content in `<PublicLayout>` (web) or under the dashboard's
-   `<AppLayout>` route shell.
+2. Wrap content in `<PublicLayout>` (public marketing routes) or under the
+   `<DashboardShell>` route at `/dashboard/*` (creator studio routes). Both
+   live in the single `apps/web` Vite app.
 3. Use `<PageHead>` (or `<PageHeader>`) for the page title + sub.
 4. Use `<Section>` for section grouping with eyebrow / title / sub / action.
 5. Use `<Container>`, `<Grid>`, `<Stack>`, `<Row>`, `<Col>` for structure.
@@ -176,7 +177,6 @@ export const Foo = React.forwardRef<HTMLDivElement, FooProps>(function Foo(
 pnpm -r --if-present typecheck
 pnpm -r --if-present lint
 pnpm --filter @digipicks/web build
-pnpm --filter @digipicks/dashboard build
 ```
 
 Plus the strict-mode greps — every one of these must return zero meaningful

@@ -16,7 +16,7 @@ import {
   EmptyState,
   PersonRow,
 } from '@digipicks/ds';
-import { CONVERSATIONS } from '../data/mock';
+import { CONVERSATIONS } from '../data/studio';
 
 interface MessageEntry {
   id: string;

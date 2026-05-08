@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import {
   Container,
   Section,
@@ -22,6 +24,35 @@ import {
 
 export function Apply() {
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const submitApplication = useMutation(api.applications.submit);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    try {
+      await submitApplication({
+        name: data.get('name') as string,
+        handle: data.get('handle') as string,
+        email: data.get('email') as string,
+        sport: data.get('sport') as string,
+        niche: data.get('niche') as string,
+        existingFollowing: (data.get('audience') as string) || undefined,
+        proofCount: 0,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main>
@@ -71,28 +102,23 @@ export function Apply() {
                 }
               />
             ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSubmitted(true);
-                }}
-              >
+              <form onSubmit={handleSubmit}>
                 <Stack gap={5}>
                   <Grid cols={2} gap={4}>
                     <Field label="Full name" required htmlFor="apply-name">
-                      <Input id="apply-name" placeholder="Jordan Rivera" required />
+                      <Input id="apply-name" name="name" placeholder="Jordan Rivera" required />
                     </Field>
                     <Field label="Public handle" required htmlFor="apply-handle">
-                      <Input id="apply-handle" placeholder="@sharpedgebets" required />
+                      <Input id="apply-handle" name="handle" placeholder="@sharpedgebets" required />
                     </Field>
                   </Grid>
 
                   <Grid cols={2} gap={4}>
                     <Field label="Email" required htmlFor="apply-email">
-                      <Input id="apply-email" type="email" placeholder="you@example.com" required />
+                      <Input id="apply-email" name="email" type="email" placeholder="you@example.com" required />
                     </Field>
                     <Field label="Primary sport" required htmlFor="apply-sport">
-                      <Select id="apply-sport" defaultValue="">
+                      <Select id="apply-sport" name="sport" defaultValue="">
                         <option value="" disabled>
                           Select a sport
                         </option>
@@ -116,6 +142,7 @@ export function Apply() {
                   >
                     <Input
                       id="apply-niche"
+                      name="niche"
                       placeholder="NFL Sides & Totals, CLV-tracked"
                       required
                     />
@@ -129,6 +156,7 @@ export function Apply() {
                   >
                     <TextArea
                       id="apply-edge"
+                      name="edge"
                       rows={6}
                       placeholder="I track closing line value across all my plays..."
                       required
@@ -140,8 +168,12 @@ export function Apply() {
                     help="Optional. Twitter, Discord, Substack, Telegram — wherever your subscribers are today."
                     htmlFor="apply-audience"
                   >
-                    <Input id="apply-audience" placeholder="twitter.com/sharpedgebets" />
+                    <Input id="apply-audience" name="audience" placeholder="twitter.com/sharpedgebets" />
                   </Field>
+
+                  {error && (
+                    <Badge tone="red">{error}</Badge>
+                  )}
 
                   <Spacer />
                   <Row gap={3}>
@@ -150,11 +182,9 @@ export function Apply() {
                       variant="primary"
                       size="lg"
                       iconRight="arrow-right"
+                      disabled={loading}
                     >
-                      Submit application
-                    </Button>
-                    <Button type="button" variant="ghost" size="lg">
-                      Save draft
+                      {loading ? 'Submitting…' : 'Submit application'}
                     </Button>
                   </Row>
                 </Stack>

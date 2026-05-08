@@ -23,7 +23,7 @@ import {
   StatGrid,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
-import { INVOICES } from '../data/mock';
+import { INVOICES } from '../data/studio';
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   paid: 'green',

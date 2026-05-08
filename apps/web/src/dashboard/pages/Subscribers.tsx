@@ -24,7 +24,7 @@ import {
   TitleSub,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
-import { STUDIO_SUBSCRIBERS } from '../data/mock';
+import { STUDIO_SUBSCRIBERS } from '../data/studio';
 
 const PLAN_TONE: Record<string, BadgeTone> = {
   Premium: 'gold',

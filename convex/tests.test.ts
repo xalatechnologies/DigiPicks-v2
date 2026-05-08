@@ -105,7 +105,14 @@ describe('events', () => {
   test('create and list events', async () => {
     const t = convexTest(schema, modules);
 
-    await t.mutation(api.events.create, {
+    // Create an admin user for auth-gated create
+    const adminId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'admin', isActive: true });
+    });
+
+    const asAdmin = t.withIdentity({ subject: adminId });
+
+    await asAdmin.mutation(api.events.create, {
       sport: 'Basketball',
       league: 'NBA',
       home: 'Lakers',
@@ -114,7 +121,7 @@ describe('events', () => {
       startsAt: Date.now() + 3600000,
       featured: true,
     });
-    await t.mutation(api.events.create, {
+    await asAdmin.mutation(api.events.create, {
       sport: 'Hockey',
       league: 'NHL',
       home: 'Bruins',
@@ -134,7 +141,12 @@ describe('events', () => {
   test('filter events by sport', async () => {
     const t = convexTest(schema, modules);
 
-    await t.mutation(api.events.create, {
+    const adminId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'admin', isActive: true });
+    });
+    const asAdmin = t.withIdentity({ subject: adminId });
+
+    await asAdmin.mutation(api.events.create, {
       sport: 'Football',
       league: 'NFL',
       home: 'Chiefs',
@@ -142,7 +154,7 @@ describe('events', () => {
       time: '8:15 PM ET',
       startsAt: Date.now(),
     });
-    await t.mutation(api.events.create, {
+    await asAdmin.mutation(api.events.create, {
       sport: 'Basketball',
       league: 'NBA',
       home: 'Bucks',
@@ -162,9 +174,8 @@ describe('events', () => {
 // =============================================================================
 
 describe('picks', () => {
-  test('create and query picks by creator', async () => {
-    const t = convexTest(schema, modules);
-
+  /** Helper: set up a user linked to a creator */
+  async function setupCreatorUser(t: ReturnType<typeof convexTest>) {
     const creatorId = await t.mutation(internal.creators.create, {
       handle: '@pickmaker',
       name: 'Pick Maker',
@@ -177,7 +188,22 @@ describe('picks', () => {
       tags: ['NFL'],
     });
 
-    await t.mutation(api.picks.create, {
+    const userId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', {
+        role: 'user',
+        isActive: true,
+        creatorId,
+      });
+    });
+
+    return { creatorId, userId, asCreator: t.withIdentity({ subject: userId }) };
+  }
+
+  test('create and query picks by creator', async () => {
+    const t = convexTest(schema, modules);
+    const { creatorId, asCreator } = await setupCreatorUser(t);
+
+    await asCreator.mutation(api.picks.create, {
       creatorId,
       access: 'free',
       sport: 'Football',
@@ -201,20 +227,9 @@ describe('picks', () => {
 
   test('grade a pick', async () => {
     const t = convexTest(schema, modules);
+    const { creatorId, asCreator } = await setupCreatorUser(t);
 
-    const creatorId = await t.mutation(internal.creators.create, {
-      handle: '@grader',
-      name: 'Grader',
-      avatarColor: '#1c9cf0',
-      avatarMono: 'GR',
-      niche: 'NBA',
-      sports: ['NBA'],
-      bio: 'Grading picks.',
-      startingPrice: 24,
-      tags: ['NBA'],
-    });
-
-    const pickId = await t.mutation(api.picks.create, {
+    const pickId = await asCreator.mutation(api.picks.create, {
       creatorId,
       access: 'premium',
       sport: 'Basketball',
@@ -230,7 +245,7 @@ describe('picks', () => {
       status: 'published',
     });
 
-    // Grade the pick as a win
+    // Grade the pick internally
     await t.mutation(internal.picks.grade, {
       id: pickId,
       grade: 'win',
@@ -245,21 +260,10 @@ describe('picks', () => {
 
   test('feed returns published picks', async () => {
     const t = convexTest(schema, modules);
-
-    const creatorId = await t.mutation(internal.creators.create, {
-      handle: '@feeder',
-      name: 'Feeder',
-      avatarColor: '#f7b928',
-      avatarMono: 'FE',
-      niche: 'NFL',
-      sports: ['NFL'],
-      bio: 'Feed test.',
-      startingPrice: 19,
-      tags: ['NFL'],
-    });
+    const { creatorId, asCreator } = await setupCreatorUser(t);
 
     // Draft pick — should NOT appear in feed
-    await t.mutation(api.picks.create, {
+    await asCreator.mutation(api.picks.create, {
       creatorId,
       access: 'free',
       sport: 'Football',
@@ -276,7 +280,7 @@ describe('picks', () => {
     });
 
     // Published pick — should appear in feed
-    await t.mutation(api.picks.create, {
+    await asCreator.mutation(api.picks.create, {
       creatorId,
       access: 'free',
       sport: 'Football',

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import {
   Container,
   Section,
@@ -12,12 +14,22 @@ import {
   FeaturedEventCard,
   ResponsibleSection,
 } from '@digipicks/ds';
-import { CREATORS, EVENTS_TODAY } from '@/data/mock';
 
 export function Events() {
   const navigate = useNavigate();
-  const featured = EVENTS_TODAY.filter((e) => e.featured);
-  const rest = EVENTS_TODAY.filter((e) => !e.featured);
+  const allEvents = useQuery(api.events.today, {});
+  const featuredEvents = useQuery(api.events.featured, {});
+  const creators = useQuery(api.creators.list, { verified: true });
+
+  const featured = featuredEvents ?? [];
+  const rest = (allEvents ?? []).filter(
+    (e) => !featured.some((f) => f._id === e._id),
+  );
+
+  const avatars = (creators ?? []).slice(0, 4).map((c) => ({
+    mono: c.avatarMono,
+    color: c.avatarColor,
+  }));
 
   return (
     <main>
@@ -47,18 +59,15 @@ export function Events() {
             <Stack gap={4}>
               {featured.map((ev) => (
                 <FeaturedEventCard
-                  key={ev.id}
+                  key={ev._id}
                   sport={ev.sport}
                   league={ev.league}
                   time={ev.time}
                   home={ev.home}
                   away={ev.away}
-                  creators={ev.creators}
-                  picks={ev.picks}
-                  creatorsAvatars={CREATORS.slice(0, 4).map((c) => ({
-                    mono: c.avatar.mono,
-                    color: c.avatar.color,
-                  }))}
+                  creators={ev.creatorCount}
+                  picks={ev.pickCount}
+                  creatorsAvatars={avatars}
                 />
               ))}
             </Stack>
@@ -73,14 +82,14 @@ export function Events() {
           <Grid cols={3} gap={4}>
             {rest.map((ev) => (
               <EventCard
-                key={ev.id}
+                key={ev._id}
                 sport={ev.sport}
                 league={ev.league}
                 time={ev.time}
                 home={ev.home}
                 away={ev.away}
-                creators={ev.creators}
-                picks={ev.picks}
+                creators={ev.creatorCount}
+                picks={ev.pickCount}
               />
             ))}
           </Grid>

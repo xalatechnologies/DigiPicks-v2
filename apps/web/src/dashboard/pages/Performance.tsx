@@ -19,7 +19,7 @@ import {
   StatGrid,
   TitleSub,
 } from '@digipicks/ds';
-import { MARKET_PERF } from '../data/mock';
+import { MARKET_PERF } from '../data/studio';
 
 const RANGE_OPTIONS = [
   { label: '7D', value: '7d' },
