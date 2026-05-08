@@ -6,6 +6,7 @@ import { requireUser } from './shared/permissions';
 // Messages Module — Buyer-seller conversations
 // =============================================================================
 
+// Auth-only.
 /** List conversations for the authenticated user. */
 export const listConversations = query({
   args: {},
@@ -30,7 +31,8 @@ export const listConversations = query({
   },
 });
 
-/** Get messages for a conversation. Auth-gated — must be participant. */
+// Owner-or-admin.
+/** Get messages for a conversation. Caller must be a participant. */
 export const getMessages = query({
   args: { conversationId: v.id('conversations'), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
@@ -51,7 +53,8 @@ export const getMessages = query({
   },
 });
 
-/** Send a message in a conversation. Auth-gated. */
+// Owner-or-admin.
+/** Send a message in a conversation. Caller must be a participant. */
 export const send = mutation({
   args: {
     conversationId: v.id('conversations'),

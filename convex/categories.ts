@@ -1,11 +1,13 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import { listingType } from './shared/validators';
+import { requireAdmin } from './shared/permissions';
 
 // =============================================================================
 // Categories Module
 // =============================================================================
 
+// Public.
 /** List categories by type. Bounded to 100. */
 export const list = query({
   args: { type: v.optional(listingType) },
@@ -20,10 +22,12 @@ export const list = query({
   },
 });
 
-/** Idempotent seed of default categories. */
+// Admin-only.
+/** Idempotent seed of default categories. Admin-only. */
 export const seedDefaultCategories = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const categories = [
       { type: 'torget' as const, name: 'Møbler', slug: 'mobler', sortOrder: 10 },
       { type: 'torget' as const, name: 'Elektronikk', slug: 'elektronikk', sortOrder: 20 },

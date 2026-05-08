@@ -1,12 +1,13 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import { eventStatus } from './shared/validators';
-import { requireUser } from './shared/permissions';
+import { requireAdmin } from './shared/permissions';
 
 // =============================================================================
 // Event Queries & Mutations
 // =============================================================================
 
+// Public.
 export const today = query({
   args: { sport: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -20,6 +21,7 @@ export const today = query({
   },
 });
 
+// Public.
 export const featured = query({
   args: {},
   handler: async (ctx) => {
@@ -30,6 +32,7 @@ export const featured = query({
   },
 });
 
+// Admin-only.
 /** Create a new event. Admin-only. */
 export const create = mutation({
   args: {
@@ -43,10 +46,7 @@ export const create = mutation({
     status: v.optional(eventStatus),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    if (user.role !== 'super_admin' && user.role !== 'admin') {
-      throw new Error('Forbidden: admin role required');
-    }
+    await requireAdmin(ctx);
 
     return await ctx.db.insert('events', {
       sport: args.sport,
@@ -60,5 +60,47 @@ export const create = mutation({
       featured: args.featured ?? false,
       status: args.status ?? 'upcoming',
     });
+  },
+});
+
+// Public.
+/** Events currently in progress (status === 'live'). */
+export const live = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query('events')
+      .withIndex('by_status_and_startsAt', (q) => q.eq('status', 'live'))
+      .take(20);
+  },
+});
+
+/** Recently completed events. */
+export const recent = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query('events')
+      .withIndex('by_status_and_startsAt', (q) => q.eq('status', 'completed'))
+      .order('desc')
+      .take(10);
+  },
+});
+
+/** Upcoming events (not yet started). */
+export const upcoming = query({
+  args: { sport: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    if (args.sport) {
+      return await ctx.db
+        .query('events')
+        .withIndex('by_sport_and_startsAt', (q) => q.eq('sport', args.sport!))
+        .take(20);
+    }
+    return await ctx.db
+      .query('events')
+      .withIndex('by_status_and_startsAt', (q) => q.eq('status', 'upcoming'))
+      .order('asc')
+      .take(20);
   },
 });

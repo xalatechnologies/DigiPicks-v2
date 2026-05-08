@@ -6,6 +6,7 @@ import { listingType } from './shared/validators';
 // Search Module — Full-text search via Convex search indexes
 // =============================================================================
 
+// Public.
 export const searchListings = query({
   args: {
     query: v.string(),

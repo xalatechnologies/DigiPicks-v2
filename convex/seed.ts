@@ -1,13 +1,25 @@
 import { mutation } from './_generated/server';
 import { api } from './_generated/api';
+import { requireUser } from './shared/permissions';
 
 // =============================================================================
 // Seed Module — Populates dev environment with rich sample data
 // =============================================================================
 
+// Admin-only.
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
+    // Hard gate: refuse outright in production.
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Seeding is disabled in production');
+    }
+    // Otherwise: only super_admin may run the seed.
+    const user = await requireUser(ctx);
+    if (user.role !== 'super_admin') {
+      throw new Error('Forbidden: super_admin role required');
+    }
+
     // 1. Seed categories
     await ctx.runMutation(api.categories.seedDefaultCategories, {});
 
@@ -240,26 +252,24 @@ export const seedAll = mutation({
     // ═══════════════════════════════════════════════════════════════════════
 
     const events = [
-      // NBA
-      { sport: 'Basketball', league: 'NBA', home: 'Lakers', away: 'Celtics', time: '7:30 PM ET', startsAt: now + 3600000, creatorCount: 28, pickCount: 42, featured: true, status: 'upcoming' as const },
-      { sport: 'Basketball', league: 'NBA', home: 'Nuggets', away: 'Knicks', time: '9:00 PM ET', startsAt: now + 9000000, creatorCount: 18, pickCount: 31, featured: false, status: 'upcoming' as const },
-      { sport: 'Basketball', league: 'NBA', home: 'Bucks', away: '76ers', time: '8:00 PM ET', startsAt: now + 5400000, creatorCount: 14, pickCount: 22, featured: false, status: 'upcoming' as const },
-      // NFL
-      { sport: 'Football', league: 'NFL', home: 'Chiefs', away: 'Bills', time: '8:15 PM ET', startsAt: now + 7200000, creatorCount: 34, pickCount: 56, featured: true, status: 'upcoming' as const },
-      { sport: 'Football', league: 'NFL', home: '49ers', away: 'Eagles', time: '4:25 PM ET', startsAt: now + 1800000, creatorCount: 22, pickCount: 38, featured: false, status: 'upcoming' as const },
-      // NHL
-      { sport: 'Hockey', league: 'NHL', home: 'Bruins', away: 'Rangers', time: '7:00 PM ET', startsAt: now + 1800000, creatorCount: 12, pickCount: 18, featured: false, status: 'upcoming' as const },
-      { sport: 'Hockey', league: 'NHL', home: 'Maple Leafs', away: 'Panthers', time: '7:30 PM ET', startsAt: now + 3600000, creatorCount: 8, pickCount: 12, featured: false, status: 'upcoming' as const },
-      // Soccer
-      { sport: 'Soccer', league: 'EPL', home: 'Arsenal', away: 'Liverpool', time: '3:00 PM GMT', startsAt: now + 43200000, creatorCount: 18, pickCount: 26, featured: true, status: 'upcoming' as const },
-      { sport: 'Soccer', league: 'Bundesliga', home: 'Leverkusen', away: 'Dortmund', time: '5:30 PM CET', startsAt: now + 28800000, creatorCount: 9, pickCount: 14, featured: false, status: 'upcoming' as const },
-      // Tennis
-      { sport: 'Tennis', league: 'ATP Madrid', home: 'Sinner', away: 'Alcaraz', time: '2:00 PM CET', startsAt: now + 36000000, creatorCount: 6, pickCount: 10, featured: false, status: 'upcoming' as const },
-      // MLB
-      { sport: 'Baseball', league: 'MLB', home: 'Yankees', away: 'Red Sox', time: '7:05 PM ET', startsAt: now + 5400000, creatorCount: 8, pickCount: 14, featured: false, status: 'upcoming' as const },
-      { sport: 'Baseball', league: 'MLB', home: 'Dodgers', away: 'Padres', time: '10:10 PM ET', startsAt: now + 14400000, creatorCount: 6, pickCount: 9, featured: false, status: 'upcoming' as const },
-      // MMA
-      { sport: 'MMA', league: 'UFC 310', home: 'Makhachev', away: 'Oliveira', time: '10:00 PM ET', startsAt: now + 86400000, creatorCount: 14, pickCount: 22, featured: false, status: 'upcoming' as const },
+      // Soccer — EPL
+      { sport: 'Soccer', league: 'EPL', home: 'Arsenal', away: 'Liverpool', time: '3:00 PM GMT', startsAt: now + 43200000, creatorCount: 28, pickCount: 42, featured: true, status: 'upcoming' as const },
+      { sport: 'Soccer', league: 'EPL', home: 'Chelsea', away: 'Man City', time: '5:30 PM GMT', startsAt: now + 52200000, creatorCount: 22, pickCount: 38, featured: true, status: 'upcoming' as const },
+      { sport: 'Soccer', league: 'EPL', home: 'Tottenham', away: 'Newcastle', time: '3:00 PM GMT', startsAt: now + 43200000, creatorCount: 14, pickCount: 22, featured: false, status: 'upcoming' as const },
+      { sport: 'Soccer', league: 'EPL', home: 'Aston Villa', away: 'Brighton', time: '3:00 PM GMT', startsAt: now + 43200000, creatorCount: 8, pickCount: 12, featured: false, status: 'upcoming' as const },
+      // Soccer — La Liga
+      { sport: 'Soccer', league: 'La Liga', home: 'Real Madrid', away: 'Barcelona', time: '9:00 PM CET', startsAt: now + 72000000, creatorCount: 34, pickCount: 56, featured: true, status: 'upcoming' as const },
+      { sport: 'Soccer', league: 'La Liga', home: 'Atlético Madrid', away: 'Sevilla', time: '4:15 PM CET', startsAt: now + 54000000, creatorCount: 9, pickCount: 14, featured: false, status: 'upcoming' as const },
+      // Soccer — Bundesliga
+      { sport: 'Soccer', league: 'Bundesliga', home: 'Leverkusen', away: 'Dortmund', time: '5:30 PM CET', startsAt: now + 28800000, creatorCount: 12, pickCount: 18, featured: false, status: 'upcoming' as const },
+      // Cricket — IPL
+      { sport: 'Cricket', league: 'IPL', home: 'Mumbai Indians', away: 'Chennai Super Kings', time: '7:30 PM IST', startsAt: now + 18000000, creatorCount: 18, pickCount: 26, featured: true, status: 'upcoming' as const },
+      { sport: 'Cricket', league: 'IPL', home: 'Royal Challengers', away: 'Kolkata Knight Riders', time: '3:30 PM IST', startsAt: now + 3600000, creatorCount: 12, pickCount: 18, featured: false, status: 'upcoming' as const },
+      { sport: 'Cricket', league: 'IPL', home: 'Delhi Capitals', away: 'Rajasthan Royals', time: '7:30 PM IST', startsAt: now + 90000000, creatorCount: 8, pickCount: 11, featured: false, status: 'upcoming' as const },
+      // Tennis — Italian Open
+      { sport: 'Tennis', league: 'ATP Italian Open', home: 'Sinner', away: 'Alcaraz', time: '2:00 PM CET', startsAt: now + 36000000, creatorCount: 6, pickCount: 10, featured: false, status: 'upcoming' as const },
+      { sport: 'Tennis', league: 'WTA Italian Open', home: 'Świątek', away: 'Gauff', time: '12:00 PM CET', startsAt: now + 28800000, creatorCount: 4, pickCount: 7, featured: false, status: 'upcoming' as const },
+      { sport: 'Tennis', league: 'ATP Italian Open', home: 'Djokovic', away: 'Medvedev', time: '8:00 PM CET', startsAt: now + 57600000, creatorCount: 5, pickCount: 8, featured: false, status: 'upcoming' as const },
     ];
 
     const eventIds = [];
@@ -398,11 +408,82 @@ export const seedAll = mutation({
       });
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 6. Seed Users (8 subscribers + 2 admins)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    const users = [
+      { name: 'Alex Rivera', email: 'alex@example.com', role: 'user' as const },
+      { name: 'Jordan Mitchell', email: 'jordan@example.com', role: 'user' as const },
+      { name: 'Casey Brooks', email: 'casey@example.com', role: 'user' as const },
+      { name: 'Taylor Reid', email: 'taylor@example.com', role: 'user' as const },
+      { name: 'Morgan Quinn', email: 'morgan@example.com', role: 'user' as const },
+      { name: 'Riley Dawson', email: 'riley@example.com', role: 'user' as const },
+      { name: 'Cameron Hart', email: 'cameron@example.com', role: 'user' as const },
+      { name: 'Drew Sullivan', email: 'drew@example.com', role: 'user' as const },
+      { name: 'Admin User', email: 'admin@digipicks.com', role: 'admin' as const },
+      { name: 'Super Admin', email: 'super@digipicks.com', role: 'super_admin' as const },
+    ];
+
+    const userIds = [];
+    for (const user of users) {
+      const id = await ctx.db.insert('users', {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: true,
+      });
+      userIds.push(id);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 7. Seed Subscriptions (subscribers → creators)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    const subs = [
+      // Alex follows SharpEdge + CourtVision
+      { sub: 0, creator: 0, plan: 'premium' as const },
+      { sub: 0, creator: 2, plan: 'free' as const },
+      // Jordan follows Nordic + Octagon
+      { sub: 1, creator: 1, plan: 'free' as const },
+      { sub: 1, creator: 5, plan: 'premium' as const },
+      // Casey follows Line Movement (VIP)
+      { sub: 2, creator: 9, plan: 'vip' as const },
+      // Taylor follows SharpEdge + Gridiron
+      { sub: 3, creator: 0, plan: 'free' as const },
+      { sub: 3, creator: 7, plan: 'free' as const },
+      // Morgan follows CourtVision + Diamond
+      { sub: 4, creator: 2, plan: 'premium' as const },
+      { sub: 4, creator: 6, plan: 'free' as const },
+      // Riley follows Tennis Edge + Nordic
+      { sub: 5, creator: 4, plan: 'free' as const },
+      { sub: 5, creator: 1, plan: 'premium' as const },
+      // Cameron follows Puckline + Line Movement
+      { sub: 6, creator: 3, plan: 'free' as const },
+      { sub: 6, creator: 9, plan: 'premium' as const },
+      // Drew follows SharpEdge (cancelled)
+      { sub: 7, creator: 0, plan: 'free' as const, cancelled: true },
+    ];
+
+    for (const s of subs) {
+      await ctx.db.insert('subscriptions', {
+        subscriberId: userIds[s.sub],
+        creatorId: creatorIds[s.creator],
+        plan: s.plan,
+        status: s.cancelled ? 'cancelled' : 'active',
+        startedAt: now - 86400000 * Math.floor(Math.random() * 90 + 7),
+        renewsAt: s.cancelled ? undefined : now + 86400000 * 30,
+        cancelledAt: s.cancelled ? now - 86400000 * 2 : undefined,
+      });
+    }
+
     return {
       status: 'seeded',
       creators: creatorIds.length,
       events: eventIds.length,
       picks: picks.length,
+      users: userIds.length,
+      subscriptions: subs.length,
     };
   },
 });

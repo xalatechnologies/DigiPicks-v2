@@ -62,6 +62,10 @@
   color: var(--green);
   animation: dp-pulse-dot var(--dur-ambient-pulse) var(--ease-in-out) infinite;
 }
+.dotMuted {
+  background: var(--primary);
+  animation: none;
+}
 .liveLabel {
   font-family: var(--f-mono);
   font-size: var(--text-2xs);
@@ -69,6 +73,9 @@
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   font-weight: var(--weight-semibold);
+}
+.labelMuted {
+  color: var(--primary);
 }
 .eyebrow {
   font-family: var(--f-mono);
@@ -95,12 +102,17 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 .teamName {
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--t-1);
   letter-spacing: var(--tracking-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .teamMeta {
   font-family: var(--f-mono);
@@ -117,9 +129,10 @@
   gap: 2px;
   font-family: var(--f-mono);
   color: var(--t-1);
+  flex-shrink: 0;
 }
 .scoreValue {
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-tighter);
   font-variant-numeric: tabular-nums;
@@ -131,6 +144,20 @@
 }
 .scoreDelta.down {
   color: var(--red);
+}
+
+.time {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.timeValue {
+  font-family: var(--f-mono);
+  font-size: var(--text-xs);
+  color: var(--t-2);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
 }
 
 .foot {
@@ -166,3 +193,4 @@
 .cta:hover {
   transform: translateX(2px);
 }
+

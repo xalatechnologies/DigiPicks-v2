@@ -1,0 +1,128 @@
+import React from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useConvexAuth, useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
+import { Container, Section, EmptyState, Button } from '@digipicks/ds';
+
+/**
+ * Roles defined in `convex/shared/validators.ts`. Mirrored here as a string
+ * union to keep the gate package-agnostic; values are validated against the
+ * live `user.role` returned by `api.users.meSafe`.
+ */
+export type UserRole =
+  | 'super_admin'
+  | 'tenant_admin'
+  | 'admin'
+  | 'moderator'
+  | 'user';
+
+export interface AuthGateProps {
+  children: React.ReactNode;
+  /**
+   * If provided, the current user's `role` must be one of these to pass.
+   * Combined with `requireCreator` via OR — admin OR creator both pass.
+   */
+  allowedRoles?: ReadonlyArray<UserRole>;
+  /**
+   * If true, the current user must have `creatorId` set on their profile
+   * (i.e., they are a creator).
+   */
+  requireCreator?: boolean;
+  /**
+   * Title shown on the "forbidden" empty-state when authenticated but lacking
+   * the required role / creator status.
+   */
+  forbiddenTitle?: string;
+  forbiddenSubtitle?: string;
+}
+
+/**
+ * Gates a route subtree behind Convex auth + RBAC.
+ *
+ * States:
+ *  1. **Auth or profile resolving** — DS loading panel.
+ *  2. **Unauthenticated** — redirect to `/auth?next=<originalPath>`.
+ *  3. **Authenticated but unauthorized** — DS "Forbidden" panel with a CTA
+ *     back to the public site.
+ *
+ * If neither `allowedRoles` nor `requireCreator` is set, any authenticated
+ * user passes (auth-only gate).
+ */
+export function AuthGate({
+  children,
+  allowedRoles,
+  requireCreator,
+  forbiddenTitle = "You don't have access to this area.",
+  forbiddenSubtitle = 'This part of DigiPicks is reserved for verified creators and platform admins. If you think this is a mistake, contact support.',
+}: AuthGateProps) {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { pathname, search } = useLocation();
+
+  // Only fetch the profile after Convex auth resolves.
+  const user = useQuery(
+    api.users.meSafe,
+    isAuthenticated ? {} : 'skip',
+  );
+
+  // ── Auth resolving (or profile loading) ──────────────────────────────
+  if (isLoading || (isAuthenticated && user === undefined)) {
+    return (
+      <main>
+        <Container size="xl">
+          <Section noReveal>
+            <EmptyState
+              icon="lock"
+              title="Loading your studio…"
+              subtitle="One moment while we verify your session."
+            />
+          </Section>
+        </Container>
+      </main>
+    );
+  }
+
+  // ── Unauthenticated → bounce to /auth, remembering destination ──────
+  if (!isAuthenticated || user === null) {
+    const next = encodeURIComponent(`${pathname}${search}`);
+    return <Navigate to={`/auth?next=${next}`} replace />;
+  }
+
+  // ── RBAC check ───────────────────────────────────────────────────────
+  // Earlier branches narrowed undefined/null, but TS can't follow useQuery's
+  // discriminated union — re-assert the non-null user once.
+  if (!user) return null;
+  const noConstraints = !allowedRoles && !requireCreator;
+  const roleOk = allowedRoles
+    ? Boolean(user.role && allowedRoles.includes(user.role as UserRole))
+    : false;
+  const creatorOk = requireCreator ? Boolean(user.creatorId) : false;
+  const allowed = noConstraints || roleOk || creatorOk;
+
+  if (!allowed) {
+    return (
+      <main>
+        <Container size="xl">
+          <Section noReveal>
+            <EmptyState
+              icon="shield"
+              title={forbiddenTitle}
+              subtitle={forbiddenSubtitle}
+              action={
+                <Button
+                  variant="primary"
+                  iconLeft="arrow-left"
+                  onClick={() => navigate('/')}
+                >
+                  Back to home
+                </Button>
+              }
+            />
+          </Section>
+        </Container>
+      </main>
+    );
+  }
+
+  return <>{children}</>;
+}

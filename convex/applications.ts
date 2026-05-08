@@ -1,14 +1,15 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import { applicationStatus } from './shared/validators';
-import { requireUser } from './shared/permissions';
+import { requireUser, requireAdmin } from './shared/permissions';
 import { internal } from './_generated/api';
 
 // =============================================================================
 // Applications Module — Creator application lifecycle
 // =============================================================================
 
-/** Submit a creator application. Public (no auth required). */
+// Auth-only.
+/** Submit a creator application. Auth-gated. */
 export const submit = mutation({
   args: {
     name: v.string(),
@@ -22,6 +23,7 @@ export const submit = mutation({
     winClaim: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     // Check for duplicate email
     const existing = await ctx.db
       .query('applications')
@@ -58,6 +60,7 @@ export const submit = mutation({
   },
 });
 
+// Admin-only.
 /** List applications by status. Admin-only. */
 export const listByStatus = query({
   args: {
@@ -65,10 +68,7 @@ export const listByStatus = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    if (user.role !== 'super_admin' && user.role !== 'admin') {
-      throw new Error('Forbidden: admin role required');
-    }
+    await requireAdmin(ctx);
 
     if (args.status) {
       return await ctx.db
@@ -84,6 +84,7 @@ export const listByStatus = query({
   },
 });
 
+// Admin-only.
 /** Review (approve/reject) an application. Admin-only. */
 export const review = mutation({
   args: {
@@ -92,10 +93,7 @@ export const review = mutation({
     reviewNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    if (user.role !== 'super_admin' && user.role !== 'admin') {
-      throw new Error('Forbidden: admin role required');
-    }
+    const user = await requireAdmin(ctx);
 
     const app = await ctx.db.get(args.id);
     if (!app) throw new Error('Application not found');

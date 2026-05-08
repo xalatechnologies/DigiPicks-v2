@@ -26,6 +26,8 @@ export interface HeroLivePanelProps {
   events: HeroLiveEvent[];
   creators?: HeroLivePanelCreator[];
   creatorsCount?: number;
+  /** Whether events are currently live. Switches header + dot style. */
+  live?: boolean;
   ctaLabel?: string;
   onCta?: () => void;
   className?: string;
@@ -35,6 +37,7 @@ export function HeroLivePanel({
   events,
   creators = [],
   creatorsCount,
+  live = false,
   ctaLabel = 'Open live tracker',
   onCta,
   className,
@@ -43,34 +46,44 @@ export function HeroLivePanel({
     <div className={cx(s.panel, className)}>
       <div className={s.head}>
         <div className={s.headLeft}>
-          <span className={s.liveDot} aria-hidden="true" />
-          <span className={s.liveLabel}>Live now</span>
+          <span className={cx(s.liveDot, !live && s.dotMuted)} aria-hidden="true" />
+          <span className={cx(s.liveLabel, !live && s.labelMuted)}>
+            {live ? 'Live now' : 'Upcoming'}
+          </span>
         </div>
-        <span className={s.eyebrow}>Tonight · {events.length} games</span>
+        <span className={s.eyebrow}>
+          {live ? 'Tonight' : 'Next up'} · {events.length} {events.length === 1 ? 'game' : 'games'}
+        </span>
       </div>
 
       <div>
-        {events.map((ev, i) => (
-          <div key={i} className={s.event}>
-            <div className={s.team}>
-              <span className={s.teamName}>{ev.away} @ {ev.home}</span>
-              <span className={s.teamMeta}>
-                {ev.league}
-                {ev.status ? ` · ${ev.status}` : ''}
-              </span>
-            </div>
-            <div className={s.score}>
-              <span className={s.scoreValue}>
-                {ev.awayScore ?? '—'}
-                <span aria-hidden="true"> · </span>
-                {ev.homeScore ?? '—'}
-              </span>
-              {(ev.homeDelta || ev.awayDelta) && (
-                <span className={s.scoreDelta}>{ev.homeDelta ?? ev.awayDelta}</span>
+        {events.map((ev, i) => {
+          const isLive = ev.status === 'Live' || (ev.homeScore !== undefined && ev.homeScore !== 0) || (ev.awayScore !== undefined && ev.awayScore !== 0);
+          return (
+            <div key={i} className={s.event}>
+              <div className={s.team}>
+                <span className={s.teamName}>{ev.away} vs {ev.home}</span>
+                <span className={s.teamMeta}>
+                  {ev.league}
+                  {ev.status && ev.status !== 'Upcoming' && ev.status !== 'Live' ? ` · ${ev.status}` : ''}
+                </span>
+              </div>
+              {isLive ? (
+                <div className={s.score}>
+                  <span className={s.scoreValue}>
+                    {ev.awayScore ?? '—'}
+                    <span aria-hidden="true"> · </span>
+                    {ev.homeScore ?? '—'}
+                  </span>
+                </div>
+              ) : (
+                <div className={s.time}>
+                  <span className={s.timeValue}>{ev.status || '—'}</span>
+                </div>
               )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className={s.foot}>

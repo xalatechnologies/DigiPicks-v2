@@ -1,7 +1,7 @@
 /* ── Outer hero band ──────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  padding: var(--space-20) var(--space-7) var(--space-18);
+  padding: var(--space-20) 0 var(--space-18);
   overflow: hidden;
   isolation: isolate;
   border-bottom: 1px solid var(--line-soft);
@@ -56,6 +56,8 @@
 .inner {
   max-width: var(--container-xl);
   margin: 0 auto;
+  padding-left: var(--space-7);
+  padding-right: var(--space-7);
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-12);

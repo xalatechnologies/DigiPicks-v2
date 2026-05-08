@@ -6,6 +6,7 @@ import { requireUser } from './shared/permissions';
 // Notifications Module
 // =============================================================================
 
+// Auth-only.
 /** List unread notifications for the authenticated user. */
 export const listUnread = query({
   args: { limit: v.optional(v.number()) },
@@ -21,7 +22,8 @@ export const listUnread = query({
   },
 });
 
-/** Mark a notification as read. */
+// Owner-or-admin.
+/** Mark a notification as read. Owner-only. */
 export const markRead = mutation({
   args: { id: v.id('notifications') },
   handler: async (ctx, args) => {

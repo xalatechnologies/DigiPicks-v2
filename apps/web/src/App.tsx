@@ -4,6 +4,7 @@ import { useConvexAuth, useAuthActions } from '@convex-dev/auth/react';
 import {
   PublicLayout,
   Container,
+  Section,
   Row,
   Logo,
   Button,
@@ -12,6 +13,7 @@ import {
   Input,
   Icon,
   Spacer,
+  EmptyState,
 } from '@digipicks/ds';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
@@ -19,7 +21,10 @@ import { Creators } from './pages/Creators';
 import { CreatorDetail } from './pages/CreatorDetail';
 import { Apply } from './pages/Apply';
 import { Auth } from './pages/Auth';
-import { DashboardRoutes } from './dashboard/Routes';
+import { AuthGate } from './auth/AuthGate';
+
+// Code-split the entire creator studio so public visitors never download it.
+const DashboardRoutes = React.lazy(() => import('./dashboard/Routes'));
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/', label: 'Home' },
@@ -193,10 +198,41 @@ export function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/creators" element={<Creators />} />
         <Route path="/creators/:id" element={<CreatorDetail />} />
-        <Route path="/apply" element={<Apply />} />
+        <Route
+          path="/apply"
+          element={
+            <AuthGate
+              forbiddenTitle="Sign in required"
+              forbiddenSubtitle="Creator applications need a verified email account so we can follow up on your submission."
+            >
+              <Apply />
+            </AuthGate>
+          }
+        />
       </Route>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/dashboard/*" element={<DashboardRoutes />} />
+      <Route
+        path="/dashboard/*"
+        element={
+          <React.Suspense
+            fallback={
+              <main>
+                <Container size="xl">
+                  <Section noReveal>
+                    <EmptyState
+                      icon="lock"
+                      title="Loading your studio…"
+                      subtitle="One moment while we boot the dashboard."
+                    />
+                  </Section>
+                </Container>
+              </main>
+            }
+          >
+            <DashboardRoutes />
+          </React.Suspense>
+        }
+      />
     </Routes>
   );
 }

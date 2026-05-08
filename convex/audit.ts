@@ -1,6 +1,6 @@
 import { internalMutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { requireUser } from './shared/permissions';
+import { requireAdmin } from './shared/permissions';
 
 // =============================================================================
 // Audit Module — Internal logging + admin query
@@ -32,6 +32,7 @@ export const log = internalMutation({
   },
 });
 
+// Admin-only.
 /** List audit logs by entity. Admin-only. */
 export const listByEntity = query({
   args: {
@@ -40,10 +41,7 @@ export const listByEntity = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    if (user.role !== 'super_admin' && user.role !== 'admin') {
-      throw new Error('Forbidden: admin role required');
-    }
+    await requireAdmin(ctx);
 
     if (args.entityId) {
       return await ctx.db

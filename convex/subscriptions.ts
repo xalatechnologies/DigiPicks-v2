@@ -7,7 +7,8 @@ import { requireUser } from './shared/permissions';
 // Subscriptions Module — User ↔ Creator subscription lifecycle
 // =============================================================================
 
-/** List the current user's active subscriptions. Auth-gated. */
+// Auth-only.
+/** List the current user's subscriptions. Always filtered by current user. */
 export const mySubscriptions = query({
   args: {},
   handler: async (ctx) => {
@@ -21,7 +22,8 @@ export const mySubscriptions = query({
   },
 });
 
-/** Check if the current user is subscribed to a creator. Auth-gated. */
+// Auth-only.
+/** Check if the current user is subscribed to a creator. */
 export const isSubscribed = query({
   args: { creatorId: v.id('creators') },
   handler: async (ctx, { creatorId }) => {
@@ -36,7 +38,8 @@ export const isSubscribed = query({
   },
 });
 
-/** List subscriber count for a creator. Public. */
+// Public.
+/** Count active subscribers for a creator. */
 export const countByCreator = query({
   args: { creatorId: v.id('creators') },
   handler: async (ctx, { creatorId }) => {
@@ -48,7 +51,8 @@ export const countByCreator = query({
   },
 });
 
-/** Subscribe the current user to a creator. Auth-gated. */
+// Auth-only.
+/** Subscribe the current user to a creator. subscriberId derived from session. */
 export const subscribe = mutation({
   args: {
     creatorId: v.id('creators'),
@@ -81,7 +85,8 @@ export const subscribe = mutation({
   },
 });
 
-/** Cancel the current user's subscription to a creator. Auth-gated. */
+// Auth-only.
+/** Cancel the current user's subscription to a creator. */
 export const cancel = mutation({
   args: { creatorId: v.id('creators') },
   handler: async (ctx, args) => {

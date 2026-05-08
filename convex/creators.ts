@@ -6,6 +6,7 @@ import { creatorStatus } from './shared/validators';
 // Creator Queries & Mutations
 // =============================================================================
 
+// Public.
 export const list = query({
   args: {
     sport: v.optional(v.string()),
@@ -36,6 +37,7 @@ export const list = query({
   },
 });
 
+// Public.
 export const getByHandle = query({
   args: { handle: v.string() },
   handler: async (ctx, { handle }) => {
@@ -46,6 +48,7 @@ export const getByHandle = query({
   },
 });
 
+// Public.
 export const get = query({
   args: { id: v.id('creators') },
   handler: async (ctx, { id }) => {
@@ -53,6 +56,7 @@ export const get = query({
   },
 });
 
+// Internal-only.
 /** Create a new creator profile. Internal only — used during application approval. */
 export const create = internalMutation({
   args: {

@@ -41,11 +41,6 @@ const TRUST_BRANDS = [
   'BetIQ',
 ];
 
-const HERO_LIVE_EVENTS = [
-  { league: 'NBA', away: 'Celtics', home: 'Lakers', awayScore: 89, homeScore: 92, status: 'Q3 · 4:21' },
-  { league: 'NFL', away: 'Bills', home: 'Chiefs', awayScore: 17, homeScore: 14, status: 'Q2 · 1:08' },
-  { league: 'NHL', away: 'Rangers', home: 'Bruins', awayScore: 2, homeScore: 3, status: 'P3 · 7:45' },
-];
 
 const STEPS: Array<{
   step: number;
@@ -201,6 +196,19 @@ export function Landing() {
   const featuredEvent = (featuredEvents ?? [])[0] ?? (allEvents ?? [])[0];
   const otherEvents = (allEvents ?? []).filter((e) => e._id !== featuredEvent?._id).slice(0, 6);
 
+  const liveEvents = useQuery(api.events.live, {});
+  const upcomingEvents = useQuery(api.events.featured, {});
+  const hasLive = (liveEvents ?? []).length > 0;
+  const panelEvents = hasLive ? liveEvents! : (upcomingEvents ?? []);
+  const heroLiveEvents = panelEvents.slice(0, 3).map((e) => ({
+    league: e.league,
+    away: e.away,
+    home: e.home,
+    awayScore: e.awayScore ?? 0,
+    homeScore: e.homeScore ?? 0,
+    status: e.gameStatus ?? e.time,
+  }));
+
   return (
     <main>
       {/* ── 01 · Hero — single confident lead-in with live signal ──────── */}
@@ -211,7 +219,12 @@ export function Landing() {
             Track every play.
           </>
         }
-        subtitle="The first curated network where every pick is graded by the platform, every record is real, and every creator is vetted before they publish. No screenshots. No parlays-as-content. Just edge."
+        subtitle={
+          <>
+            Every pick published with verified records and fully graded transparency.{' '}
+            <em>Follow the sharpest minds in sports</em> — for free or premium.
+          </>
+        }
         actions={
           <>
             <Button
@@ -234,10 +247,11 @@ export function Landing() {
         ]}
         panel={
           <HeroLivePanel
-            events={HERO_LIVE_EVENTS}
+            events={heroLiveEvents}
+            live={hasLive}
             creators={heroCreators}
             creatorsCount={28}
-            ctaLabel="Open live tracker"
+            ctaLabel={hasLive ? 'Open live tracker' : 'View all events'}
             onCta={() => navigate('/events')}
           />
         }

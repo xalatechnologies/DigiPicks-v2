@@ -310,7 +310,15 @@ describe('categories', () => {
   test('seed default categories', async () => {
     const t = convexTest(schema, modules);
 
-    const result = await t.mutation(api.categories.seedDefaultCategories, {});
+    const adminId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'admin', isActive: true });
+    });
+    const asAdmin = t.withIdentity({ subject: adminId });
+
+    const result = await asAdmin.mutation(
+      api.categories.seedDefaultCategories,
+      {},
+    );
     expect(result).toBe(true);
 
     const all = await t.query(api.categories.list, {});
@@ -323,8 +331,13 @@ describe('categories', () => {
   test('seed is idempotent', async () => {
     const t = convexTest(schema, modules);
 
-    await t.mutation(api.categories.seedDefaultCategories, {});
-    await t.mutation(api.categories.seedDefaultCategories, {});
+    const adminId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'admin', isActive: true });
+    });
+    const asAdmin = t.withIdentity({ subject: adminId });
+
+    await asAdmin.mutation(api.categories.seedDefaultCategories, {});
+    await asAdmin.mutation(api.categories.seedDefaultCategories, {});
 
     const all = await t.query(api.categories.list, {});
     expect(all.length).toBe(10); // Still 10, not 20
@@ -336,10 +349,19 @@ describe('categories', () => {
 // =============================================================================
 
 describe('applications', () => {
+  /** Helper: create an authenticated test client. */
+  async function setupAuthedUser(t: ReturnType<typeof convexTest>) {
+    const userId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'user', isActive: true });
+    });
+    return t.withIdentity({ subject: userId });
+  }
+
   test('submit application', async () => {
     const t = convexTest(schema, modules);
+    const asUser = await setupAuthedUser(t);
 
-    const appId = await t.mutation(api.applications.submit, {
+    const appId = await asUser.mutation(api.applications.submit, {
       name: 'Jane Doe',
       handle: '@janedoe',
       email: 'jane@example.com',
@@ -352,8 +374,9 @@ describe('applications', () => {
 
   test('reject duplicate email', async () => {
     const t = convexTest(schema, modules);
+    const asUser = await setupAuthedUser(t);
 
-    await t.mutation(api.applications.submit, {
+    await asUser.mutation(api.applications.submit, {
       name: 'Jane Doe',
       handle: '@janedoe',
       email: 'jane@example.com',
@@ -363,7 +386,7 @@ describe('applications', () => {
     });
 
     await expect(
-      t.mutation(api.applications.submit, {
+      asUser.mutation(api.applications.submit, {
         name: 'Jane Again',
         handle: '@janedoe2',
         email: 'jane@example.com',
@@ -372,5 +395,20 @@ describe('applications', () => {
         proofCount: 3,
       }),
     ).rejects.toThrow('Application already submitted');
+  });
+
+  test('submit rejects unauthenticated callers', async () => {
+    const t = convexTest(schema, modules);
+
+    await expect(
+      t.mutation(api.applications.submit, {
+        name: 'Anon',
+        handle: '@anon',
+        email: 'anon@example.com',
+        sport: 'NBA',
+        niche: 'Spreads',
+        proofCount: 1,
+      }),
+    ).rejects.toThrow();
   });
 });

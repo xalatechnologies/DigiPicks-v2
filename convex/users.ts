@@ -8,6 +8,7 @@ import { requireUser, getCurrentUser } from './shared/permissions';
 // managed by @convex-dev/auth. This module adds DigiPicks-specific profile ops.
 // =============================================================================
 
+// Auth-only.
 /** Get the current authenticated user profile. Throws if not authenticated. */
 export const me = query({
   args: {},
@@ -16,6 +17,7 @@ export const me = query({
   },
 });
 
+// Public.
 /** Safe version — returns null for unauthenticated users (for conditional UI). */
 export const meSafe = query({
   args: {},
@@ -24,6 +26,7 @@ export const meSafe = query({
   },
 });
 
+// Auth-only.
 /**
  * Update the current user's profile (display name, locale, etc).
  * Auth-gated: derives userId from session.

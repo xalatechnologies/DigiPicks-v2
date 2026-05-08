@@ -27,6 +27,14 @@ crons.interval(
   internal.crons.archiveExpiredListings,
   {},
 );
+// ─── Poll live scores from The Odds API ─────────────────────────────────
+// Runs every 60 seconds. Gracefully no-ops when THE_ODDS_API_KEY is not set.
+
+crons.interval(
+  'poll-live-scores',
+  { seconds: 60 },
+  internal.liveScores.pollActive,
+);
 
 export default crons;
 

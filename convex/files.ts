@@ -1,12 +1,13 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { requireUser } from './shared/permissions';
+import { requireUser, isAdmin } from './shared/permissions';
 
 // =============================================================================
 // File Storage Module
 // Per guidelines: ctx.storage for uploads, _storage system table for metadata
 // =============================================================================
 
+// Auth-only.
 /** Generate an upload URL for the client. Auth-gated. */
 export const generateUploadUrl = mutation({
   args: {},
@@ -16,31 +17,51 @@ export const generateUploadUrl = mutation({
   },
 });
 
-/** Get a signed URL for a stored file. */
+// Auth-only.
+/** Get a signed URL for a stored file. Auth-gated. */
 export const getUrl = query({
   args: { storageId: v.id('_storage') },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     return await ctx.storage.getUrl(args.storageId);
   },
 });
 
-/** Get file metadata from the _storage system table. */
+// Auth-only.
+/** Get file metadata from the _storage system table. Auth-gated. */
 export const getMetadata = query({
   args: { storageId: v.id('_storage') },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     return await ctx.db.system.get(args.storageId);
   },
 });
 
-/** Delete a stored file. Auth-gated. */
+// Owner-or-admin.
+/** Delete a stored file. Caller must own a listing referencing it, or be admin. */
 export const deleteFile = mutation({
   args: { storageId: v.id('_storage') },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    const user = await requireUser(ctx);
+    if (!isAdmin(user)) {
+      // Verify the file is referenced by a listing the caller owns (if at all).
+      const media = await ctx.db
+        .query('listingMedia')
+        .filter((q) => q.eq(q.field('storageId'), args.storageId))
+        .first();
+      if (media) {
+        const listing = await ctx.db.get(media.listingId);
+        if (!listing || listing.ownerUserId !== user._id) {
+          throw new Error('Forbidden');
+        }
+      }
+      // If no media row, fall through — only the uploader could know the id.
+    }
     await ctx.storage.delete(args.storageId);
   },
 });
 
+// Owner-or-admin.
 /**
  * Attach a stored file to a listing as media.
  * Called after successful upload.
@@ -56,7 +77,7 @@ export const attachToListing = mutation({
     const user = await requireUser(ctx);
     const listing = await ctx.db.get(args.listingId);
     if (!listing) throw new Error('Listing not found');
-    if (listing.ownerUserId !== user._id && user.role !== 'super_admin') {
+    if (listing.ownerUserId !== user._id && !isAdmin(user)) {
       throw new Error('Forbidden');
     }
 

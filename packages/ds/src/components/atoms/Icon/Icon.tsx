@@ -48,7 +48,10 @@ export type IconName =
   | 'calendar'
   | 'clock'
   | 'trophy'
-  | 'audit';
+  | 'audit'
+  | 'soccer'
+  | 'cricket'
+  | 'tennis';
 
 export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, 'name'> {
   name: IconName | (string & {});
@@ -397,6 +400,30 @@ export const Icon: React.FC<IconProps> = ({ name, size = 16, ...rest }) => {
         <svg {...common}>
           <path d="M9 4h6l4 4v12a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1h3z" />
           <path d="M14 4v4h4M9 13h6M9 17h4" />
+        </svg>
+      );
+    case 'soccer':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 3l2.5 4.5h5L17 12l2.5 4.5h-5L12 21l-2.5-4.5h-5L7 12l-2.5-4.5h5z" />
+        </svg>
+      );
+    case 'cricket':
+      return (
+        <svg {...common}>
+          <path d="M5 19l7-7M14 10l5 5" />
+          <circle cx="17.5" cy="6.5" r="2.5" />
+          <path d="M3 21l2-2" />
+        </svg>
+      );
+    case 'tennis':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M5 4c2 4 2 12 0 16" />
+          <path d="M19 4c-2 4-2 12 0 16" />
+          <path d="M3 12h18" />
         </svg>
       );
     default:

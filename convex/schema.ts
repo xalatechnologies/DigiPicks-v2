@@ -296,10 +296,17 @@ export default defineSchema({
     pickCount: v.number(),
     featured: v.boolean(),
     status: eventStatus,
+    // ── Live score fields (populated by cron) ──
+    homeScore: v.optional(v.number()),
+    awayScore: v.optional(v.number()),
+    gameStatus: v.optional(v.string()),
+    lastScoreUpdate: v.optional(v.number()),
+    externalId: v.optional(v.string()),
   })
     .index('by_sport_and_startsAt', ['sport', 'startsAt'])
     .index('by_featured_and_startsAt', ['featured', 'startsAt'])
-    .index('by_status_and_startsAt', ['status', 'startsAt']),
+    .index('by_status_and_startsAt', ['status', 'startsAt'])
+    .index('by_external_id', ['externalId']),
 
   subscriptions: defineTable({
     subscriberId: v.id('users'),

@@ -1,13 +1,14 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import { listingType, paymentMode } from './shared/validators';
-import { requireUser } from './shared/permissions';
+import { requireUser, isAdmin } from './shared/permissions';
 import { internal } from './_generated/api';
 
 // =============================================================================
 // Listings Module
 // =============================================================================
 
+// Public.
 /** List published listings, optionally filtered by type. Bounded to 50. */
 export const listPublished = query({
   args: {
@@ -33,6 +34,7 @@ export const listPublished = query({
   },
 });
 
+// Public.
 /** Get a single listing by ID with its media. */
 export const getById = query({
   args: { id: v.id('listings') },
@@ -49,7 +51,8 @@ export const getById = query({
   },
 });
 
-/** Create a draft listing. Auth-gated. */
+// Auth-only.
+/** Create a draft listing. Auth-gated. ownerUserId derived from session. */
 export const createDraft = mutation({
   args: {
     type: listingType,
@@ -110,6 +113,7 @@ export const createDraft = mutation({
   },
 });
 
+// Owner-or-admin.
 /** Publish a listing. Ownership-gated. */
 export const publish = mutation({
   args: { id: v.id('listings') },
@@ -117,7 +121,7 @@ export const publish = mutation({
     const user = await requireUser(ctx);
     const listing = await ctx.db.get(args.id);
     if (!listing) throw new Error('Listing not found');
-    if (listing.ownerUserId !== user._id && user.role !== 'super_admin') {
+    if (listing.ownerUserId !== user._id && !isAdmin(user)) {
       throw new Error('Forbidden');
     }
 
