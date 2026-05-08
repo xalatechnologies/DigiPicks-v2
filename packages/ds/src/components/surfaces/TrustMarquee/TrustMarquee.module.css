@@ -1,5 +1,7 @@
 .band {
   position: relative;
+  /* Breathing room above and below so the next Section doesn't crowd it. */
+  margin: 0 0 var(--space-12);
   border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
   background: linear-gradient(

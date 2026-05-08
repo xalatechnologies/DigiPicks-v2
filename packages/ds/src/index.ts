@@ -51,6 +51,8 @@ export { FilterChips } from './components/forms/FilterChips/FilterChips';
 export type { FilterChipsProps, FilterChipsOption } from './components/forms/FilterChips/FilterChips';
 export { SwitchRow } from './components/forms/SwitchRow/SwitchRow';
 export type { SwitchRowProps } from './components/forms/SwitchRow/SwitchRow';
+export { PasswordInput } from './components/forms/PasswordInput/PasswordInput';
+export type { PasswordInputProps } from './components/forms/PasswordInput/PasswordInput';
 
 // ── surfaces ─────────────────────────────────────────────────────────────
 export { Card } from './components/surfaces/Card/Card';
@@ -71,6 +73,8 @@ export type { TestimonialProps } from './components/surfaces/Testimonial/Testimo
 export { SplitCTA } from './components/surfaces/SplitCTA/SplitCTA';
 export type { SplitCTAProps, SplitCTAPanel } from './components/surfaces/SplitCTA/SplitCTA';
 export { PriceCard } from './components/surfaces/PriceCard/PriceCard';
+export { AuthCard, AuthDivider, AuthFooterLink } from './components/surfaces/AuthCard/AuthCard';
+export type { AuthCardProps } from './components/surfaces/AuthCard/AuthCard';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';
@@ -128,6 +132,8 @@ export { Eyebrow } from './components/layout/Eyebrow/Eyebrow';
 export { Muted } from './components/layout/Muted/Muted';
 export { Mono } from './components/layout/Mono/Mono';
 export { Serif } from './components/layout/Serif/Serif';
+export { AuthLayout } from './components/layout/AuthLayout/AuthLayout';
+export type { AuthLayoutProps } from './components/layout/AuthLayout/AuthLayout';
 
 // ── motion ───────────────────────────────────────────────────────────────
 export { Reveal } from './components/motion/Reveal/Reveal';

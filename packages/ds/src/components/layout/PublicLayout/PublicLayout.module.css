@@ -7,6 +7,7 @@
 }
 
 .header {
+  position: relative;
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
@@ -14,7 +15,30 @@
   background: color-mix(in srgb, var(--bg-0) 82%, transparent);
   backdrop-filter: var(--backdrop-glass);
   -webkit-backdrop-filter: var(--backdrop-glass);
-  border-bottom: 1px solid var(--line-soft);
+  /* Silky gradient bottom border — thin at the edges, thicker in the middle,
+     primary-blue tinted. Replaces the flat 1px line. */
+  border-bottom: 0;
+  /* Rich, diffused, primary-tinted shadow that fades downward into the page. */
+  box-shadow:
+    0 14px 40px -22px color-mix(in srgb, var(--primary) 26%, transparent),
+    0 4px 14px -8px rgba(0, 0, 0, 0.1);
+}
+.header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--primary) 8%, transparent) 14%,
+    color-mix(in srgb, var(--primary) 38%, transparent) 50%,
+    color-mix(in srgb, var(--primary) 8%, transparent) 86%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .headerInner {

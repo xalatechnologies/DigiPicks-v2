@@ -46,7 +46,7 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
     // ── DigiPicks custom fields ──
-    role,
+    role: v.optional(role),
     locale: v.optional(v.union(v.literal('nb'), v.literal('en'))),
     isActive: v.optional(v.boolean()),
     creatorId: v.optional(v.id('creators')),
@@ -302,7 +302,7 @@ export default defineSchema({
     .index('by_status_and_startsAt', ['status', 'startsAt']),
 
   subscriptions: defineTable({
-    subscriberId: v.string(),
+    subscriberId: v.id('users'),
     creatorId: v.id('creators'),
     plan: subscriptionPlan,
     status: subscriptionStatus,

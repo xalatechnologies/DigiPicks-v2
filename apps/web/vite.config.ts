@@ -9,6 +9,7 @@ export default defineConfig({
     port: 5173,
   },
   resolve: {
+    dedupe: ['react', 'react-dom', 'convex', 'convex/react', '@convex-dev/auth'],
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@digipicks/sdk': path.resolve(__dirname, '../../packages/sdk/src'),

@@ -22,8 +22,8 @@ export function Creators() {
       <Container size="xl">
         <PageHead
           eyebrow="The network"
-          title="Every verified creator, in one place."
-          sub="Browse by sport, niche, win rate, or price. Each profile shows the full pick history, graded by the platform."
+          title="Verified creators."
+          sub="Browse by sport, niche, win rate, or price — every record graded by the platform."
           actions={
             <Row gap={2}>
               <Button variant="outline" onClick={() => navigate('/events')}>
@@ -44,7 +44,7 @@ export function Creators() {
           <Stack gap={5}>
             <Search placeholder="Search creators by name, handle, sport, or niche..." />
 
-            <Grid cols={3} gap={5}>
+            <Grid cols={2} gap={5}>
               {CREATORS.map((c) => (
                 <CreatorCard
                   key={c.id}
@@ -56,9 +56,14 @@ export function Creators() {
                   bio={c.bio}
                   winRate={c.winRate}
                   record={c.record}
+                  units={c.units}
                   subs={c.subs}
                   last10={c.last10}
+                  streak={c.streak}
+                  trending={c.trending}
+                  startingPrice={c.startingPrice}
                   tags={c.tags}
+                  onClick={() => navigate(`/creators/${c.id}`)}
                 />
               ))}
             </Grid>

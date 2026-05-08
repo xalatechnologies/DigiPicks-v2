@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useConvexAuth, useAuthActions } from '@convex-dev/auth/react';
 import {
   PublicLayout,
   Container,
@@ -10,20 +11,38 @@ import {
   Footer,
   Input,
   Icon,
-  Mono,
-  Muted,
   Spacer,
 } from '@digipicks/ds';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
 import { Creators } from './pages/Creators';
+import { CreatorDetail } from './pages/CreatorDetail';
 import { Apply } from './pages/Apply';
+import { Auth } from './pages/Auth';
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/', label: 'Home' },
   { to: '/events', label: "Today's Events" },
   { to: '/creators', label: 'Creators' },
 ];
+
+function AuthHeaderButton() {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { signOut } = useAuthActions();
+
+  if (isLoading) return null;
+
+  return isAuthenticated ? (
+    <Button variant="outline" onClick={() => signOut()}>
+      Sign out
+    </Button>
+  ) : (
+    <Button variant="primary" onClick={() => navigate('/auth')}>
+      Sign in
+    </Button>
+  );
+}
 
 function PublicHeader() {
   const navigate = useNavigate();
@@ -38,6 +57,8 @@ function PublicHeader() {
           onClick={() => navigate('/')}
           aria-label="DigiPicks home"
         />
+
+        <Spacer />
 
         <Row gap={1}>
           {NAV_ITEMS.map((item) => {
@@ -58,9 +79,14 @@ function PublicHeader() {
 
         <Row gap={2}>
           <ThemeIconButton />
-          <Button variant="primary" onClick={() => navigate('/apply')}>
-            Get started
+          <Button
+            variant="outline"
+            iconRight="sparkles"
+            onClick={() => navigate('/apply')}
+          >
+            Become a creator
           </Button>
+          <AuthHeaderButton />
         </Row>
       </Row>
     </Container>
@@ -137,16 +163,14 @@ function PublicFooter() {
         { icon: <Icon name="audit" size={14} />, label: 'Independent grading' },
         { icon: <Icon name="lock" size={14} />, label: '21+ age-gated' },
       ]}
-      bottomLeft={
-        <Muted>
-          © 2026 DigiPicks · Information only — not gambling advice. Must be 21+. Bet responsibly.
-        </Muted>
-      }
-      bottomRight={
-        <Row gap={2}>
-          <Muted>Crisis? Call</Muted>
-          <Mono>1-800-GAMBLER</Mono>
-        </Row>
+      credit={
+        <>
+          Developed by
+          <a href="https://xala.no" target="_blank" rel="noopener noreferrer">
+            Xala Technologies AS
+            <Icon name="arrow-right" size={11} />
+          </a>
+        </>
       }
     />
   );
@@ -167,8 +191,10 @@ export function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/events" element={<Events />} />
         <Route path="/creators" element={<Creators />} />
+        <Route path="/creators/:id" element={<CreatorDetail />} />
         <Route path="/apply" element={<Apply />} />
       </Route>
+      <Route path="/auth" element={<Auth />} />
     </Routes>
   );
 }

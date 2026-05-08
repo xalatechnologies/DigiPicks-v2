@@ -1,5 +1,11 @@
 .crumb {
-  font-size: var(--text-sm);
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-weight: var(--weight-semibold);
   color: var(--t-3);
 }
 
@@ -19,29 +25,46 @@
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-xs);
   color: var(--t-3);
   text-decoration: none;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .link:hover {
+  background: var(--bg-2);
   color: var(--t-1);
 }
 .link:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
-  border-radius: var(--r-xs);
 }
 
 .text {
+  padding: var(--space-1) var(--space-2);
   color: var(--t-3);
 }
 
 .current {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-xs);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
   color: var(--t-1);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
 }
 
 .sep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--t-4);
   user-select: none;
+  width: var(--size-2xs);
+  height: var(--size-2xs);
 }

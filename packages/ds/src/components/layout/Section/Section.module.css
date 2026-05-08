@@ -35,6 +35,8 @@
   line-height: var(--leading-tight);
   margin: 0;
   color: var(--t-1);
+  /* Prefer balanced wrapping; never break on awkward orphan words. */
+  text-wrap: balance;
 }
 
 .sub {

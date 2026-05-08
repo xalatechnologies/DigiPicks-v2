@@ -11,11 +11,13 @@ export const listUnread = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    return await ctx.db
+    // Use the compound index — readAt undefined means unread
+    const all = await ctx.db
       .query('notifications')
       .withIndex('by_user', (q) => q.eq('userId', user._id))
       .order('desc')
       .take(args.limit ?? 20);
+    return all.filter((n) => n.readAt === undefined);
   },
 });
 

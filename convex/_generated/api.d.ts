@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as applications from "../applications.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
@@ -24,6 +25,7 @@ import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_validators from "../shared/validators.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 
 import type {
@@ -33,6 +35,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  applications: typeof applications;
   audit: typeof audit;
   auth: typeof auth;
   categories: typeof categories;
@@ -49,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   "shared/permissions": typeof shared_permissions;
   "shared/validators": typeof shared_validators;
+  subscriptions: typeof subscriptions;
   users: typeof users;
 }>;
 

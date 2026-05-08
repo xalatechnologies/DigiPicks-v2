@@ -8,7 +8,6 @@ import {
   Row,
   Grid,
   Muted,
-  Mono,
   Serif,
   Button,
   Badge,
@@ -257,8 +256,8 @@ export function Landing() {
         {/* ── 03 · How it works (narrative bridge) ─────────────────────── */}
         <Section
           eyebrow="How it works"
-          title="From discovery to tracked plays — in three steps."
-          sub="No Discord screenshots, no parlay-as-content, no hidden upsells. Just a focused product for the people who do the research and the people who follow them."
+          title="Three steps to your edge."
+          sub="No Discord screenshots, no parlays-as-content, no hidden upsells — just a focused product for the people who do the research and the ones who follow them."
           action={
             <Badge tone="blue" dot>
               Avg. setup &lt; 5 min
@@ -288,7 +287,7 @@ export function Landing() {
         {/* ── 04 · By the numbers (was floating BigStats) ──────────────── */}
         <Section
           eyebrow="By the numbers"
-          title="A network that earns its presence."
+          title="Numbers that earn the network."
           action={
             <Badge tone="blue" dot>
               Updated weekly
@@ -346,10 +345,14 @@ export function Landing() {
                 bio={c.bio}
                 winRate={c.winRate}
                 record={c.record}
+                units={c.units}
                 subs={c.subs}
                 last10={c.last10}
+                streak={c.streak}
+                trending={c.trending}
+                startingPrice={c.startingPrice}
                 tags={c.tags}
-                onClick={() => navigate('/creators')}
+                onClick={() => navigate(`/creators/${c.id}`)}
               />
             ))}
           </Grid>
@@ -358,8 +361,8 @@ export function Landing() {
         {/* ── 06 · Tonight's slate ────────────────────────────────────── */}
         <Section
           eyebrow="Tonight's slate"
-          title="Big events, fully covered."
-          sub="The biggest games on tonight's board with creator coverage and pick volume."
+          title="Tonight's biggest plays."
+          sub="The marquee games on tonight's board — every creator covering them, every pick they're calling."
           action={
             <Button
               variant="ghost"
@@ -407,8 +410,8 @@ export function Landing() {
         {/* ── 07 · Testimonials (social proof) ────────────────────────── */}
         <Section
           eyebrow="What people say"
-          title="Two sides of the network, both winning."
-          sub="From the creators publishing the picks and the subscribers betting on them."
+          title="Both sides, winning."
+          sub="From the creators publishing the picks and the subscribers backing them."
         >
           <Grid cols={3} gap={5}>
             {TESTIMONIALS.map((t) => (
@@ -430,7 +433,7 @@ export function Landing() {
         {/* ── 08 · Pricing ────────────────────────────────────────────── */}
         <Section
           eyebrow="Simple pricing"
-          title="Pick a plan that fits your edge."
+          title="Plans that fit your edge."
           sub="Cancel anytime. No retention loops. No hidden fees."
         >
           <Grid cols={3} gap={5}>
@@ -457,7 +460,7 @@ export function Landing() {
         </Section>
 
         {/* ── 09 · Split CTA — creator vs subscriber path ─────────────── */}
-        <Section eyebrow="Two ways in" title="Pick the side that fits.">
+        <Section eyebrow="Two ways in" title="Pick your side.">
           <SplitCTA
             panels={[
               {

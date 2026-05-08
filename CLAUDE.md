@@ -12,64 +12,128 @@ Convex agent skills for common tasks can be installed by running
 
 <!-- convex-ai-end -->
 
-# DigiPicks — agent guide
+# DigiPicks — Reusable-Component Doctrine (READ FIRST)
 
-**DigiPicks** is a creator network for premium sports picks. Verified creators publish picks to subscribers; subscribers track results and follow plays. This file is the contract for working in this monorepo.
+**This file is a hard contract.** Every agent and every contributor working in
+this monorepo follows these rules. There are no exceptions, no "just this
+once," no "small inline tweak."
 
----
-
-## 1. Workspace layout
-
-```
-.
-├── apps/
-│   ├── web/             # public marketing site (landing, /events, /creators, /apply)
-│   └── dashboard/       # creator-studio dashboard (overview, picks, subscribers, …)
-├── packages/
-│   ├── tokens/          # design tokens (CSS variables) — the only global stylesheet
-│   ├── ds/              # @digipicks/ds — design system: components + module CSS
-│   ├── app-shell/       # ThemeProvider, ConvexProvider
-│   ├── sdk/             # convex-backed data hooks (stub)
-│   ├── shared/          # shared TypeScript types & constants
-│   ├── eslint-config/   # shared eslint
-│   └── tsconfig/        # shared tsconfig presets
-├── convex/              # convex schema + functions
-└── prototype/           # original high-fidelity HTML/JSX prototype (read-only reference)
-```
-
-Workspace manager: **pnpm**. Build orchestrator: **vite** per app, **tsc** for typechecking. CSS pipeline: Tailwind v4 + CSS Modules (CSS Modules is the source of truth for component styles; Tailwind exists for the `@theme` bridge but **must not be used in app code**).
+If a rule below ever feels in the way, the answer is to **extend the design
+system or add a token**, not to bend the rule.
 
 ---
 
-## 2. Architecture (read this before writing code)
+## 1. The single source of truth
 
-### 2.1 Styling rules — non-negotiable
+| Layer | Lives in | Authoritative for |
+| --- | --- | --- |
+| Design tokens (CSS variables) | `packages/tokens/src/tokens.css` | Every color, size, radius, shadow, motion, z-index, container width, font, weight, tracking, leading. |
+| Global resets / body / scrollbars / focus rings | `packages/tokens/src/globals.css` | Browser-level baseline. |
+| Reusable React components + their CSS Modules | `packages/ds/src/components/**` | Every visual element rendered in any app. |
+| Public DS API | `packages/ds/src/index.ts` | The only surface apps may import from. |
 
-1. **No inline `style={{…}}`** in app code or DS components. The only allowed inline styles are dynamic CSS custom properties on a wrapper element (`style={{ '--av-size': '32px' } as React.CSSProperties}`) when the value is genuinely runtime-driven (avatar sizes, percent fills, dynamic colors).
-2. **No Tailwind utility classes in app code.** No `className="flex gap-3 max-w-4xl"`. The `@theme` bridge is for the build, not for ergonomics.
-3. **No raw `className` strings on plain DOM elements in apps.** If you need a flex row, use `<Row>` from DS. A vertical stack? `<Stack>`. A panel? `<Card>`. A heading? `<PageHead>` or DS components. Apps compose DS components — they do not author CSS.
-4. **No custom CSS files in apps.** If a styling pattern doesn't exist, add it to the DS as a new component or extend an existing component's prop API.
-5. **Every value comes from a token.** Never hardcode `#1c9cf0`, `14px`, `0 8px 24px`, or `1.45` — use `var(--blue)`, `var(--space-3)`, `var(--shadow-md)`, `var(--leading-normal)`.
+`packages/tokens` and `packages/ds` are the **only** packages that may author
+styles. Everywhere else consumes.
 
-### 2.2 The DS package (`packages/ds`)
+---
 
-Pattern (one folder per component):
-```
-packages/ds/src/components/<bucket>/<Component>/<Component>.tsx
-packages/ds/src/components/<bucket>/<Component>/<Component>.module.css
-```
+## 2. Hard rules (apps/**)
 
-Buckets:
-- `atoms/` — primitives that don't compose other DS components (Icon, Avatar, Badge, Button, Switch, …)
-- `forms/` — input controls (Input, TextArea, Select, Field, Search, FilterGroup, …)
-- `surfaces/` — visual surfaces (Card, Metric, EmptyState, PriceCard, Hero, CTABanner, …)
-- `data/` — tabular & display (Table, KV, DataPair, Stat, BigStat)
-- `nav/` — navigation chrome (AppHeader, Topbar, Sidebar, NavItem, RoleSwitcher, ThemeToggle, …)
-- `layout/` — structural primitives (PublicLayout, AppLayout, Container, Row, Col, Stack, Footer, …)
-- `feedback/` — overlays & disclosure (Modal, Drawer, Accordion, Toast, ResponsibleNote)
-- `domain/` — DigiPicks-specific compositions (CreatorChip, CreatorCard, EventCard, PickCard)
+These are violations. They will be reverted on sight:
 
-Component file pattern (mirrors `Button` exactly):
+1. **No `style={{…}}` on app code, ever, for any static value.** The only
+   permissible inline `style` in app code is forwarding to a DS component's
+   prop, not styling the DOM. Apps don't dress DOM nodes — DS components do.
+2. **No raw `className` strings in apps.** No `<div className="…">`,
+   `<span className="…">`, etc. The only acceptable raw HTML in app pages is
+   `<main>`, `<form>`, `<em>`, `<br />` — all without `className`.
+3. **No Tailwind utility classes anywhere in apps.** No `flex gap-3 p-4
+   text-xl bg-card rounded-lg`. The `@theme inline` bridge in
+   `packages/tokens/src/theme.css` exists for the build, not for ergonomics.
+4. **No `.css` or `.module.css` files inside any `apps/**` source tree.** The
+   only stylesheet apps import is `@digipicks/ds/styles` (in `main.tsx`,
+   exactly once).
+5. **No deep imports from `@digipicks/ds`.** Apps import from the package
+   root only. If something isn't exported from `packages/ds/src/index.ts`,
+   it doesn't exist as far as apps are concerned.
+6. **No hardcoded colors, sizes, fonts, durations, or shadows in app code.**
+   These never appear in app TSX:
+   `padding: 14`, `color: '#1c9cf0'`, `gap: 16`, `font-size: 18`. If you
+   think you need one, you don't — you need a DS component or a token.
+
+If you cannot accomplish a layout using only DS components, **the answer is
+to extend the DS**, not to add CSS or inline styles to an app.
+
+---
+
+## 3. Hard rules (packages/ds/**)
+
+1. Each component lives in its own folder:
+   `packages/ds/src/components/<bucket>/<Foo>/Foo.tsx` +
+   `packages/ds/src/components/<bucket>/<Foo>/Foo.module.css`.
+2. CSS Modules use **camelCase** class names (`s.btnPrimary`), are imported
+   as `import s from './Foo.module.css'`, and combined via `cx` from
+   `packages/ds/src/utils/cx.ts`.
+3. **Every value in a CSS Module is a token reference**: `var(--token-name)`.
+   Hardcoded `#hex`, `Npx`, `Nrem`, `Nem`, `Nms`, `Ns` are forbidden, with
+   the following narrow whitelist:
+   - `1px` / `2px` / `3px` for borders, dividers, focus rings.
+   - `0`, `100%`, `50%`, percent values, `currentColor`, `transparent`.
+   - `#000` / `#fff` inside SVG mask gradients only.
+   - The two documented chevron / verified-mark literals (`#6E7682` in
+     `Select.module.css`, `#08090B` in `Icon.tsx`) — both annotated.
+   - Inline `linear-gradient(...)` / `rgba(...)` overlay literals **only**
+     when the value is genuinely a translucent surface treatment that
+     can't be represented with the existing color tokens.
+4. **No new global CSS classes.** All component styles are scoped via
+   `.module.css`. The legacy globals in `packages/ds/src/styles.css` are not
+   to be extended.
+5. **Inline `style={{…}}` in DS components is permitted only for dynamic
+   CSS custom properties** that need to vary per-instance (e.g.
+   `style={{ '--av-size': '32px', '--av-color': color } as React.CSSProperties}`
+   on `Avatar`). Static values still go in the module.
+6. **All public components are exported from `packages/ds/src/index.ts`.**
+   No deep-import escape hatches.
+7. **If you need a value that doesn't exist as a token**, add it to
+   `packages/tokens/src/tokens.css` first, then reference it. Never inline.
+
+---
+
+## 4. Where new things go
+
+| You need to add… | Where it goes |
+| --- | --- |
+| A new color / size / shadow / motion value | `packages/tokens/src/tokens.css` (and `theme.css` if exposed to Tailwind) |
+| A visual pattern reused 2+ places | A new DS component under the right bucket, plus an export in `packages/ds/src/index.ts` |
+| A page (route) | `apps/<app>/src/pages/<Page>.tsx` — composing DS components only |
+| A domain shape (Pick, Creator, Event types) | `packages/shared/src/types/` |
+| A Convex query / mutation | `convex/` + a hook in `packages/sdk/src/` |
+| Theme / provider concern | `packages/app-shell/src/providers/` |
+
+DS buckets:
+`atoms/` (Icon, Avatar, Badge, Button, Switch, …)
+`forms/` (Input, TextArea, Select, Field, Search, FilterChips, SwitchRow, …)
+`surfaces/` (Card, CardHead, Metric, EmptyState, FeatureCard, Hero, CTABanner, PriceCard, StepCard, Testimonial, SplitCTA, TrustMarquee, ResponsibleSection, …)
+`data/` (Table, KV, DataPair, Stat, BigStat)
+`nav/` (AppHeader, Topbar, Sidebar, NavItem, RoleSwitcher, ThemeToggle, Segmented, Tabs, Breadcrumb)
+`layout/` (PublicLayout, AppLayout, DashboardLayout, Container, Grid, Heading, PageHead, PageHeader, Section, Footer, Row, Col, Stack, Spacer, Divider, Eyebrow, Muted, Mono, Serif, MetricGrid, StatGrid, TitleSub)
+`feedback/` (ResponsibleNote, Accordion, FAQList, Modal, Drawer, Toast)
+`domain/` (CreatorChip, CreatorCard, EventCard, FeaturedEventCard, PickCard, PersonRow, HeroLivePanel)
+`motion/` (Reveal, Stagger, StaggerItem)
+
+---
+
+## 5. Adding a DS component (the recipe)
+
+1. Pick the bucket.
+2. Create `packages/ds/src/components/<bucket>/<Foo>/Foo.tsx` and
+   `Foo.module.css`. Mirror an existing component (`Button` is the canonical
+   example).
+3. Use `cx` for class composition. Use `var(--token)` exclusively in CSS.
+4. Add the export to `packages/ds/src/index.ts`.
+5. Run `pnpm --filter @digipicks/ds typecheck`.
+
+Component file pattern:
 
 ```tsx
 import React from 'react';
@@ -89,137 +153,69 @@ export const Foo = React.forwardRef<HTMLDivElement, FooProps>(function Foo(
 });
 ```
 
-CSS Module conventions:
-- camelCase class names (Vite default; access as `s.fooName`).
-- Reference tokens via `var(--token)`. **No raw values**.
-- Co-locate the `.module.css` next to its `.tsx`. Never share modules across components.
-- For dynamic CSS custom properties, set them inline on the rendered element with `as React.CSSProperties` (e.g. `style={{ '--av-size': size + 'px' }}`).
-
-Public exports: `packages/ds/src/index.ts`. Apps import only from `@digipicks/ds` (no deep paths).
-
-### 2.3 The tokens package (`packages/tokens`)
-
-The **only** global stylesheet. Apps import once via `@digipicks/ds/styles` (which re-imports `@digipicks/tokens`).
-
-Files:
-- `tokens.css` — every CSS variable. Defines `:root`/`[data-theme='light']` and `.dark`/`[data-theme='dark']`. Both selectors are populated so theme can be switched via either class or attribute.
-- `theme.css` — `@theme inline` Tailwind v4 bridge.
-- `globals.css` — base resets, body, headings, scrollbars, selection, focus rings.
-- `fonts.css` — Google Fonts (Open Sans, Geist, JetBrains Mono, Instrument Serif).
-
-Token namespaces:
-- **surfaces**: `--bg-0..--bg-elev`, shadcn-compatible (`--background`, `--card`, `--popover`).
-- **lines**: `--line`, `--line-soft`, `--line-strong`.
-- **text**: `--t-1..--t-4`, `--t-on-accent`.
-- **brand**: `--primary`, `--primary-foreground`, `--accent`, `--ring`.
-- **semantic**: `--green/--gold/--red/--amber/--blue/--violet`, each with `-soft` and `-line` variants.
-- **sport accents**: `--sport-{nfl,nba,nhl,mlb,soc,ten,ufc}`.
-- **typography**: `--f-sans/--f-mono/--f-serif`, `--text-2xs..--text-8xl`, `--weight-light..--weight-extrabold`, `--tracking-tightest..--tracking-widest`, `--leading-tight..--leading-relaxed`.
-- **space**: `--space-0..--space-32` (4px base).
-- **radius**: `--r-xs..--r-2xl`, `--r-pill`.
-- **shadow**: `--shadow-2xs..--shadow-2xl`, `--shadow-inset`, `--shadow-glow`.
-- **motion**: `--dur-instant..--dur-slower`, `--ease-out/--ease-in-out/--ease-spring`.
-- **z-index**: `--z-dropdown/--z-sticky/--z-overlay/--z-modal/--z-toast/--z-tooltip`.
-- **layout**: `--container-{sm,md,lg,xl,2xl}`, `--header-h`, `--topbar-h`, `--sidebar-w`.
-
-When you need a new value, **add it to `tokens.css`** rather than hardcoding.
-
-### 2.4 Theme (`packages/app-shell`)
-
-`ThemeProvider` sets both `.dark` class and `data-theme` attribute on `<html>`, persisted in `localStorage('dp-theme')`. `useTheme()` returns `{ colorScheme, isDark, toggleTheme, setColorScheme }`. DS components like `<ThemeToggle>` and `<ThemeIconButton>` already wire up to it.
-
-### 2.5 Apps (`apps/web`, `apps/dashboard`)
-
-Apps:
-- Wrap `<App />` in `<BrowserRouter><ThemeProvider>` from `main.tsx`.
-- Import the global stylesheet exactly once: `import '@digipicks/ds/styles';` in `main.tsx`.
-- Compose pages from DS components. **Pages contain layout & data; DS components contain visuals.**
-- For routing: `react-router-dom`. For navigation actions inside DS components, prefer `useNavigate()` rather than wrapping `<Button>` inside `<Link>` (avoids button-in-anchor warnings).
-- Mock data in `apps/<app>/src/data/mock.ts` until SDK hooks land.
-
 ---
 
-## 3. Working with this codebase
-
-### 3.1 Where to put new code
-
-| Need | Where |
-| --- | --- |
-| New visual pattern reused 2+ places | `packages/ds/src/components/<bucket>/<Component>/` |
-| New token / spacing / color value | `packages/tokens/src/tokens.css` |
-| New domain shape (Pick, Creator, Event types) | `packages/shared/src/types/` |
-| Convex query/mutation | `convex/` + hook in `packages/sdk/src/` |
-| Page (route) | `apps/<app>/src/pages/<Page>.tsx` (composes DS, no styles) |
-| Theme/provider concern | `packages/app-shell/src/providers/` |
-
-### 3.2 Common scripts (run from repo root)
-
-```bash
-pnpm dev                  # convex + web + dashboard concurrently
-pnpm dev:web              # web only
-pnpm dev:dashboard        # dashboard only
-pnpm dev:convex           # convex only
-pnpm build                # build everything
-pnpm typecheck            # tsc --noEmit across all packages
-pnpm lint                 # eslint (where configured)
-```
-
-### 3.3 Adding a DS component (the recipe)
-
-1. Pick the bucket (atom/form/surface/data/nav/layout/feedback/domain).
-2. Create `packages/ds/src/components/<bucket>/<Foo>/Foo.tsx` and `Foo.module.css`.
-3. Mirror the `Button` pattern. Use `cx` for class composition. Use `var(--token)` exclusively in CSS.
-4. Add the export to `packages/ds/src/index.ts`.
-5. Run `pnpm --filter @digipicks/ds typecheck`.
-
-### 3.4 Adding a new page
+## 6. Adding a page (the recipe)
 
 1. Create `apps/<app>/src/pages/<Page>.tsx`.
-2. Compose with `<PublicLayout>` (web) or under `<AppLayout>` route shell (dashboard).
-3. Use `<PageHead>` for the page title + sub.
-4. Use `<Section>`, `<Stack>`, `<Row>`, `<Col>`, `<Container>` for structure.
-5. Use domain components (CreatorCard, EventCard, PickCard, …) for content surfaces.
-6. **Never** add a `style` prop, a Tailwind utility, or a raw `className` string on a plain DOM element.
-
-### 3.5 Don't
-
-- Don't import deep paths from `@digipicks/ds`. Always import from the package root.
-- Don't add `color: '#xxx'` or `padding: 14px` inline. Use a token. If no token fits, add one.
-- Don't write `<div className="flex items-center gap-2">`. Use `<Row gap={2}>`.
-- Don't write a global stylesheet in an app. There is one global stylesheet, and it lives in `@digipicks/tokens`.
-- Don't author component CSS in `packages/ds/src/styles.css`. That file imports tokens only. Per-component CSS lives in `<Component>.module.css`.
-- Don't fork the `prototype/` folder. It is read-only reference for visual fidelity.
+2. Wrap content in `<PublicLayout>` (web) or under the dashboard's
+   `<AppLayout>` route shell.
+3. Use `<PageHead>` (or `<PageHeader>`) for the page title + sub.
+4. Use `<Section>` for section grouping with eyebrow / title / sub / action.
+5. Use `<Container>`, `<Grid>`, `<Stack>`, `<Row>`, `<Col>` for structure.
+6. Use domain components (`CreatorCard`, `EventCard`, `PickCard`, `PriceCard`,
+   `Testimonial`, `StepCard`, `SplitCTA`, …) for content.
+7. **Never** add a `style` prop, a Tailwind utility, or a raw `className`
+   string on a plain DOM element.
 
 ---
 
-## 4. Visual conventions
+## 7. Verification (run before declaring done)
 
-The design language is **modern, professional, sports-network confident**. Larger typography than typical SaaS, generous whitespace, bold serif italic accents on hero copy, X/Twitter-blue primary, dense data when needed (mono tabular for odds/units), tight 1.5-stroke line iconography.
+```bash
+pnpm -r --if-present typecheck
+pnpm -r --if-present lint
+pnpm --filter @digipicks/web build
+pnpm --filter @digipicks/dashboard build
+```
 
-Type scale (from `--text-*` tokens):
-- Display: `--text-7xl` / `--text-8xl` for hero copy
-- H1: `--text-4xl` / `--text-5xl`
-- H2: `--text-2xl` / `--text-3xl`
-- H3: `--text-lg` / `--text-xl`
-- Body: `--text-base` / `--text-md`
-- Meta: `--text-sm` / `--text-xs`
-- Eyebrow: `--text-2xs` mono uppercase tracked-wide
+Plus the strict-mode greps — every one of these must return zero meaningful
+hits inside `apps/**`:
 
-Spacing: snap to the `--space-*` scale (4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 40 / 48 / 64 / 80 / 96 / 128). Section gaps are typically `--space-20` to `--space-32`.
-
-Colors: prefer the brand semantic (`--green` for win, `--red` for loss, `--gold` for premium, `--violet` for VIP) over raw hex. Subtle backgrounds use the `-soft` variants; thin borders use the `-line` variants.
+```bash
+# inline static styles in apps
+grep -rE "style=\{\{" apps --include="*.tsx"
+# raw className in apps
+grep -rnE 'className=' apps --include="*.tsx" | grep -vE '\.module\.css|\bcx\(|s\.|className: '
+# tailwind utilities in apps
+grep -rE 'className="[^"]*\b(flex|grid|gap-|p-|m-|text-|bg-|border|rounded|w-|h-|max-w|min-w|space-|items-|justify-)' apps --include="*.tsx"
+# any css file in apps
+find apps -name "*.css"
+```
 
 ---
 
-## 5. Decision log
+## 8. The quick "is this allowed?" checklist
 
-| Decision | Rationale |
+| Pattern | Verdict |
 | --- | --- |
-| CSS Modules over global classes | Auto-scoping prevents name collisions; component owns its styles; tree-shakable. |
-| Tokens stay global | Variables must be available to every module; the `@theme inline` bridge needs them. |
-| No Tailwind utilities in apps | Forces all visuals through DS — keeps the design system coherent. |
-| `data-theme` + `.dark` both set | Tailwind dark variant requires `.dark`; prototype-style attribute selectors require `data-theme`. We support both. |
-| Public nav uses `useNavigate()` not `<Link><Button>` | Avoids invalid button-in-anchor nesting; cleaner accessibility tree. |
-| Domain components live in `ds/components/domain/` | They're reusable across both apps (web shows CreatorCard/EventCard; dashboard shows PickCard). |
+| `<div className="flex gap-3">` in an app | ❌ Use `<Row gap={3}>`. |
+| `<h2 style={{ fontSize: 30 }}>` in an app | ❌ Use `<Heading level={2} size="3xl">`. |
+| `<span style={{ color: '#1c9cf0' }}>` anywhere | ❌ Use a tokenized DS component / class. |
+| `<button className="btn-primary">` in an app | ❌ Use `<Button variant="primary">`. |
+| Adding a new `.module.css` inside `apps/web/src/` | ❌ Move it into a DS component. |
+| Importing `@digipicks/ds/components/atoms/Button/Button` | ❌ Import from `@digipicks/ds`. |
+| `padding: 14px` in a DS module | ❌ Use `var(--space-3)` or add a token. |
+| `color: #1c9cf0` in a DS module | ❌ Use `var(--primary)`. |
+| `style={{ '--av-size': size + 'px' }}` on `<Avatar>` (DS internal) | ✅ Dynamic CSS custom property. |
+| `<Row gap={3}>` in an app | ✅ Layout primitive. |
+| `<Section eyebrow="…" title="…">…</Section>` in an app | ✅ Compose DS. |
+| `<Button variant="primary" iconRight="arrow-right">…</Button>` | ✅ DS API. |
+| Adding `--space-9: 36px` to `tokens.css` because nothing fits | ✅ Token first, then reference. |
+| Building a new `<NumberStep>` DS component because two pages duplicate the same stack of DOM | ✅ Extract first, reuse. |
 
-When adding a non-obvious decision, append a row here and link to a PR.
+---
+
+**Summary in one line:** *Apps compose DS components only — no inline styles,
+no Tailwind utilities, no raw classNames, no custom CSS files. The DS
+authors all visuals; the tokens authoritatively define every value.*

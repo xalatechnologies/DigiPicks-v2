@@ -37,7 +37,10 @@ export interface FooterProps {
   /** Optional trust strip rendered above the bottom row. */
   trust?: FooterTrustItem[];
   bottomLeft?: React.ReactNode;
+  bottomCenter?: React.ReactNode;
   bottomRight?: React.ReactNode;
+  /** Optional below-bottom-row credit (e.g. "Developed by …"). */
+  credit?: React.ReactNode;
   className?: string;
 }
 
@@ -49,7 +52,9 @@ export const Footer: React.FC<FooterProps> = ({
   newsletter,
   trust,
   bottomLeft,
+  bottomCenter,
   bottomRight,
+  credit,
   className,
 }) => {
   return (
@@ -118,24 +123,23 @@ export const Footer: React.FC<FooterProps> = ({
 
         {trust && trust.length > 0 && (
           <div className={s.trust}>
-            <span className={s.trustLabel}>Trust signals</span>
-            <div className={s.trustItems}>
-              {trust.map((t, i) => (
-                <span key={i} className={s.trustItem}>
-                  {t.icon}
-                  {t.label}
-                </span>
-              ))}
-            </div>
+            {trust.map((t, i) => (
+              <span key={i} className={s.trustItem}>
+                {t.icon && <span className={s.trustItemIcon}>{t.icon}</span>}
+                {t.label}
+              </span>
+            ))}
           </div>
         )}
 
-        {(bottomLeft || bottomRight) && (
+        {(bottomLeft || bottomCenter || bottomRight) && (
           <div className={s.bottom}>
-            <div className={s.bottomLeft}>{bottomLeft}</div>
-            <div className={s.bottomRight}>{bottomRight}</div>
+            {bottomLeft && <div className={s.bottomLeft}>{bottomLeft}</div>}
+            {bottomCenter && <div className={s.bottomCenter}>{bottomCenter}</div>}
+            {bottomRight && <div className={s.bottomRight}>{bottomRight}</div>}
           </div>
         )}
+        {credit && <div className={s.credit}>{credit}</div>}
       </div>
     </footer>
   );

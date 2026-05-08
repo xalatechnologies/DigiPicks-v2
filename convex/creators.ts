@@ -1,4 +1,4 @@
-import { query, mutation } from './_generated/server';
+import { query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { creatorStatus } from './shared/validators';
 
@@ -53,8 +53,8 @@ export const get = query({
   },
 });
 
-/** Create a new creator profile. Used during onboarding/approval. */
-export const create = mutation({
+/** Create a new creator profile. Internal only — used during application approval. */
+export const create = internalMutation({
   args: {
     handle: v.string(),
     name: v.string(),

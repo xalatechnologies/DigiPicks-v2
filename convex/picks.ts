@@ -1,6 +1,7 @@
-import { query, mutation } from './_generated/server';
+import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { pickAccess, pickConfidence, pickStatus, pickGrade } from './shared/validators';
+import { requireUser } from './shared/permissions';
 
 // =============================================================================
 // Pick Queries & Mutations
@@ -47,7 +48,7 @@ export const byCreator = query({
   },
 });
 
-/** Create a new pick. */
+/** Create a new pick. Auth-gated — caller must own the creator profile. */
 export const create = mutation({
   args: {
     creatorId: v.id('creators'),
@@ -68,6 +69,13 @@ export const create = mutation({
     status: v.optional(pickStatus),
   },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+
+    // Verify caller is linked to the creator or is admin
+    if (user.creatorId !== args.creatorId && user.role !== 'super_admin') {
+      throw new Error('Forbidden: not linked to this creator profile');
+    }
+
     const now = Date.now();
     return await ctx.db.insert('picks', {
       creatorId: args.creatorId,
@@ -92,8 +100,8 @@ export const create = mutation({
   },
 });
 
-/** Grade a pick (admin/platform action). */
-export const grade = mutation({
+/** Grade a pick. Internal only — called by platform/cron, not clients. */
+export const grade = internalMutation({
   args: {
     id: v.id('picks'),
     grade: pickGrade,

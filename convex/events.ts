@@ -1,6 +1,7 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import { eventStatus } from './shared/validators';
+import { requireUser } from './shared/permissions';
 
 // =============================================================================
 // Event Queries & Mutations
@@ -29,7 +30,7 @@ export const featured = query({
   },
 });
 
-/** Create a new event. */
+/** Create a new event. Admin-only. */
 export const create = mutation({
   args: {
     sport: v.string(),
@@ -42,6 +43,11 @@ export const create = mutation({
     status: v.optional(eventStatus),
   },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    if (user.role !== 'super_admin' && user.role !== 'admin') {
+      throw new Error('Forbidden: admin role required');
+    }
+
     return await ctx.db.insert('events', {
       sport: args.sport,
       league: args.league,

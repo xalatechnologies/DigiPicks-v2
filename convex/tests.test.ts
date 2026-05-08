@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from 'convex-test';
 import { expect, test, describe } from 'vitest';
-import { api } from './_generated/api';
+import { api, internal } from './_generated/api';
 import schema from './schema';
 
 const modules = import.meta.glob('./**/*.ts');
@@ -15,7 +15,7 @@ describe('creators', () => {
     const t = convexTest(schema, modules);
 
     // Create a creator
-    const creatorId = await t.mutation(api.creators.create, {
+    const creatorId = await t.mutation(internal.creators.create, {
       handle: '@testcreator',
       name: 'Test Creator',
       avatarColor: '#1c9cf0',
@@ -39,7 +39,7 @@ describe('creators', () => {
   test('filter creators by sport', async () => {
     const t = convexTest(schema, modules);
 
-    await t.mutation(api.creators.create, {
+    await t.mutation(internal.creators.create, {
       handle: '@nflonly',
       name: 'NFL Only',
       avatarColor: '#00ba7c',
@@ -50,7 +50,7 @@ describe('creators', () => {
       startingPrice: 19,
       tags: ['NFL'],
     });
-    await t.mutation(api.creators.create, {
+    await t.mutation(internal.creators.create, {
       handle: '@nbaonly',
       name: 'NBA Only',
       avatarColor: '#7a4dd9',
@@ -74,7 +74,7 @@ describe('creators', () => {
   test('get creator by handle', async () => {
     const t = convexTest(schema, modules);
 
-    await t.mutation(api.creators.create, {
+    await t.mutation(internal.creators.create, {
       handle: '@findme',
       name: 'Find Me',
       avatarColor: '#f4212e',
@@ -165,7 +165,7 @@ describe('picks', () => {
   test('create and query picks by creator', async () => {
     const t = convexTest(schema, modules);
 
-    const creatorId = await t.mutation(api.creators.create, {
+    const creatorId = await t.mutation(internal.creators.create, {
       handle: '@pickmaker',
       name: 'Pick Maker',
       avatarColor: '#00ba7c',
@@ -202,7 +202,7 @@ describe('picks', () => {
   test('grade a pick', async () => {
     const t = convexTest(schema, modules);
 
-    const creatorId = await t.mutation(api.creators.create, {
+    const creatorId = await t.mutation(internal.creators.create, {
       handle: '@grader',
       name: 'Grader',
       avatarColor: '#1c9cf0',
@@ -231,7 +231,7 @@ describe('picks', () => {
     });
 
     // Grade the pick as a win
-    await t.mutation(api.picks.grade, {
+    await t.mutation(internal.picks.grade, {
       id: pickId,
       grade: 'win',
       netUnits: '+1.39u',
@@ -246,7 +246,7 @@ describe('picks', () => {
   test('feed returns published picks', async () => {
     const t = convexTest(schema, modules);
 
-    const creatorId = await t.mutation(api.creators.create, {
+    const creatorId = await t.mutation(internal.creators.create, {
       handle: '@feeder',
       name: 'Feeder',
       avatarColor: '#f7b928',
@@ -324,5 +324,49 @@ describe('categories', () => {
 
     const all = await t.query(api.categories.list, {});
     expect(all.length).toBe(10); // Still 10, not 20
+  });
+});
+
+// =============================================================================
+// Applications Tests
+// =============================================================================
+
+describe('applications', () => {
+  test('submit application', async () => {
+    const t = convexTest(schema, modules);
+
+    const appId = await t.mutation(api.applications.submit, {
+      name: 'Jane Doe',
+      handle: '@janedoe',
+      email: 'jane@example.com',
+      sport: 'NBA',
+      niche: 'Player props',
+      proofCount: 5,
+    });
+    expect(appId).toBeDefined();
+  });
+
+  test('reject duplicate email', async () => {
+    const t = convexTest(schema, modules);
+
+    await t.mutation(api.applications.submit, {
+      name: 'Jane Doe',
+      handle: '@janedoe',
+      email: 'jane@example.com',
+      sport: 'NBA',
+      niche: 'Player props',
+      proofCount: 5,
+    });
+
+    await expect(
+      t.mutation(api.applications.submit, {
+        name: 'Jane Again',
+        handle: '@janedoe2',
+        email: 'jane@example.com',
+        sport: 'NFL',
+        niche: 'Spreads',
+        proofCount: 3,
+      }),
+    ).rejects.toThrow('Application already submitted');
   });
 });
