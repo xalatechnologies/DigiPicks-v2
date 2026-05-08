@@ -1,0 +1,41 @@
+.locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-9) var(--space-6);
+  text-align: center;
+  background: linear-gradient(180deg, var(--gold-soft), transparent 70%), var(--bg-1);
+  border: 1px dashed var(--gold-line);
+  border-radius: var(--r-md);
+}
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 420px;
+}
+.title {
+  font-family: var(--f-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
+}
+.body {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--t-2);
+  line-height: var(--leading-relaxed);
+}

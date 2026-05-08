@@ -1,0 +1,6 @@
+.odds {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+}

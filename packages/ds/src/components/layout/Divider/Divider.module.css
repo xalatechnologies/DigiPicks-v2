@@ -1,0 +1,11 @@
+.divider {
+  height: 1px;
+  background: var(--line-soft);
+  border: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.strong {
+  background: var(--line-strong);
+}

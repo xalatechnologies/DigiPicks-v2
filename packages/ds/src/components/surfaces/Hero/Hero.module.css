@@ -1,0 +1,193 @@
+/* ── Outer hero band ──────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: var(--space-24) var(--space-7) var(--space-20);
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.hero.compact {
+  padding: var(--space-16) var(--space-7) var(--space-14);
+}
+
+/* ── Atmospheric, animated aurora background ─────────────────────────── */
+.glow {
+  position: absolute;
+  inset: -10% -10% -20%;
+  z-index: -2;
+  background:
+    radial-gradient(
+      60% 50% at 70% 20%,
+      color-mix(in srgb, var(--primary) 22%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      40% 40% at 25% 75%,
+      color-mix(in srgb, var(--violet) 18%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      35% 35% at 80% 85%,
+      color-mix(in srgb, var(--green) 14%, transparent),
+      transparent 60%
+    );
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  background-position: 0% 0%, 100% 100%, 50% 50%;
+  animation: dp-aurora 22s var(--ease-in-out) infinite;
+  pointer-events: none;
+  filter: saturate(115%);
+}
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--t-1) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--t-1) 6%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 0%, transparent 75%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ── Inner two-column grid (with optional right panel) ──────────────── */
+.inner {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+  align-items: center;
+}
+.inner.split {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: var(--space-16);
+}
+@media (max-width: 1024px) {
+  .inner.split {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+}
+
+/* ── Left content column ─────────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-7);
+  animation: dp-fade-in-up var(--dur-slower) var(--ease-out) both;
+}
+.inner:not(.split) .content {
+  align-items: center;
+  text-align: center;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.eyebrowRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: clamp(var(--text-5xl), 6.4vw, var(--text-7xl));
+  font-weight: var(--weight-medium);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-tightest);
+  line-height: 1.02;
+}
+.title em,
+.title :global(em) {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: var(--weight-regular);
+  background: linear-gradient(
+    180deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 60%, var(--t-1))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.06em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--text-xl);
+  color: var(--t-2);
+  line-height: var(--leading-relaxed);
+  max-width: 60ch;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.trust {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-6);
+  margin-top: var(--space-2);
+  color: var(--t-3);
+  font-size: var(--text-sm);
+}
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.trustItem svg {
+  color: var(--blue);
+}
+
+/* ── Right panel (when split layout used) ─────────────────────────────── */
+.panel {
+  position: relative;
+  animation: dp-fade-in-up var(--dur-slower) var(--ease-out) both;
+  animation-delay: 80ms;
+}
+
+/* ── Bottom marquee (single-column hero only) ────────────────────────── */
+.marquee {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-12) auto 0;
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--line-soft);
+  max-width: var(--container-xl);
+  width: 100%;
+}
+.marqueeLabel {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-weight: var(--weight-semibold);
+  margin-right: var(--space-3);
+}
+.marqueeItem {
+  font-family: var(--f-serif);
+  font-size: var(--text-xl);
+  color: var(--t-2);
+  opacity: 0.6;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.marqueeItem:hover {
+  opacity: 1;
+}

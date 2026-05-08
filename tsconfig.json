@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@digipicks/tokens": ["./packages/tokens/src"],
+      "@digipicks/ds": ["./packages/ds/src"],
+      "@digipicks/ds/*": ["./packages/ds/src/*"],
+      "@digipicks/shared": ["./packages/shared/src"],
+      "@digipicks/shared/*": ["./packages/shared/src/*"],
+      "@digipicks/sdk": ["./packages/sdk/src"],
+      "@digipicks/sdk/*": ["./packages/sdk/src/*"],
+      "@digipicks/app-shell": ["./packages/app-shell/src"],
+      "@digipicks/app-shell/*": ["./packages/app-shell/src/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "apps",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

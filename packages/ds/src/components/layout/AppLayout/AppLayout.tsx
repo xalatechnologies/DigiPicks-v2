@@ -1,0 +1,20 @@
+import React from 'react';
+import { cx } from '../../../utils/cx';
+import s from './AppLayout.module.css';
+
+export interface AppLayoutProps {
+  header: React.ReactNode;
+  sidebar: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export const AppLayout: React.FC<AppLayoutProps> = ({ header, sidebar, children, className }) => {
+  return (
+    <div className={cx(s.app, className)}>
+      <div className={s.header}>{header}</div>
+      <div className={s.sidebar}>{sidebar}</div>
+      <main className={s.main}>{children}</main>
+    </div>
+  );
+};

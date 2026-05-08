@@ -1,0 +1,12 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-1);
+  overflow: hidden;
+}
+
+.accordion > * + * {
+  border-top: 1px solid var(--line-soft);
+}

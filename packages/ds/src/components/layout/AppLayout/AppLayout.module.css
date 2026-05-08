@@ -1,0 +1,30 @@
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w, 296px) 1fr;
+  grid-template-rows: var(--header-h, 68px) 1fr;
+  grid-template-areas:
+    'header header'
+    'sidebar main';
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg-0);
+}
+
+.header {
+  grid-area: header;
+  min-width: 0;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.main {
+  grid-area: main;
+  overflow-y: auto;
+  position: relative;
+  background: var(--bg-0);
+}

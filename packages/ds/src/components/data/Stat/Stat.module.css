@@ -1,0 +1,29 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.label {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.value {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.accent {
+  color: var(--blue);
+}
+.success {
+  color: var(--green);
+}

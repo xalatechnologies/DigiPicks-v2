@@ -1,0 +1,4 @@
+.serif {
+  font-family: var(--f-serif);
+  font-weight: var(--weight-regular);
+}

@@ -1,0 +1,43 @@
+.bar {
+  height: 6px;
+  background: var(--bg-2);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+}
+
+.thin {
+  height: 4px;
+}
+
+.thick {
+  height: 10px;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  width: var(--pct, 0%);
+  border-radius: var(--r-pill);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.primary {
+  background: var(--primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.green {
+  background: var(--green);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--green) 40%, transparent);
+}
+
+.amber {
+  background: var(--amber);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--amber) 40%, transparent);
+}
+
+.red {
+  background: var(--red);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--red) 40%, transparent);
+}

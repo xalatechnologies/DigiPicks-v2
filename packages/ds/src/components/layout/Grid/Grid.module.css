@@ -1,0 +1,32 @@
+.grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(var(--grid-cols, 3), minmax(0, 1fr));
+  gap: var(--grid-gap, var(--space-5));
+  align-items: stretch;
+}
+
+/* Every direct grid item — including the motion wrapper used by stagger —
+   takes the full row height. Combined with each card's `height: 100%`,
+   sibling cards on the same row end up equal-height regardless of content. */
+.grid > * {
+  height: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(min(var(--grid-cols, 3), 2), minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* explicit responsive override: keep single column on mobile always */
+.grid.dense {
+  grid-auto-flow: dense;
+}

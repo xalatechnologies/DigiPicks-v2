@@ -1,0 +1,185 @@
+.header {
+  display: grid;
+  grid-template-columns: var(--sidebar-w, 296px) 1fr auto;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0 var(--space-6) 0 0;
+  background: color-mix(in srgb, var(--bg-1) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid var(--line-soft);
+  height: var(--header-h, 72px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  height: 100%;
+  border-right: 1px solid var(--line-soft);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.05;
+}
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-wide);
+  color: var(--t-1);
+}
+.brandSub {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  color: var(--t-3);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+.searchWrap {
+  max-width: 640px;
+  width: 100%;
+  justify-self: center;
+  padding: 0 var(--space-3);
+}
+.search {
+  position: relative;
+  width: 100%;
+}
+.searchIcon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t-3);
+  pointer-events: none;
+}
+.searchInput {
+  height: 44px;
+  width: 100%;
+  border-radius: var(--r-pill, 999px);
+  padding: 0 56px 0 44px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+  color: var(--t-1);
+  font-family: var(--f-sans);
+  font-size: var(--text-sm);
+  outline: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.searchInput:hover {
+  border-color: var(--line);
+}
+.searchInput:focus {
+  border-color: var(--blue-line);
+  background: var(--bg-1);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+.searchInput::placeholder {
+  color: var(--t-3);
+}
+.kbdHint {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill, 999px);
+  border: 0;
+  background: transparent;
+  color: var(--t-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.iconBtn:hover {
+  background: var(--bg-2);
+  color: var(--t-1);
+}
+.iconBtn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  margin-left: var(--space-2);
+  border-radius: var(--r-pill, 999px);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+  font-family: inherit;
+  color: inherit;
+}
+.user:hover {
+  background: var(--bg-2);
+}
+.user:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t-1);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+.userName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
+}
+.userMail {
+  font-size: var(--text-xs);
+  color: var(--t-3);
+}
+.userChev {
+  color: var(--t-3);
+  margin-left: var(--space-1);
+}

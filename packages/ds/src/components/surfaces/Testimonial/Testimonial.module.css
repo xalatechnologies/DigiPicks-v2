@@ -1,0 +1,103 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-8);
+  height: 100%;
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  isolation: isolate;
+  animation: dp-fade-in-up var(--dur-base) var(--ease-out);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+.card:hover {
+  border-color: var(--line);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quoteMark {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-6);
+  color: var(--primary);
+  opacity: 0.18;
+  font-family: var(--f-serif);
+  font-size: 88px;
+  line-height: 1;
+  font-weight: var(--weight-bold);
+  pointer-events: none;
+  user-select: none;
+}
+
+.quote {
+  font-size: var(--text-md);
+  color: var(--t-1);
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-snug);
+  font-weight: var(--weight-regular);
+  position: relative;
+  z-index: 1;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line-soft);
+}
+
+.authorText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.authorName {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
+  display: inline-flex;
+  align-items: center;
+}
+
+.authorRole {
+  font-size: var(--text-sm);
+  color: var(--t-3);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.statValue {
+  font-family: var(--f-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--green);
+  letter-spacing: var(--tracking-snug);
+  font-variant-numeric: tabular-nums;
+}
+.statLabel {
+  font-size: var(--text-2xs);
+  color: var(--t-4);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  font-family: var(--f-mono);
+}

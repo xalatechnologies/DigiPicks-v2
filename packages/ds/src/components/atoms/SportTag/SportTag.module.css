@@ -1,0 +1,45 @@
+.sport {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
+  background: var(--bg-3);
+  border: 1px solid var(--line-soft);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  color: var(--t-2);
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+
+.lg {
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-xs);
+  border-radius: var(--r-md);
+}
+
+.sport[data-sport='nfl'] {
+  color: var(--sport-nfl);
+}
+.sport[data-sport='nba'] {
+  color: var(--sport-nba);
+}
+.sport[data-sport='nhl'] {
+  color: var(--sport-nhl);
+}
+.sport[data-sport='mlb'] {
+  color: var(--sport-mlb);
+}
+.sport[data-sport='soc'] {
+  color: var(--sport-soc);
+}
+.sport[data-sport='ten'] {
+  color: var(--sport-ten);
+}
+.sport[data-sport='ufc'] {
+  color: var(--sport-ufc);
+}

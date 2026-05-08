@@ -1,0 +1,61 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 34px;
+  padding: 0 var(--space-4);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+  color: var(--t-2);
+  font-family: var(--f-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  user-select: none;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-snug);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.chip:hover {
+  color: var(--t-1);
+  border-color: var(--line);
+  background: var(--bg-3);
+}
+
+.chip:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.active {
+  background: var(--bg-3);
+  color: var(--t-1);
+  border-color: var(--line-strong);
+}
+
+.greenActive {
+  background: var(--green-soft);
+  color: var(--green);
+  border-color: var(--green-line);
+}
+
+.count {
+  background: var(--bg-3);
+  color: var(--t-3);
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  margin-left: -2px;
+}
+
+.active .count,
+.greenActive .count {
+  background: rgba(0, 0, 0, 0.25);
+  color: currentColor;
+}

@@ -1,0 +1,18 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.label {
+  font-family: var(--f-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}

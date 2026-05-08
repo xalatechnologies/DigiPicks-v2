@@ -1,0 +1,28 @@
+.dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--t-3);
+}
+
+.win {
+  background: var(--green);
+}
+
+.loss {
+  background: var(--red);
+}
+
+.muted {
+  background: var(--t-3);
+}
+
+.empty {
+  background: var(--t-3);
+  opacity: 0.3;
+}

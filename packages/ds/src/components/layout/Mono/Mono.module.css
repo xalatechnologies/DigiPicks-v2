@@ -1,0 +1,6 @@
+.mono {
+  font-family: var(--f-mono);
+  font-feature-settings: 'ss06';
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-snug);
+}

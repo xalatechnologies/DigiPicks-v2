@@ -1,0 +1,345 @@
+.footer {
+  position: relative;
+  /* Raise the footer above the body so a negative-margin newsletter card
+     paints over (not behind) Section animations that create their own
+     stacking contexts via transform. */
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    var(--bg-1) 0%,
+    color-mix(in srgb, var(--bg-1) 96%, var(--bg-0)) 100%
+  );
+  border-top: 1px solid var(--line-soft);
+  /* small top padding only — when a newsletter card is present it pulls itself
+     up via negative margin-top to straddle the body/footer boundary */
+  padding: var(--space-7) var(--space-7) var(--space-8);
+  /* No overflow:hidden so a negative-margin newsletter card can break above
+     the footer's top edge. Decorative .glow / .grid layers are positioned
+     with explicit insets and do not need clipping. */
+}
+
+/* When the footer has a newsletter card, kill the top padding entirely
+   so nothing sits above the floating card. */
+.footer.hasNewsletter {
+  padding-top: 0;
+}
+
+/* atmospheric glow at the top edge */
+.glow {
+  position: absolute;
+  inset: -180px 0 auto;
+  height: 320px;
+  z-index: -1;
+  background: radial-gradient(
+      50% 60% at 30% 100%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 50% at 75% 100%,
+      color-mix(in srgb, var(--violet) 10%, transparent),
+      transparent 70%
+    );
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* faint dot grid */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--t-1) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.inner {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* ── Newsletter band — floats half-above / half-below the footer edge ── */
+.newsletter {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-10);
+  align-items: center;
+  padding: var(--space-9) var(--space-10);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 55%
+    ),
+    var(--bg-elev);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  /* Lift the card so it straddles the body/footer boundary —
+     a portion above the footer's top edge, the rest below. The reduced
+     lift leaves visible breathing room above the card so it doesn't
+     touch the last body section. */
+  margin-top: calc(-1 * var(--space-12));
+  margin-bottom: var(--space-12);
+  position: relative;
+  z-index: 2;
+  box-shadow:
+    var(--shadow-xl),
+    inset 0 1px 0 color-mix(in srgb, var(--t-1) 6%, transparent);
+}
+
+/* Inner accent ring (gradient border feel) */
+.newsletter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xl);
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 60%, transparent),
+    transparent 35%,
+    transparent 65%,
+    color-mix(in srgb, var(--violet) 50%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.65;
+}
+.newsletterTitle {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+  color: var(--t-1);
+}
+.newsletterSub {
+  font-size: var(--text-base);
+  color: var(--t-3);
+  line-height: var(--leading-relaxed);
+  max-width: 48ch;
+}
+.newsletterForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.newsletterRow {
+  display: flex;
+  gap: var(--space-2);
+}
+.newsletterRow > :global(.dpInput),
+.newsletterRow > :global(input) {
+  flex: 1;
+}
+.newsletterFine {
+  font-size: var(--text-xs);
+  color: var(--t-4);
+}
+
+/* ── Top: brand block + columns ─────────────────────────────────────── */
+.top {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  gap: var(--space-10);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 360px;
+}
+.brandTagline {
+  color: var(--t-3);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+.brandSocial {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.brandSocialBtn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+  color: var(--t-3);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.brandSocialBtn:hover {
+  background: var(--bg-3);
+  border-color: var(--line);
+  color: var(--t-1);
+  transform: translateY(-1px);
+}
+
+.cols {
+  display: contents;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.colTitle {
+  font-family: var(--f-mono);
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-weight: var(--weight-semibold);
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.listItem {
+  margin: 0;
+}
+.link {
+  position: relative;
+  font-size: var(--text-base);
+  color: var(--t-2);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 0;
+  background: var(--t-1);
+  transition: width var(--dur-base) var(--ease-out);
+}
+.link:hover {
+  color: var(--t-1);
+}
+.link:hover::after {
+  width: 100%;
+}
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--r-xs);
+}
+
+/* ── Trust strip ─────────────────────────────────────────────────────── */
+.trust {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  flex-wrap: wrap;
+  padding: var(--space-5) 0;
+  border-top: 1px dashed var(--line-soft);
+  border-bottom: 1px dashed var(--line-soft);
+}
+.trustLabel {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-weight: var(--weight-semibold);
+}
+.trustItems {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  flex: 1;
+}
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--t-3);
+  font-size: var(--text-sm);
+}
+.trustItem svg {
+  color: var(--blue);
+}
+
+/* ── Bottom row ─────────────────────────────────────────────────────── */
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  flex-wrap: wrap;
+}
+
+.bottomLeft,
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+@media (max-width: 1024px) {
+  .top {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .brand {
+    grid-column: span 3;
+    max-width: none;
+  }
+  .newsletter {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: var(--space-7);
+  }
+}
+
+@media (max-width: 640px) {
+  .top {
+    grid-template-columns: 1fr 1fr;
+  }
+  .brand {
+    grid-column: span 2;
+  }
+  .footer {
+    padding: var(--space-12) var(--space-5) var(--space-6);
+  }
+}

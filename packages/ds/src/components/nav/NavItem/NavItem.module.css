@@ -1,0 +1,137 @@
+@keyframes dp-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  padding-left: calc(var(--space-3) - 3px);
+  margin: 0;
+  min-height: 52px;
+  border-radius: var(--r-xs);
+  color: var(--t-2);
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  border-left: 3px solid transparent;
+  position: relative;
+  background: transparent;
+  animation: dp-fade-in var(--dur-base) var(--ease-out);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t-3);
+  background: transparent;
+  border: 0;
+  flex-shrink: 0;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
+  line-height: var(--leading-snug);
+}
+
+.sub {
+  font-size: var(--text-sm);
+  color: var(--t-3);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item:has(.sub) {
+  min-height: 64px;
+}
+
+.chev {
+  color: var(--t-4);
+  flex-shrink: 0;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.item:hover {
+  background: var(--bg-2);
+}
+.item:hover .icon {
+  color: var(--primary);
+}
+.item:hover .chev {
+  color: var(--t-2);
+  transform: translateX(2px);
+}
+
+.item:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.active {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary) 12%, transparent),
+    color-mix(in srgb, var(--primary) 4%, transparent)
+  );
+  border-left-color: var(--primary);
+}
+.active .icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--primary) 50%, transparent));
+}
+.active .label {
+  color: var(--primary);
+  font-weight: var(--weight-semibold);
+}
+.active .chev {
+  color: var(--primary);
+}
+
+.badge {
+  font-size: var(--text-2xs);
+  background: var(--bg-3);
+  color: var(--t-2);
+  padding: 2px 7px;
+  border-radius: var(--r-pill, 999px);
+  font-family: var(--f-mono);
+  font-weight: var(--weight-medium);
+  flex-shrink: 0;
+}
+
+.active .badge {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}

@@ -1,0 +1,25 @@
+.ph {
+  position: relative;
+  width: 100%;
+  height: var(--ph-height, 140px);
+  border-radius: var(--ph-radius, var(--r-md));
+  background-color: var(--bg-2);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 12px,
+    rgba(255, 255, 255, 0.02) 12px 24px
+  );
+  overflow: hidden;
+}
+.label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+  letter-spacing: var(--tracking-wide);
+  text-transform: lowercase;
+}

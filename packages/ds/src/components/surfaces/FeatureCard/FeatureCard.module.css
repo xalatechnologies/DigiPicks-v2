@@ -1,0 +1,108 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  height: 100%;
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  isolation: isolate;
+  animation: dp-fade-in-up var(--dur-base) var(--ease-out);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.shine {
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+  transform: skewX(-20deg) translateX(0);
+  transition: transform var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--blue-line);
+  box-shadow: var(--shadow-lg);
+}
+.card:hover .shine {
+  transform: skewX(-20deg) translateX(280%);
+}
+.card:hover .icon {
+  animation: dp-bounce-subtle var(--dur-slower) var(--ease-out);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 28px -10px color-mix(in srgb, var(--primary) 60%, transparent);
+}
+
+/* Header row: icon + title on the same line, vertically centered */
+.head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 60%, var(--blue-soft))
+  );
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  color: var(--primary-foreground);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 20px -10px color-mix(in srgb, var(--primary) 50%, transparent);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  flex: 1;
+  min-width: 0;
+}
+
+.body {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-base);
+  color: var(--t-3);
+  line-height: var(--leading-relaxed);
+}

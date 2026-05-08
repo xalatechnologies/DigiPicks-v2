@@ -1,0 +1,4 @@
+/* FAQList composes Accordion + AccordionItem; no extra styles needed. */
+.placeholder {
+  display: contents;
+}

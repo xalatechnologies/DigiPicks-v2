@@ -1,0 +1,16 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 22px;
+  padding: 0 var(--space-2);
+  background: var(--bg-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  color: var(--t-2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
