@@ -1,0 +1,25 @@
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.block {
+  display: flex;
+}
+
+.title {
+  color: var(--t-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  min-width: 0;
+}
+
+.sub {
+  color: var(--t-3);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  min-width: 0;
+}

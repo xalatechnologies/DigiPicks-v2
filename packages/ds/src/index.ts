@@ -47,6 +47,10 @@ export { Search } from './components/forms/Search/Search';
 export { FilterGroup } from './components/forms/FilterGroup/FilterGroup';
 export { FilterRadio } from './components/forms/FilterRadio/FilterRadio';
 export { FilterCheck } from './components/forms/FilterCheck/FilterCheck';
+export { FilterChips } from './components/forms/FilterChips/FilterChips';
+export type { FilterChipsProps, FilterChipsOption } from './components/forms/FilterChips/FilterChips';
+export { SwitchRow } from './components/forms/SwitchRow/SwitchRow';
+export type { SwitchRowProps } from './components/forms/SwitchRow/SwitchRow';
 
 // ── surfaces ─────────────────────────────────────────────────────────────
 export { Card } from './components/surfaces/Card/Card';
@@ -106,6 +110,14 @@ export type {
 } from './components/layout/Heading/Heading';
 export { Section } from './components/layout/Section/Section';
 export { PageHead } from './components/layout/PageHead/PageHead';
+export { PageHeader } from './components/layout/PageHeader/PageHeader';
+export type { PageHeaderProps, PageHeaderCrumb } from './components/layout/PageHeader/PageHeader';
+export { TitleSub } from './components/layout/TitleSub/TitleSub';
+export type { TitleSubProps } from './components/layout/TitleSub/TitleSub';
+export { MetricGrid } from './components/layout/MetricGrid/MetricGrid';
+export type { MetricGridProps, MetricGridItem } from './components/layout/MetricGrid/MetricGrid';
+export { StatGrid } from './components/layout/StatGrid/StatGrid';
+export type { StatGridProps, StatGridItem } from './components/layout/StatGrid/StatGrid';
 export { Footer } from './components/layout/Footer/Footer';
 export { Row } from './components/layout/Row/Row';
 export { Col } from './components/layout/Col/Col';
@@ -125,6 +137,8 @@ export type { StaggerProps, StaggerItemProps } from './components/motion/Stagger
 
 // ── feedback ─────────────────────────────────────────────────────────────
 export { ResponsibleNote } from './components/feedback/ResponsibleNote/ResponsibleNote';
+export { ResponsibleSection } from './components/feedback/ResponsibleSection/ResponsibleSection';
+export type { ResponsibleSectionProps } from './components/feedback/ResponsibleSection/ResponsibleSection';
 export { Accordion } from './components/feedback/Accordion/Accordion';
 export { AccordionItem } from './components/feedback/AccordionItem/AccordionItem';
 export { FAQList } from './components/feedback/FAQList/FAQList';
@@ -134,6 +148,8 @@ export { Toast } from './components/feedback/Toast/Toast';
 
 // ── domain ───────────────────────────────────────────────────────────────
 export { CreatorChip } from './components/domain/CreatorChip/CreatorChip';
+export { PersonRow } from './components/domain/PersonRow/PersonRow';
+export type { PersonRowProps } from './components/domain/PersonRow/PersonRow';
 export { HeroLivePanel } from './components/domain/HeroLivePanel/HeroLivePanel';
 export type { HeroLiveEvent, HeroLivePanelProps } from './components/domain/HeroLivePanel/HeroLivePanel';
 export { CreatorCard } from './components/domain/CreatorCard/CreatorCard';

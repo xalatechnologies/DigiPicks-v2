@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { authTables } from '@convex-dev/auth/server';
 import {
   role,
   listingStatus,
@@ -28,27 +29,29 @@ import {
 // =============================================================================
 
 export default defineSchema({
+  // Convex Auth managed tables
+  ...authTables,
   // ═══════════════════════════════════════════════════════════════════════════
   // PLATFORM — Users, tenants, memberships
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // Override authTables.users with our custom fields merged with auth-required fields
   users: defineTable({
-    tokenIdentifier: v.string(),
-    externalId: v.optional(v.string()),
-    email: v.string(),
+    // ── Convex Auth required fields ──
     name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
-    imageUrl: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    // ── DigiPicks custom fields ──
     role,
     locale: v.optional(v.union(v.literal('nb'), v.literal('en'))),
-    isActive: v.boolean(),
+    isActive: v.optional(v.boolean()),
     creatorId: v.optional(v.id('creators')),
-    createdAt: v.number(),
-    updatedAt: v.number(),
   })
-    .index('by_tokenIdentifier', ['tokenIdentifier'])
-    .index('by_email', ['email'])
-    .index('by_externalId', ['externalId'])
+    .index('email', ['email'])
     .index('by_role', ['role']),
 
   tenants: defineTable({
@@ -61,7 +64,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index('by_slug', ['slug'])
-    .index('by_owner', ['ownerUserId']),
+    .index('by_ownerUserId', ['ownerUserId']),
 
   memberships: defineTable({
     tenantId: v.id('tenants'),
@@ -118,9 +121,9 @@ export default defineSchema({
   })
     .index('by_status', ['status'])
     .index('by_type_and_status', ['type', 'status'])
-    .index('by_owner', ['ownerUserId'])
-    .index('by_tenant', ['tenantId'])
-    .index('by_category', ['categoryId'])
+    .index('by_ownerUserId', ['ownerUserId'])
+    .index('by_tenantId', ['tenantId'])
+    .index('by_categoryId', ['categoryId'])
     .index('by_slug', ['slug'])
     .searchIndex('search_listings', {
       searchField: 'title',
@@ -242,7 +245,7 @@ export default defineSchema({
     units: v.string(),
     streak: v.string(),
     tags: v.array(v.string()),
-    trending: v.optional(v.boolean()),
+    trending: v.boolean(),
     status: creatorStatus,
     createdAt: v.number(),
   })
@@ -291,12 +294,12 @@ export default defineSchema({
     startsAt: v.number(),
     creatorCount: v.number(),
     pickCount: v.number(),
-    featured: v.optional(v.boolean()),
+    featured: v.boolean(),
     status: eventStatus,
   })
-    .index('by_sport', ['sport', 'startsAt'])
-    .index('by_featured', ['featured', 'startsAt'])
-    .index('by_status', ['status', 'startsAt']),
+    .index('by_sport_and_startsAt', ['sport', 'startsAt'])
+    .index('by_featured_and_startsAt', ['featured', 'startsAt'])
+    .index('by_status_and_startsAt', ['status', 'startsAt']),
 
   subscriptions: defineTable({
     subscriberId: v.string(),

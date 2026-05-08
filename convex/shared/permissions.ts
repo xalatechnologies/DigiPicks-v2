@@ -1,31 +1,27 @@
 import { QueryCtx, MutationCtx } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
+import { getAuthUserId } from '@convex-dev/auth/server';
 
 // =============================================================================
 // Permission Helpers
 // Per guidelines: derive identity server-side, never accept userId as arg
+// With Convex Auth: use getAuthUserId() which returns the users table _id
 // =============================================================================
 
 type Ctx = QueryCtx | MutationCtx;
 
 /**
  * Resolve the current authenticated user from the users table.
- * Uses tokenIdentifier (stable across sessions) per Convex guidelines.
+ * Uses getAuthUserId from @convex-dev/auth (returns users._id directly).
  */
 export async function getCurrentUser(ctx: Ctx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) return null;
-
-  return await ctx.db
-    .query('users')
-    .withIndex('by_tokenIdentifier', (q) =>
-      q.eq('tokenIdentifier', identity.tokenIdentifier),
-    )
-    .unique();
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return null;
+  return await ctx.db.get(userId);
 }
 
 /**
- * Require an authenticated user. Throws if not logged in or no users record.
+ * Require an authenticated user. Throws if not logged in.
  */
 export async function requireUser(ctx: Ctx) {
   const user = await getCurrentUser(ctx);

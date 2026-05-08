@@ -9,9 +9,13 @@
  */
 
 import type * as audit from "../audit.js";
+import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
 import type * as creators from "../creators.js";
+import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as files from "../files.js";
+import type * as http from "../http.js";
 import type * as listings from "../listings.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
@@ -30,9 +34,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   audit: typeof audit;
+  auth: typeof auth;
   categories: typeof categories;
   creators: typeof creators;
+  crons: typeof crons;
   events: typeof events;
+  files: typeof files;
+  http: typeof http;
   listings: typeof listings;
   messages: typeof messages;
   notifications: typeof notifications;

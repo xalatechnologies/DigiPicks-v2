@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -10,14 +10,32 @@ import {
   Button,
   Icon,
   PageHead,
-  Breadcrumb,
-  Avatar,
   Badge,
   Muted,
   Search,
   EmptyState,
+  PersonRow,
 } from '@digipicks/ds';
 import { CONVERSATIONS } from '../data/mock';
+
+interface MessageEntry {
+  id: string;
+  time: string;
+  body: string;
+}
+
+const ACTIVE_THREAD: MessageEntry[] = [
+  {
+    id: 'm1',
+    time: 'Yesterday · 6:42 PM',
+    body: "Quick q on the Lakers H1 line — what's your read on Denver's pace tonight?",
+  },
+  {
+    id: 'm2',
+    time: 'Yesterday · 6:51 PM',
+    body: "Pace tier suggests over still has value at -110 — Murray's minutes are the swing factor.",
+  },
+];
 
 export function Messages() {
   const [query, setQuery] = React.useState('');
@@ -32,9 +50,9 @@ export function Messages() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Messages"
-        crumb={<Breadcrumb items={[{ label: 'Audience' }, { label: 'Messages' }]} />}
+        crumbs={[{ label: 'Audience' }, { label: 'Messages' }]}
         actions={
           <Button variant="primary" size="sm">
             <Icon name="plus" size={13} />
@@ -61,29 +79,23 @@ export function Messages() {
               <Card pad="sm">
                 <Stack gap={1}>
                   {filtered.map((c) => (
-                    <Card
-                      key={c.id}
-                      hover
-                      pad="sm"
-                      onClick={() => setActiveId(c.id)}
-                    >
-                      <Row gap={3} between>
-                        <Row gap={3}>
-                          <Avatar mono={c.mono} color={c.color} size={32} />
-                          <Stack gap={0}>
-                            <span>{c.name}</span>
-                            <Muted>{c.preview}</Muted>
+                    <Card key={c.id} hover pad="sm" onClick={() => setActiveId(c.id)}>
+                      <PersonRow
+                        name={c.name}
+                        sub={c.preview}
+                        mono={c.mono}
+                        color={c.color}
+                        trailing={
+                          <Stack gap={1}>
+                            <Muted>{c.time}</Muted>
+                            {c.unread && (
+                              <Badge tone="green" dot>
+                                new
+                              </Badge>
+                            )}
                           </Stack>
-                        </Row>
-                        <Stack gap={1}>
-                          <Muted>{c.time}</Muted>
-                          {c.unread && (
-                            <Badge tone="green" dot>
-                              new
-                            </Badge>
-                          )}
-                        </Stack>
-                      </Row>
+                        }
+                      />
                     </Card>
                   ))}
                 </Stack>
@@ -97,26 +109,20 @@ export function Messages() {
                     title={active.name}
                     sub="VIP subscriber · joined 94d ago"
                     action={
-                      <Row gap={2}>
-                        <Button variant="ghost" size="sm" iconOnly aria-label="More">
-                          <Icon name="more" size={14} />
-                        </Button>
-                      </Row>
+                      <Button variant="ghost" size="sm" iconOnly aria-label="More">
+                        <Icon name="more" size={14} />
+                      </Button>
                     }
                   />
                   <Stack gap={3}>
-                    <Card pad="sm">
-                      <Stack gap={1}>
-                        <Muted>Yesterday · 6:42 PM</Muted>
-                        <span>Quick q on the Lakers H1 line — what's your read on Denver's pace tonight?</span>
-                      </Stack>
-                    </Card>
-                    <Card pad="sm">
-                      <Stack gap={1}>
-                        <Muted>Yesterday · 6:51 PM</Muted>
-                        <span>Pace tier suggests over still has value at -110 — Murray's minutes are the swing factor.</span>
-                      </Stack>
-                    </Card>
+                    {ACTIVE_THREAD.map((m) => (
+                      <Card key={m.id} pad="sm">
+                        <Stack gap={1}>
+                          <Muted>{m.time}</Muted>
+                          <span>{m.body}</span>
+                        </Stack>
+                      </Card>
+                    ))}
                   </Stack>
                 </Card>
               ) : (

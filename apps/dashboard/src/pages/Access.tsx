@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -9,7 +9,6 @@ import {
   Button,
   Icon,
   PageHead,
-  Breadcrumb,
   Table,
   THead,
   TBody,
@@ -39,6 +38,17 @@ const ROWS: AccessRow[] = [
   { market: 'EPL · Goalscorer', free: false, premium: false, vip: true, cap: 'VIP only' },
 ];
 
+interface DefaultEntry {
+  id: 'free' | 'premium' | 'vip';
+  caption: string;
+}
+
+const DEFAULTS: DefaultEntry[] = [
+  { id: 'free', caption: 'New free market default' },
+  { id: 'premium', caption: 'Premium default' },
+  { id: 'vip', caption: 'VIP exclusive default' },
+];
+
 export function Access() {
   const [rows, setRows] = React.useState<AccessRow[]>(ROWS);
 
@@ -48,9 +58,9 @@ export function Access() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Access Control"
-        crumb={<Breadcrumb items={[{ label: 'Growth' }, { label: 'Access' }]} />}
+        crumbs={[{ label: 'Growth' }, { label: 'Access' }]}
         actions={
           <Button variant="primary" size="sm">
             <Icon name="check" size={13} />
@@ -108,18 +118,12 @@ export function Access() {
           <Card>
             <CardHead title="Defaults for new markets" sub="Applied automatically when you publish in a new market" />
             <Row gap={4} wrap>
-              <Stack gap={1}>
-                <Muted>New free market default</Muted>
-                <AccessBadge access="free" />
-              </Stack>
-              <Stack gap={1}>
-                <Muted>Premium default</Muted>
-                <AccessBadge access="premium" />
-              </Stack>
-              <Stack gap={1}>
-                <Muted>VIP exclusive default</Muted>
-                <AccessBadge access="vip" />
-              </Stack>
+              {DEFAULTS.map((d) => (
+                <Stack key={d.id} gap={1}>
+                  <Muted>{d.caption}</Muted>
+                  <AccessBadge access={d.id} />
+                </Stack>
+              ))}
             </Row>
           </Card>
         </Stack>

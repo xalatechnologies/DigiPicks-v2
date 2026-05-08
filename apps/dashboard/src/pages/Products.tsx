@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -9,21 +9,96 @@ import {
   Icon,
   PriceCard,
   PageHead,
-  Breadcrumb,
   Card,
   CardHead,
   KV,
   Mono,
-  Muted,
   Badge,
+  TitleSub,
 } from '@digipicks/ds';
+import type { BadgeTone } from '@digipicks/ds';
+
+interface PlanDef {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  featured?: boolean;
+  features: string[];
+  ctaLabel: string;
+  ctaVariant: 'primary' | 'outline';
+}
+
+const PLANS: PlanDef[] = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: '$0',
+    period: 'mo',
+    features: [
+      '1–2 free picks per week',
+      'Discoverable in feed',
+      'No analysis attached',
+      'Sample of voice and edge',
+    ],
+    ctaLabel: 'Configure',
+    ctaVariant: 'outline',
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: '$39',
+    period: 'mo',
+    featured: true,
+    features: [
+      'All picks · pre-game only',
+      'Full analysis & confidence',
+      'Direct messages with creator',
+      'Discord access (subscribers-only)',
+      'Cancel anytime',
+    ],
+    ctaLabel: 'Edit plan',
+    ctaVariant: 'primary',
+  },
+  {
+    id: 'vip',
+    name: 'VIP',
+    price: '$99',
+    period: 'mo',
+    features: [
+      'Everything in Premium',
+      'Early access · 30 min head-start',
+      'Live events & voice rooms',
+      'Quarterly 1:1 strategy call',
+      'Priority replies on DMs',
+    ],
+    ctaLabel: 'Edit plan',
+    ctaVariant: 'outline',
+  },
+];
+
+interface DiscountDef {
+  code: string;
+  description: string;
+  status: 'Live' | 'Paused';
+}
+
+const DISCOUNT_TONE: Record<DiscountDef['status'], BadgeTone> = {
+  Live: 'green',
+  Paused: 'amber',
+};
+
+const DISCOUNTS: DiscountDef[] = [
+  { code: 'FIRST30', description: '30% off first month · Premium', status: 'Live' },
+  { code: 'SLATE7', description: '7-day free trial · VIP', status: 'Paused' },
+];
 
 export function Products() {
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Products"
-        crumb={<Breadcrumb items={[{ label: 'Studio' }, { label: 'Products' }]} />}
+        crumbs={[{ label: 'Studio' }, { label: 'Products' }]}
         actions={
           <Button variant="primary" size="sm">
             <Icon name="plus" size={13} />
@@ -41,63 +116,22 @@ export function Products() {
           />
 
           <Row gap={4} wrap>
-            <Col gap={0}>
-              <PriceCard
-                name="Free"
-                price="$0"
-                period="mo"
-                features={[
-                  '1–2 free picks per week',
-                  'Discoverable in feed',
-                  'No analysis attached',
-                  'Sample of voice and edge',
-                ]}
-                cta={
-                  <Button variant="outline" size="md" block>
-                    Configure
-                  </Button>
-                }
-              />
-            </Col>
-            <Col gap={0}>
-              <PriceCard
-                name="Premium"
-                price="$39"
-                period="mo"
-                featured
-                features={[
-                  'All picks · pre-game only',
-                  'Full analysis & confidence',
-                  'Direct messages with creator',
-                  'Discord access (subscribers-only)',
-                  'Cancel anytime',
-                ]}
-                cta={
-                  <Button variant="primary" size="md" block>
-                    Edit plan
-                  </Button>
-                }
-              />
-            </Col>
-            <Col gap={0}>
-              <PriceCard
-                name="VIP"
-                price="$99"
-                period="mo"
-                features={[
-                  'Everything in Premium',
-                  'Early access · 30 min head-start',
-                  'Live events & voice rooms',
-                  'Quarterly 1:1 strategy call',
-                  'Priority replies on DMs',
-                ]}
-                cta={
-                  <Button variant="outline" size="md" block>
-                    Edit plan
-                  </Button>
-                }
-              />
-            </Col>
+            {PLANS.map((plan) => (
+              <Col key={plan.id} gap={0}>
+                <PriceCard
+                  name={plan.name}
+                  price={plan.price}
+                  period={plan.period}
+                  featured={plan.featured}
+                  features={plan.features}
+                  cta={
+                    <Button variant={plan.ctaVariant} size="md" block>
+                      {plan.ctaLabel}
+                    </Button>
+                  }
+                />
+              </Col>
+            ))}
           </Row>
 
           <Row gap={5} wrap>
@@ -128,24 +162,14 @@ export function Products() {
               <Card>
                 <CardHead title="Active discounts" sub="Promotions running on your products" />
                 <Stack gap={2}>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>FIRST30</span>
-                      <Muted>30% off first month · Premium</Muted>
-                    </Stack>
-                    <Badge tone="green" dot>
-                      Live
-                    </Badge>
-                  </Row>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>SLATE7</span>
-                      <Muted>7-day free trial · VIP</Muted>
-                    </Stack>
-                    <Badge tone="amber" dot>
-                      Paused
-                    </Badge>
-                  </Row>
+                  {DISCOUNTS.map((d) => (
+                    <Row key={d.code} gap={3} between>
+                      <TitleSub title={d.code} sub={d.description} />
+                      <Badge tone={DISCOUNT_TONE[d.status]} dot>
+                        {d.status}
+                      </Badge>
+                    </Row>
+                  ))}
                 </Stack>
               </Card>
 

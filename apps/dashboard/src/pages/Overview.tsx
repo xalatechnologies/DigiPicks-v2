@@ -1,27 +1,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
   Col,
   Card,
   CardHead,
-  Metric,
   Button,
   Icon,
   Stat,
-  Muted,
-  Mono,
   Eyebrow,
-  Avatar,
+  Mono,
   Badge,
   Sparkline,
   Section,
-  Breadcrumb,
+  MetricGrid,
+  PersonRow,
+  TitleSub,
+  PickCard,
 } from '@digipicks/ds';
-import { PickCard } from '@digipicks/ds';
 import { FEED_PICKS, CREATORS, STUDIO_SUBSCRIBERS, creatorById } from '../data/mock';
 
 export function Overview() {
@@ -32,16 +31,9 @@ export function Overview() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Overview"
-        crumb={
-          <Breadcrumb
-            items={[
-              { label: 'Studio' },
-              { label: 'Overview' },
-            ]}
-          />
-        }
+        crumbs={[{ label: 'Studio' }, { label: 'Overview' }]}
         actions={
           <Row gap={2}>
             <Button variant="secondary" size="sm">
@@ -64,40 +56,38 @@ export function Overview() {
             sub="A quick read on your studio, audience, and growth — tonight's slate is loaded."
           />
 
-          <Row gap={4} wrap>
-            <Col gap={0}>
-              <Metric
-                label="Monthly recurring revenue"
-                value={<Mono>$12,480</Mono>}
-                delta={{ value: '+18.4%', dir: 'up' }}
-                icon={<Icon name="dollar" size={14} />}
-              />
-            </Col>
-            <Col gap={0}>
-              <Metric
-                label="Active subscribers"
-                value={<Mono>426</Mono>}
-                delta={{ value: '+34 this mo', dir: 'up' }}
-                icon={<Icon name="users" size={14} />}
-              />
-            </Col>
-            <Col gap={0}>
-              <Metric
-                label="Win rate · 30d"
-                value={<Mono>61.2%</Mono>}
-                delta={{ value: '+1.8 pts', dir: 'up' }}
-                icon={<Icon name="trophy" size={14} />}
-              />
-            </Col>
-            <Col gap={0}>
-              <Metric
-                label="ROI · 30d"
-                value={<Mono>+11.4%</Mono>}
-                delta={{ value: '+2.1 pts', dir: 'up' }}
-                icon={<Icon name="chart" size={14} />}
-              />
-            </Col>
-          </Row>
+          <MetricGrid
+            items={[
+              {
+                id: 'mrr',
+                label: 'Monthly recurring revenue',
+                value: <Mono>$12,480</Mono>,
+                delta: { value: '+18.4%', dir: 'up' },
+                icon: <Icon name="dollar" size={14} />,
+              },
+              {
+                id: 'subs',
+                label: 'Active subscribers',
+                value: <Mono>426</Mono>,
+                delta: { value: '+34 this mo', dir: 'up' },
+                icon: <Icon name="users" size={14} />,
+              },
+              {
+                id: 'win',
+                label: 'Win rate · 30d',
+                value: <Mono>61.2%</Mono>,
+                delta: { value: '+1.8 pts', dir: 'up' },
+                icon: <Icon name="trophy" size={14} />,
+              },
+              {
+                id: 'roi',
+                label: 'ROI · 30d',
+                value: <Mono>+11.4%</Mono>,
+                delta: { value: '+2.1 pts', dir: 'up' },
+                icon: <Icon name="chart" size={14} />,
+              },
+            ]}
+          />
 
           <Row gap={5} wrap>
             <Col gap={4}>
@@ -184,16 +174,14 @@ export function Overview() {
                 />
                 <Stack gap={3}>
                   {recentSubs.map((u) => (
-                    <Row key={u.id} gap={3} between>
-                      <Row gap={3}>
-                        <Avatar mono={u.mono} color={u.color} size={32} />
-                        <Stack gap={0}>
-                          <span>{u.name}</span>
-                          <Muted>{u.email}</Muted>
-                        </Stack>
-                      </Row>
-                      <Stat label={u.plan} value={<Mono>{u.ltv}</Mono>} />
-                    </Row>
+                    <PersonRow
+                      key={u.id}
+                      name={u.name}
+                      sub={u.email}
+                      mono={u.mono}
+                      color={u.color}
+                      trailing={<Stat label={u.plan} value={<Mono>{u.ltv}</Mono>} />}
+                    />
                   ))}
                 </Stack>
               </Card>
@@ -220,19 +208,15 @@ export function Overview() {
   );
 }
 
-function QuickAction({
-  icon,
-  title,
-  sub,
-  cta,
-  onClick,
-}: {
+interface QuickActionProps {
   icon: string;
   title: string;
   sub: string;
   cta: string;
   onClick?: () => void;
-}) {
+}
+
+function QuickAction({ icon, title, sub, cta, onClick }: QuickActionProps) {
   return (
     <Card hover pad="sm" onClick={onClick}>
       <Row gap={3} between>
@@ -240,10 +224,7 @@ function QuickAction({
           <Button variant="secondary" size="sm" iconOnly aria-label={title}>
             <Icon name={icon} size={16} />
           </Button>
-          <Stack gap={0}>
-            <span>{title}</span>
-            <Muted>{sub}</Muted>
-          </Stack>
+          <TitleSub title={title} sub={sub} />
         </Row>
         <Button variant="ghost" size="sm">
           {cta}

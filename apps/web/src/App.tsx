@@ -123,9 +123,8 @@ function PublicFooter() {
         form: (
           <Row gap={2}>
             <Input type="email" placeholder="you@example.com" aria-label="Email address" />
-            <Button variant="primary">
+            <Button variant="primary" iconRight="arrow-right">
               Subscribe
-              <Icon name="arrow-right" size={14} />
             </Button>
           </Row>
         ),

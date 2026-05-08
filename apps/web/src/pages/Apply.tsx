@@ -16,7 +16,8 @@ import {
   Icon,
   Badge,
   FeatureCard,
-  ResponsibleNote,
+  EmptyState,
+  ResponsibleSection,
 } from '@digipicks/ds';
 
 export function Apply() {
@@ -59,21 +60,16 @@ export function Apply() {
         <Section eyebrow="The form" title="Tell us about your edge.">
           <Card pad="xl">
             {submitted ? (
-              <Stack gap={3}>
-                <Row gap={2}>
-                  <Icon name="check" size={20} />
-                  <strong>Application received.</strong>
-                </Row>
-                <p>
-                  Thanks for applying. Our team reviews every submission personally — you'll hear
-                  back within 5 business days.
-                </p>
-                <Row gap={2}>
+              <EmptyState
+                icon="check"
+                title="Application received."
+                subtitle="Thanks for applying. Our team reviews every submission personally — you'll hear back within 5 business days."
+                action={
                   <Button variant="outline" onClick={() => setSubmitted(false)}>
                     Submit another
                   </Button>
-                </Row>
-              </Stack>
+                }
+              />
             ) : (
               <form
                 onSubmit={(e) => {
@@ -149,9 +145,13 @@ export function Apply() {
 
                   <Spacer />
                   <Row gap={3}>
-                    <Button type="submit" variant="primary" size="lg">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      iconRight="arrow-right"
+                    >
                       Submit application
-                      <Icon name="arrow-right" size={14} />
                     </Button>
                     <Button type="button" variant="ghost" size="lg">
                       Save draft
@@ -163,10 +163,7 @@ export function Apply() {
           </Card>
         </Section>
 
-        <Section>
-          <ResponsibleNote />
-          <Spacer />
-        </Section>
+        <ResponsibleSection />
       </Container>
     </main>
   );

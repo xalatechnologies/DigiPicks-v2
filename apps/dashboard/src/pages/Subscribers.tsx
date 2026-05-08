@@ -1,10 +1,9 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
-  Col,
   Card,
   Button,
   Icon,
@@ -13,7 +12,6 @@ import {
   Mono,
   Muted,
   Search,
-  Chip,
   Table,
   THead,
   TBody,
@@ -21,8 +19,9 @@ import {
   Th,
   Td,
   PageHead,
-  Breadcrumb,
-  Metric,
+  MetricGrid,
+  FilterChips,
+  TitleSub,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { STUDIO_SUBSCRIBERS } from '../data/mock';
@@ -45,6 +44,8 @@ const STATUS_LABEL: Record<string, string> = {
   churned: 'Churned',
 };
 
+const PLAN_OPTIONS = ['Premium', 'VIP', 'Trial'];
+
 export function Subscribers() {
   const [query, setQuery] = React.useState('');
   const [plan, setPlan] = React.useState<string | null>(null);
@@ -64,9 +65,9 @@ export function Subscribers() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Subscribers"
-        crumb={<Breadcrumb items={[{ label: 'Audience' }, { label: 'Subscribers' }]} />}
+        crumbs={[{ label: 'Audience' }, { label: 'Subscribers' }]}
         actions={
           <Row gap={2}>
             <Button variant="secondary" size="sm">
@@ -89,36 +90,22 @@ export function Subscribers() {
             sub="Active members across Premium and VIP — sorted by lifetime value."
           />
 
-          <Row gap={4} wrap>
-            <Col gap={0}>
-              <Metric label="Active" value={<Mono>{active}</Mono>} delta={{ value: '+34 mo', dir: 'up' }} />
-            </Col>
-            <Col gap={0}>
-              <Metric label="Past due" value={<Mono>{pastDue}</Mono>} delta={{ value: 'monitor', dir: 'flat' }} />
-            </Col>
-            <Col gap={0}>
-              <Metric label="Churned · 30d" value={<Mono>{churned}</Mono>} delta={{ value: '−2 vs prev', dir: 'down' }} />
-            </Col>
-            <Col gap={0}>
-              <Metric label="Avg LTV" value={<Mono>$184</Mono>} delta={{ value: '+$12 mo', dir: 'up' }} />
-            </Col>
-          </Row>
+          <MetricGrid
+            items={[
+              { id: 'active', label: 'Active', value: <Mono>{active}</Mono>, delta: { value: '+34 mo', dir: 'up' } },
+              { id: 'past_due', label: 'Past due', value: <Mono>{pastDue}</Mono>, delta: { value: 'monitor', dir: 'flat' } },
+              { id: 'churned', label: 'Churned · 30d', value: <Mono>{churned}</Mono>, delta: { value: '−2 vs prev', dir: 'down' } },
+              { id: 'ltv', label: 'Avg LTV', value: <Mono>$184</Mono>, delta: { value: '+$12 mo', dir: 'up' } },
+            ]}
+          />
 
           <Row gap={3} between wrap>
-            <Row gap={2} wrap>
-              <Chip active={plan === null} onClick={() => setPlan(null)}>
-                All plans
-              </Chip>
-              <Chip active={plan === 'Premium'} onClick={() => setPlan('Premium')}>
-                Premium
-              </Chip>
-              <Chip active={plan === 'VIP'} onClick={() => setPlan('VIP')}>
-                VIP
-              </Chip>
-              <Chip active={plan === 'Trial'} onClick={() => setPlan('Trial')}>
-                Trial
-              </Chip>
-            </Row>
+            <FilterChips
+              options={PLAN_OPTIONS}
+              value={plan}
+              onChange={setPlan}
+              allLabel="All plans"
+            />
             <Search
               placeholder="Search by name or email"
               value={query}
@@ -143,10 +130,7 @@ export function Subscribers() {
                     <Td>
                       <Row gap={3}>
                         <Avatar mono={u.mono} color={u.color} size={32} />
-                        <Stack gap={0}>
-                          <span>{u.name}</span>
-                          <Muted>{u.email}</Muted>
-                        </Stack>
+                        <TitleSub title={u.name} sub={u.email} />
                       </Row>
                     </Td>
                     <Td>

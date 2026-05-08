@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -9,15 +9,15 @@ import {
   CardHead,
   Button,
   Icon,
-  BigStat,
   Mono,
   Muted,
   Sparkline,
   Badge,
   PageHead,
-  Breadcrumb,
   Segmented,
   KV,
+  StatGrid,
+  TitleSub,
 } from '@digipicks/ds';
 import { MARKET_PERF } from '../data/mock';
 
@@ -28,14 +28,27 @@ const RANGE_OPTIONS = [
   { label: 'YTD', value: 'ytd' },
 ];
 
+interface TopEarner {
+  id: string;
+  title: string;
+  meta: string;
+  saves: string;
+}
+
+const TOP_EARNERS: TopEarner[] = [
+  { id: 'lakers-h1', title: 'Lakers vs Nuggets H1 Over', meta: 'NBA · Totals', saves: '+312 saves' },
+  { id: 'knicks-ml', title: 'Knicks ML preview', meta: 'NBA · Moneyline', saves: '+522 saves' },
+  { id: 'saka', title: 'Saka anytime scorer', meta: 'EPL · Goalscorer', saves: '+198 saves' },
+];
+
 export function Performance() {
   const [range, setRange] = React.useState('30d');
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Performance"
-        crumb={<Breadcrumb items={[{ label: 'Audience' }, { label: 'Performance' }]} />}
+        crumbs={[{ label: 'Audience' }, { label: 'Performance' }]}
         actions={
           <Button variant="secondary" size="sm">
             <Icon name="filter" size={13} />
@@ -60,72 +73,54 @@ export function Performance() {
             }
           />
 
-          <Row gap={4} wrap>
-            <Col gap={0}>
-              <Card>
-                <BigStat
-                  label="Win rate"
-                  value={<Mono>61.2%</Mono>}
-                  sub={
-                    <Row gap={2}>
-                      <Badge tone="green" dot>
-                        +1.8 pts
-                      </Badge>
-                      <Muted>vs prior 30d</Muted>
-                    </Row>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat
-                  label="ROI"
-                  value={<Mono>+11.4%</Mono>}
-                  sub={
-                    <Row gap={2}>
-                      <Badge tone="green" dot>
-                        +2.1 pts
-                      </Badge>
-                      <Muted>units-weighted</Muted>
-                    </Row>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat
-                  label="Units"
-                  value={<Mono>+41.4u</Mono>}
-                  sub={
-                    <Row gap={2}>
-                      <Badge tone="green" dot>
-                        +6.2u
-                      </Badge>
-                      <Muted>this month</Muted>
-                    </Row>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat
-                  label="Streak"
-                  value={<Mono>W4</Mono>}
-                  sub={
-                    <Row gap={2}>
-                      <Badge tone="gold" dot>
-                        Hot
-                      </Badge>
-                      <Muted>3 graded today</Muted>
-                    </Row>
-                  }
-                />
-              </Card>
-            </Col>
-          </Row>
+          <StatGrid
+            items={[
+              {
+                id: 'win',
+                label: 'Win rate',
+                value: <Mono>61.2%</Mono>,
+                sub: (
+                  <Row gap={2}>
+                    <Badge tone="green" dot>+1.8 pts</Badge>
+                    <Muted>vs prior 30d</Muted>
+                  </Row>
+                ),
+              },
+              {
+                id: 'roi',
+                label: 'ROI',
+                value: <Mono>+11.4%</Mono>,
+                sub: (
+                  <Row gap={2}>
+                    <Badge tone="green" dot>+2.1 pts</Badge>
+                    <Muted>units-weighted</Muted>
+                  </Row>
+                ),
+              },
+              {
+                id: 'units',
+                label: 'Units',
+                value: <Mono>+41.4u</Mono>,
+                sub: (
+                  <Row gap={2}>
+                    <Badge tone="green" dot>+6.2u</Badge>
+                    <Muted>this month</Muted>
+                  </Row>
+                ),
+              },
+              {
+                id: 'streak',
+                label: 'Streak',
+                value: <Mono>W4</Mono>,
+                sub: (
+                  <Row gap={2}>
+                    <Badge tone="gold" dot>Hot</Badge>
+                    <Muted>3 graded today</Muted>
+                  </Row>
+                ),
+              },
+            ]}
+          />
 
           <Row gap={5} wrap>
             <Col gap={4}>
@@ -134,10 +129,10 @@ export function Performance() {
                 <Stack gap={4}>
                   {MARKET_PERF.map((m) => (
                     <Row key={m.market} gap={4} between wrap>
-                      <Stack gap={0}>
-                        <span>{m.market}</span>
-                        <Muted>{m.picks} picks · {(m.winRate * 100).toFixed(1)}%</Muted>
-                      </Stack>
+                      <TitleSub
+                        title={m.market}
+                        sub={`${m.picks} picks · ${(m.winRate * 100).toFixed(1)}%`}
+                      />
                       <Sparkline values={m.trend} width={140} height={32} />
                       <Mono>{m.units}</Mono>
                     </Row>
@@ -161,27 +156,12 @@ export function Performance() {
               <Card>
                 <CardHead title="Top earners" sub="Picks that drove the most subscriber action" />
                 <Stack gap={3}>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Lakers vs Nuggets H1 Over</span>
-                      <Muted>NBA · Totals</Muted>
-                    </Stack>
-                    <Mono>+312 saves</Mono>
-                  </Row>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Knicks ML preview</span>
-                      <Muted>NBA · Moneyline</Muted>
-                    </Stack>
-                    <Mono>+522 saves</Mono>
-                  </Row>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Saka anytime scorer</span>
-                      <Muted>EPL · Goalscorer</Muted>
-                    </Stack>
-                    <Mono>+198 saves</Mono>
-                  </Row>
+                  {TOP_EARNERS.map((t) => (
+                    <Row key={t.id} gap={3} between>
+                      <TitleSub title={t.title} sub={t.meta} />
+                      <Mono>{t.saves}</Mono>
+                    </Row>
+                  ))}
                 </Stack>
               </Card>
             </Col>

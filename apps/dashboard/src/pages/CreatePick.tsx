@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -9,7 +9,6 @@ import {
   Card,
   CardHead,
   Button,
-  Icon,
   Field,
   Input,
   Select,
@@ -17,7 +16,6 @@ import {
   Segmented,
   PickCard,
   PageHead,
-  Breadcrumb,
   Muted,
   Eyebrow,
   Divider,
@@ -36,6 +34,15 @@ const CONFIDENCE_OPTIONS = [
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
   { value: 'high', label: 'High' },
+];
+
+const MARKET_OPTIONS = [
+  '1H Over/Under',
+  'Spread',
+  'Moneyline',
+  'Player Prop',
+  'Goalscorer',
+  'Goalie Saves O/U',
 ];
 
 export function CreatePick() {
@@ -59,17 +66,13 @@ export function CreatePick() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Create pick"
-        crumb={
-          <Breadcrumb
-            items={[
-              { label: 'Studio' },
-              { label: 'Posts & Picks' },
-              { label: 'New' },
-            ]}
-          />
-        }
+        crumbs={[
+          { label: 'Studio' },
+          { label: 'Posts & Picks' },
+          { label: 'New' },
+        ]}
         actions={
           <Row gap={2}>
             <Button variant="secondary" size="sm" onClick={() => navigate('/picks')}>
@@ -121,12 +124,11 @@ export function CreatePick() {
                     <Col gap={0}>
                       <Field label="Market">
                         <Select value={market} onChange={(e) => setMarket(e.target.value)}>
-                          <option>1H Over/Under</option>
-                          <option>Spread</option>
-                          <option>Moneyline</option>
-                          <option>Player Prop</option>
-                          <option>Goalscorer</option>
-                          <option>Goalie Saves O/U</option>
+                          {MARKET_OPTIONS.map((m) => (
+                            <option key={m} value={m}>
+                              {m}
+                            </option>
+                          ))}
                         </Select>
                       </Field>
                     </Col>

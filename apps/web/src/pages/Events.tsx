@@ -6,13 +6,11 @@ import {
   PageHead,
   Row,
   Stack,
-  Spacer,
   Grid,
   Button,
-  Icon,
   EventCard,
   FeaturedEventCard,
-  ResponsibleNote,
+  ResponsibleSection,
 } from '@digipicks/ds';
 import { CREATORS, EVENTS_TODAY } from '@/data/mock';
 
@@ -33,9 +31,12 @@ export function Events() {
               <Button variant="outline" onClick={() => navigate('/creators')}>
                 Browse creators
               </Button>
-              <Button variant="primary" onClick={() => navigate('/apply')}>
+              <Button
+                variant="primary"
+                iconRight="arrow-right"
+                onClick={() => navigate('/apply')}
+              >
                 Get started
-                <Icon name="arrow-right" size={13} />
               </Button>
             </Row>
           }
@@ -85,10 +86,7 @@ export function Events() {
           </Grid>
         </Section>
 
-        <Section>
-          <ResponsibleNote />
-          <Spacer />
-        </Section>
+        <ResponsibleSection />
       </Container>
     </main>
   );

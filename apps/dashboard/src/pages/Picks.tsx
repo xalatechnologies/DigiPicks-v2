@@ -1,16 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
-  Col,
   Card,
   Button,
   Icon,
   Tabs,
-  Chip,
   Search,
   Table,
   THead,
@@ -24,7 +22,8 @@ import {
   Mono,
   Muted,
   PageHead,
-  Breadcrumb,
+  FilterChips,
+  TitleSub,
 } from '@digipicks/ds';
 import { STUDIO_PICKS, SPORTS } from '../data/mock';
 
@@ -58,9 +57,9 @@ export function Picks() {
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Posts & Picks"
-        crumb={<Breadcrumb items={[{ label: 'Studio' }, { label: 'Posts & Picks' }]} />}
+        crumbs={[{ label: 'Studio' }, { label: 'Posts & Picks' }]}
         actions={
           <Button variant="primary" size="sm" onClick={() => navigate('/create')}>
             <Icon name="plus" size={13} />
@@ -91,25 +90,19 @@ export function Picks() {
 
           <Row gap={3} between wrap>
             <Tabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Pick status" />
-            <Row gap={2}>
-              <Search
-                placeholder="Search picks"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </Row>
+            <Search
+              placeholder="Search picks"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </Row>
 
-          <Row gap={2} wrap>
-            <Chip active={sport === null} onClick={() => setSport(null)}>
-              All sports
-            </Chip>
-            {SPORTS.map((s) => (
-              <Chip key={s} active={sport === s} onClick={() => setSport(s)}>
-                {s}
-              </Chip>
-            ))}
-          </Row>
+          <FilterChips
+            options={SPORTS}
+            value={sport}
+            onChange={setSport}
+            allLabel="All sports"
+          />
 
           <Card pad="sm">
             <Table>
@@ -131,10 +124,7 @@ export function Picks() {
                 {filtered.map((p) => (
                   <Tr key={p.id}>
                     <Td>
-                      <Stack gap={0}>
-                        <span>{p.title}</span>
-                        <Muted>{p.market}</Muted>
-                      </Stack>
+                      <TitleSub title={p.title} sub={p.market} />
                     </Td>
                     <Td>
                       <SportTag sport={p.sport} />

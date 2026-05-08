@@ -20,6 +20,7 @@
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/vite": "^4.2.4",
+    "@types/node": "^25.6.2",
     "concurrently": "^9.1.0",
     "convex-test": "^0.0.51",
     "husky": "^9.1.0",
@@ -42,6 +43,8 @@
   },
   "packageManager": "pnpm@9.15.4",
   "dependencies": {
+    "@auth/core": "0.37.0",
+    "@convex-dev/auth": "^0.0.92",
     "convex": "^1.31.7"
   }
 }

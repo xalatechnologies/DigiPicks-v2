@@ -1,0 +1,5 @@
+/* Page-closer responsible-note: adds bottom breathing room so the legal
+   call-out doesn't sit flush against the footer. */
+.pad {
+  padding-bottom: var(--space-12);
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -10,33 +10,69 @@ import {
   Button,
   Icon,
   PageHead,
-  Breadcrumb,
   Field,
   Input,
   TextArea,
   Select,
-  Switch,
   Muted,
   KV,
   Mono,
   Divider,
+  SwitchRow,
 } from '@digipicks/ds';
 
+const NICHE_OPTIONS = [
+  'NBA Player Props',
+  'NFL Sides & Totals',
+  'Cross-sport Props',
+  'Soccer & Tennis',
+];
+
+interface NotificationToggle {
+  id: 'pickAlerts' | 'billingAlerts' | 'growthAlerts';
+  label: string;
+  sub: string;
+}
+
+const NOTIFICATIONS: NotificationToggle[] = [
+  {
+    id: 'pickAlerts',
+    label: 'Pick alerts',
+    sub: 'When a pick auto-grades or hits cutoff',
+  },
+  {
+    id: 'billingAlerts',
+    label: 'Billing alerts',
+    sub: 'Failed payments, refunds, payout updates',
+  },
+  {
+    id: 'growthAlerts',
+    label: 'Growth opportunities',
+    sub: 'Weekly digest of new growth ideas',
+  },
+];
+
 export function Settings() {
-  const [pickAlerts, setPickAlerts] = React.useState(true);
-  const [billingAlerts, setBillingAlerts] = React.useState(true);
-  const [growthAlerts, setGrowthAlerts] = React.useState(false);
   const [name, setName] = React.useState('CourtVision Pro');
   const [handle, setHandle] = React.useState('@courtvisionpro');
   const [bio, setBio] = React.useState(
     'Player props specialist. Pace and matchup-driven. Pre-game only, no live bets.',
   );
+  const [toggles, setToggles] = React.useState<Record<NotificationToggle['id'], boolean>>({
+    pickAlerts: true,
+    billingAlerts: true,
+    growthAlerts: false,
+  });
+
+  const setToggle = (id: NotificationToggle['id']) => (next: boolean) => {
+    setToggles((prev) => ({ ...prev, [id]: next }));
+  };
 
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Settings"
-        crumb={<Breadcrumb items={[{ label: 'Account' }, { label: 'Settings' }]} />}
+        crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
           <Button variant="primary" size="sm">
             <Icon name="check" size={13} />
@@ -69,10 +105,11 @@ export function Settings() {
                   </Field>
                   <Field label="Niche">
                     <Select defaultValue="NBA Player Props">
-                      <option>NBA Player Props</option>
-                      <option>NFL Sides &amp; Totals</option>
-                      <option>Cross-sport Props</option>
-                      <option>Soccer &amp; Tennis</option>
+                      {NICHE_OPTIONS.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
                     </Select>
                   </Field>
                 </Stack>
@@ -81,29 +118,17 @@ export function Settings() {
               <Card>
                 <CardHead title="Notifications" sub="Where to send alerts about activity in your studio" />
                 <Stack gap={3}>
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Pick alerts</span>
-                      <Muted>When a pick auto-grades or hits cutoff</Muted>
-                    </Stack>
-                    <Switch checked={pickAlerts} onChange={setPickAlerts} />
-                  </Row>
-                  <Divider />
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Billing alerts</span>
-                      <Muted>Failed payments, refunds, payout updates</Muted>
-                    </Stack>
-                    <Switch checked={billingAlerts} onChange={setBillingAlerts} />
-                  </Row>
-                  <Divider />
-                  <Row gap={3} between>
-                    <Stack gap={0}>
-                      <span>Growth opportunities</span>
-                      <Muted>Weekly digest of new growth ideas</Muted>
-                    </Stack>
-                    <Switch checked={growthAlerts} onChange={setGrowthAlerts} />
-                  </Row>
+                  {NOTIFICATIONS.map((n, i) => (
+                    <React.Fragment key={n.id}>
+                      {i > 0 && <Divider />}
+                      <SwitchRow
+                        label={n.label}
+                        sub={n.sub}
+                        checked={toggles[n.id]}
+                        onChange={setToggle(n.id)}
+                      />
+                    </React.Fragment>
+                  ))}
                 </Stack>
               </Card>
             </Col>

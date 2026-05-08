@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Topbar,
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -10,7 +10,6 @@ import {
   Button,
   Icon,
   PageHead,
-  Breadcrumb,
   KV,
   Mono,
   Muted,
@@ -21,7 +20,7 @@ import {
   Tr,
   Th,
   Td,
-  BigStat,
+  StatGrid,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { INVOICES } from '../data/mock';
@@ -35,9 +34,9 @@ const STATUS_TONE: Record<string, BadgeTone> = {
 export function Earnings() {
   return (
     <>
-      <Topbar
+      <PageHeader
         title="Earnings"
-        crumb={<Breadcrumb items={[{ label: 'Growth' }, { label: 'Earnings' }]} />}
+        crumbs={[{ label: 'Growth' }, { label: 'Earnings' }]}
         actions={
           <Row gap={2}>
             <Button variant="secondary" size="sm">
@@ -60,28 +59,14 @@ export function Earnings() {
             sub="MRR, payouts, and historical invoices — net of platform and processing fees."
           />
 
-          <Row gap={4} wrap>
-            <Col gap={0}>
-              <Card>
-                <BigStat label="MRR" value={<Mono>$12,480</Mono>} sub={<Badge tone="green" dot>+18.4%</Badge>} />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat label="Pending payout" value={<Mono>$3,148.20</Mono>} sub={<Muted>arrives May 31</Muted>} />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat label="Lifetime" value={<Mono>$84,210</Mono>} sub={<Muted>since Jan 2024</Muted>} />
-              </Card>
-            </Col>
-            <Col gap={0}>
-              <Card>
-                <BigStat label="Take rate" value={<Mono>87%</Mono>} sub={<Muted>creator share</Muted>} />
-              </Card>
-            </Col>
-          </Row>
+          <StatGrid
+            items={[
+              { id: 'mrr', label: 'MRR', value: <Mono>$12,480</Mono>, sub: <Badge tone="green" dot>+18.4%</Badge> },
+              { id: 'pending', label: 'Pending payout', value: <Mono>$3,148.20</Mono>, sub: <Muted>arrives May 31</Muted> },
+              { id: 'lifetime', label: 'Lifetime', value: <Mono>$84,210</Mono>, sub: <Muted>since Jan 2024</Muted> },
+              { id: 'take', label: 'Take rate', value: <Mono>87%</Mono>, sub: <Muted>creator share</Muted> },
+            ]}
+          />
 
           <Row gap={5} wrap>
             <Col gap={4}>

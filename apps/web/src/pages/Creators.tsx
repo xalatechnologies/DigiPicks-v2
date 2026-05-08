@@ -6,13 +6,11 @@ import {
   PageHead,
   Row,
   Stack,
-  Spacer,
   Grid,
   Button,
-  Icon,
   Search,
   CreatorCard,
-  ResponsibleNote,
+  ResponsibleSection,
 } from '@digipicks/ds';
 import { CREATORS } from '@/data/mock';
 
@@ -31,9 +29,12 @@ export function Creators() {
               <Button variant="outline" onClick={() => navigate('/events')}>
                 Tonight's events
               </Button>
-              <Button variant="primary" onClick={() => navigate('/apply')}>
+              <Button
+                variant="primary"
+                iconRight="arrow-right"
+                onClick={() => navigate('/apply')}
+              >
                 Apply as a creator
-                <Icon name="arrow-right" size={13} />
               </Button>
             </Row>
           }
@@ -64,10 +65,7 @@ export function Creators() {
           </Stack>
         </Section>
 
-        <Section>
-          <ResponsibleNote />
-          <Spacer />
-        </Section>
+        <ResponsibleSection />
       </Container>
     </main>
   );

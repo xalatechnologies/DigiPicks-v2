@@ -1,6 +1,6 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import { listingType, listingStatus, paymentMode } from './shared/validators';
+import { listingType, paymentMode } from './shared/validators';
 import { requireUser } from './shared/permissions';
 import { internal } from './_generated/api';
 
@@ -98,7 +98,8 @@ export const createDraft = mutation({
       updatedAt: now,
     });
 
-    await ctx.runMutation(internal.audit.log, {
+    // W9 fix: defer audit to scheduled function — don't extend txn read/write set
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
       actorUserId: user._id,
       entityType: 'listing',
       entityId: listingId,
@@ -127,7 +128,8 @@ export const publish = mutation({
       updatedAt: now,
     });
 
-    await ctx.runMutation(internal.audit.log, {
+    // W9 fix: defer audit to scheduled function
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
       actorUserId: user._id,
       entityType: 'listing',
       entityId: args.id,

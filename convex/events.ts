@@ -12,7 +12,7 @@ export const today = query({
     if (args.sport) {
       return await ctx.db
         .query('events')
-        .withIndex('by_sport', (q) => q.eq('sport', args.sport!))
+        .withIndex('by_sport_and_startsAt', (q) => q.eq('sport', args.sport!))
         .take(50);
     }
     return await ctx.db.query('events').order('asc').take(50);
@@ -24,7 +24,7 @@ export const featured = query({
   handler: async (ctx) => {
     return await ctx.db
       .query('events')
-      .withIndex('by_featured', (q) => q.eq('featured', true))
+      .withIndex('by_featured_and_startsAt', (q) => q.eq('featured', true))
       .take(10);
   },
 });

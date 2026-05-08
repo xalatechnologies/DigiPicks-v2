@@ -18,7 +18,6 @@ import {
   FeaturedEventCard,
   BigStat,
   FAQList,
-  ResponsibleNote,
   HeroLivePanel,
   TrustMarquee,
   PriceCard,
@@ -27,6 +26,7 @@ import {
   StepCard,
   Testimonial,
   SplitCTA,
+  ResponsibleSection,
 } from '@digipicks/ds';
 import { CREATORS, EVENTS_TODAY } from '@/data/mock';
 
@@ -217,9 +217,13 @@ export function Landing() {
         subtitle="A curated network for sports betting creators and the subscribers who back their edge."
         actions={
           <>
-            <Button variant="primary" size="lg" onClick={() => navigate('/creators')}>
+            <Button
+              variant="primary"
+              size="lg"
+              iconRight="arrow-right"
+              onClick={() => navigate('/creators')}
+            >
               Discover creators
-              <Icon name="arrow-right" size={14} />
             </Button>
             <Button variant="outline" size="lg" onClick={() => navigate('/apply')}>
               Apply as a creator
@@ -321,9 +325,12 @@ export function Landing() {
           title="Verified, transparent, and actually good."
           sub="Two of the network's standout operators. Win rates are independently graded — every record is real, every line has CLV behind it."
           action={
-            <Button variant="outline" onClick={() => navigate('/creators')}>
+            <Button
+              variant="outline"
+              iconRight="arrow-right"
+              onClick={() => navigate('/creators')}
+            >
               Browse all 142 creators
-              <Icon name="arrow-right" size={13} />
             </Button>
           }
         >
@@ -354,9 +361,12 @@ export function Landing() {
           title="Big events, fully covered."
           sub="The biggest games on tonight's board with creator coverage and pick volume."
           action={
-            <Button variant="ghost" onClick={() => navigate('/events')}>
+            <Button
+              variant="ghost"
+              iconRight="arrow-right"
+              onClick={() => navigate('/events')}
+            >
               See full slate
-              <Icon name="arrow-right" size={13} />
             </Button>
           }
         >
@@ -501,9 +511,7 @@ export function Landing() {
         </Section>
 
         {/* ── 10 · Responsible-gambling notice (legally important, modern card) ── */}
-        <Section noReveal>
-          <ResponsibleNote />
-        </Section>
+        <ResponsibleSection noReveal pad={false} />
 
         {/* ── 11 · FAQ (2-col split) ──────────────────────────────────── */}
         <Section>
@@ -518,9 +526,12 @@ export function Landing() {
                 or one click away in our docs.
               </Muted>
               <Row gap={3} wrap>
-                <Button variant="outline" onClick={() => navigate('/apply')}>
+                <Button
+                  variant="outline"
+                  iconRight="arrow-right"
+                  onClick={() => navigate('/apply')}
+                >
                   Read full docs
-                  <Icon name="arrow-right" size={13} />
                 </Button>
                 <Button variant="ghost" onClick={() => navigate('/apply')}>
                   Contact support
