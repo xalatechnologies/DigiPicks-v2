@@ -11,16 +11,15 @@ import {
   Button,
   Icon,
   Badge,
-  Muted,
-  Mono,
-  KV,
+  PersonRow,
   Divider,
   SwitchRow,
-  PersonRow,
   DashGrid,
   Field,
   Input,
   Select,
+  SectionHead,
+  InsightCard,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -34,59 +33,30 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
 const NOTIFICATION_SECTIONS = [
   {
     title: 'Pick notifications',
+    eyebrow: 'Pick alerts',
+    sub: 'Stay in the loop the moment a creator publishes.',
     items: [
-      {
-        id: 'newPick',
-        label: 'New pick alerts',
-        sub: 'When a subscribed creator publishes a new pick',
-        defaultOn: true,
-      },
-      {
-        id: 'gradeAlert',
-        label: 'Grading updates',
-        sub: 'When your followed picks are graded',
-        defaultOn: true,
-      },
-      {
-        id: 'urgentPick',
-        label: 'Urgent picks',
-        sub: 'Push notifications for picks with cutoffs under 1h',
-        defaultOn: true,
-      },
+      { id: 'newPick', label: 'New pick alerts', sub: 'When a subscribed creator publishes', defaultOn: true },
+      { id: 'gradeAlert', label: 'Grading updates', sub: 'When followed picks are graded', defaultOn: true },
+      { id: 'urgentPick', label: 'Urgent picks', sub: 'Picks with cutoffs under 1h', defaultOn: true },
     ],
   },
   {
-    title: 'Billing notifications',
+    title: 'Billing',
+    eyebrow: 'Billing',
+    sub: 'Renewals, failed payments, price changes.',
     items: [
-      {
-        id: 'billing',
-        label: 'Billing alerts',
-        sub: 'Failed payments, renewals, and refund confirmations',
-        defaultOn: true,
-      },
-      {
-        id: 'priceChange',
-        label: 'Price changes',
-        sub: 'When a creator updates their subscription pricing',
-        defaultOn: true,
-      },
+      { id: 'billing', label: 'Billing alerts', sub: 'Failed payments and renewals', defaultOn: true },
+      { id: 'priceChange', label: 'Price changes', sub: 'Creator pricing updates', defaultOn: true },
     ],
   },
   {
-    title: 'Community notifications',
+    title: 'Community',
+    eyebrow: 'Community',
+    sub: 'Weekly digest and reply notifications.',
     items: [
-      {
-        id: 'digest',
-        label: 'Weekly digest',
-        sub: 'Top picks, new creators, and win-rate movers',
-        defaultOn: false,
-      },
-      {
-        id: 'community',
-        label: 'Community mentions',
-        sub: 'When someone replies to your message',
-        defaultOn: false,
-      },
+      { id: 'digest', label: 'Weekly digest', sub: 'Top picks and win-rate movers', defaultOn: false },
+      { id: 'community', label: 'Mentions', sub: 'When someone replies to you', defaultOn: false },
     ],
   },
 ];
@@ -105,9 +75,7 @@ export function AccountSettings() {
   const [toggles, setToggles] = React.useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     for (const section of NOTIFICATION_SECTIONS) {
-      for (const item of section.items) {
-        initial[item.id] = item.defaultOn;
-      }
+      for (const item of section.items) initial[item.id] = item.defaultOn;
     }
     return initial;
   });
@@ -115,6 +83,7 @@ export function AccountSettings() {
   const [weeklyCap, setWeeklyCap] = React.useState(false);
   const [cooldown, setCooldown] = React.useState(false);
   const [privateProfile, setPrivateProfile] = React.useState(false);
+  const [hideLeaderboards, setHideLeaderboards] = React.useState(false);
 
   React.useEffect(() => {
     if (me?.name) setName(me.name);
@@ -134,18 +103,24 @@ export function AccountSettings() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save profile.');
+      setError(err instanceof Error ? err.message : 'Could not save.');
     } finally {
       setSaving(false);
     }
   }
 
-  // ── Sidebar ──────────────────────────────────────────────────────────
+  const memberSince = me?._creationTime
+    ? new Date(me._creationTime).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+    : '—';
+
   const aside = (
     <>
-      {/* Connected accounts */}
-      <Card>
-        <CardHead title="Connected accounts" />
+      <InsightCard
+        tone="blue"
+        eyebrow="Connected"
+        title="Sign-in providers"
+        sub="Add backup providers to stay locked in."
+      >
         <Stack gap={0}>
           <PersonRow
             name="Google"
@@ -160,113 +135,72 @@ export function AccountSettings() {
             sub="Not connected"
             mono="D"
             color="#5865F2"
-            trailing={
-              <Button variant="outline" size="sm">
-                Connect
-              </Button>
-            }
+            trailing={<Button variant="outline" size="sm">Connect</Button>}
           />
           <Divider />
           <PersonRow
             name="Apple"
             sub="Not connected"
             mono="A"
-            color="#333"
-            trailing={
-              <Button variant="outline" size="sm">
-                Connect
-              </Button>
-            }
+            color="var(--t-1)"
+            trailing={<Button variant="outline" size="sm">Connect</Button>}
           />
         </Stack>
-      </Card>
+      </InsightCard>
 
-      {/* Responsible betting */}
-      <Card>
-        <CardHead title="Responsible betting" action={<Badge tone="green">Recommended</Badge>} />
+      <InsightCard
+        tone="green"
+        eyebrow="Recommended"
+        title="Responsible betting"
+        sub="Soft guards to stay disciplined when variance bites."
+      >
         <Stack gap={0}>
           <SwitchRow
             label="Weekly play cap"
-            sub="Limit follows to 20 per week"
+            sub="Limit to 20 plays per week"
             checked={weeklyCap}
             onChange={setWeeklyCap}
           />
           <Divider />
           <SwitchRow
             label="Cooldown period"
-            sub="Pause follows for 24h after 3+ losses"
+            sub="Pause after 3+ losses in a row"
             checked={cooldown}
             onChange={setCooldown}
           />
         </Stack>
-      </Card>
+      </InsightCard>
 
-      {/* Privacy */}
-      <Card>
-        <CardHead title="Privacy" />
+      <InsightCard tone="mute" eyebrow="Privacy" title="Profile visibility">
         <Stack gap={0}>
           <SwitchRow
             label="Private profile"
-            sub="Hide your portfolio from other users"
+            sub="Hide portfolio from other subscribers"
             checked={privateProfile}
             onChange={setPrivateProfile}
           />
           <Divider />
           <SwitchRow
             label="Hide from leaderboards"
-            sub="Exclude from subscriber rankings"
-            checked={false}
-            onChange={() => {}}
+            sub="Exclude me from public rankings"
+            checked={hideLeaderboards}
+            onChange={setHideLeaderboards}
           />
         </Stack>
-      </Card>
+      </InsightCard>
 
-      {/* Account info */}
-      <Card>
-        <CardHead title="Account info" />
-        <Stack gap={0}>
-          <KV k="User ID" v={<Mono>{me?._id ? String(me._id).slice(0, 16) + '…' : '—'}</Mono>} />
-          <Divider />
-          <KV
-            k="Role"
-            v={
-              <Badge tone={me?.creatorId ? 'green' : 'blue'}>
-                {me?.creatorId ? 'Creator' : 'Subscriber'}
-              </Badge>
-            }
-          />
-          <Divider />
-          <KV k="Auth" v={<Mono>Google OAuth</Mono>} />
-          <Divider />
-          <KV
-            k="Since"
-            v={
-              <Mono>
-                {me?._creationTime ? new Date(me._creationTime).toLocaleDateString() : '—'}
-              </Mono>
-            }
-          />
-        </Stack>
-      </Card>
-
-      {/* Danger zone */}
-      <Card>
-        <CardHead title="Danger zone" />
-        <Stack gap={3}>
-          <Muted>Pausing hides your activity. Deleting is permanent and cannot be undone.</Muted>
-          <Row gap={2}>
-            <Button variant="outline" size="sm">
-              Export data
-            </Button>
-            <Button variant="outline" size="sm">
-              Pause
-            </Button>
-            <Button variant="danger" size="sm">
-              Delete
-            </Button>
-          </Row>
-        </Stack>
-      </Card>
+      <InsightCard
+        tone="red"
+        eyebrow="Danger zone"
+        title="Pause or delete"
+        sub="Pausing hides your activity. Deleting is permanent and cannot be undone."
+      >
+        <Row gap={2} wrap>
+          <Button variant="outline" size="sm">Export data</Button>
+          <Button variant="outline" size="sm">Pause</Button>
+          <Button variant="danger" size="sm">Delete</Button>
+        </Row>
+      </InsightCard>
     </>
   );
 
@@ -277,11 +211,7 @@ export function AccountSettings() {
         crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
           <Row gap={2}>
-            {saved && (
-              <Badge tone="green" dot>
-                Saved
-              </Badge>
-            )}
+            {saved && <Badge tone="green" dot>Saved</Badge>}
             <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
               <Icon name="check" size={13} />
               {saving ? 'Saving…' : 'Save changes'}
@@ -291,54 +221,42 @@ export function AccountSettings() {
       />
 
       <Container size="2xl">
-        <Stack gap={5}>
+        <Stack gap={6}>
           {error && (
-            <Card>
-              <PersonRow
-                name="Error saving"
-                sub={error}
-                mono="!"
-                color="var(--red)"
-                trailing={
-                  <Button variant="ghost" size="sm" onClick={() => setError(null)}>
-                    Dismiss
-                  </Button>
-                }
-              />
-            </Card>
+            <InsightCard
+              tone="red"
+              eyebrow="Save failed"
+              title="Could not update your profile"
+              sub={error}
+              action={
+                <Button variant="ghost" size="sm" onClick={() => setError(null)}>
+                  Dismiss
+                </Button>
+              }
+            />
           )}
 
           <DashGrid aside={aside}>
-            {/* Profile */}
-            <Card>
-              <CardHead
-                title="Profile"
-                sub="Your public identity"
-                action={
-                  me?.creatorId ? (
-                    <Badge tone="green">Creator</Badge>
-                  ) : (
-                    <Badge tone="blue">Subscriber</Badge>
-                  )
-                }
-              />
+            {/* Identity & profile */}
+            <SectionHead
+              eyebrow="Profile"
+              title="Your identity"
+              sub="How you appear across DigiPicks."
+              action={
+                <Badge tone={me?.creatorId ? 'green' : 'blue'}>
+                  {me?.creatorId ? 'Creator' : 'Subscriber'}
+                </Badge>
+              }
+            />
+            <Card pad="md">
               <Stack gap={4}>
                 <PersonRow
                   name={me?.name ?? 'Loading…'}
                   sub={me?.email ?? ''}
                   mono={me?.name?.[0]?.toUpperCase() ?? 'U'}
                   color="var(--primary)"
-                  trailing={
-                    <Muted>
-                      Since{' '}
-                      {me?._creationTime
-                        ? new Date(me._creationTime).toLocaleDateString(undefined, {
-                            month: 'short',
-                            year: 'numeric',
-                          })
-                        : '—'}
-                    </Muted>
-                  }
+                  size={48}
+                  trailing={<Badge tone="mute">{`Member since ${memberSince}`}</Badge>}
                 />
                 <Divider />
                 <Field label="Display name" required>
@@ -350,19 +268,22 @@ export function AccountSettings() {
                 <Field label="Language">
                   <Select value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
                     {LOCALE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </Select>
                 </Field>
               </Stack>
             </Card>
 
-            {/* Notification preferences */}
+            {/* Notifications */}
+            <SectionHead
+              eyebrow="Notifications"
+              title="What you hear from us"
+              sub="Pick alerts, billing notices, and community signals."
+            />
             {NOTIFICATION_SECTIONS.map((section) => (
-              <Card key={section.title}>
-                <CardHead title={section.title} />
+              <Card key={section.title} pad="md">
+                <CardHead title={section.title} sub={section.sub} />
                 <Stack gap={0}>
                   {section.items.map((item, i) => (
                     <React.Fragment key={item.id}>
@@ -379,25 +300,19 @@ export function AccountSettings() {
               </Card>
             ))}
 
-            {/* Creator application CTA */}
+            {/* Creator CTA */}
             {!me?.creatorId && (
-              <Card>
-                <CardHead title="Become a creator" />
-                <Stack gap={2}>
-                  <Muted>
-                    Have a track record? Apply to publish picks on DigiPicks. Set your pricing, keep
-                    87% of revenue.
-                  </Muted>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    iconRight="arrow-right"
-                    onClick={() => navigate('/apply')}
-                  >
-                    Apply for creator access
+              <InsightCard
+                tone="amber"
+                eyebrow="Become a creator"
+                title="Have a track record? Publish picks."
+                sub="Apply once, get verified, and keep 87% of every subscription."
+                action={
+                  <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/apply')}>
+                    Apply now
                   </Button>
-                </Stack>
-              </Card>
+                }
+              />
             )}
           </DashGrid>
         </Stack>

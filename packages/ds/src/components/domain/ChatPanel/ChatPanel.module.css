@@ -93,6 +93,118 @@
   align-items: end;
 }
 
+/* ── Reactions row ──────────────────────────────────────────────────── */
+
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--t-2);
+  font-size: var(--text-2xs);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.reaction:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+}
+
+.reaction:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.reactionMine {
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--line));
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-2));
+  color: var(--primary);
+}
+
+.reactionEmoji {
+  font-size: var(--text-sm);
+  line-height: 1;
+}
+
+.reactionCount {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+}
+
+.pickerWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.addReaction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--t-3);
+  cursor: pointer;
+}
+
+.addReaction:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.addReaction:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.picker {
+  position: absolute;
+  bottom: 26px;
+  left: 0;
+  display: flex;
+  gap: 2px;
+  padding: var(--space-1);
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-popover, 50);
+}
+
+.pickerEmoji {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  font-size: var(--text-md);
+}
+
+.pickerEmoji:hover {
+  background: var(--bg-2);
+}
+
+.pickerEmoji:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
 @media (max-width: 640px) {
   .bubbleWrap {
     max-width: 86%;

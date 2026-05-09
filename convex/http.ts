@@ -141,6 +141,17 @@ http.route({
         }
       } else if (eventType === 'invoice.paid' && obj) {
         await dispatchPayout(ctx, obj);
+      } else if (
+        (eventType === 'charge.refunded' ||
+          eventType === 'invoice.refunded' ||
+          eventType === 'invoice.voided') &&
+        obj
+      ) {
+        // Phase 14e — refund handling. Stripe surfaces the original
+        // subscription via different paths depending on the event type;
+        // we accept either subscription or invoice.subscription as the
+        // reference and flip our local row to 'refunded'.
+        await dispatchRefund(ctx, obj);
       }
     } catch (err) {
       console.error(`Stripe webhook ${eventType} dispatch failed:`, err);
@@ -193,6 +204,25 @@ async function dispatchSubscriptionUpsert(
       stripeCustomerId,
       status: dpStatus,
       renewsAt,
+    },
+  );
+}
+
+async function dispatchRefund(
+  ctx: ActionCtx,
+  obj: Record<string, unknown>,
+) {
+  const stripeSubscriptionId =
+    (obj.subscription as string | undefined) ??
+    ((obj.lines as { data?: Array<{ subscription?: string }> } | undefined)
+      ?.data?.[0]?.subscription as string | undefined);
+  if (!stripeSubscriptionId) return;
+
+  await ctx.runMutation(
+    internal.subscriptions._updateSubscriptionStatusFromStripe,
+    {
+      stripeSubscriptionId,
+      status: 'refunded',
     },
   );
 }

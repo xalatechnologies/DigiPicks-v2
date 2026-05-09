@@ -79,6 +79,7 @@ export const subscriptionStatus = v.union(
   v.literal('active'),
   v.literal('past_due'),
   v.literal('cancelled'),
+  v.literal('refunded'),
 );
 
 export const applicationStatus = v.union(

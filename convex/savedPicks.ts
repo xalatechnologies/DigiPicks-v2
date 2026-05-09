@@ -90,6 +90,46 @@ export const savedIdsBatch = query({
 });
 
 /**
+ * Cursor-paginated saved library (Phase 14a). Paginated rows, then
+ * enrichment in-memory. usePaginatedQuery in the frontend binds
+ * loadMore → next page seamlessly.
+ */
+export const listPaginated = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const page = await ctx.db
+      .query('savedPicks')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .paginate(args.paginationOpts);
+
+    const enriched = await Promise.all(
+      page.page.map(async (row) => {
+        const pick = await ctx.db.get(row.pickId);
+        if (!pick) return null;
+        const creator = await ctx.db.get(pick.creatorId);
+        return {
+          savedId: row._id,
+          savedAt: row.savedAt,
+          pick,
+          creator,
+        };
+      }),
+    );
+    return {
+      ...page,
+      page: enriched.filter((x): x is NonNullable<typeof x> => x !== null),
+    };
+  },
+});
+
+/**
  * The current user's saved library — joined with the pick + creator
  * fields needed to render PickCards. Most-recent first.
  */

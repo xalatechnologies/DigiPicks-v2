@@ -41,6 +41,55 @@ export const feed = query({
 });
 
 // Public.
+/**
+ * Cursor-paginated feed (Phase 14a). Convex paginate() — caller passes
+ * the token from the previous page in `paginationOpts.cursor`. The DS
+ * `LoadMore` button binds to `loadMore()` from `usePaginatedQuery`.
+ */
+export const feedPaginated = query({
+  args: {
+    sport: v.optional(v.string()),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    if (args.sport) {
+      return await ctx.db
+        .query('picks')
+        .withIndex('by_sport', (q) => q.eq('sport', args.sport!))
+        .order('desc')
+        .paginate(args.paginationOpts);
+    }
+    return await ctx.db
+      .query('picks')
+      .withIndex('by_status', (q) => q.eq('status', 'published'))
+      .order('desc')
+      .paginate(args.paginationOpts);
+  },
+});
+
+/**
+ * Append-only audit history for a pick — used by the "grading explanation"
+ * surface (Phase 14f). Returns the audit log entries scoped to the pick,
+ * ordered ascending so the surface reads as a timeline.
+ */
+export const gradingHistory = query({
+  args: { pickId: v.id('picks') },
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query('auditLogs')
+      .withIndex('by_entity', (q) =>
+        q.eq('entityType', 'pick').eq('entityId', args.pickId),
+      )
+      .order('asc')
+      .take(50);
+    return rows;
+  },
+});
+
+// Public.
 export const byCreator = query({
   args: { creatorId: v.id('creators'), limit: v.optional(v.number()) },
   handler: async (ctx, { creatorId, limit }) => {
@@ -202,6 +251,15 @@ export const grade = internalMutation({
       grade: args.grade,
       netUnits: args.netUnits,
       gradedAt: Date.now(),
+    });
+
+    // Phase 14f — grading explanation surface. Append-only audit row
+    // scoped to the pick so subscribers can read the result timeline.
+    await ctx.runMutation(internal.audit.log, {
+      entityType: 'pick',
+      entityId: args.id,
+      action: `pick.graded.${args.grade}`,
+      metadata: { netUnits: args.netUnits ?? null },
     });
 
     // Fan out the grading result to subscribers + savers (FM-010 trigger).

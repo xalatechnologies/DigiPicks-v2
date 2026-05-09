@@ -49,6 +49,7 @@ export function Community() {
     activeId ? { channelId: activeId } : 'skip',
   );
   const postToChannel = useMutation(api.messages.postToChannel);
+  const toggleReaction = useMutation(api.messages.toggleReaction);
 
   React.useEffect(() => {
     if (!activeId && channels && channels.length > 0) {
@@ -68,7 +69,23 @@ export function Community() {
     body: m.body,
     createdAt: m.createdAt,
     isOwn: m.senderUserId === me?._id,
+    reactions: (m.reactions ?? []).map((r) => ({
+      emoji: r.emoji,
+      count: r.userIds.length,
+      reactedByMe: Boolean(me?._id) && r.userIds.includes(me!._id),
+    })),
   }));
+
+  async function handleToggleReaction(messageId: string, emoji: string) {
+    try {
+      await toggleReaction({
+        messageId: messageId as Id<'messages'>,
+        emoji,
+      });
+    } catch (err) {
+      console.warn('toggleReaction failed:', err);
+    }
+  }
 
   async function handleSend() {
     if (!activeId || !draft.trim()) return;
@@ -199,6 +216,7 @@ export function Community() {
                       draft={draft}
                       onDraftChange={setDraft}
                       onSend={handleSend}
+                      onToggleReaction={handleToggleReaction}
                       sending={sending}
                       placeholder={`Message #${active.channel.slug}`}
                       emptyTitle="Be the first to post."

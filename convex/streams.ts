@@ -112,6 +112,49 @@ export const _setLiveState = internalMutation({
   },
 });
 
+/**
+ * Phase 14g — ensure a stream-linked channel exists for the creator and
+ * activate it. Idempotent: re-runs are no-ops when the channel is already
+ * present + active. Called from fanLiveNotification when a creator
+ * transitions offline → live.
+ */
+export const _ensureStreamRoom = internalMutation({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, args): Promise<{ channelId: Id<'channels'> } | null> => {
+    const creator = await ctx.db.get(args.creatorId);
+    if (!creator) return null;
+
+    const existing = await ctx.db
+      .query('channels')
+      .withIndex('by_linkedStream', (q) =>
+        q.eq('linkedStreamCreatorId', args.creatorId),
+      )
+      .first();
+
+    if (existing) {
+      if (!existing.isActive) {
+        await ctx.db.patch(existing._id, { isActive: true });
+      }
+      return { channelId: existing._id };
+    }
+
+    const slug = `live-${creator.handle.replace(/^@/, '')}`;
+    const channelId = await ctx.db.insert('channels', {
+      creatorId: args.creatorId,
+      slug,
+      name: `${creator.name} · Live room`,
+      description: 'Open while the creator is live.',
+      type: 'public',
+      access: 'public',
+      isActive: true,
+      linkedStreamCreatorId: args.creatorId,
+      memberCount: 0,
+      createdAt: Date.now(),
+    });
+    return { channelId };
+  },
+});
+
 // ─── Polling action ─────────────────────────────────────────────────────────
 
 interface LiveResult {
@@ -185,6 +228,12 @@ export const fanLiveNotification = internalAction({
       creatorId: args.creatorId,
     });
     if (!ctxData) return;
+
+    // Spin up (or reactivate) the stream-linked community room so the
+    // notification deep-link has somewhere to land.
+    await ctx.runMutation(internal.streams._ensureStreamRoom, {
+      creatorId: args.creatorId,
+    });
 
     const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
     const url = `${baseUrl}/creators/${ctxData.creator.handle}`;

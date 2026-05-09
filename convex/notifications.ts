@@ -51,6 +51,29 @@ export const listMine = query({
 });
 
 // Auth-only.
+/**
+ * Cursor-paginated inbox (Phase 14a). usePaginatedQuery in the frontend
+ * binds loadMore → next page. Use this in place of `listMine` when the
+ * inbox grows past the first ~30 items.
+ */
+export const listMinePaginated = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    return await ctx.db
+      .query('notifications')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .paginate(args.paginationOpts);
+  },
+});
+
+// Auth-only.
 /** Unread badge count — capped at 99 for display. */
 export const unreadCount = query({
   args: {},

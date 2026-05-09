@@ -6,44 +6,34 @@ import {
   Container,
   Stack,
   Row,
-  Card,
-  CardHead,
   Button,
   Icon,
   Badge,
   Muted,
-  Mono,
-  KV,
   PersonRow,
   EmptyState,
   Divider,
-  Stat,
   DashGrid,
-  MetricGrid,
+  StatTile,
+  SubscriptionTile,
+  SectionHead,
+  InsightCard,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 function fmtDate(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function fmtShortDate(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+function fmtShort(ms: number): string {
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 export function Subscriptions() {
   const navigate = useNavigate();
   const subs = useQuery(api.subscriptions.mySubscriptions);
   const cancelSub = useMutation(api.subscriptions.cancel);
-
   const [cancelling, setCancelling] = React.useState<Id<'creators'> | null>(null);
 
   const isLoading = subs === undefined;
@@ -60,124 +50,111 @@ export function Subscriptions() {
   const earliestSub = [...active, ...cancelled].reduce((earliest, s) => {
     return earliest === 0 || s.startedAt < earliest ? s.startedAt : earliest;
   }, 0);
-  const monthsActive =
-    earliestSub > 0 ? Math.max(1, Math.ceil((Date.now() - earliestSub) / (30 * 86400000))) : 0;
+  const monthsActive = earliestSub > 0 ? Math.max(1, Math.ceil((Date.now() - earliestSub) / (30 * 86400000))) : 0;
   const lifetimeEstimate = totalMonthly * monthsActive;
 
   async function handleCancel(creatorId: Id<'creators'>) {
     setCancelling(creatorId);
-    try {
-      await cancelSub({ creatorId });
-    } catch {
-      /* useQuery recovers */
-    } finally {
-      setCancelling(null);
-    }
+    try { await cancelSub({ creatorId }); }
+    catch { /* useQuery recovers */ }
+    finally { setCancelling(null); }
   }
 
-  // ── Sidebar ──────────────────────────────────────────────────────────
+  // ── Right rail ─────────────────────────────────────────────────────────
   const aside = (
     <>
-      {/* Payment method */}
-      <Card>
-        <CardHead title="Payment method" sub="Managed by Stripe" />
-        <Stack gap={3}>
+      <InsightCard
+        tone="blue"
+        eyebrow="Default card"
+        title="Visa ending 4242"
+        sub="Expires 09/28"
+        action={<Badge tone="green">Default</Badge>}
+      >
+        <Button variant="outline" size="sm" iconLeft="plus">Add method</Button>
+      </InsightCard>
+
+      <InsightCard
+        tone="green"
+        eyebrow="Spending"
+        title="Lifetime estimate"
+        sub={`Across ${monthsActive || 0} month${monthsActive === 1 ? '' : 's'}`}
+      >
+        <Stack gap={2}>
           <PersonRow
-            name="Visa ending in 4242"
-            sub="Expires 09/28 · Default"
-            mono="V"
-            color="#4F8CFF"
-            trailing={<Badge tone="green">Default</Badge>}
+            name={`$${totalMonthly}`}
+            sub="This month"
+            mono="$"
+            color="var(--green)"
+            trailing={<Badge tone="green">Active</Badge>}
           />
-          <Button variant="outline" size="sm" iconLeft="plus">
-            Add payment method
-          </Button>
+          <Divider />
+          <PersonRow
+            name={`$${lifetimeEstimate}`}
+            sub={`Lifetime · ${monthsActive} mo`}
+            mono="∞"
+            color="var(--gold)"
+            trailing={<Badge tone="gold">Total</Badge>}
+          />
         </Stack>
-      </Card>
+      </InsightCard>
 
-      {/* Spending summary */}
-      <Card>
-        <CardHead title="Spending" sub="Current period" />
-        <Row gap={3} wrap>
-          <Stat label="This month" value={`$${totalMonthly}`} />
-          <Stat label="Last month" value={`$${totalMonthly}`} />
-          <Stat
-            label="Avg/month"
-            value={
-              lifetimeEstimate > 0
-                ? `$${Math.round(lifetimeEstimate / Math.max(monthsActive, 1))}`
-                : '$0'
-            }
-          />
-        </Row>
-      </Card>
-
-      {/* Billing history */}
-      <Card>
-        <CardHead
-          title="Billing history"
-          action={
-            <Button variant="ghost" size="sm">
-              All invoices
-            </Button>
-          }
-        />
-        <Stack gap={0}>
-          {[...active, ...cancelled].slice(0, 5).map((sub, i) => (
-            <React.Fragment key={`bill-${sub._id}`}>
-              {i > 0 && <Divider />}
-              <PersonRow
-                name={`${sub.creatorName} · ${sub.plan}`}
-                sub={sub.startedAt ? fmtDate(sub.startedAt) : '—'}
-                mono={sub.creatorMono}
-                color={sub.creatorColor}
-                trailing={
-                  <Row gap={2}>
-                    <Mono>{`$${sub.creatorStartingPrice}`}</Mono>
+      <InsightCard
+        tone="mute"
+        eyebrow="Recent invoices"
+        title="Billing history"
+        action={<Button variant="ghost" size="sm" iconRight="arrow-right">All</Button>}
+      >
+        {active.length === 0 && cancelled.length === 0 ? (
+          <Muted>No billing history yet.</Muted>
+        ) : (
+          <Stack gap={0}>
+            {[...active, ...cancelled].slice(0, 5).map((sub, i) => (
+              <React.Fragment key={`bill-${sub._id}`}>
+                {i > 0 && <Divider />}
+                <PersonRow
+                  name={sub.creatorName}
+                  sub={sub.startedAt ? fmtDate(sub.startedAt) : '—'}
+                  mono={sub.creatorMono}
+                  color={sub.creatorColor}
+                  trailing={
                     <Badge tone={sub.status === 'active' ? 'green' : 'mute'}>
-                      {sub.status === 'active' ? 'Paid' : 'Refunded'}
+                      ${sub.creatorStartingPrice}
                     </Badge>
-                  </Row>
-                }
-              />
-            </React.Fragment>
-          ))}
-          {active.length === 0 && cancelled.length === 0 && <Muted>No billing history yet.</Muted>}
-        </Stack>
-      </Card>
+                  }
+                />
+              </React.Fragment>
+            ))}
+          </Stack>
+        )}
+      </InsightCard>
 
-      {/* Quick links */}
-      <Card>
-        <CardHead title="Quick links" />
+      <InsightCard tone="blue" eyebrow="Quick links" title="Billing tools" sub="External portals & support">
         <Stack gap={0}>
-          <KV
-            k="Portal"
-            v={
-              <Button variant="ghost" size="sm" iconRight="arrow-right">
-                Open Stripe portal
-              </Button>
-            }
+          <PersonRow
+            name="Stripe portal"
+            sub="Manage billing"
+            mono="S"
+            color="var(--primary)"
+            trailing={<Icon name="arrow-right" size={14} />}
           />
           <Divider />
-          <KV
-            k="Receipts"
-            v={
-              <Button variant="ghost" size="sm" iconRight="arrow-right">
-                Download receipts
-              </Button>
-            }
+          <PersonRow
+            name="Download receipts"
+            sub="PDF export"
+            mono="R"
+            color="var(--blue)"
+            trailing={<Icon name="arrow-right" size={14} />}
           />
           <Divider />
-          <KV
-            k="Support"
-            v={
-              <Button variant="ghost" size="sm" iconRight="arrow-right">
-                Billing support
-              </Button>
-            }
+          <PersonRow
+            name="Billing support"
+            sub="Get help"
+            mono="H"
+            color="var(--green)"
+            trailing={<Icon name="arrow-right" size={14} />}
           />
         </Stack>
-      </Card>
+      </InsightCard>
     </>
   );
 
@@ -191,12 +168,7 @@ export function Subscriptions() {
             <Button variant="secondary" size="sm" onClick={() => navigate('/account')}>
               Dashboard
             </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              iconRight="arrow-right"
-              onClick={() => navigate('/account/discover')}
-            >
+            <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
               Discover more
             </Button>
           </Row>
@@ -204,164 +176,164 @@ export function Subscriptions() {
       />
 
       <Container size="2xl">
-        <Stack gap={5}>
-          {/* ── Metrics ─────────────────────────────────────────────── */}
-          <MetricGrid
-            items={[
-              {
-                id: 'activeSubs',
-                label: 'Active subscriptions',
-                value: <Mono>{active.length}</Mono>,
-                icon: <Icon name="users" size={14} />,
-              },
-              {
-                id: 'monthly',
-                label: 'Monthly cost',
-                value: <Mono>${totalMonthly}</Mono>,
-                delta:
-                  nextRenewal > 0
-                    ? { value: `Next ${fmtShortDate(nextRenewal)}`, dir: 'flat' }
-                    : undefined,
-                icon: <Icon name="card" size={14} />,
-              },
-              {
-                id: 'lifetime',
-                label: 'Lifetime spend',
-                value: <Mono>${lifetimeEstimate}</Mono>,
-                delta:
-                  monthsActive > 0 ? { value: `${monthsActive} months`, dir: 'flat' } : undefined,
-                icon: <Icon name="dollar" size={14} />,
-              },
-            ]}
-          />
+        <Stack gap={6}>
+          {/* Top metrics — accent stat tiles */}
+          <Row gap={4} wrap>
+            <StatTile
+              label="Active"
+              tone="green"
+              value={String(active.length)}
+              sub={active.length > 0 ? `${active.length} creator${active.length === 1 ? '' : 's'} on rotation` : 'No active plans'}
+            />
+            <StatTile
+              label="Monthly spend"
+              tone="blue"
+              value={`$${totalMonthly}`}
+              sub={nextRenewal > 0 ? `Next charge ${fmtShort(nextRenewal)}` : '—'}
+            />
+            <StatTile
+              label="Lifetime"
+              tone="gold"
+              value={`$${lifetimeEstimate}`}
+              sub={monthsActive > 0 ? `Across ${monthsActive} month${monthsActive === 1 ? '' : 's'}` : '—'}
+            />
+            <StatTile
+              label="Past due"
+              tone={pastDue.length > 0 ? 'red' : 'neutral'}
+              value={String(pastDue.length)}
+              sub={pastDue.length > 0 ? 'Action required' : 'All paid'}
+              trend={pastDue.length > 0 ? { value: 'Resolve', dir: 'down' } : undefined}
+            />
+          </Row>
 
-          {/* ── Two-column: plans + billing ─────────────────────────── */}
           <DashGrid aside={aside}>
             {isLoading && <EmptyState icon="card" title="Loading subscriptions…" />}
 
-            {!isLoading &&
-              active.length === 0 &&
-              pastDue.length === 0 &&
-              cancelled.length === 0 && (
-                <EmptyState
-                  icon="card"
-                  title="No subscriptions yet."
-                  subtitle="Discover creators and subscribe to start receiving premium picks in your feed."
+            {!isLoading && active.length === 0 && pastDue.length === 0 && cancelled.length === 0 && (
+              <EmptyState
+                icon="card"
+                title="No subscriptions yet"
+                subtitle="Discover creators and subscribe to start receiving premium picks."
+                action={
+                  <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
+                    Browse creators
+                  </Button>
+                }
+              />
+            )}
+
+            {pastDue.length > 0 && (
+              <>
+                <SectionHead
+                  size="sm"
+                  eyebrow="Action needed"
+                  title="Past due"
+                  sub="Update your card to keep these subscriptions active."
+                  action={<Badge tone="red" dot>{pastDue.length}</Badge>}
+                />
+                <Stack gap={2}>
+                  {pastDue.map((sub) => (
+                    <SubscriptionTile
+                      key={sub._id}
+                      creatorName={sub.creatorName}
+                      creatorHandle={sub.creatorHandle}
+                      creatorMono={sub.creatorMono}
+                      creatorColor={sub.creatorColor}
+                      plan={sub.plan}
+                      price={sub.creatorStartingPrice}
+                      status="past_due"
+                      meta="Payment failed"
+                      primaryAction={<Button variant="primary" size="sm">Retry payment</Button>}
+                      secondaryAction={
+                        <Button variant="ghost" size="sm" onClick={() => navigate(`/creators/${sub.creatorHandle}`)}>
+                          View
+                        </Button>
+                      }
+                    />
+                  ))}
+                </Stack>
+              </>
+            )}
+
+            {active.length > 0 && (
+              <>
+                <SectionHead
+                  size="sm"
+                  eyebrow="Currently subscribed"
+                  title="Active plans"
+                  sub={`${active.length} creator${active.length === 1 ? '' : 's'} · $${totalMonthly}/mo total`}
                   action={
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      iconRight="arrow-right"
-                      onClick={() => navigate('/account/discover')}
-                    >
-                      Browse creators
+                    <Button variant="outline" size="sm" iconLeft="compass" onClick={() => navigate('/account/discover')}>
+                      Add more
                     </Button>
                   }
                 />
-              )}
-
-            {/* Past-due warning */}
-            {pastDue.length > 0 && (
-              <Card>
-                <CardHead
-                  title="Action needed"
-                  action={
-                    <Badge tone="red" dot>
-                      Past due
-                    </Badge>
-                  }
-                />
-                <Stack gap={0}>
-                  {pastDue.map((sub, i) => (
-                    <React.Fragment key={sub._id}>
-                      {i > 0 && <Divider />}
-                      <PersonRow
-                        name={sub.creatorName}
-                        sub="Payment failed — update your card"
-                        mono={sub.creatorMono}
-                        color={sub.creatorColor}
-                        trailing={
-                          <Button variant="primary" size="sm">
-                            Retry payment
-                          </Button>
-                        }
-                      />
-                    </React.Fragment>
+                <Stack gap={2}>
+                  {active.map((sub) => (
+                    <SubscriptionTile
+                      key={sub._id}
+                      creatorName={sub.creatorName}
+                      creatorHandle={sub.creatorHandle}
+                      creatorMono={sub.creatorMono}
+                      creatorColor={sub.creatorColor}
+                      plan={sub.plan}
+                      price={sub.creatorStartingPrice}
+                      status="active"
+                      meta={sub.renewsAt ? `Renews ${fmtDate(sub.renewsAt)}` : undefined}
+                      primaryAction={
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/creators/${sub.creatorHandle}`)}
+                        >
+                          View profile
+                        </Button>
+                      }
+                      secondaryAction={
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCancel(sub.creatorId)}
+                          disabled={cancelling === sub.creatorId}
+                        >
+                          {cancelling === sub.creatorId ? 'Cancelling…' : 'Cancel'}
+                        </Button>
+                      }
+                    />
                   ))}
                 </Stack>
-              </Card>
+              </>
             )}
 
-            {/* Active subscriptions */}
-            {active.length > 0 && (
-              <Card>
-                <CardHead
-                  title="Active subscriptions"
-                  action={
-                    <Badge tone="green" dot>
-                      {`$${totalMonthly}/mo`}
-                    </Badge>
-                  }
-                />
-                <Stack gap={0}>
-                  {active.map((sub, i) => (
-                    <React.Fragment key={sub._id}>
-                      {i > 0 && <Divider />}
-                      <PersonRow
-                        name={sub.creatorName}
-                        sub={`${sub.plan} · Renews ${sub.renewsAt ? fmtDate(sub.renewsAt) : '—'}`}
-                        mono={sub.creatorMono}
-                        color={sub.creatorColor}
-                        trailing={
-                          <Row gap={2}>
-                            <Mono>{`$${sub.creatorStartingPrice}/mo`}</Mono>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCancel(sub.creatorId)}
-                              disabled={cancelling === sub.creatorId}
-                            >
-                              {cancelling === sub.creatorId ? 'Cancelling…' : 'Manage'}
-                            </Button>
-                          </Row>
-                        }
-                      />
-                    </React.Fragment>
-                  ))}
-                </Stack>
-              </Card>
-            )}
-
-            {/* Cancelled */}
             {cancelled.length > 0 && (
-              <Card>
-                <CardHead title="Cancelled" sub="Resubscribe anytime" />
-                <Stack gap={0}>
-                  {cancelled.map((sub, i) => (
-                    <React.Fragment key={sub._id}>
-                      {i > 0 && <Divider />}
-                      <PersonRow
-                        name={sub.creatorName}
-                        sub={`Cancelled ${sub.cancelledAt ? fmtDate(sub.cancelledAt) : '—'} · was $${sub.creatorStartingPrice}/mo`}
-                        mono={sub.creatorMono}
-                        color={sub.creatorColor}
-                        trailing={
-                          <Row gap={2}>
-                            <Badge tone="mute">Cancelled</Badge>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate(`/creators/${sub.creatorHandle}`)}
-                            >
-                              Resubscribe
-                            </Button>
-                          </Row>
-                        }
-                      />
-                    </React.Fragment>
+              <>
+                <SectionHead
+                  size="sm"
+                  eyebrow="Inactive"
+                  title="Cancelled"
+                  sub="Resubscribe anytime — your history with these creators is preserved."
+                />
+                <Stack gap={2}>
+                  {cancelled.map((sub) => (
+                    <SubscriptionTile
+                      key={sub._id}
+                      creatorName={sub.creatorName}
+                      creatorHandle={sub.creatorHandle}
+                      creatorMono={sub.creatorMono}
+                      creatorColor={sub.creatorColor}
+                      plan={sub.plan}
+                      price={sub.creatorStartingPrice}
+                      status="cancelled"
+                      meta={sub.cancelledAt ? `Cancelled ${fmtDate(sub.cancelledAt)}` : undefined}
+                      primaryAction={
+                        <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate(`/creators/${sub.creatorHandle}`)}>
+                          Resubscribe
+                        </Button>
+                      }
+                    />
                   ))}
                 </Stack>
-              </Card>
+              </>
             )}
           </DashGrid>
         </Stack>

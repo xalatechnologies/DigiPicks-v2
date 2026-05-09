@@ -1,0 +1,134 @@
+.card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ic-accent) 6%, transparent) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--ic-accent) 38%, var(--line));
+  box-shadow: var(--shadow-sm);
+}
+
+.strip {
+  position: relative;
+  z-index: 1;
+  width: 3px;
+  background: var(--ic-accent);
+  flex-shrink: 0;
+}
+
+.body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  flex: 1;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--ic-accent) 12%, var(--bg-1));
+  color: var(--ic-accent);
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--ic-accent);
+}
+
+.title {
+  font-family: var(--f-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  color: var(--t-1);
+  line-height: 1.3;
+}
+
+.sub {
+  font-family: var(--f-sans);
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  line-height: 1.5;
+}
+
+.action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.blue {
+  --ic-accent: var(--blue);
+}
+.green {
+  --ic-accent: var(--green);
+}
+.gold {
+  --ic-accent: var(--gold);
+}
+.red {
+  --ic-accent: var(--red);
+}
+.amber {
+  --ic-accent: var(--amber);
+}
+.mute {
+  --ic-accent: var(--t-3);
+}

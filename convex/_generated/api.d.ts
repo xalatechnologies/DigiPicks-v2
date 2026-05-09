@@ -27,6 +27,7 @@ import type * as files from "../files.js";
 import type * as followedCreators from "../followedCreators.js";
 import type * as gdpr from "../gdpr.js";
 import type * as http from "../http.js";
+import type * as lineMovement from "../lineMovement.js";
 import type * as listings from "../listings.js";
 import type * as liveScores from "../liveScores.js";
 import type * as messages from "../messages.js";
@@ -61,6 +62,7 @@ import type * as telegram from "../telegram.js";
 import type * as trending from "../trending.js";
 import type * as trust from "../trust.js";
 import type * as users from "../users.js";
+import type * as watchlists from "../watchlists.js";
 
 import type {
   ApiFromModules,
@@ -88,6 +90,7 @@ declare const fullApi: ApiFromModules<{
   followedCreators: typeof followedCreators;
   gdpr: typeof gdpr;
   http: typeof http;
+  lineMovement: typeof lineMovement;
   listings: typeof listings;
   liveScores: typeof liveScores;
   messages: typeof messages;
@@ -122,6 +125,7 @@ declare const fullApi: ApiFromModules<{
   trending: typeof trending;
   trust: typeof trust;
   users: typeof users;
+  watchlists: typeof watchlists;
 }>;
 
 /**

@@ -137,6 +137,67 @@ export const listByChannel = query({
   },
 });
 
+/**
+ * Toggle a reaction emoji on a message (Phase 14d). Works for both
+ * channel and DM messages. Caller must be a participant in the parent
+ * thread/channel — same access rules as posting.
+ */
+export const toggleReaction = mutation({
+  args: {
+    messageId: v.id('messages'),
+    emoji: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const m = await ctx.db.get(args.messageId);
+    if (!m) throw new Error('Message not found');
+
+    // Parent-access check.
+    if (m.channelId) {
+      const channel = await ctx.db.get(m.channelId);
+      if (!channel) return { ok: false as const };
+      const access = await checkChannelAccess(ctx, channel, user._id);
+      if (!access.allowed) throw new Error('Not a member of this channel');
+    } else if (m.dmThreadId) {
+      const thread = await ctx.db.get(m.dmThreadId);
+      if (!thread) return { ok: false as const };
+      const isCreatorSide = user.creatorId === thread.creatorId;
+      const isUserSide = thread.userId === user._id;
+      if (!isCreatorSide && !isUserSide) throw new Error('Forbidden');
+    } else if (m.conversationId) {
+      const convo = await ctx.db.get(m.conversationId);
+      if (!convo) return { ok: false as const };
+      if (convo.buyerUserId !== user._id && convo.sellerUserId !== user._id) {
+        throw new Error('Forbidden');
+      }
+    }
+
+    const trimmedEmoji = args.emoji.trim();
+    if (!trimmedEmoji || trimmedEmoji.length > 16) {
+      throw new Error('Emoji must be 1-16 characters');
+    }
+
+    const reactions = (m.reactions ?? []).map((r) => ({
+      emoji: r.emoji,
+      userIds: [...r.userIds],
+    }));
+    const idx = reactions.findIndex((r) => r.emoji === trimmedEmoji);
+    if (idx === -1) {
+      reactions.push({ emoji: trimmedEmoji, userIds: [user._id] });
+    } else {
+      const entry = reactions[idx];
+      const has = entry.userIds.includes(user._id);
+      entry.userIds = has
+        ? entry.userIds.filter((u) => u !== user._id)
+        : [...entry.userIds, user._id];
+      // Drop empty buckets so the array stays clean.
+      if (entry.userIds.length === 0) reactions.splice(idx, 1);
+    }
+    await ctx.db.patch(args.messageId, { reactions });
+    return { ok: true as const };
+  },
+});
+
 /** Post a message to a channel. Phase 4 allows any authenticated user. */
 export const postToChannel = mutation({
   args: {
@@ -153,6 +214,15 @@ export const postToChannel = mutation({
     const channel = await ctx.db.get(args.channelId);
     if (!channel) throw new Error('Channel not found');
     if (!channel.isActive) throw new Error('Channel is archived');
+
+    // Stream-linked rooms (Phase 14g) only accept posts while the linked
+    // creator is currently live. Falls through to the standard tier gate.
+    if (channel.linkedStreamCreatorId) {
+      const linked = await ctx.db.get(channel.linkedStreamCreatorId);
+      if (!linked?.streamLive) {
+        throw new Error('This channel is only open while the creator is live.');
+      }
+    }
 
     const access = await checkChannelAccess(ctx, channel, user._id);
     if (!access.allowed) {

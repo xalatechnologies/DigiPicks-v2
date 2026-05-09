@@ -56,6 +56,7 @@ export function Messages() {
   );
   const send = useMutation(api.dmThreads.send);
   const markRead = useMutation(api.dmThreads.markRead);
+  const toggleReaction = useMutation(api.messages.toggleReaction);
 
   // Auto-pick the first thread once data lands.
   React.useEffect(() => {
@@ -92,8 +93,24 @@ export function Messages() {
       body: m.body,
       createdAt: m.createdAt,
       isOwn,
+      reactions: (m.reactions ?? []).map((r) => ({
+        emoji: r.emoji,
+        count: r.userIds.length,
+        reactedByMe: Boolean(me?._id) && r.userIds.includes(me!._id),
+      })),
     };
   });
+
+  async function handleToggleReaction(messageId: string, emoji: string) {
+    try {
+      await toggleReaction({
+        messageId: messageId as Id<'messages'>,
+        emoji,
+      });
+    } catch (err) {
+      console.warn('toggleReaction failed:', err);
+    }
+  }
 
   async function handleSend() {
     if (!activeId || !draft.trim()) return;
@@ -204,6 +221,7 @@ export function Messages() {
                     draft={draft}
                     onDraftChange={setDraft}
                     onSend={handleSend}
+                    onToggleReaction={handleToggleReaction}
                     sending={sending}
                     placeholder="Reply to subscriber…"
                     emptyTitle="No messages yet"

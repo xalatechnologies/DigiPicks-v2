@@ -111,6 +111,16 @@ crons.interval(
   internal.trending.recomputeTrending,
 );
 
+// ─── Line-movement alert poller (Phase 14b) ─────────────────────────────
+// Hourly comparison of recent oddsSnapshots → notify.dispatch when
+// implied-probability shifts exceed LINE_MOVE_THRESHOLD_PCT (default 5%).
+
+crons.interval(
+  'poll-line-movements',
+  { hours: 1 },
+  internal.lineMovement.pollLineMovements,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

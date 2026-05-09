@@ -215,6 +215,18 @@ export default defineSchema({
     body: v.string(),
     readAt: v.optional(v.number()),
     createdAt: v.number(),
+    /**
+     * Reactions (Phase 14d). One entry per emoji; userIds carries which
+     * users have reacted with it. Add/remove handled by toggleReaction.
+     */
+    reactions: v.optional(
+      v.array(
+        v.object({
+          emoji: v.string(),
+          userIds: v.array(v.id('users')),
+        }),
+      ),
+    ),
   })
     .index('by_conversation', ['conversationId'])
     .index('by_channel_and_createdAt', ['channelId', 'createdAt'])
@@ -255,13 +267,20 @@ export default defineSchema({
       ),
     ),
     isActive: v.boolean(),
+    /**
+     * Phase 14g — stream-linked rooms. When set, the channel is a
+     * transient companion to the creator's live stream and is only
+     * surfaced in `channels.list` while the creator is live.
+     */
+    linkedStreamCreatorId: v.optional(v.id('creators')),
     memberCount: v.number(),
     lastMessageAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_creator', ['creatorId', 'createdAt'])
     .index('by_slug', ['slug'])
-    .index('by_type', ['type', 'lastMessageAt']),
+    .index('by_type', ['type', 'lastMessageAt'])
+    .index('by_linkedStream', ['linkedStreamCreatorId']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COMMERCE — Orders
@@ -628,6 +647,36 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_creator', ['creatorId'])
     .index('by_user_and_creator', ['userId', 'creatorId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WATCHLISTS (PRD M14, M15, Phase 14c) — user-defined alert rules. Each
+  // row carries a filter object that gets matched against newly published
+  // picks; a hit fires an extra notify.dispatch for the watchlist owner.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  watchlists: defineTable({
+    userId: v.id('users'),
+    name: v.string(),
+    filter: v.object({
+      sport: v.optional(v.string()),
+      league: v.optional(v.string()),
+      creatorIds: v.optional(v.array(v.id('creators'))),
+      market: v.optional(v.string()),
+      /** 'Low' / 'Medium' / 'High' — match picks at or above this. */
+      minConfidence: v.optional(v.string()),
+      /** 'free' / 'premium' / 'vip' — match picks at this access tier. */
+      access: v.optional(v.string()),
+      /** Case-insensitive substring match against pick body/title/teaser. */
+      bodyContains: v.optional(v.string()),
+      /** Line-movement watch — fire when shifts ≥ this percent. */
+      lineMoveAbovePercent: v.optional(v.number()),
+    }),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['userId', 'createdAt'])
+    .index('by_active', ['isActive']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PUSH SUBSCRIPTIONS — Web push (VAPID) endpoints registered by browsers.

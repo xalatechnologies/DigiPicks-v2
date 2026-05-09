@@ -1,0 +1,329 @@
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-9) var(--space-9) var(--space-8);
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 8% 0%,
+      color-mix(in srgb, var(--blue) 14%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 100% 100%,
+      color-mix(in srgb, var(--green) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.aurora {
+  position: absolute;
+  inset: -20% -10%;
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      color-mix(in srgb, var(--primary) 10%, transparent) 0%,
+      transparent 40%
+    );
+  filter: blur(40px);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+  animation: dp-hero-drift var(--dur-ambient-aurora) var(--ease-in-out) infinite alternate;
+}
+
+@keyframes dp-hero-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(2%, 1%, 0) scale(1.03);
+  }
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    transparent 0%,
+    color-mix(in srgb, var(--t-1) 1.5%, transparent) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 64ch;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--t-3);
+}
+.eyebrow::before {
+  content: '';
+  width: var(--space-6);
+  height: 1px;
+  background: var(--line);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tightest);
+  line-height: 1.05;
+  color: var(--t-1);
+}
+.title em,
+.title :global(em) {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+  color: var(--primary);
+  padding-right: 0.06em;
+}
+
+.sub {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--t-3);
+}
+
+.actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.gaugeHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.gaugeLabel {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--t-3);
+}
+
+.gaugeReadout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--f-mono);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tightest);
+  color: var(--t-1);
+  line-height: 1;
+}
+
+.gaugeValue {
+  font-size: var(--text-5xl);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaugeUnit {
+  font-size: var(--text-xl);
+  color: var(--t-3);
+  margin-left: 2px;
+}
+
+.gaugeChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-3);
+  border-radius: var(--r-pill);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.chip_green {
+  color: var(--green);
+  background: var(--green-soft);
+}
+.chip_primary {
+  color: var(--primary);
+  background: var(--blue-soft);
+}
+.chip_amber {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+.chip_red {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.kpiStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-soft);
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.kpiLabel {
+  font-family: var(--f-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--t-3);
+}
+
+.kpiValue {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tightest);
+  font-variant-numeric: tabular-nums;
+  color: var(--t-1);
+  line-height: 1.05;
+}
+
+.v_green {
+  color: var(--green);
+}
+.v_red {
+  color: var(--red);
+}
+.v_gold {
+  color: var(--gold);
+}
+.v_neutral {
+  color: var(--t-1);
+}
+
+.spark {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+.spark > svg,
+.spark > div {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.empty .body,
+.empty.hero {
+  gap: var(--space-5);
+}
+
+.emptyState {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-7);
+  background: color-mix(in srgb, var(--bg-2) 50%, transparent);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+}
+
+.emptyTitle {
+  font-family: var(--f-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+}
+
+.emptySub {
+  font-family: var(--f-sans);
+  font-size: var(--text-sm);
+  color: var(--t-3);
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.emptyAction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding: var(--space-7) var(--space-6) var(--space-6);
+    gap: var(--space-6);
+  }
+  .title {
+    font-size: var(--text-3xl);
+  }
+  .gaugeValue {
+    font-size: var(--text-4xl);
+  }
+  .kpiStrip {
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+  }
+  .kpiValue {
+    font-size: var(--text-xl);
+  }
+}

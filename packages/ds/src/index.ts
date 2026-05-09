@@ -119,6 +119,11 @@ export type {
   TrendingCarouselProps,
   TrendingItem,
 } from './components/surfaces/TrendingCarousel/TrendingCarousel';
+export { InsightCard } from './components/surfaces/InsightCard/InsightCard';
+export type {
+  InsightCardProps,
+  InsightTone,
+} from './components/surfaces/InsightCard/InsightCard';
 export { MfaEnrollmentCard } from './components/surfaces/MfaEnrollmentCard/MfaEnrollmentCard';
 export type {
   MfaEnrollmentCardProps,
@@ -132,6 +137,12 @@ export { KV } from './components/data/KV/KV';
 export { DataPair } from './components/data/DataPair/DataPair';
 export { Stat } from './components/data/Stat/Stat';
 export { BigStat } from './components/data/BigStat/BigStat';
+export { StatTile } from './components/data/StatTile/StatTile';
+export type {
+  StatTileProps,
+  StatTileTone,
+  StatTileTrend,
+} from './components/data/StatTile/StatTile';
 export { OddsGrid } from './components/data/OddsGrid/OddsGrid';
 export type {
   OddsGridProps,
@@ -175,6 +186,8 @@ export { PageHeader } from './components/layout/PageHeader/PageHeader';
 export type { PageHeaderProps, PageHeaderCrumb } from './components/layout/PageHeader/PageHeader';
 export { TitleSub } from './components/layout/TitleSub/TitleSub';
 export type { TitleSubProps } from './components/layout/TitleSub/TitleSub';
+export { SectionHead } from './components/layout/SectionHead/SectionHead';
+export type { SectionHeadProps } from './components/layout/SectionHead/SectionHead';
 export { MetricGrid } from './components/layout/MetricGrid/MetricGrid';
 export type { MetricGridProps, MetricGridItem } from './components/layout/MetricGrid/MetricGrid';
 export { StatGrid } from './components/layout/StatGrid/StatGrid';
@@ -232,6 +245,17 @@ export type {
   HeroLiveEvent,
   HeroLivePanelProps,
 } from './components/domain/HeroLivePanel/HeroLivePanel';
+export { PortfolioHero } from './components/domain/PortfolioHero/PortfolioHero';
+export type {
+  PortfolioHeroProps,
+  PortfolioHeroKpi,
+  PortfolioHeroState,
+} from './components/domain/PortfolioHero/PortfolioHero';
+export { SubscriptionTile } from './components/domain/SubscriptionTile/SubscriptionTile';
+export type {
+  SubscriptionTileProps,
+  SubscriptionTileStatus,
+} from './components/domain/SubscriptionTile/SubscriptionTile';
 export { CreatorCard } from './components/domain/CreatorCard/CreatorCard';
 export { EventCard } from './components/domain/EventCard/EventCard';
 export type {
@@ -240,7 +264,11 @@ export type {
 } from './components/domain/EventCard/EventCard';
 export { PickCard } from './components/domain/PickCard/PickCard';
 export { ChatPanel } from './components/domain/ChatPanel/ChatPanel';
-export type { ChatPanelProps, ChatPanelMessage } from './components/domain/ChatPanel/ChatPanel';
+export type {
+  ChatPanelProps,
+  ChatPanelMessage,
+  ChatPanelReaction,
+} from './components/domain/ChatPanel/ChatPanel';
 export { StreamEmbed } from './components/domain/StreamEmbed/StreamEmbed';
 export type { StreamEmbedProps, StreamPlatform } from './components/domain/StreamEmbed/StreamEmbed';
 export { PricingModal } from './components/domain/PricingModal/PricingModal';

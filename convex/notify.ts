@@ -211,6 +211,32 @@ export const onPickPublished = internalAction({
         }),
       ),
     );
+
+    // Phase 14c — watchlist matches. A user may be both a subscriber AND
+    // have a matching watchlist; the dispatcher's 5-minute entityKey dedup
+    // collapses those into a single in-app row.
+    const matched = await ctx.runQuery(internal.watchlists._matchPick, {
+      pickId: args.pickId,
+    });
+    await Promise.all(
+      matched.map((w) =>
+        ctx.runAction(internal.notify.dispatch, {
+          userId: w.userId,
+          kind: 'pick_published',
+          payload: {
+            title: `Watchlist hit · ${w.name}`,
+            body: `${ctxData.creator.name}: ${ctxData.pick.title}`,
+            url,
+            entityKey: `pick-published:${args.pickId}`,
+            data: {
+              pickId: args.pickId,
+              watchlistId: w._id,
+              watchlistName: w.name,
+            },
+          },
+        }),
+      ),
+    );
   },
 });
 
