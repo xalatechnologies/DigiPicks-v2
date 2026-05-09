@@ -21,7 +21,10 @@ import {
   Divider,
   SwitchRow,
   PushNotificationPrompt,
+  MfaEnrollmentCard,
   type PushPermissionState,
+  type MfaEnrollmentSecrets,
+  type MfaState,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { urlBase64ToUint8Array } from '../../lib/pushKey';
@@ -75,6 +78,77 @@ export function Settings() {
   const testDiscordWebhook = useAction(api.discordSettings.testWebhook);
   const exportMyData = useAction(api.gdpr.exportMyData);
   const deleteMyAccount = useMutation(api.gdpr.deleteMyAccount);
+
+  const mfaStatus = useQuery(api.mfa.status);
+  const mfaEnroll = useAction(api.mfa.enrollStart);
+  const mfaVerifySetup = useAction(api.mfa.verifySetup);
+  const mfaVerify = useAction(api.mfa.verify);
+  const mfaDisable = useMutation(api.mfa.disable);
+  const [mfaSecrets, setMfaSecrets] = React.useState<MfaEnrollmentSecrets | null>(null);
+  const [mfaBusy, setMfaBusy] = React.useState(false);
+  const [mfaError, setMfaError] = React.useState<string | null>(null);
+
+  const mfaState: MfaState = mfaSecrets
+    ? 'enrolling'
+    : mfaStatus?.enrolled
+      ? 'enrolled'
+      : 'idle';
+
+  async function handleMfaStart() {
+    setMfaError(null);
+    setMfaBusy(true);
+    try {
+      const result = await mfaEnroll({});
+      setMfaSecrets(result);
+    } catch (err) {
+      setMfaError(err instanceof Error ? err.message : 'Could not start MFA enrollment.');
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function handleMfaConfirm(code: string) {
+    setMfaError(null);
+    setMfaBusy(true);
+    try {
+      const { ok } = await mfaVerifySetup({ code });
+      if (!ok) {
+        setMfaError('Code did not match — try again with a fresh one.');
+        return;
+      }
+      setMfaSecrets(null);
+    } catch (err) {
+      setMfaError(err instanceof Error ? err.message : 'MFA confirmation failed.');
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function handleMfaVerify(code: string) {
+    setMfaError(null);
+    setMfaBusy(true);
+    try {
+      const { ok } = await mfaVerify({ code });
+      if (!ok) setMfaError('Code did not match.');
+    } catch (err) {
+      setMfaError(err instanceof Error ? err.message : 'Verification failed.');
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function handleMfaDisable() {
+    if (!window.confirm('Turn off two-factor? Sensitive actions will skip the gate.')) return;
+    setMfaError(null);
+    setMfaBusy(true);
+    try {
+      await mfaDisable({ code: 'confirmed' });
+    } catch (err) {
+      setMfaError(err instanceof Error ? err.message : 'Could not disable MFA.');
+    } finally {
+      setMfaBusy(false);
+    }
+  }
   const myPrefs = useQuery(api.notify.myPrefs);
   const updatePrefs = useMutation(api.notify.updatePrefs);
   const startTelegramLink = useMutation(api.notify.startTelegramLink);
@@ -490,6 +564,19 @@ export function Settings() {
                   <KV k="Handle" v={creator?.handle ?? '—'} />
                 </Stack>
               </Card>
+
+              <MfaEnrollmentCard
+                state={mfaState}
+                secrets={mfaSecrets ?? undefined}
+                remainingRecoveryCodes={mfaStatus?.remainingRecoveryCodes}
+                lastVerifiedAt={mfaStatus?.lastVerifiedAt ?? null}
+                busy={mfaBusy}
+                error={mfaError}
+                onStartEnroll={handleMfaStart}
+                onConfirmEnroll={handleMfaConfirm}
+                onVerify={handleMfaVerify}
+                onDisable={handleMfaDisable}
+              />
 
               <Card>
                 <CardHead

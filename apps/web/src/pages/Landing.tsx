@@ -27,6 +27,8 @@ import {
   Testimonial,
   SplitCTA,
   ResponsibleSection,
+  TrendingCarousel,
+  type TrendingItem,
 } from '@digipicks/ds';
 
 const TRUST_BRANDS = [
@@ -181,6 +183,31 @@ const PRICING_TIERS = [
   },
 ];
 
+/**
+ * Trending picks rail — sources from api.trending.trending (Phase 12).
+ * Lives next to Landing rather than inline so the header stays terse.
+ */
+function TrendingPicksRail() {
+  const navigate = useNavigate();
+  const data = useQuery(api.trending.trending, { limit: 12 });
+  const items: TrendingItem[] = (data ?? []).map(({ pick, creator }) => ({
+    id: pick._id,
+    title: pick.title,
+    sub: creator ? `${creator.name} · ${pick.eventName}` : pick.eventName,
+    sport: pick.sport,
+    score: pick.trendingScore,
+    onClick: () =>
+      navigate(creator ? `/creators/${creator.handle}` : '/feed'),
+  }));
+  return (
+    <TrendingCarousel
+      items={items}
+      loading={data === undefined}
+      sub="Updated every 12 hours"
+    />
+  );
+}
+
 export function Landing() {
   const navigate = useNavigate();
   const creators = useQuery(api.creators.list, {});
@@ -264,6 +291,11 @@ export function Landing() {
       />
 
       <Container size="xl">
+        {/* ── Trending now — top picks across the platform ───────────── */}
+        <Section>
+          <TrendingPicksRail />
+        </Section>
+
         {/* ── 03 · How it works (narrative bridge) ─────────────────────── */}
         <Section
           eyebrow="How it works"

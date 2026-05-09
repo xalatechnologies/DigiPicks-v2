@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -21,6 +21,8 @@ import {
   Eyebrow,
   Divider,
   Badge,
+  AIAssistPanel,
+  type AISuggestion,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -78,6 +80,47 @@ export function CreatePick() {
   const [access, setAccess] = React.useState<PickAccess>('premium');
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+
+  const suggestPick = useAction(api.ai.suggestPick);
+  const [aiSuggestion, setAiSuggestion] = React.useState<AISuggestion | null>(null);
+  const [aiBusy, setAiBusy] = React.useState(false);
+  const [aiError, setAiError] = React.useState<string | null>(null);
+
+  async function handleSuggest() {
+    setAiError(null);
+    setAiBusy(true);
+    try {
+      const result = await suggestPick({
+        sport,
+        league,
+        eventName,
+        market,
+        selection,
+        odds,
+        units,
+        body: body || undefined,
+      });
+      setAiSuggestion({
+        summary: result.summary,
+        confidence: result.confidence,
+        reasoning: result.reasoning,
+      });
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Suggest failed.');
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  function handleAccept(s: AISuggestion) {
+    // Pre-fill summary into title (or body if title already set) and body
+    // with the reasoning. Confidence maps to creator confidence buckets.
+    if (!body) setBody(s.reasoning);
+    setConfidence(
+      s.confidence >= 75 ? 'High' : s.confidence >= 50 ? 'Medium' : 'Low',
+    );
+    setAiSuggestion(null);
+  }
 
   async function handleSubmit(status: 'draft' | 'published') {
     if (!creator?._id) {
@@ -279,6 +322,15 @@ export function CreatePick() {
                       ))}
                     </Select>
                   </Field>
+
+                  <AIAssistPanel
+                    suggestion={aiSuggestion}
+                    busy={aiBusy}
+                    error={aiError}
+                    onSuggest={handleSuggest}
+                    onAccept={handleAccept}
+                    onDismiss={() => setAiSuggestion(null)}
+                  />
 
                   <Field
                     label="Analysis"

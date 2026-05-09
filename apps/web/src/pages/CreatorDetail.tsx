@@ -31,6 +31,8 @@ import {
   Breadcrumb,
   Divider,
   StreamEmbed,
+  FollowButton,
+  TrustScoreBadge,
   type PricingPlan,
   type PricingTier,
 } from '@digipicks/ds';
@@ -69,6 +71,32 @@ export function CreatorDetail() {
     creator?._id ? { creatorId: creator._id, limit: 4 } : 'skip',
   );
   const allCreators = useQuery(api.creators.list, {});
+  const trust = useQuery(
+    api.trust.get,
+    creator?._id ? { creatorId: creator._id } : 'skip',
+  );
+  const isFollowing = useQuery(
+    api.followedCreators.isFollowing,
+    creator?._id ? { creatorId: creator._id } : 'skip',
+  );
+  const followCreator = useMutation(api.followedCreators.follow);
+  const unfollowCreator = useMutation(api.followedCreators.unfollow);
+  const [followBusy, setFollowBusy] = React.useState(false);
+
+  const handleFollowToggle = React.useCallback(
+    async (next: boolean) => {
+      if (!creator?._id) return;
+      setFollowBusy(true);
+      try {
+        if (next) await followCreator({ creatorId: creator._id });
+        else await unfollowCreator({ creatorId: creator._id });
+      } finally {
+        setFollowBusy(false);
+      }
+    },
+    [creator?._id, followCreator, unfollowCreator],
+  );
+
   const isSubscribed = useQuery(
     api.subscriptions.isSubscribed,
     creator?._id && isAuthenticated ? { creatorId: creator._id } : 'skip',
@@ -243,6 +271,10 @@ export function CreatorDetail() {
                           Subscribed
                         </Badge>
                       )}
+                      <TrustScoreBadge
+                        size="sm"
+                        score={trust?.score ?? null}
+                      />
                     </Row>
                     <Heading level={1} size="3xl" balance>
                       {creator.name}
@@ -282,9 +314,12 @@ export function CreatorDetail() {
                   <Button variant="outline" iconLeft="bell">
                     Notify me
                   </Button>
-                  <Button variant="ghost" iconLeft="bookmark">
-                    Save
-                  </Button>
+                  <FollowButton
+                    following={Boolean(isFollowing)}
+                    onToggle={handleFollowToggle}
+                    size="md"
+                    disabled={followBusy}
+                  />
                 </Row>
               </Stack>
 
