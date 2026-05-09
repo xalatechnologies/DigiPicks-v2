@@ -1,7 +1,10 @@
 import { v } from 'convex/values';
-import { internalAction, internalQuery } from './_generated/server';
+import { action, internalAction, internalQuery } from './_generated/server';
 import { internal } from './_generated/api';
 import { parseAnalysis, type AnalysisResult } from './shared/aiParse';
+import { getCurrentUser } from './shared/permissions';
+import { rateLimiter } from './shared/rateLimit';
+import type { Doc } from './_generated/dataModel';
 
 // =============================================================================
 // AI Intelligence Engine (PRD M9, Phase 5) — Anthropic Claude.
@@ -80,6 +83,13 @@ export const _pickForAi = internalQuery({
   },
 });
 
+export const _meForSuggest = internalQuery({
+  args: {},
+  handler: async (ctx): Promise<Doc<'users'> | null> => {
+    return await getCurrentUser(ctx);
+  },
+});
+
 /**
  * Generate an AI summary + confidence + reasoning for a pick and persist
  * the result. Idempotent at the data layer — a second analysis just
@@ -136,6 +146,99 @@ export const analyzePick = internalAction({
       model,
     });
 
+    return { ...result, model };
+  },
+});
+
+// =============================================================================
+// AI Co-write — pre-publish suggestion (PRD M9 differentiator, Phase 12).
+//
+// CreatePick form calls this action with the in-progress sketch (sport,
+// market, selection, odds, body). Returns suggested summary + confidence
+// + reasoning the form can pre-fill. The system prompt is the same one
+// `analyzePick` uses, marked with cache_control so the prompt-cache
+// hit path keeps token costs low across both calls.
+//
+// Rate-limited per user via the existing stripeCheckout bucket (5/10min)
+// — Anthropic spend is the throttle vector here, same shape as Stripe.
+// =============================================================================
+
+const SUGGEST_RATE_BUCKET = 'stripeCheckout';
+
+export const suggestPick = action({
+  args: {
+    sport: v.string(),
+    league: v.string(),
+    eventName: v.string(),
+    market: v.string(),
+    selection: v.string(),
+    odds: v.string(),
+    units: v.optional(v.string()),
+    body: v.optional(v.string()),
+    model: v.optional(v.string()),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<AnalysisResult & { model: string }> => {
+    const user: Doc<'users'> | null = await ctx.runQuery(internal.ai._meForSuggest, {});
+    if (!user) throw new Error('Unauthorized');
+    await rateLimiter.limit(ctx, SUGGEST_RATE_BUCKET, {
+      key: user._id,
+      throws: true,
+    });
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error('ANTHROPIC_API_KEY not configured');
+    }
+
+    const model = args.model ?? DEFAULT_MODEL;
+    const userPrompt = [
+      `Sport / League: ${args.sport} / ${args.league}`,
+      `Event: ${args.eventName}`,
+      `Market: ${args.market}`,
+      `Selection: ${args.selection}`,
+      `Odds: ${args.odds}`,
+      args.units ? `Stake (units): ${args.units}` : '',
+      args.body ? `\nCreator notes:\n${args.body}` : '',
+      '',
+      'Suggest summary / confidence / reasoning the creator can use as a starting point.',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 600,
+        // Prompt-cached system block — same content as analyzePick so
+        // both actions share the cache entry.
+        system: [
+          {
+            type: 'text',
+            text: SYSTEM_PROMPT,
+            cache_control: { type: 'ephemeral' },
+          },
+        ],
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    const body = (await res.json()) as AnthropicMessageResponse;
+    if (!res.ok) {
+      const msg = body.error?.message ?? `Anthropic API error (${res.status})`;
+      throw new Error(msg);
+    }
+
+    const text = body.content?.find((b) => b.type === 'text')?.text ?? '';
+    const result = parseAnalysis(text);
     return { ...result, model };
   },
 });

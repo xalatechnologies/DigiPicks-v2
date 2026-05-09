@@ -574,11 +574,8 @@ describe('disputes', () => {
         reason: 'Audit me',
       });
 
-    // Drain scheduled functions (audit.log is dispatched via runAfter(0,...)).
-    // `finishAllScheduledFunctions` advances fake timers — the noop is fine
-    // because runAfter(0) is queued for "now".
-    await t.finishAllScheduledFunctions(() => {});
-
+    // disputes.open writes the audit log inline (same transaction), so no
+    // scheduler draining required — log is visible immediately.
     const logs = await t.run(async (ctx) =>
       ctx.db
         .query('auditLogs')

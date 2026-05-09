@@ -71,12 +71,24 @@ export const create = mutation({
     body: v.optional(v.string()),
     teaser: v.optional(v.string()),
     status: v.optional(pickStatus),
+    /** Required when status='scheduled' — must be in the future. */
+    publishAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireCreatorOwnership(ctx, args.creatorId);
 
     const now = Date.now();
     const status = args.status ?? 'draft';
+
+    if (status === 'scheduled') {
+      if (!args.publishAt) {
+        throw new Error('publishAt is required when status=scheduled');
+      }
+      if (args.publishAt <= now) {
+        throw new Error('publishAt must be in the future for scheduled picks');
+      }
+    }
+
     const pickId = await ctx.db.insert('picks', {
       creatorId: args.creatorId,
       access: args.access,
@@ -96,10 +108,12 @@ export const create = mutation({
       status,
       grade: 'pending',
       publishedAt: status === 'published' ? now : undefined,
+      publishAt: status === 'scheduled' ? args.publishAt : undefined,
       createdAt: now,
     });
 
     // AI analysis + downstream notification fanout are best-effort: schedule async.
+    // Scheduled picks defer all of this to the publishDueScheduled cron run.
     if (status === 'published') {
       await ctx.scheduler.runAfter(0, internal.ai.analyzePick, { pickId });
       // Per-creator Discord channel embed — one delivery per creator.
@@ -112,6 +126,47 @@ export const create = mutation({
     }
 
     return pickId;
+  },
+});
+
+// Internal-only.
+/**
+ * Cron handler — flip scheduled picks whose publishAt has passed into
+ * 'published' state and fire the notification fan-out. Bounded scan via
+ * the by_status_and_publishAt index, batch of 100 per run.
+ */
+export const _publishDueScheduled = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const due = await ctx.db
+      .query('picks')
+      .withIndex('by_status_and_publishAt', (q) =>
+        q.eq('status', 'scheduled').lte('publishAt', now),
+      )
+      .take(100);
+
+    let flipped = 0;
+    for (const pick of due) {
+      await ctx.db.patch(pick._id, {
+        status: 'published',
+        publishedAt: now,
+        publishAt: undefined,
+      });
+      // Schedule downstream fan-out — same chain picks.create uses.
+      await ctx.scheduler.runAfter(0, internal.ai.analyzePick, {
+        pickId: pick._id,
+      });
+      await ctx.scheduler.runAfter(0, internal.discord.deliverPickNotification, {
+        pickId: pick._id,
+        creatorId: pick.creatorId,
+      });
+      await ctx.scheduler.runAfter(0, internal.notify.onPickPublished, {
+        pickId: pick._id,
+      });
+      flipped++;
+    }
+    return { flipped };
   },
 });
 

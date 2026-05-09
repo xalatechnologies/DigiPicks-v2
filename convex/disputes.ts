@@ -83,7 +83,8 @@ export const open = mutation({
       updatedAt: now,
     });
 
-    await ctx.scheduler.runAfter(0, internal.audit.log, {
+    // Audit-log inline so the dispute + log live in the same transaction.
+    await ctx.runMutation(internal.audit.log, {
       actorUserId: user._id,
       entityType: 'dispute',
       entityId: id,
@@ -156,7 +157,7 @@ export const transition = mutation({
     }
     await ctx.db.patch(args.disputeId, patch);
 
-    await ctx.scheduler.runAfter(0, internal.audit.log, {
+    await ctx.runMutation(internal.audit.log, {
       actorUserId: admin._id,
       entityType: 'dispute',
       entityId: args.disputeId,

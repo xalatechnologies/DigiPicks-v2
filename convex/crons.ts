@@ -91,6 +91,16 @@ crons.interval(
   internal.trust.recomputeTrustScores,
 );
 
+// ─── Publish scheduled picks (Phase 12) ─────────────────────────────────
+// Runs every minute. Flips scheduled → published when publishAt has
+// passed, and fires the same fan-out chain as picks.create.
+
+crons.interval(
+  'publish-scheduled-picks',
+  { minutes: 1 },
+  internal.picks._publishDueScheduled,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

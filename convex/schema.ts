@@ -396,6 +396,8 @@ export default defineSchema({
     netUnits: v.optional(v.string()),
     gradedAt: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
+    /** Future-publish timestamp for status='scheduled' rows (Phase 12). */
+    publishAt: v.optional(v.number()),
     createdAt: v.number(),
     // ── AI Intelligence (PRD M9, Phase 5) ──
     aiSummary: v.optional(v.string()),
@@ -407,6 +409,7 @@ export default defineSchema({
     .index('by_creator', ['creatorId', 'createdAt'])
     .index('by_sport', ['sport', 'createdAt'])
     .index('by_status', ['status', 'createdAt'])
+    .index('by_status_and_publishAt', ['status', 'publishAt'])
     .index('by_access', ['access', 'createdAt']),
 
   events: defineTable({
