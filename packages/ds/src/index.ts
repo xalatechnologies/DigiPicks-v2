@@ -81,6 +81,8 @@ export type {
   EventFormValue,
   EventFormVisibility,
 } from './components/forms/EventForm/EventForm';
+export { DisputeForm } from './components/forms/DisputeForm/DisputeForm';
+export type { DisputeFormProps } from './components/forms/DisputeForm/DisputeForm';
 
 // ── surfaces ─────────────────────────────────────────────────────────────
 export { Card } from './components/surfaces/Card/Card';
@@ -117,6 +119,12 @@ export type {
   TrendingCarouselProps,
   TrendingItem,
 } from './components/surfaces/TrendingCarousel/TrendingCarousel';
+export { MfaEnrollmentCard } from './components/surfaces/MfaEnrollmentCard/MfaEnrollmentCard';
+export type {
+  MfaEnrollmentCardProps,
+  MfaState,
+  MfaEnrollmentSecrets,
+} from './components/surfaces/MfaEnrollmentCard/MfaEnrollmentCard';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';
@@ -207,6 +215,8 @@ export { FAQList } from './components/feedback/FAQList/FAQList';
 export { Modal } from './components/feedback/Modal/Modal';
 export { Drawer } from './components/feedback/Drawer/Drawer';
 export { Toast } from './components/feedback/Toast/Toast';
+export { ReferralShareModal } from './components/feedback/ReferralShareModal/ReferralShareModal';
+export type { ReferralShareModalProps } from './components/feedback/ReferralShareModal/ReferralShareModal';
 export {
   PushNotificationPrompt,
   type PushNotificationPromptProps,
