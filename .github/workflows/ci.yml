@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs on the same branch when a new commit lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: typecheck · lint · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test (Convex backend)
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Thin-app guardrails
+        # Hard gate from CLAUDE.md: zero inline styles / raw classNames /
+        # tailwind utilities / .css files anywhere under apps/ (source only).
+        run: |
+          set -euo pipefail
+          fail=0
+
+          # Skip build outputs — `apps/<x>/dist/` is generated and contains
+          # bundled CSS by design.
+          src_paths=$(find apps -type d -name src)
+
+          if grep -rE 'style=\{\{' $src_paths --include='*.tsx'; then
+            echo "❌ inline style={{…}} found in apps/" >&2
+            fail=1
+          fi
+
+          if grep -rE 'className="[^"]*\b(flex|grid|gap-|p-|m-|text-|bg-|border|rounded|w-|h-|max-w|min-w|space-|items-|justify-)' $src_paths --include='*.tsx'; then
+            echo "❌ tailwind utility classes found in apps/" >&2
+            fail=1
+          fi
+
+          stray_css=$(find apps -path '*/dist' -prune -o -name '*.css' -print | grep -v '^$' || true)
+          if [ -n "$stray_css" ]; then
+            echo "❌ .css file found inside apps/ source — DS owns all styles" >&2
+            echo "$stray_css"
+            fail=1
+          fi
+
+          if [ $fail -ne 0 ]; then
+            exit 1
+          fi
+          echo "✓ thin-app guardrails clean"

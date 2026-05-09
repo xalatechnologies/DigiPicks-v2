@@ -119,6 +119,13 @@ export function Auth() {
         >
           <Stack gap={4}>
             <AuthMethodButton
+              icon={<Icon name="discord" size={18} />}
+              label="Continue with Discord"
+              description="Sign in with your Discord account"
+              onClick={() => void signIn('discord')}
+            />
+
+            <AuthMethodButton
               icon={<Icon name="email" size={18} />}
               label="Continue with email"
               description="Sign in with your email and password"

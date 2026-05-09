@@ -8,17 +8,33 @@ import { requireUser } from './shared/permissions';
 // =============================================================================
 
 // Auth-only.
-/** List the current user's subscriptions. Always filtered by current user. */
+/** List the current user's subscriptions with joined creator details. */
 export const mySubscriptions = query({
   args: {},
   handler: async (ctx) => {
     const user = await requireUser(ctx);
-    return await ctx.db
+    const subs = await ctx.db
       .query('subscriptions')
       .withIndex('by_subscriber_and_creator', (q) =>
         q.eq('subscriberId', user._id),
       )
       .take(50);
+
+    const enriched = await Promise.all(
+      subs.map(async (sub) => {
+        const creator = await ctx.db.get(sub.creatorId);
+        return {
+          ...sub,
+          creatorName: creator?.name ?? 'Unknown',
+          creatorHandle: creator?.handle ?? '',
+          creatorMono: creator?.avatarMono ?? 'U',
+          creatorColor: creator?.avatarColor ?? '#3A4F7A',
+          creatorVerified: creator?.verified ?? false,
+          creatorStartingPrice: creator?.startingPrice ?? 0,
+        };
+      }),
+    );
+    return enriched;
   },
 });
 

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
+import { convexTest } from './__tests__/setup';
 import { describe, expect, test } from 'vitest';
 import { api, internal } from './_generated/api';
 import schema from './schema';
@@ -89,7 +89,7 @@ describe('channels', () => {
     });
 
     const listed = await t.query(api.channels.list, {});
-    expect(listed.map((l) => l.channel.slug)).toEqual(['public-room']);
+    expect(listed.map((l: any) => l.channel.slug)).toEqual(['public-room']);
   });
 
   test('non-owner creator cannot create a channel under another creator', async () => {
@@ -140,7 +140,7 @@ describe('channel messages', () => {
     });
 
     const messages = await t.query(api.messages.listByChannel, { channelId });
-    expect(messages.map((m) => m.body)).toEqual(['first', 'second']);
+    expect(messages.map((m: any) => m.body)).toEqual(['first', 'second']);
     expect(messages[0].senderHandle).toBe('@chatcreator');
   });
 

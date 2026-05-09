@@ -1,6 +1,7 @@
 import { internalAction, internalMutation } from './_generated/server';
 import { internal } from './_generated/api';
 import { v } from 'convex/values';
+import { withRetry } from './shared/retry';
 
 // =============================================================================
 // Live Scores — Polls The Odds API and updates events with live game data
@@ -34,7 +35,10 @@ export const pollActive = internalAction({
     for (const sportKey of sportKeys) {
       try {
         const url = `${ODDS_API_BASE}/sports/${sportKey}/scores/?apiKey=${apiKey}&daysFrom=3`;
-        const res = await fetch(url);
+        const res = await withRetry(() => fetch(url), {
+          label: `liveScores ${sportKey}`,
+          maxAttempts: 3,
+        });
 
         if (!res.ok) {
           console.warn(`Odds API error for ${sportKey}: ${res.status}`);
@@ -117,17 +121,28 @@ export const upsertEvent = internalMutation({
       .withIndex('by_external_id', (q) => q.eq('externalId', args.externalId))
       .first();
 
-    // Fallback: match by team names
+    const startsAt = new Date(args.commenceTime).getTime();
+
+    // Fallback: match by team names within a bounded ±36h window in the same
+    // sport. Covers pre-cron seed rows that lack externalId without scanning
+    // the entire events table (NFR-001/005).
     if (!event) {
-      const allEvents = await ctx.db.query('events').collect();
-      event = allEvents.find(
-        (e) =>
-          (e.home === args.homeTeam && e.away === args.awayTeam) ||
-          (e.home === args.awayTeam && e.away === args.homeTeam),
-      ) ?? null;
+      const windowStart = startsAt - 36 * 60 * 60 * 1000;
+      const windowEnd = startsAt + 36 * 60 * 60 * 1000;
+      const candidates = await ctx.db
+        .query('events')
+        .withIndex('by_sport_and_startsAt', (q) =>
+          q.eq('sport', args.sport).gte('startsAt', windowStart).lte('startsAt', windowEnd),
+        )
+        .take(200);
+      event =
+        candidates.find(
+          (e) =>
+            (e.home === args.homeTeam && e.away === args.awayTeam) ||
+            (e.home === args.awayTeam && e.away === args.homeTeam),
+        ) ?? null;
     }
 
-    const startsAt = new Date(args.commenceTime).getTime();
     const status = args.completed ? 'completed' as const : (args.gameStatus === 'Live' ? 'live' as const : 'upcoming' as const);
     const time = new Date(args.commenceTime).toLocaleTimeString('en-US', {
       hour: 'numeric',

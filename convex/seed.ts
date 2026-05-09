@@ -1,5 +1,6 @@
 import { mutation } from './_generated/server';
 import { api } from './_generated/api';
+import type { Id } from './_generated/dataModel';
 import { requireUser } from './shared/permissions';
 
 // =============================================================================
@@ -238,7 +239,7 @@ export const seedAll = mutation({
       },
     ];
 
-    const creatorIds = [];
+    const creatorIds: Id<'creators'>[] = [];
     for (const creator of creators) {
       const id = await ctx.db.insert('creators', {
         ...creator,
@@ -272,7 +273,7 @@ export const seedAll = mutation({
       { sport: 'Tennis', league: 'ATP Italian Open', home: 'Djokovic', away: 'Medvedev', time: '8:00 PM CET', startsAt: now + 57600000, creatorCount: 5, pickCount: 8, featured: false, status: 'upcoming' as const },
     ];
 
-    const eventIds = [];
+    const eventIds: Id<'events'>[] = [];
     for (const event of events) {
       const id = await ctx.db.insert('events', event);
       eventIds.push(id);
@@ -425,7 +426,7 @@ export const seedAll = mutation({
       { name: 'Super Admin', email: 'super@digipicks.com', role: 'super_admin' as const },
     ];
 
-    const userIds = [];
+    const userIds: Id<'users'>[] = [];
     for (const user of users) {
       const id = await ctx.db.insert('users', {
         name: user.name,

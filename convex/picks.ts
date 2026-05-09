@@ -99,9 +99,13 @@ export const create = mutation({
       createdAt: now,
     });
 
-    // AI analysis is best-effort: schedule async, don't block the publish.
+    // AI analysis + Discord notification are best-effort: schedule async.
     if (status === 'published') {
       await ctx.scheduler.runAfter(0, internal.ai.analyzePick, { pickId });
+      await ctx.scheduler.runAfter(0, internal.discord.deliverPickNotification, {
+        pickId,
+        creatorId: args.creatorId,
+      });
     }
 
     return pickId;
@@ -109,7 +113,13 @@ export const create = mutation({
 });
 
 // Internal-only.
-/** Grade a pick. Internal only — called by platform/cron, not clients. */
+/**
+ * Grade a pick. Internal only — called by platform/cron, not clients.
+ *
+ * NFR-006 (data integrity): grading is immutable once finalized. A pick that
+ * already carries a terminal grade (win/loss/push) cannot be re-graded — the
+ * patch is rejected so historical performance numbers cannot be rewritten.
+ */
 export const grade = internalMutation({
   args: {
     id: v.id('picks'),
@@ -119,6 +129,12 @@ export const grade = internalMutation({
   handler: async (ctx, args) => {
     const pick = await ctx.db.get(args.id);
     if (!pick) throw new Error('Pick not found');
+
+    if (pick.grade && pick.grade !== 'pending') {
+      throw new Error(
+        `Pick ${args.id} is already graded as "${pick.grade}"; grade is immutable once finalized.`,
+      );
+    }
 
     await ctx.db.patch(args.id, {
       grade: args.grade,

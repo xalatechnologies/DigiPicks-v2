@@ -3,6 +3,13 @@ import { query } from './_generated/server';
 import { Doc, Id } from './_generated/dataModel';
 import { requireUser } from './shared/permissions';
 
+// NOTE: rate limiting on `feed.personalized` is intentionally omitted —
+// Convex queries do not have a runMutation ctx and cannot consume bucket
+// state. Public-facing reactive read paths rely on Convex's platform-level
+// throttling. Mutation/action paths in this codebase (applications.submit,
+// messages.postToChannel, stripe.createCheckoutSession, gdpr.exportMyData)
+// carry the per-user rate-limiter from `convex/shared/rateLimit.ts`.
+
 // =============================================================================
 // Personalized Feed (PRD M11) — picks from the creators the user is
 // subscribed to, joined with creator profile fields the PickCard needs.

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
+import { convexTest } from './__tests__/setup';
 import { expect, test, describe } from 'vitest';
 import { api, internal } from './_generated/api';
 import schema from './schema';
@@ -256,6 +256,46 @@ describe('picks', () => {
     expect(picks[0].grade).toBe('win');
     expect(picks[0].netUnits).toBe('+1.39u');
     expect(picks[0].gradedAt).toBeDefined();
+  });
+
+  test('grading is immutable once finalized (NFR-006)', async () => {
+    const t = convexTest(schema, modules);
+    const { creatorId, asCreator } = await setupCreatorUser(t);
+
+    const pickId = await asCreator.mutation(api.picks.create, {
+      creatorId,
+      access: 'free',
+      sport: 'Football',
+      league: 'NFL',
+      eventName: 'A @ B',
+      eventTime: '8 PM ET',
+      title: 'Lock',
+      market: 'Spread',
+      selection: 'A -3',
+      odds: '-110',
+      units: '1u',
+      confidence: 'High',
+      status: 'published',
+    });
+
+    await t.mutation(internal.picks.grade, {
+      id: pickId,
+      grade: 'win',
+      netUnits: '+0.91u',
+    });
+
+    // Re-grade attempts must be rejected.
+    await expect(
+      t.mutation(internal.picks.grade, {
+        id: pickId,
+        grade: 'loss',
+        netUnits: '-1u',
+      }),
+    ).rejects.toThrow(/already graded/i);
+
+    const picks = await t.query(api.picks.byCreator, { creatorId });
+    expect(picks[0].grade).toBe('win');
+    expect(picks[0].netUnits).toBe('+0.91u');
   });
 
   test('feed returns published picks', async () => {

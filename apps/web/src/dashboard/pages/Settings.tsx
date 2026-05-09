@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery, useAction } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -70,6 +70,10 @@ export function Settings() {
     me?.creatorId ? { id: me.creatorId } : 'skip',
   );
   const updateProfile = useMutation(api.users.updateProfile);
+  const setDiscordWebhook = useMutation(api.discordSettings.setWebhookUrl);
+  const testDiscordWebhook = useAction(api.discordSettings.testWebhook);
+  const exportMyData = useAction(api.gdpr.exportMyData);
+  const deleteMyAccount = useMutation(api.gdpr.deleteMyAccount);
 
   const [name, setName] = React.useState('');
   const [locale, setLocale] = React.useState<Locale>('en');
@@ -78,6 +82,16 @@ export function Settings() {
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
+
+  // Discord state
+  const [webhookUrl, setWebhookUrl] = React.useState('');
+  const [webhookSaving, setWebhookSaving] = React.useState(false);
+  const [webhookTesting, setWebhookTesting] = React.useState(false);
+  const [webhookMsg, setWebhookMsg] = React.useState<string | null>(null);
+
+  // GDPR state
+  const [gdprBusy, setGdprBusy] = React.useState<'idle' | 'exporting' | 'deleting'>('idle');
+  const [gdprMsg, setGdprMsg] = React.useState<string | null>(null);
 
   const [toggles, setToggles] = React.useState<Record<NotificationToggle['id'], boolean>>({
     pickAlerts: true,
@@ -96,6 +110,10 @@ export function Settings() {
     if (creator?.niche) setNiche(creator.niche);
   }, [creator?.bio, creator?.niche]);
 
+  React.useEffect(() => {
+    if (creator?.discordWebhookUrl) setWebhookUrl(creator.discordWebhookUrl);
+  }, [creator?.discordWebhookUrl]);
+
   const setToggle = (id: NotificationToggle['id']) => (next: boolean) => {
     setToggles((prev) => ({ ...prev, [id]: next }));
   };
@@ -111,6 +129,84 @@ export function Settings() {
       setError(err instanceof Error ? err.message : 'Could not save profile.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleSaveWebhook() {
+    if (!creator) return;
+    setWebhookMsg(null);
+    setWebhookSaving(true);
+    try {
+      await setDiscordWebhook({
+        creatorId: creator._id,
+        webhookUrl: webhookUrl || undefined,
+      });
+      setWebhookMsg('Webhook URL saved.');
+    } catch (err) {
+      setWebhookMsg(err instanceof Error ? err.message : 'Could not save webhook URL.');
+    } finally {
+      setWebhookSaving(false);
+    }
+  }
+
+  async function handleTestWebhook() {
+    if (!creator || !webhookUrl) return;
+    setWebhookMsg(null);
+    setWebhookTesting(true);
+    try {
+      await testDiscordWebhook({
+        creatorId: creator._id,
+        webhookUrl,
+      });
+      setWebhookMsg('Test embed sent — check your Discord channel.');
+    } catch (err) {
+      setWebhookMsg(err instanceof Error ? err.message : 'Webhook test failed.');
+    } finally {
+      setWebhookTesting(false);
+    }
+  }
+
+  async function handleExportData() {
+    setGdprMsg(null);
+    setGdprBusy('exporting');
+    try {
+      const data = await exportMyData({});
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `digipicks-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setGdprMsg('Export downloaded. Includes every record we hold about your account.');
+    } catch (err) {
+      setGdprMsg(err instanceof Error ? err.message : 'Export failed.');
+    } finally {
+      setGdprBusy('idle');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (
+      !window.confirm(
+        'Delete your account permanently? This anonymizes your profile, cancels active subscriptions, and clears saved picks. Audit history is retained but no longer linked to identifying data.',
+      )
+    ) {
+      return;
+    }
+    setGdprMsg(null);
+    setGdprBusy('deleting');
+    try {
+      await deleteMyAccount({ confirm: 'DELETE' });
+      setGdprMsg('Account deleted. You will be signed out shortly.');
+    } catch (err) {
+      setGdprMsg(err instanceof Error ? err.message : 'Account deletion failed.');
+    } finally {
+      setGdprBusy('idle');
     }
   }
 
@@ -217,6 +313,49 @@ export function Settings() {
               </Card>
 
               <Card>
+                <CardHead
+                  title="Discord Integration"
+                  sub="Deliver pick notifications to your Discord server"
+                />
+                <Stack gap={3}>
+                  <Field
+                    label="Webhook URL"
+                    help="Paste a Discord webhook URL from Server Settings → Integrations → Webhooks."
+                  >
+                    <Input
+                      value={webhookUrl}
+                      onChange={(e) => setWebhookUrl(e.target.value)}
+                      placeholder="https://discord.com/api/webhooks/..."
+                    />
+                  </Field>
+                  {webhookMsg && <Muted>{webhookMsg}</Muted>}
+                  <Row gap={2}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleSaveWebhook}
+                      disabled={webhookSaving}
+                    >
+                      <Icon name="check" size={13} />
+                      {webhookSaving ? 'Saving…' : 'Save webhook'}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleTestWebhook}
+                      disabled={webhookTesting || !webhookUrl}
+                    >
+                      <Icon name="discord" size={13} />
+                      {webhookTesting ? 'Sending…' : 'Test webhook'}
+                    </Button>
+                  </Row>
+                  {me?.discordUsername && (
+                    <KV k="Discord" v={<Mono>{me.discordUsername}</Mono>} />
+                  )}
+                </Stack>
+              </Card>
+
+              <Card>
                 <CardHead title="Verification" sub="Your platform status" />
                 <Stack gap={2}>
                   <KV
@@ -225,6 +364,36 @@ export function Settings() {
                   />
                   <KV k="Status" v={creator?.status ?? '—'} />
                   <KV k="Handle" v={creator?.handle ?? '—'} />
+                </Stack>
+              </Card>
+
+              <Card>
+                <CardHead
+                  title="Privacy & data"
+                  sub="Export everything we have on you, or remove your account entirely (GDPR Articles 15 & 17)."
+                />
+                <Stack gap={3}>
+                  {gdprMsg && <Muted>{gdprMsg}</Muted>}
+                  <Row gap={2}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleExportData}
+                      disabled={gdprBusy !== 'idle'}
+                    >
+                      <Icon name="arrow-down" size={13} />
+                      {gdprBusy === 'exporting' ? 'Preparing…' : 'Export my data'}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={handleDeleteAccount}
+                      disabled={gdprBusy !== 'idle'}
+                    >
+                      <Icon name="trash" size={13} />
+                      {gdprBusy === 'deleting' ? 'Deleting…' : 'Delete my account'}
+                    </Button>
+                  </Row>
                 </Stack>
               </Card>
 

@@ -29,6 +29,9 @@ export { VerifiedMark } from './components/atoms/VerifiedMark/VerifiedMark';
 export { SportTag } from './components/atoms/SportTag/SportTag';
 export { Tag } from './components/atoms/Tag/Tag';
 
+export { SkipLink } from './components/atoms/SkipLink/SkipLink';
+export type { SkipLinkProps } from './components/atoms/SkipLink/SkipLink';
+
 export { Bar } from './components/atoms/Bar/Bar';
 export { ConfidenceBar } from './components/atoms/ConfidenceBar/ConfidenceBar';
 export { ConfidenceGauge } from './components/atoms/ConfidenceGauge/ConfidenceGauge';

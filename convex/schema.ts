@@ -58,10 +58,14 @@ export default defineSchema({
     isActive: v.optional(v.boolean()),
     creatorId: v.optional(v.id('creators')),
     stripeCustomerId: v.optional(v.string()),
+    // ── Discord (OAuth identity) ──
+    discordId: v.optional(v.string()),
+    discordUsername: v.optional(v.string()),
   })
     .index('email', ['email'])
     .index('by_role', ['role'])
-    .index('by_stripeCustomerId', ['stripeCustomerId']),
+    .index('by_stripeCustomerId', ['stripeCustomerId'])
+    .index('by_discordId', ['discordId']),
 
   tenants: defineTable({
     name: v.string(),
@@ -285,6 +289,8 @@ export default defineSchema({
       v.union(v.literal('twitch'), v.literal('youtube'), v.literal('kick')),
     ),
     streamHandle: v.optional(v.string()),
+    // ── Discord webhook (pick delivery) ──
+    discordWebhookUrl: v.optional(v.string()),
   })
     .index('by_handle', ['handle'])
     .index('by_verified', ['verified'])

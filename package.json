@@ -13,7 +13,7 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
+    "test": "vitest run --config convex/vitest.config.ts convex",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -44,6 +44,7 @@
   "dependencies": {
     "@auth/core": "0.37.0",
     "@convex-dev/auth": "^0.0.92",
+    "@convex-dev/rate-limiter": "^0.3.2",
     "convex": "^1.31.7"
   }
 }

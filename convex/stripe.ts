@@ -3,6 +3,8 @@ import { action, internalQuery } from './_generated/server';
 import { internal } from './_generated/api';
 import { subscriptionPlan } from './shared/validators';
 import { getCurrentUser } from './shared/permissions';
+import { withRetry } from './shared/retry';
+import { rateLimiter } from './shared/rateLimit';
 
 // =============================================================================
 // Stripe Checkout — V8 runtime, raw fetch (no SDK).
@@ -21,28 +23,61 @@ const STRIPE_API = 'https://api.stripe.com/v1';
 
 async function stripeFetch(
   path: string,
-  init: { method?: string; body?: URLSearchParams } = {},
+  init: {
+    method?: string;
+    body?: URLSearchParams;
+    /**
+     * Stripe idempotency key — Stripe deduplicates POST requests carrying the
+     * same key for 24h. Use a stable key per logical operation so retries on
+     * network blips do not double-charge or create duplicate customers.
+     * See https://stripe.com/docs/api/idempotent_requests.
+     */
+    idempotencyKey?: string;
+  } = {},
 ): Promise<Record<string, unknown>> {
   const secret = process.env.STRIPE_SECRET_KEY;
   if (!secret) throw new Error('STRIPE_SECRET_KEY not configured');
 
-  const res = await fetch(`${STRIPE_API}${path}`, {
-    method: init.method ?? 'POST',
-    headers: {
-      Authorization: `Bearer ${secret}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: init.body?.toString(),
-  });
+  return await withRetry(
+    async () => {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${secret}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+      if (init.idempotencyKey) headers['Idempotency-Key'] = init.idempotencyKey;
 
-  const json = (await res.json()) as Record<string, unknown>;
-  if (!res.ok) {
-    const errMsg =
-      (json.error as { message?: string } | undefined)?.message ??
-      `Stripe ${path} failed (${res.status})`;
-    throw new Error(errMsg);
-  }
-  return json;
+      const res = await fetch(`${STRIPE_API}${path}`, {
+        method: init.method ?? 'POST',
+        headers,
+        body: init.body?.toString(),
+      });
+
+      const json = (await res.json()) as Record<string, unknown>;
+      if (!res.ok) {
+        const errMsg =
+          (json.error as { message?: string } | undefined)?.message ??
+          `Stripe ${path} failed (${res.status})`;
+        const err = new Error(errMsg);
+        // Surface the status code in the message so withRetry's default
+        // shouldRetry can decide whether to back off.
+        (err as Error & { status?: number }).status = res.status;
+        throw err;
+      }
+      return json;
+    },
+    {
+      label: `stripe ${path}`,
+      shouldRetry: (err) => {
+        if (!(err instanceof Error)) return false;
+        const status = (err as Error & { status?: number }).status;
+        // 4xx (other than 429) are caller errors — never retry.
+        if (status && status >= 400 && status < 500 && status !== 429) {
+          return false;
+        }
+        return true;
+      },
+    },
+  );
 }
 
 // ─── Internal helpers (private to this module) ──────────────────────────────
@@ -82,6 +117,11 @@ export const createCheckoutSession = action({
     const me = await ctx.runQuery(internal.stripe._meForCheckout, {});
     if (!me) throw new Error('Unauthorized');
 
+    await rateLimiter.limit(ctx, 'stripeCheckout', {
+      key: me._id,
+      throws: true,
+    });
+
     const creator = await ctx.runQuery(internal.stripe._creatorForCheckout, {
       creatorId: args.creatorId,
     });
@@ -106,6 +146,8 @@ export const createCheckoutSession = action({
           ...(me.name ? { name: me.name } : {}),
           'metadata[userId]': me._id,
         }),
+        // Stable per-user key so retries don't create duplicate customers.
+        idempotencyKey: `customer-create:${me._id}`,
       });
       customerId = customer.id as string;
       await ctx.runMutation(internal.users._setStripeCustomerId, {
@@ -132,7 +174,14 @@ export const createCheckoutSession = action({
     params.set('subscription_data[metadata][plan]', args.plan);
     params.set('subscription_data[metadata][userId]', me._id);
 
-    const session = await stripeFetch('/checkout/sessions', { body: params });
+    // Idempotency-Key bucketed to a 5-minute window so duplicate clicks /
+    // network retries land on the same Checkout Session without blocking a
+    // user who genuinely wants to re-attempt later.
+    const bucket = Math.floor(Date.now() / (5 * 60 * 1000));
+    const session = await stripeFetch('/checkout/sessions', {
+      body: params,
+      idempotencyKey: `checkout:${me._id}:${args.creatorId}:${args.plan}:${bucket}`,
+    });
     const url = session.url as string | undefined;
     if (!url) throw new Error('Stripe did not return a checkout URL.');
 

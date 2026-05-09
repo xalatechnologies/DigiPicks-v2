@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import { activateFocusTrap } from '../../../utils/focusTrap';
 import { Icon } from '../../atoms/Icon/Icon';
 import s from './Modal.module.css';
 
@@ -20,6 +21,8 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   className,
 }) => {
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -28,9 +31,16 @@ export const Modal: React.FC<ModalProps> = ({
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    let releaseTrap: (() => void) | undefined;
+    if (dialogRef.current) {
+      releaseTrap = activateFocusTrap(dialogRef.current);
+    }
+
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
+      releaseTrap?.();
     };
   }, [open, onClose]);
 
@@ -39,10 +49,12 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className={s.overlay} onClick={onClose} role="presentation">
       <div
+        ref={dialogRef}
         className={cx(s.modal, className)}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (

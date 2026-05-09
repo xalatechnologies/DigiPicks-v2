@@ -1,6 +1,7 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import { requireUser } from './shared/permissions';
+import { rateLimiter } from './shared/rateLimit';
 
 // =============================================================================
 // Messages Module — Buyer-seller conversations
@@ -137,6 +138,10 @@ export const postToChannel = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    await rateLimiter.limit(ctx, 'channelsPost', {
+      key: user._id,
+      throws: true,
+    });
 
     const channel = await ctx.db.get(args.channelId);
     if (!channel) throw new Error('Channel not found');

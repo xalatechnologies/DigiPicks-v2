@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import { SkipLink } from '../../atoms/SkipLink/SkipLink';
 import s from './DashboardLayout.module.css';
 
 export interface DashboardLayoutProps {
@@ -15,8 +16,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   return (
     <div className={cx(s.app, className)}>
+      <SkipLink />
       <div className={s.sidebar}>{sidebar}</div>
-      <main className={s.main}>{children}</main>
+      <main id="main-content" className={s.main} tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 };

@@ -17,9 +17,12 @@ import type * as categories from "../categories.js";
 import type * as channels from "../channels.js";
 import type * as creators from "../creators.js";
 import type * as crons from "../crons.js";
+import type * as discord from "../discord.js";
+import type * as discordSettings from "../discordSettings.js";
 import type * as events from "../events.js";
 import type * as feed from "../feed.js";
 import type * as files from "../files.js";
+import type * as gdpr from "../gdpr.js";
 import type * as http from "../http.js";
 import type * as listings from "../listings.js";
 import type * as liveScores from "../liveScores.js";
@@ -35,9 +38,12 @@ import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as shared_aiParse from "../shared/aiParse.js";
 import type * as shared_permissions from "../shared/permissions.js";
+import type * as shared_rateLimit from "../shared/rateLimit.js";
+import type * as shared_retry from "../shared/retry.js";
 import type * as shared_validators from "../shared/validators.js";
 import type * as streams from "../streams.js";
 import type * as stripe from "../stripe.js";
+import type * as subscriberStats from "../subscriberStats.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as teamLogos from "../teamLogos.js";
 import type * as users from "../users.js";
@@ -58,9 +64,12 @@ declare const fullApi: ApiFromModules<{
   channels: typeof channels;
   creators: typeof creators;
   crons: typeof crons;
+  discord: typeof discord;
+  discordSettings: typeof discordSettings;
   events: typeof events;
   feed: typeof feed;
   files: typeof files;
+  gdpr: typeof gdpr;
   http: typeof http;
   listings: typeof listings;
   liveScores: typeof liveScores;
@@ -76,9 +85,12 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   "shared/aiParse": typeof shared_aiParse;
   "shared/permissions": typeof shared_permissions;
+  "shared/rateLimit": typeof shared_rateLimit;
+  "shared/retry": typeof shared_retry;
   "shared/validators": typeof shared_validators;
   streams: typeof streams;
   stripe: typeof stripe;
+  subscriberStats: typeof subscriberStats;
   subscriptions: typeof subscriptions;
   teamLogos: typeof teamLogos;
   users: typeof users;
@@ -110,4 +122,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
+};

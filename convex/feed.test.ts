@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
+import { convexTest } from './__tests__/setup';
 import { describe, expect, test } from 'vitest';
 import { api, internal } from './_generated/api';
 import schema from './schema';
@@ -93,7 +93,7 @@ describe('feed.personalized', () => {
     const result = await asUser.query(api.feed.personalized, {});
     expect(result.personalized).toBe(true);
     expect(result.subscribedCreatorCount).toBe(1);
-    expect(result.items.map((i) => i.pick.title)).toEqual(['NFL pick']);
+    expect(result.items.map((i: any) => i.pick.title)).toEqual(['NFL pick']);
   });
 
   test('cancelled subscriptions do not personalize the feed', async () => {
@@ -131,7 +131,7 @@ describe('feed.personalized', () => {
     const result = await t
       .withIdentity({ subject: subscriberId })
       .query(api.feed.personalized, { sport: 'NFL' });
-    expect(result.items.map((i) => i.pick.title)).toEqual(['NFL pick']);
+    expect(result.items.map((i: any) => i.pick.title)).toEqual(['NFL pick']);
   });
 
   test('rejects unauthenticated callers', async () => {

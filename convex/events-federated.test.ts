@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
+import { convexTest } from './__tests__/setup';
 import { describe, expect, test } from 'vitest';
 import { api, internal } from './_generated/api';
 import schema from './schema';
@@ -213,7 +213,7 @@ describe('events.byCreator + pendingReview', () => {
     });
 
     const pending = await asAdmin.query(api.events.pendingReview, {});
-    expect(pending.map((p) => p._id)).toEqual([e2]);
+    expect(pending.map((p: any) => p._id)).toEqual([e2]);
   });
 
   test('pendingReview rejects non-admins', async () => {

@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 import { applicationStatus } from './shared/validators';
 import { requireUser, requireAdmin } from './shared/permissions';
 import { internal } from './_generated/api';
+import { rateLimiter } from './shared/rateLimit';
 
 // =============================================================================
 // Applications Module — Creator application lifecycle
@@ -23,7 +24,11 @@ export const submit = mutation({
     winClaim: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    const user = await requireUser(ctx);
+    await rateLimiter.limit(ctx, 'applicationsSubmit', {
+      key: user._id,
+      throws: true,
+    });
     // Check for duplicate email
     const existing = await ctx.db
       .query('applications')

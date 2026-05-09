@@ -59,6 +59,7 @@ const AdminEventReview = React.lazy(() =>
   })),
 );
 const DashboardRoutes = React.lazy(() => import('./dashboard/Routes'));
+const AccountRoutes = React.lazy(() => import('./account/Routes'));
 
 // Shared fallback for lazy-loaded pages, rendered inside the public layout.
 function PageFallback({ title = 'Loading…' }: { title?: string }) {
@@ -90,9 +91,14 @@ function AuthHeaderButton() {
   if (isLoading) return null;
 
   return isAuthenticated ? (
-    <Button variant="outline" onClick={() => signOut()}>
-      Sign out
-    </Button>
+    <Row gap={2}>
+      <Button variant="secondary" onClick={() => navigate('/account')}>
+        My account
+      </Button>
+      <Button variant="outline" onClick={() => signOut()}>
+        Sign out
+      </Button>
+    </Row>
   ) : (
     <Button variant="primary" onClick={() => navigate('/auth')}>
       Sign in
@@ -369,6 +375,16 @@ export function App() {
         element={
           <React.Suspense fallback={<PageFallback title="Loading sign in…" />}>
             <Auth />
+          </React.Suspense>
+        }
+      />
+      <Route
+        path="/account/*"
+        element={
+          <React.Suspense
+            fallback={<PageFallback title="Loading your account…" />}
+          >
+            <AccountRoutes />
           </React.Suspense>
         }
       />

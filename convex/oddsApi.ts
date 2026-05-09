@@ -1,6 +1,7 @@
 import { internalAction } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { withRetry } from './shared/retry';
 
 // =============================================================================
 // Odds API — Upcoming events importer.
@@ -89,7 +90,10 @@ export const pollUpcoming = internalAction({
     for (const sportKey of sportKeys) {
       try {
         const url = `${ODDS_API_BASE}/sports/${sportKey}/events?apiKey=${apiKey}`;
-        const res = await fetch(url);
+        const res = await withRetry(() => fetch(url), {
+          label: `oddsApi events:${sportKey}`,
+          maxAttempts: 3,
+        });
 
         if (!res.ok) {
           console.warn(
@@ -202,7 +206,10 @@ export const pollOddsSnapshots = internalAction({
         const url =
           `${ODDS_API_BASE}/sports/${sportKey}/odds` +
           `?regions=${SNAPSHOT_REGIONS}&markets=${SNAPSHOT_MARKETS}&oddsFormat=decimal&apiKey=${apiKey}`;
-        const res = await fetch(url);
+        const res = await withRetry(() => fetch(url), {
+          label: `oddsApi odds:${sportKey}`,
+          maxAttempts: 3,
+        });
         if (!res.ok) {
           console.warn(
             `Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`,
