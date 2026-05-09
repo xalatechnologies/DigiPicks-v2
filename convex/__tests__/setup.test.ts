@@ -1,10 +1,16 @@
 /// <reference types="vite/client" />
+import { test } from 'vitest';
 import {
   convexTest as baseConvexTest,
   type TestConvex,
 } from 'convex-test';
 import rateLimiterTest from '@convex-dev/rate-limiter/test';
 import schema from '../schema';
+
+// Vitest "no test in file" guard — this file is a shared helper, not a
+// real test suite. The .test.ts naming exists so Convex's deployment
+// scanner ignores it (it would otherwise try to bundle convex-test).
+test('setup helper module loads', () => {});
 
 // =============================================================================
 // Shared convex-test setup. Always use this in *.test.ts so every installed

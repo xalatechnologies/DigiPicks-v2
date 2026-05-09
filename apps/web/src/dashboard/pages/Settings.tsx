@@ -20,8 +20,11 @@ import {
   Mono,
   Divider,
   SwitchRow,
+  PushNotificationPrompt,
+  type PushPermissionState,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { urlBase64ToUint8Array } from '../../lib/pushKey';
 
 const NICHE_OPTIONS = [
   'Soccer Goalscorer Props',
@@ -38,28 +41,26 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
 ];
 
 interface NotificationToggle {
-  id: 'pickAlerts' | 'billingAlerts' | 'growthAlerts';
+  id: 'pickPublished' | 'pickGraded' | 'lineMoved';
   label: string;
   sub: string;
 }
 
-// TODO: convex — notification preferences need a real
-// api.users.notificationPrefs query + mutation.
 const NOTIFICATIONS: NotificationToggle[] = [
   {
-    id: 'pickAlerts',
-    label: 'Pick alerts',
-    sub: 'When a pick auto-grades or hits cutoff',
+    id: 'pickPublished',
+    label: 'New picks',
+    sub: 'Fires the moment a creator publishes a pick',
   },
   {
-    id: 'billingAlerts',
-    label: 'Billing alerts',
-    sub: 'Failed payments, refunds, payout updates',
+    id: 'pickGraded',
+    label: 'Grading results',
+    sub: 'Win / loss / push outcomes for picks you saved or follow',
   },
   {
-    id: 'growthAlerts',
-    label: 'Growth opportunities',
-    sub: 'Weekly digest of new growth ideas',
+    id: 'lineMoved',
+    label: 'Line movement',
+    sub: 'Significant odds shifts on events you have picks on',
   },
 ];
 
@@ -74,6 +75,12 @@ export function Settings() {
   const testDiscordWebhook = useAction(api.discordSettings.testWebhook);
   const exportMyData = useAction(api.gdpr.exportMyData);
   const deleteMyAccount = useMutation(api.gdpr.deleteMyAccount);
+  const myPrefs = useQuery(api.notify.myPrefs);
+  const updatePrefs = useMutation(api.notify.updatePrefs);
+  const startTelegramLink = useMutation(api.notify.startTelegramLink);
+  const pushVapidKey = useQuery(api.pushSubscriptions.publicKey);
+  const subscribePush = useMutation(api.pushSubscriptions.subscribe);
+  const unsubscribePush = useMutation(api.pushSubscriptions.unsubscribe);
 
   const [name, setName] = React.useState('');
   const [locale, setLocale] = React.useState<Locale>('en');
@@ -93,11 +100,27 @@ export function Settings() {
   const [gdprBusy, setGdprBusy] = React.useState<'idle' | 'exporting' | 'deleting'>('idle');
   const [gdprMsg, setGdprMsg] = React.useState<string | null>(null);
 
-  const [toggles, setToggles] = React.useState<Record<NotificationToggle['id'], boolean>>({
-    pickAlerts: true,
-    billingAlerts: true,
-    growthAlerts: false,
-  });
+  // Push state — derived from the browser + Convex.
+  const [pushState, setPushState] = React.useState<PushPermissionState>('unknown');
+  const [pushBusy, setPushBusy] = React.useState(false);
+
+  // Telegram link state.
+  const [tgCode, setTgCode] = React.useState<string | null>(null);
+  const [tgMsg, setTgMsg] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      setPushState('unsupported');
+      return;
+    }
+    setPushState(
+      Notification.permission === 'granted'
+        ? 'granted'
+        : Notification.permission === 'denied'
+          ? 'denied'
+          : 'unknown',
+    );
+  }, []);
 
   // Hydrate from Convex once the queries land.
   React.useEffect(() => {
@@ -114,9 +137,78 @@ export function Settings() {
     if (creator?.discordWebhookUrl) setWebhookUrl(creator.discordWebhookUrl);
   }, [creator?.discordWebhookUrl]);
 
-  const setToggle = (id: NotificationToggle['id']) => (next: boolean) => {
-    setToggles((prev) => ({ ...prev, [id]: next }));
+  const prefs = myPrefs?.prefs ?? {};
+  const toggleValue = (id: NotificationToggle['id']): boolean => prefs[id] !== false;
+
+  const setToggle = (id: NotificationToggle['id']) => async (next: boolean) => {
+    try {
+      await updatePrefs({ [id]: next });
+    } catch (err) {
+      console.warn('updatePrefs failed:', err);
+    }
   };
+
+  async function handleEnablePush() {
+    if (!pushVapidKey) {
+      console.warn('VAPID public key not configured');
+      return;
+    }
+    setPushBusy(true);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setPushState(permission === 'denied' ? 'denied' : 'unknown');
+        return;
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(pushVapidKey) as BufferSource,
+      });
+      const json = sub.toJSON();
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return;
+      await subscribePush({
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
+        userAgent: navigator.userAgent,
+      });
+      await updatePrefs({ push: true });
+      setPushState('granted');
+    } catch (err) {
+      console.warn('enable push failed:', err);
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
+  async function handleDisablePush() {
+    setPushBusy(true);
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        await unsubscribePush({ endpoint: sub.endpoint });
+        await sub.unsubscribe();
+      }
+      await updatePrefs({ push: false });
+    } catch (err) {
+      console.warn('disable push failed:', err);
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
+  async function handleLinkTelegram() {
+    setTgMsg(null);
+    try {
+      const { code } = await startTelegramLink({});
+      setTgCode(code);
+      setTgMsg('Open Telegram and send this code to the DigiPicks bot.');
+    } catch (err) {
+      setTgMsg(err instanceof Error ? err.message : 'Could not start Telegram link.');
+    }
+  }
 
   async function handleSave() {
     setError(null);
@@ -279,19 +371,51 @@ export function Settings() {
               </Card>
 
               <Card>
-                <CardHead title="Notifications" sub="Where to send alerts about activity in your studio" />
+                <CardHead
+                  title="Notifications"
+                  sub="What you get pinged for, and where the alerts land"
+                />
                 <Stack gap={3}>
+                  <PushNotificationPrompt
+                    state={pushState}
+                    onEnable={handleEnablePush}
+                    onDisable={handleDisablePush}
+                    busy={pushBusy}
+                  />
+                  <Divider />
                   {NOTIFICATIONS.map((n, i) => (
                     <React.Fragment key={n.id}>
                       {i > 0 && <Divider />}
                       <SwitchRow
                         label={n.label}
                         sub={n.sub}
-                        checked={toggles[n.id]}
+                        checked={toggleValue(n.id)}
                         onChange={setToggle(n.id)}
                       />
                     </React.Fragment>
                   ))}
+                  <Divider />
+                  <SwitchRow
+                    label="Telegram"
+                    sub={
+                      myPrefs?.telegramLinked
+                        ? 'Linked — toggle to pause Telegram delivery'
+                        : 'Link the DigiPicks bot to receive alerts in Telegram'
+                    }
+                    checked={Boolean(prefs.telegram) && Boolean(myPrefs?.telegramLinked)}
+                    onChange={(next) => updatePrefs({ telegram: next })}
+                    disabled={!myPrefs?.telegramLinked}
+                  />
+                  {!myPrefs?.telegramLinked && (
+                    <Row gap={2}>
+                      <Button variant="secondary" size="sm" onClick={handleLinkTelegram}>
+                        <Icon name="link" size={13} />
+                        {tgCode ? 'Refresh code' : 'Link Telegram'}
+                      </Button>
+                      {tgCode && <Mono>{`/start ${tgCode}`}</Mono>}
+                    </Row>
+                  )}
+                  {tgMsg && <Muted>{tgMsg}</Muted>}
                 </Stack>
               </Card>
             </Col>

@@ -183,6 +183,11 @@ export { FAQList } from './components/feedback/FAQList/FAQList';
 export { Modal } from './components/feedback/Modal/Modal';
 export { Drawer } from './components/feedback/Drawer/Drawer';
 export { Toast } from './components/feedback/Toast/Toast';
+export {
+  PushNotificationPrompt,
+  type PushNotificationPromptProps,
+  type PushPermissionState,
+} from './components/feedback/PushNotificationPrompt/PushNotificationPrompt';
 
 // ── domain ───────────────────────────────────────────────────────────────
 export { CreatorChip } from './components/domain/CreatorChip/CreatorChip';

@@ -99,13 +99,16 @@ export const create = mutation({
       createdAt: now,
     });
 
-    // AI analysis + Discord notification are best-effort: schedule async.
+    // AI analysis + downstream notification fanout are best-effort: schedule async.
     if (status === 'published') {
       await ctx.scheduler.runAfter(0, internal.ai.analyzePick, { pickId });
+      // Per-creator Discord channel embed — one delivery per creator.
       await ctx.scheduler.runAfter(0, internal.discord.deliverPickNotification, {
         pickId,
         creatorId: args.creatorId,
       });
+      // Per-subscriber fanout (in-app + push + telegram per user prefs).
+      await ctx.scheduler.runAfter(0, internal.notify.onPickPublished, { pickId });
     }
 
     return pickId;
@@ -141,6 +144,14 @@ export const grade = internalMutation({
       netUnits: args.netUnits,
       gradedAt: Date.now(),
     });
+
+    // Fan out the grading result to subscribers + savers (FM-010 trigger).
+    if (args.grade !== 'pending') {
+      await ctx.scheduler.runAfter(0, internal.notify.onPickGraded, {
+        pickId: args.id,
+      });
+    }
+
     return args.id;
   },
 });

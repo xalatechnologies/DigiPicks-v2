@@ -13,6 +13,8 @@ export interface SwitchRowProps {
   checked: boolean;
   /** Called with the next toggle state when the switch is flipped. */
   onChange: (next: boolean) => void;
+  /** When true, the switch ignores clicks and renders muted. */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -21,11 +23,24 @@ export interface SwitchRowProps {
  * Replaces the repeated `<Row between><Stack/><Switch/></Row>` toggle
  * pattern in Settings (and anywhere else a labeled toggle is needed).
  */
-export function SwitchRow({ label, sub, checked, onChange, className }: SwitchRowProps) {
+export function SwitchRow({
+  label,
+  sub,
+  checked,
+  onChange,
+  disabled,
+  className,
+}: SwitchRowProps) {
   return (
     <div className={cx(s.row, className)}>
       <TitleSub title={label} sub={sub} />
-      <Switch checked={checked} onChange={onChange} />
+      <Switch
+        checked={checked}
+        onChange={(next) => {
+          if (disabled) return;
+          onChange(next);
+        }}
+      />
     </div>
   );
 }

@@ -29,10 +29,13 @@ import type * as liveScores from "../liveScores.js";
 import type * as messages from "../messages.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
+import type * as notify from "../notify.js";
 import type * as odds from "../odds.js";
 import type * as oddsApi from "../oddsApi.js";
 import type * as payouts from "../payouts.js";
 import type * as picks from "../picks.js";
+import type * as push from "../push.js";
+import type * as pushSubscriptions from "../pushSubscriptions.js";
 import type * as savedPicks from "../savedPicks.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
@@ -46,6 +49,7 @@ import type * as stripe from "../stripe.js";
 import type * as subscriberStats from "../subscriberStats.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as teamLogos from "../teamLogos.js";
+import type * as telegram from "../telegram.js";
 import type * as users from "../users.js";
 
 import type {
@@ -76,10 +80,13 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   migrations: typeof migrations;
   notifications: typeof notifications;
+  notify: typeof notify;
   odds: typeof odds;
   oddsApi: typeof oddsApi;
   payouts: typeof payouts;
   picks: typeof picks;
+  push: typeof push;
+  pushSubscriptions: typeof pushSubscriptions;
   savedPicks: typeof savedPicks;
   search: typeof search;
   seed: typeof seed;
@@ -93,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   subscriberStats: typeof subscriberStats;
   subscriptions: typeof subscriptions;
   teamLogos: typeof teamLogos;
+  telegram: typeof telegram;
   users: typeof users;
 }>;
 

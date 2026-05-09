@@ -61,11 +61,29 @@ export default defineSchema({
     // ── Discord (OAuth identity) ──
     discordId: v.optional(v.string()),
     discordUsername: v.optional(v.string()),
+    // ── Notification delivery preferences (Phase 9, FM-010) ──
+    // Per-channel toggles + Telegram chat link. Discord webhook is per-creator
+    // (creators.discordWebhookUrl), not per-user.
+    notifyPrefs: v.optional(
+      v.object({
+        push: v.optional(v.boolean()),
+        telegram: v.optional(v.boolean()),
+        // Per-kind toggles — default true.
+        pickPublished: v.optional(v.boolean()),
+        pickGraded: v.optional(v.boolean()),
+        lineMoved: v.optional(v.boolean()),
+      }),
+    ),
+    telegramChatId: v.optional(v.string()),
+    telegramLinkCode: v.optional(v.string()),
+    telegramLinkedAt: v.optional(v.number()),
   })
     .index('email', ['email'])
     .index('by_role', ['role'])
     .index('by_stripeCustomerId', ['stripeCustomerId'])
-    .index('by_discordId', ['discordId']),
+    .index('by_discordId', ['discordId'])
+    .index('by_telegramLinkCode', ['telegramLinkCode'])
+    .index('by_telegramChatId', ['telegramChatId']),
 
   tenants: defineTable({
     name: v.string(),
@@ -453,6 +471,22 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_user_and_pick', ['userId', 'pickId'])
     .index('by_pick', ['pickId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PUSH SUBSCRIPTIONS — Web push (VAPID) endpoints registered by browsers.
+  // One row per (userId, endpoint). Removed on 410 Gone or explicit unsub.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  pushSubscriptions: defineTable({
+    userId: v.id('users'),
+    endpoint: v.string(),
+    p256dh: v.string(),
+    auth: v.string(),
+    userAgent: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_endpoint', ['endpoint']),
 
   applications: defineTable({
     name: v.string(),
