@@ -3,10 +3,26 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { ConvexReactClient } from 'convex/react';
+import * as Sentry from '@sentry/react';
 type AnyConvexClient = React.ComponentProps<typeof ConvexAuthProvider>['client'];
 import { ThemeProvider } from '@digipicks/app-shell';
+import { Container, Heading, Muted, Stack } from '@digipicks/ds';
 import '@digipicks/ds/styles';
 import { App } from './App';
+
+// Sentry — opt-in via VITE_SENTRY_DSN. Quiet no-op when unset so dev
+// environments don't ship spurious events.
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: import.meta.env.MODE,
+    integrations: [Sentry.browserTracingIntegration()],
+    // Conservative sample rate — increase per-deploy when investigating.
+    tracesSampleRate: 0.1,
+    release: import.meta.env.VITE_RELEASE as string | undefined,
+  });
+}
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -21,7 +37,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const Tree = (
   <React.StrictMode>
     <ConvexAuthProvider client={convex as unknown as AnyConvexClient}>
       <BrowserRouter>
@@ -30,5 +46,26 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ThemeProvider>
       </BrowserRouter>
     </ConvexAuthProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
+
+const Root = SENTRY_DSN ? (
+  <Sentry.ErrorBoundary fallback={<SentryErrorFallback />}>{Tree}</Sentry.ErrorBoundary>
+) : (
+  Tree
+);
+
+function SentryErrorFallback() {
+  return (
+    <main>
+      <Container size="md">
+        <Stack gap={3}>
+          <Heading level={1}>Something went wrong</Heading>
+          <Muted>The team has been notified. Try refreshing the page.</Muted>
+        </Stack>
+      </Container>
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(Root);

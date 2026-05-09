@@ -100,10 +100,16 @@ export const analyzePick = internalAction({
     pickId: v.id('picks'),
     model: v.optional(v.string()),
   },
-  handler: async (ctx, args): Promise<AnalysisResult & { model: string }> => {
+  handler: async (
+    ctx,
+    args,
+  ): Promise<(AnalysisResult & { model: string }) | { skipped: true }> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY not configured');
+      // Quiet no-op when the key isn't configured (dev / tests). Matches
+      // the pattern used by oddsApi / streams / push / telegram so missing
+      // creds never blow up the scheduler chain picks.create depends on.
+      return { skipped: true };
     }
 
     const pick = await ctx.runQuery(internal.ai._pickForAi, {
