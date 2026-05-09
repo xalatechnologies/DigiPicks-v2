@@ -80,6 +80,17 @@ crons.interval(
   internal.sources.espncricinfo.pollCricketFixtures,
 );
 
+// ─── Recompute creator trust scores nightly (Phase 11) ──────────────────
+// Composite 0–100 score derived from verification, win-rate, dispute
+// ratio, account age, and sample size. Cheap full-table scan for now —
+// re-evaluate when creator count outgrows the 2k batch.
+
+crons.interval(
+  'recompute-trust-scores',
+  { hours: 24 },
+  internal.trust.recomputeTrustScores,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

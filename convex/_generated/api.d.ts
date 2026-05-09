@@ -19,6 +19,7 @@ import type * as creators from "../creators.js";
 import type * as crons from "../crons.js";
 import type * as discord from "../discord.js";
 import type * as discordSettings from "../discordSettings.js";
+import type * as disputes from "../disputes.js";
 import type * as dmThreads from "../dmThreads.js";
 import type * as events from "../events.js";
 import type * as feed from "../feed.js";
@@ -29,6 +30,7 @@ import type * as http from "../http.js";
 import type * as listings from "../listings.js";
 import type * as liveScores from "../liveScores.js";
 import type * as messages from "../messages.js";
+import type * as mfa from "../mfa.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
 import type * as notify from "../notify.js";
@@ -55,6 +57,7 @@ import type * as subscriberStats from "../subscriberStats.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as teamLogos from "../teamLogos.js";
 import type * as telegram from "../telegram.js";
+import type * as trust from "../trust.js";
 import type * as users from "../users.js";
 
 import type {
@@ -75,6 +78,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   discord: typeof discord;
   discordSettings: typeof discordSettings;
+  disputes: typeof disputes;
   dmThreads: typeof dmThreads;
   events: typeof events;
   feed: typeof feed;
@@ -85,6 +89,7 @@ declare const fullApi: ApiFromModules<{
   listings: typeof listings;
   liveScores: typeof liveScores;
   messages: typeof messages;
+  mfa: typeof mfa;
   migrations: typeof migrations;
   notifications: typeof notifications;
   notify: typeof notify;
@@ -111,6 +116,7 @@ declare const fullApi: ApiFromModules<{
   subscriptions: typeof subscriptions;
   teamLogos: typeof teamLogos;
   telegram: typeof telegram;
+  trust: typeof trust;
   users: typeof users;
 }>;
 

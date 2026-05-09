@@ -452,3 +452,142 @@ describe('applications', () => {
     ).rejects.toThrow();
   });
 });
+
+// =============================================================================
+// Disputes Tests (Phase 11)
+// =============================================================================
+
+describe('disputes', () => {
+  async function setupGradedPick(t: ReturnType<typeof convexTest>) {
+    const creatorId = await t.mutation(internal.creators.create, {
+      handle: '@disputee',
+      name: 'Dispute Target',
+      avatarColor: '#1c9cf0',
+      avatarMono: 'DT',
+      niche: 'NFL',
+      sports: ['NFL'],
+      bio: 'For dispute tests.',
+      startingPrice: 19,
+      tags: ['NFL'],
+    });
+    const ownerUserId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', {
+        role: 'user',
+        isActive: true,
+        creatorId,
+      });
+    });
+    const subscriberId = await t.run(async (ctx) => {
+      return await ctx.db.insert('users', { role: 'user', isActive: true });
+    });
+    await t.run(async (ctx) => {
+      await ctx.db.insert('subscriptions', {
+        subscriberId,
+        creatorId,
+        plan: 'premium',
+        status: 'active',
+        startedAt: Date.now(),
+      });
+    });
+
+    const pickId = await t
+      .withIdentity({ subject: ownerUserId })
+      .mutation(api.picks.create, {
+        creatorId,
+        access: 'free',
+        sport: 'Football',
+        league: 'NFL',
+        eventName: 'A @ B',
+        eventTime: '8 PM ET',
+        title: 'Pick',
+        market: 'Spread',
+        selection: 'A -3',
+        odds: '-110',
+        units: '1u',
+        confidence: 'High',
+        status: 'published',
+      });
+    await t.mutation(internal.picks.grade, {
+      id: pickId,
+      grade: 'loss',
+      netUnits: '-1u',
+    });
+
+    return { creatorId, ownerUserId, subscriberId, pickId };
+  }
+
+  test('subscriber opens a dispute, admin resolves it, status is terminal', async () => {
+    const t = convexTest(schema, modules);
+    const { pickId, subscriberId } = await setupGradedPick(t);
+
+    const adminId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { role: 'admin', isActive: true }),
+    );
+
+    const disputeId = await t
+      .withIdentity({ subject: subscriberId })
+      .mutation(api.disputes.open, {
+        pickId,
+        reason: 'Disagree with grade',
+      });
+    expect(disputeId).toBeDefined();
+
+    await t.withIdentity({ subject: adminId }).mutation(api.disputes.transition, {
+      disputeId,
+      status: 'resolved',
+      resolution: 'After review the grade stands.',
+    });
+
+    // Re-transition is rejected — terminal status is locked.
+    await expect(
+      t.withIdentity({ subject: adminId }).mutation(api.disputes.transition, {
+        disputeId,
+        status: 'open',
+      }),
+    ).rejects.toThrow(/finalized/i);
+  });
+
+  test('non-subscriber, non-creator cannot open a dispute', async () => {
+    const t = convexTest(schema, modules);
+    const { pickId } = await setupGradedPick(t);
+
+    const randomUserId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { role: 'user', isActive: true }),
+    );
+
+    await expect(
+      t.withIdentity({ subject: randomUserId }).mutation(api.disputes.open, {
+        pickId,
+        reason: 'I have opinions',
+      }),
+    ).rejects.toThrow(/active subscribers/i);
+  });
+
+  test('dispute open writes an audit log entry', async () => {
+    const t = convexTest(schema, modules);
+    const { pickId, subscriberId } = await setupGradedPick(t);
+
+    const disputeId = await t
+      .withIdentity({ subject: subscriberId })
+      .mutation(api.disputes.open, {
+        pickId,
+        reason: 'Audit me',
+      });
+
+    // Drain scheduled functions (audit.log is dispatched via runAfter(0,...)).
+    // `finishAllScheduledFunctions` advances fake timers — the noop is fine
+    // because runAfter(0) is queued for "now".
+    await t.finishAllScheduledFunctions(() => {});
+
+    const logs = await t.run(async (ctx) =>
+      ctx.db
+        .query('auditLogs')
+        .withIndex('by_entity', (q) =>
+          q.eq('entityType', 'dispute').eq('entityId', disputeId),
+        )
+        .collect(),
+    );
+    expect(logs.length).toBeGreaterThan(0);
+    expect(logs[0]!.action).toBe('dispute.opened');
+  });
+});

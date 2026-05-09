@@ -46,6 +46,24 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Audit-log append-only guard
+        # NFR-006 — auditLogs is append-only. The schema doesn't enforce it
+        # at the DB layer, so we gate at CI: no patch / delete / replace
+        # against the auditLogs table anywhere in the codebase. The only
+        # legitimate writer is `audit.log` which uses ctx.db.insert.
+        run: |
+          set -euo pipefail
+          if grep -rE "\.(patch|replace|delete)\(\s*[A-Za-z0-9_'\"]*['\"]?auditLogs|ctx\.db\.(patch|replace|delete)\b.*auditLogs" convex --include='*.ts'; then
+            echo "❌ append-only violation — auditLogs may not be patched / replaced / deleted" >&2
+            exit 1
+          fi
+          # Also reject any direct ctx.db.delete on a doc returned from a query against auditLogs.
+          if grep -rE "auditLogs.*\.delete\(\)" convex --include='*.ts'; then
+            echo "❌ append-only violation — auditLogs row deleted" >&2
+            exit 1
+          fi
+          echo "✓ auditLogs is append-only"
+
       - name: Thin-app guardrails
         # Hard gate from CLAUDE.md: zero inline styles / raw classNames /
         # tailwind utilities / .css files anywhere under apps/ (source only).

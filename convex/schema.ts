@@ -77,6 +77,13 @@ export default defineSchema({
     telegramChatId: v.optional(v.string()),
     telegramLinkCode: v.optional(v.string()),
     telegramLinkedAt: v.optional(v.number()),
+    // ── MFA / TOTP (Phase 11). Required for creator + admin roles on
+    //    sensitive mutations once enrolled. The secret is the canonical
+    //    base32 TOTP secret; lastVerifiedAt drives the recency window.
+    mfaSecret: v.optional(v.string()),
+    mfaEnrolledAt: v.optional(v.number()),
+    mfaLastVerifiedAt: v.optional(v.number()),
+    mfaRecoveryCodes: v.optional(v.array(v.string())),
   })
     .index('email', ['email'])
     .index('by_role', ['role'])
@@ -346,6 +353,19 @@ export default defineSchema({
     streamViewerCount: v.optional(v.number()),
     // ── Discord webhook (pick delivery) ──
     discordWebhookUrl: v.optional(v.string()),
+    // ── Trust score (Phase 11). 0–100 composite; recomputed nightly. ──
+    trustScore: v.optional(v.number()),
+    trustScoreUpdatedAt: v.optional(v.number()),
+    /** Breakdown for the ScoreBadge tooltip. */
+    trustSignals: v.optional(
+      v.object({
+        verification: v.number(),
+        winRate: v.number(),
+        disputeRatio: v.number(),
+        ageDays: v.number(),
+        sampleSize: v.number(),
+      }),
+    ),
   })
     .index('by_handle', ['handle'])
     .index('by_verified', ['verified'])
@@ -508,6 +528,41 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_user_and_pick', ['userId', 'pickId'])
     .index('by_pick', ['pickId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DISPUTES (PRD M16 / FM-011) — subscriber or creator can open a dispute
+  // on a graded pick. Admin reviews and resolves with an outcome.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  disputes: defineTable({
+    pickId: v.id('picks'),
+    creatorId: v.id('creators'),
+    openedByUserId: v.id('users'),
+    reason: v.string(),
+    detail: v.optional(v.string()),
+    status: v.union(
+      v.literal('open'),
+      v.literal('under_review'),
+      v.literal('resolved'),
+      v.literal('dismissed'),
+    ),
+    resolvedByAdminId: v.optional(v.id('users')),
+    resolution: v.optional(v.string()),
+    /** Free-form audit trail of admin / opener comments. */
+    notes: v.array(
+      v.object({
+        authorUserId: v.id('users'),
+        body: v.string(),
+        createdAt: v.number(),
+      }),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_pick', ['pickId'])
+    .index('by_creator', ['creatorId', 'createdAt'])
+    .index('by_status', ['status', 'createdAt'])
+    .index('by_opener', ['openedByUserId', 'createdAt']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PRICING TIERS (PRD M5 / FM-009) — replaces the hardcoded
