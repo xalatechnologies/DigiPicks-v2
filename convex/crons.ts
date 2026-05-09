@@ -59,6 +59,27 @@ crons.interval(
   internal.oddsApi.pollOddsSnapshots,
 );
 
+// ─── Poll Twitch / YouTube / Kick for creator stream live state ─────────
+// Runs every 5 minutes (Phase 10). Per-platform credentials are optional —
+// missing env keys quietly skip that platform without breaking the rest.
+
+crons.interval(
+  'poll-creator-streams',
+  { minutes: 5 },
+  internal.streams.pollStreams,
+);
+
+// ─── Poll sport-specific sources (ESPNcricinfo etc.) ────────────────────
+// Runs daily; each source checks its own enable flag. Cricket is gated by
+// SPORT_SOURCE_CRICKET_ENABLED so we never pull a fragile scraper in
+// production unintentionally.
+
+crons.interval(
+  'poll-sport-sources',
+  { hours: 24 },
+  internal.sources.espncricinfo.pollCricketFixtures,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

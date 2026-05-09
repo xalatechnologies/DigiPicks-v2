@@ -1,7 +1,5 @@
-// TODO: convex — pricing tiers need a real tiers table (api.tiers.byCreator).
-// Today we read creator.startingPrice for the entry tier; the rest stays mock.
 import React from 'react';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -18,71 +16,12 @@ import {
   Mono,
   Badge,
   TitleSub,
+  EmptyState,
+  Muted,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-
-interface PlanDef {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  featured?: boolean;
-  features: string[];
-  ctaLabel: string;
-  ctaVariant: 'primary' | 'outline';
-}
-
-function buildPlans(startingPrice: number | undefined): PlanDef[] {
-  const premiumPrice = typeof startingPrice === 'number' ? `$${startingPrice}` : '$39';
-  return [
-    {
-      id: 'free',
-      name: 'Free',
-      price: '$0',
-      period: 'mo',
-      features: [
-        '1–2 free picks per week',
-        'Discoverable in feed',
-        'No analysis attached',
-        'Sample of voice and edge',
-      ],
-      ctaLabel: 'Configure',
-      ctaVariant: 'outline',
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: premiumPrice,
-      period: 'mo',
-      featured: true,
-      features: [
-        'All picks · pre-game only',
-        'Full analysis & confidence',
-        'Direct messages with creator',
-        'Discord access (subscribers-only)',
-        'Cancel anytime',
-      ],
-      ctaLabel: 'Edit plan',
-      ctaVariant: 'primary',
-    },
-    {
-      id: 'vip',
-      name: 'VIP',
-      price: '$99',
-      period: 'mo',
-      features: [
-        'Everything in Premium',
-        'Early access · 30 min head-start',
-        'Live events & voice rooms',
-        'Quarterly 1:1 strategy call',
-        'Priority replies on DMs',
-      ],
-      ctaLabel: 'Edit plan',
-      ctaVariant: 'outline',
-    },
-  ];
-}
+import type { Id } from '../../../../../convex/_generated/dataModel';
 
 interface DiscountDef {
   code: string;
@@ -100,13 +39,65 @@ const DISCOUNTS: DiscountDef[] = [
   { code: 'SLATE7', description: '7-day free trial · VIP', status: 'Paused' },
 ];
 
+function fmtPrice(cents: number): string {
+  if (cents === 0) return '$0';
+  return `$${(cents / 100).toFixed(0)}`;
+}
+
 export function Products() {
   const me = useQuery(api.users.meSafe);
   const creator = useQuery(
     api.creators.get,
     me?.creatorId ? { id: me.creatorId } : 'skip',
   );
-  const plans = buildPlans(creator?.startingPrice);
+  const tiers = useQuery(
+    api.pricingTiers.byCreator,
+    me?.creatorId ? { creatorId: me.creatorId } : 'skip',
+  );
+  const createTier = useMutation(api.pricingTiers.create);
+  const archiveTier = useMutation(api.pricingTiers.archive);
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function handleNewTier() {
+    if (!me?.creatorId) return;
+    const name = window.prompt('Tier name (e.g. "VIP+")?');
+    if (!name) return;
+    const priceStr = window.prompt('Monthly price in USD (e.g. 99)?', '99');
+    const priceUsd = Number(priceStr);
+    if (!Number.isFinite(priceUsd) || priceUsd < 0) return;
+
+    setError(null);
+    setBusy(true);
+    try {
+      await createTier({
+        creatorId: me.creatorId,
+        name,
+        priceCents: Math.round(priceUsd * 100),
+        interval: 'month',
+        perks: ['Custom tier'],
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not create tier.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleArchive(tierId: Id<'pricingTiers'>) {
+    if (!window.confirm('Archive this tier? Existing subscribers stay active.')) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await archiveTier({ tierId });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not archive tier.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const tiersList = tiers ?? [];
 
   return (
     <>
@@ -114,9 +105,14 @@ export function Products() {
         title="Products"
         crumbs={[{ label: 'Studio' }, { label: 'Products' }]}
         actions={
-          <Button variant="primary" size="sm">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleNewTier}
+            disabled={busy || !me?.creatorId}
+          >
             <Icon name="plus" size={13} />
-            New plan
+            New tier
           </Button>
         }
       />
@@ -129,24 +125,48 @@ export function Products() {
             sub="Free is your funnel. Premium is the workhorse. VIP is your high-conviction lane."
           />
 
-          <Row gap={4} wrap>
-            {plans.map((plan) => (
-              <Col key={plan.id} gap={0}>
-                <PriceCard
-                  name={plan.name}
-                  price={plan.price}
-                  period={plan.period}
-                  featured={plan.featured}
-                  features={plan.features}
-                  cta={
-                    <Button variant={plan.ctaVariant} size="md" block>
-                      {plan.ctaLabel}
-                    </Button>
-                  }
-                />
-              </Col>
-            ))}
-          </Row>
+          {error && <Muted>{error}</Muted>}
+
+          {tiers === undefined ? (
+            <EmptyState icon="card" title="Loading tiers…" />
+          ) : tiersList.length === 0 ? (
+            <Card>
+              <EmptyState
+                icon="card"
+                title="No pricing tiers yet."
+                subtitle="Tap New tier to create your first offering. Free / Premium / VIP defaults are seeded automatically the first time a subscriber loads your profile."
+              />
+            </Card>
+          ) : (
+            <Row gap={4} wrap>
+              {tiersList.map((tier) => (
+                <Col key={tier._id} gap={0}>
+                  <PriceCard
+                    name={tier.name}
+                    price={fmtPrice(tier.priceCents)}
+                    period={tier.interval === 'month' ? 'mo' : tier.interval === 'year' ? 'yr' : 'once'}
+                    featured={tier.legacyPlan === 'premium'}
+                    features={tier.perks}
+                    cta={
+                      <Row gap={2}>
+                        <Button variant="primary" size="sm" block disabled>
+                          Edit (coming soon)
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleArchive(tier._id)}
+                          disabled={busy}
+                        >
+                          <Icon name="trash" size={13} />
+                        </Button>
+                      </Row>
+                    }
+                  />
+                </Col>
+              ))}
+            </Row>
+          )}
 
           <Row gap={5} wrap>
             <Col gap={4}>

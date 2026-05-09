@@ -18,6 +18,7 @@ import {
   PersonRow,
   EmptyState,
   ChatPanel,
+  LockedChannelPanel,
   type ChatPanelMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
@@ -42,6 +43,10 @@ export function Community() {
   const messages = useQuery(
     api.messages.listByChannel,
     activeId ? { channelId: activeId, limit: 100 } : 'skip',
+  );
+  const myAccess = useQuery(
+    api.channels.myAccess,
+    activeId ? { channelId: activeId } : 'skip',
   );
   const postToChannel = useMutation(api.messages.postToChannel);
 
@@ -177,17 +182,29 @@ export function Community() {
                     }
                   />
                   {error && <Muted>{error}</Muted>}
-                  <ChatPanel
-                    messages={chatMessages}
-                    loading={messages === undefined}
-                    draft={draft}
-                    onDraftChange={setDraft}
-                    onSend={handleSend}
-                    sending={sending}
-                    placeholder={`Message #${active.channel.slug}`}
-                    emptyTitle="Be the first to post."
-                    emptySubtitle={`Say hi in #${active.channel.slug} — your message will appear instantly for everyone in the room.`}
-                  />
+                  {myAccess && !myAccess.allowed ? (
+                    <LockedChannelPanel
+                      requiredTier={myAccess.requiredTier}
+                      creatorName={active.creator?.name}
+                      onUnlock={() =>
+                        active.creator
+                          ? navigate(`/creators/${active.creator.handle}`)
+                          : undefined
+                      }
+                    />
+                  ) : (
+                    <ChatPanel
+                      messages={chatMessages}
+                      loading={messages === undefined}
+                      draft={draft}
+                      onDraftChange={setDraft}
+                      onSend={handleSend}
+                      sending={sending}
+                      placeholder={`Message #${active.channel.slug}`}
+                      emptyTitle="Be the first to post."
+                      emptySubtitle={`Say hi in #${active.channel.slug} — your message will appear instantly for everyone in the room.`}
+                    />
+                  )}
                 </Card>
               )}
             </Col>

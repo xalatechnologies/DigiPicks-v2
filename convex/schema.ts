@@ -80,6 +80,7 @@ export default defineSchema({
   })
     .index('email', ['email'])
     .index('by_role', ['role'])
+    .index('by_creatorId', ['creatorId'])
     .index('by_stripeCustomerId', ['stripeCustomerId'])
     .index('by_discordId', ['discordId'])
     .index('by_telegramLinkCode', ['telegramLinkCode'])
@@ -199,8 +200,10 @@ export default defineSchema({
     // Polymorphic message — exactly one target should be set:
     //   conversationId  → legacy listing buyer/seller threads
     //   channelId       → creator community channel (Phase 4)
+    //   dmThreadId      → creator <-> subscriber DM (Phase 10)
     conversationId: v.optional(v.id('conversations')),
     channelId: v.optional(v.id('channels')),
+    dmThreadId: v.optional(v.id('dmThreads')),
     senderUserId: v.id('users'),
     body: v.string(),
     readAt: v.optional(v.number()),
@@ -208,7 +211,27 @@ export default defineSchema({
   })
     .index('by_conversation', ['conversationId'])
     .index('by_channel_and_createdAt', ['channelId', 'createdAt'])
+    .index('by_dmThread_and_createdAt', ['dmThreadId', 'createdAt'])
     .index('by_sender', ['senderUserId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DM THREADS (PRD M12, Phase 10) — one persistent thread per
+  // (creator, subscriber) pair. Distinct from `conversations` (listings)
+  // and `channels` (community). Created lazily on first send.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  dmThreads: defineTable({
+    creatorId: v.id('creators'),
+    userId: v.id('users'),
+    lastMessageAt: v.optional(v.number()),
+    /** Unread badge counters bumped/cleared by send + markRead. */
+    unreadForCreator: v.number(),
+    unreadForUser: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_creator', ['creatorId', 'lastMessageAt'])
+    .index('by_user', ['userId', 'lastMessageAt'])
+    .index('by_creator_and_user', ['creatorId', 'userId']),
 
   channels: defineTable({
     creatorId: v.id('creators'),
@@ -315,6 +338,12 @@ export default defineSchema({
       v.union(v.literal('twitch'), v.literal('youtube'), v.literal('kick')),
     ),
     streamHandle: v.optional(v.string()),
+    /** Live status — populated by streams.poll (Phase 10). */
+    streamLive: v.optional(v.boolean()),
+    streamLastCheckedAt: v.optional(v.number()),
+    streamWentLiveAt: v.optional(v.number()),
+    streamTitle: v.optional(v.string()),
+    streamViewerCount: v.optional(v.number()),
     // ── Discord webhook (pick delivery) ──
     discordWebhookUrl: v.optional(v.string()),
   })

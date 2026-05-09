@@ -90,7 +90,19 @@ export const listByStatus = query({
 });
 
 // Admin-only.
-/** Review (approve/reject) an application. Admin-only. */
+/**
+ * Review (approve/reject) an application. Admin-only.
+ *
+ * On approval we synchronously:
+ *   1. Create the creator profile (returns the new creatorId).
+ *   2. Patch the applicant's `users` row (by email) with creatorId +
+ *      role='creator', so they pass requireCreator on next mutation.
+ *   3. Audit-log the transition.
+ *
+ * Doing this inline (rather than through the scheduler) keeps the user-side
+ * flip atomic with the application status flip — no half-state where the
+ * application says "approved" but the user can't access creator endpoints.
+ */
 export const review = mutation({
   args: {
     id: v.id('applications'),
@@ -110,9 +122,8 @@ export const review = mutation({
       reviewedAt: Date.now(),
     });
 
-    // On approval, create the creator profile
     if (args.status === 'approved') {
-      await ctx.scheduler.runAfter(0, internal.creators.create, {
+      const creatorId = await ctx.runMutation(internal.creators.create, {
         handle: app.handle,
         name: app.name,
         avatarColor: '#1c9cf0',
@@ -129,14 +140,27 @@ export const review = mutation({
         tags: [app.sport, app.niche],
         status: 'active',
       });
+
+      // Link the applicant's user account to their fresh creator profile.
+      const applicant = await ctx.db
+        .query('users')
+        .withIndex('email', (q) => q.eq('email', app.email))
+        .first();
+      if (applicant) {
+        await ctx.db.patch(applicant._id, {
+          creatorId,
+          role: 'user',
+        });
+      }
     }
 
-    // Audit trail
+    // Audit trail — append-only.
     await ctx.scheduler.runAfter(0, internal.audit.log, {
       actorUserId: user._id,
       entityType: 'application',
       entityId: args.id,
       action: `application.${args.status}`,
+      metadata: { handle: app.handle, email: app.email },
     });
 
     return args.id;

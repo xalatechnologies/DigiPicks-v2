@@ -41,6 +41,8 @@ export { Sparkline } from './components/atoms/Sparkline/Sparkline';
 
 export { Button } from './components/atoms/Button/Button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './components/atoms/Button/Button';
+export { FollowButton } from './components/atoms/FollowButton/FollowButton';
+export type { FollowButtonProps } from './components/atoms/FollowButton/FollowButton';
 export { Chip } from './components/atoms/Chip/Chip';
 export { Switch } from './components/atoms/Switch/Switch';
 export { Checkbox } from './components/atoms/Checkbox/Checkbox';
@@ -95,6 +97,8 @@ export { AuthCard, AuthDivider, AuthFooterLink } from './components/surfaces/Aut
 export type { AuthCardProps } from './components/surfaces/AuthCard/AuthCard';
 export { AISummary } from './components/surfaces/AISummary/AISummary';
 export type { AISummaryProps } from './components/surfaces/AISummary/AISummary';
+export { LockedChannelPanel } from './components/surfaces/LockedChannelPanel/LockedChannelPanel';
+export type { LockedChannelPanelProps } from './components/surfaces/LockedChannelPanel/LockedChannelPanel';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';
