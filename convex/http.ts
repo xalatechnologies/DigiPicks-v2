@@ -227,6 +227,19 @@ async function dispatchPayout(
     paidAt: Date.now(),
     metadata: { plan: subscriptionMetadata.plan },
   });
+
+  // Phase 12 — referral redemption. If the originating Checkout Session
+  // attached a referralCode to the subscription metadata, credit the
+  // referrer with 10% of this invoice (capped at the first conversion).
+  const referralCode = subscriptionMetadata.referralCode;
+  if (referralCode && subscriptionMetadata.userId) {
+    const payoutCents = Math.floor(amountPaid * 0.1);
+    await ctx.runMutation(internal.referrals._redeem, {
+      code: referralCode,
+      referredUserId: subscriptionMetadata.userId as Id<'users'>,
+      payoutCents,
+    });
+  }
 }
 
 export default http;

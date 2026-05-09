@@ -4,6 +4,7 @@ import { applicationStatus } from './shared/validators';
 import { requireUser, requireAdmin } from './shared/permissions';
 import { internal } from './_generated/api';
 import { rateLimiter } from './shared/rateLimit';
+import { gateOnMfaIfEnrolled } from './mfa';
 
 // =============================================================================
 // Applications Module — Creator application lifecycle
@@ -111,6 +112,7 @@ export const review = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireAdmin(ctx);
+    await gateOnMfaIfEnrolled(ctx, user._id);
 
     const app = await ctx.db.get(args.id);
     if (!app) throw new Error('Application not found');

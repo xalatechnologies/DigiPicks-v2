@@ -7,6 +7,7 @@ import {
   requireAdmin,
   isAdmin,
 } from './shared/permissions';
+import { gateOnMfaIfEnrolled } from './mfa';
 
 // =============================================================================
 // Disputes (PRD M16 / FM-011) — subscriber or creator opens a dispute on a
@@ -141,6 +142,7 @@ export const transition = mutation({
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
+    await gateOnMfaIfEnrolled(ctx, admin._id);
     const dispute = await ctx.db.get(args.disputeId);
     if (!dispute) throw new Error('Dispute not found');
 

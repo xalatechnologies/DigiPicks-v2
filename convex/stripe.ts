@@ -108,6 +108,8 @@ export const createCheckoutSession = action({
   args: {
     creatorId: v.id('creators'),
     plan: subscriptionPlan,
+    /** Referral code applied at checkout — surfaces back via webhook. */
+    referralCode: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{ url: string }> => {
     if (args.plan === 'free') {
@@ -173,6 +175,14 @@ export const createCheckoutSession = action({
     params.set('subscription_data[metadata][creatorId]', args.creatorId);
     params.set('subscription_data[metadata][plan]', args.plan);
     params.set('subscription_data[metadata][userId]', me._id);
+
+    // Surface the referral code through to the invoice.paid webhook so
+    // referrals._redeem can credit the referrer when the user converts.
+    if (args.referralCode) {
+      const code = args.referralCode.trim().toLowerCase();
+      params.set('metadata[referralCode]', code);
+      params.set('subscription_data[metadata][referralCode]', code);
+    }
 
     // Idempotency-Key bucketed to a 5-minute window so duplicate clicks /
     // network retries land on the same Checkout Session without blocking a

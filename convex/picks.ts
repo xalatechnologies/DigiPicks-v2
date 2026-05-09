@@ -2,6 +2,7 @@ import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { pickAccess, pickConfidence, pickStatus, pickGrade } from './shared/validators';
 import { requireCreatorOwnership } from './shared/permissions';
+import { gateOnMfaIfEnrolled } from './mfa';
 import { internal } from './_generated/api';
 
 // =============================================================================
@@ -75,7 +76,10 @@ export const create = mutation({
     publishAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireCreatorOwnership(ctx, args.creatorId);
+    const user = await requireCreatorOwnership(ctx, args.creatorId);
+    // Sensitive mutation gate — soft variant lets non-enrolled creators
+    // keep publishing; enrolled creators must have a fresh MFA code.
+    await gateOnMfaIfEnrolled(ctx, user._id);
 
     const now = Date.now();
     const status = args.status ?? 'draft';

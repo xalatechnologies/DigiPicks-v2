@@ -239,6 +239,24 @@ export async function requireMfaFresh(
   }
 }
 
+/**
+ * Soft variant — gate ONLY when the user has already enrolled in MFA. Lets
+ * non-enrolled creators continue to publish; once they enroll, the gate
+ * kicks in transparently. The right default for sensitive mutations
+ * during the gradual MFA rollout.
+ */
+export async function gateOnMfaIfEnrolled(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>,
+): Promise<void> {
+  const user = await ctx.db.get(userId);
+  if (!user) return;
+  if (!user.mfaEnrolledAt) return;
+  if (!isFresh(user)) {
+    throw new Error('MFA verification required — re-enter your code');
+  }
+}
+
 // ─── TOTP primitives ────────────────────────────────────────────────────────
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
