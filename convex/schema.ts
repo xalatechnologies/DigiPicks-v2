@@ -216,6 +216,14 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     type: channelType,
+    /** Subscription tier required to read+post. 'public' is open. */
+    access: v.optional(
+      v.union(
+        v.literal('public'),
+        v.literal('subscriber'),
+        v.literal('vip'),
+      ),
+    ),
     isActive: v.boolean(),
     memberCount: v.number(),
     lastMessageAt: v.optional(v.number()),
@@ -471,6 +479,42 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_user_and_pick', ['userId', 'pickId'])
     .index('by_pick', ['pickId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PRICING TIERS (PRD M5 / FM-009) — replaces the hardcoded
+  // free|premium|vip enum on subscriptions. One row per offering.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  pricingTiers: defineTable({
+    creatorId: v.id('creators'),
+    name: v.string(),
+    /** Free tier when 0; otherwise priced in cents. */
+    priceCents: v.number(),
+    interval: v.union(v.literal('month'), v.literal('year'), v.literal('once')),
+    perks: v.array(v.string()),
+    stripePriceId: v.optional(v.string()),
+    archived: v.boolean(),
+    sortOrder: v.number(),
+    /** 'free' | 'premium' | 'vip' — kept so legacy subs still join cleanly. */
+    legacyPlan: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_creator', ['creatorId', 'sortOrder'])
+    .index('by_stripePriceId', ['stripePriceId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FOLLOWED CREATORS (PRD M15) — the second half of the saved library.
+  // Picks live in `savedPicks`; creators live here.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  followedCreators: defineTable({
+    userId: v.id('users'),
+    creatorId: v.id('creators'),
+    followedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_creator', ['creatorId'])
+    .index('by_user_and_creator', ['userId', 'creatorId']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PUSH SUBSCRIPTIONS — Web push (VAPID) endpoints registered by browsers.

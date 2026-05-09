@@ -1,9 +1,10 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { mutation, query, type QueryCtx } from './_generated/server';
 import {
   requireCreator,
   requireUser,
   requireCreatorOwnership,
+  getCurrentUser,
 } from './shared/permissions';
 import { channelType } from './shared/validators';
 
@@ -30,12 +31,72 @@ export const list = query({
         .filter((c) => c.isActive)
         .map(async (c) => {
           const creator = await ctx.db.get(c.creatorId);
-          return { channel: c, creator };
+          return {
+            channel: c,
+            creator,
+            // 'public' is the default for legacy rows that predate the
+            // access field. Subscriber-gating ships from this row up.
+            requiredAccess: c.access ?? 'public',
+          };
         }),
     );
     return enriched;
   },
 });
+
+/**
+ * Whether the calling user is allowed to read+post in `channel`. Returns the
+ * required tier so the UI can render the right CTA when blocked.
+ *
+ * Logic:
+ *   public      → always allowed
+ *   subscriber  → allowed iff caller has an active subscription on that creator
+ *   vip         → allowed iff caller has an active VIP-tier sub (legacyPlan === 'vip')
+ *
+ * Creator-owners always pass through their own channels regardless of tier.
+ */
+async function checkChannelAccess(
+  ctx: QueryCtx,
+  channel: {
+    creatorId: import('./_generated/dataModel').Id<'creators'>;
+    access?: 'public' | 'subscriber' | 'vip';
+  },
+  userId: import('./_generated/dataModel').Id<'users'> | null,
+): Promise<{ allowed: boolean; requiredTier: 'public' | 'subscriber' | 'vip' }> {
+  const required = channel.access ?? 'public';
+  if (required === 'public') return { allowed: true, requiredTier: required };
+  if (!userId) return { allowed: false, requiredTier: required };
+
+  // Creator owner bypass.
+  const user = await ctx.db.get(userId);
+  if (user?.creatorId === channel.creatorId) {
+    return { allowed: true, requiredTier: required };
+  }
+  // Admin bypass.
+  if (
+    user?.role === 'admin' ||
+    user?.role === 'tenant_admin' ||
+    user?.role === 'super_admin'
+  ) {
+    return { allowed: true, requiredTier: required };
+  }
+
+  const sub = await ctx.db
+    .query('subscriptions')
+    .withIndex('by_subscriber_and_creator', (q) =>
+      q.eq('subscriberId', userId).eq('creatorId', channel.creatorId),
+    )
+    .first();
+  if (!sub || sub.status !== 'active') {
+    return { allowed: false, requiredTier: required };
+  }
+  if (required === 'vip' && sub.plan !== 'vip') {
+    return { allowed: false, requiredTier: required };
+  }
+  return { allowed: true, requiredTier: required };
+}
+
+export { checkChannelAccess };
 
 /** Channels owned by a specific creator. */
 export const byCreator = query({
@@ -60,6 +121,20 @@ export const getBySlug = query({
     if (!channel) return null;
     const creator = await ctx.db.get(channel.creatorId);
     return { channel, creator };
+  },
+});
+
+/**
+ * Access check for the calling user — UI renders the locked panel
+ * (subscribe CTA) when this returns `allowed: false`.
+ */
+export const myAccess = query({
+  args: { channelId: v.id('channels') },
+  handler: async (ctx, args) => {
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) return { allowed: false as const, requiredTier: 'public' as const };
+    const user = await getCurrentUser(ctx);
+    return await checkChannelAccess(ctx, channel, user?._id ?? null);
   },
 });
 

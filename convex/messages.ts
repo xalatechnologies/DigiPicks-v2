@@ -1,7 +1,8 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import { requireUser } from './shared/permissions';
+import { requireUser, getCurrentUser } from './shared/permissions';
 import { rateLimiter } from './shared/rateLimit';
+import { checkChannelAccess } from './channels';
 
 // =============================================================================
 // Messages Module — Buyer-seller conversations
@@ -99,6 +100,12 @@ export const listByChannel = query({
     const channel = await ctx.db.get(args.channelId);
     if (!channel || !channel.isActive) return [];
 
+    // Subscriber-gated channels return an empty array for non-subscribers
+    // so the UI surfaces the locked-state CTA via `channels.myAccess`.
+    const caller = await getCurrentUser(ctx);
+    const access = await checkChannelAccess(ctx, channel, caller?._id ?? null);
+    if (!access.allowed) return [];
+
     const rows = await ctx.db
       .query('messages')
       .withIndex('by_channel_and_createdAt', (q) =>
@@ -146,6 +153,13 @@ export const postToChannel = mutation({
     const channel = await ctx.db.get(args.channelId);
     if (!channel) throw new Error('Channel not found');
     if (!channel.isActive) throw new Error('Channel is archived');
+
+    const access = await checkChannelAccess(ctx, channel, user._id);
+    if (!access.allowed) {
+      throw new Error(
+        `Posting to this channel requires a ${access.requiredTier} subscription.`,
+      );
+    }
 
     const trimmed = args.body.trim();
     if (!trimmed) throw new Error('Message body required');
