@@ -20,6 +20,20 @@ export default [
     },
   },
   {
+    // Service workers run in a different global scope (self/clients/etc.).
+    // Override `no-undef` so push.sw.js style files don't fail the lint gate.
+    files: ['**/public/sw.js', '**/public/*.sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        clients: 'readonly',
+        caches: 'readonly',
+        skipWaiting: 'readonly',
+        registration: 'readonly',
+      },
+    },
+  },
+  {
     ignores: ['dist/', 'node_modules/', '.convex/'],
   },
 ];
