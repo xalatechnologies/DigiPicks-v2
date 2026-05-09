@@ -15,8 +15,9 @@ import {
   Search,
   EmptyState,
   PersonRow,
-  Field,
-  TextArea,
+  Badge,
+  ChatPanel,
+  type ChatPanelMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
@@ -38,39 +39,68 @@ function monogram(name: string | undefined): string {
 }
 
 export function Messages() {
-  const [query, setQuery] = React.useState('');
-  const [activeId, setActiveId] = React.useState<Id<'conversations'> | null>(null);
+  const me = useQuery(api.users.me);
+  const threads = useQuery(
+    api.dmThreads.threadsForMyCreator,
+    me?.creatorId ? { creatorId: me.creatorId } : 'skip',
+  );
+  const [activeId, setActiveId] = React.useState<Id<'dmThreads'> | null>(null);
   const [draft, setDraft] = React.useState('');
   const [sending, setSending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [search, setSearch] = React.useState('');
 
-  const conversations = useQuery(api.messages.listConversations);
   const messages = useQuery(
-    api.messages.getMessages,
-    activeId ? { conversationId: activeId } : 'skip',
+    api.dmThreads.messagesIn,
+    activeId ? { threadId: activeId, limit: 200 } : 'skip',
   );
-  const sendMessage = useMutation(api.messages.send);
+  const send = useMutation(api.dmThreads.send);
+  const markRead = useMutation(api.dmThreads.markRead);
 
-  // Auto-pick the first conversation once data lands.
+  // Auto-pick the first thread once data lands.
   React.useEffect(() => {
-    if (!activeId && conversations && conversations.length > 0) {
-      setActiveId(conversations[0]!._id);
+    if (!activeId && threads && threads.length > 0) {
+      setActiveId(threads[0]!.thread._id);
     }
-  }, [activeId, conversations]);
+  }, [activeId, threads]);
 
-  const filtered = (conversations ?? []).filter((c) => {
-    if (!query) return true;
-    return c._id.toLowerCase().includes(query.toLowerCase());
+  // Mark as read when the active thread changes — fire-and-forget.
+  React.useEffect(() => {
+    if (activeId) {
+      void markRead({ threadId: activeId }).catch(() => {});
+    }
+  }, [activeId, markRead]);
+
+  const filtered = (threads ?? []).filter(({ subscriber }) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return Boolean(
+      subscriber?.name?.toLowerCase().includes(q) ||
+        subscriber?.email?.toLowerCase().includes(q),
+    );
   });
 
-  const active = conversations?.find((c) => c._id === activeId) ?? null;
+  const active = threads?.find((t) => t.thread._id === activeId) ?? null;
+
+  const chatMessages: ChatPanelMessage[] = (messages ?? []).map((m) => {
+    const isOwn = m.senderUserId === me?._id;
+    return {
+      id: m._id,
+      senderName: isOwn ? me?.name ?? 'You' : active?.subscriber?.name ?? 'Subscriber',
+      senderMono: isOwn ? monogram(me?.name) : monogram(active?.subscriber?.name),
+      senderColor: isOwn ? '#1c9cf0' : '#3A4F7A',
+      body: m.body,
+      createdAt: m.createdAt,
+      isOwn,
+    };
+  });
 
   async function handleSend() {
     if (!activeId || !draft.trim()) return;
     setError(null);
     setSending(true);
     try {
-      await sendMessage({ conversationId: activeId, body: draft.trim() });
+      await send({ threadId: activeId, body: draft.trim() });
       setDraft('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send message.');
@@ -84,56 +114,57 @@ export function Messages() {
       <PageHeader
         title="Messages"
         crumbs={[{ label: 'Audience' }, { label: 'Messages' }]}
-        actions={
-          <Button variant="primary" size="sm">
-            <Icon name="plus" size={13} />
-            New broadcast
-          </Button>
-        }
       />
 
       <Container size="2xl">
         <Stack gap={5}>
           <PageHead
             eyebrow="Audience"
-            title="Member conversations"
-            sub="DMs from active subscribers — VIP gets priority response by default."
+            title="Subscriber DMs"
+            sub="Direct conversations with active subscribers. New replies trigger a push notification on the subscriber side."
           />
 
           <Row gap={4} wrap>
             <Col gap={3}>
               <Search
-                placeholder="Search conversations"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search subscribers"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
               <Card pad="sm">
-                {conversations === undefined ? (
-                  <EmptyState icon="message" title="Loading conversations…" />
+                {threads === undefined ? (
+                  <EmptyState icon="message" title="Loading threads…" />
                 ) : filtered.length === 0 ? (
                   <EmptyState
                     icon="message"
-                    title="No conversations yet"
-                    subtitle="DMs from your subscribers will appear here."
+                    title="No subscriber DMs yet"
+                    subtitle="When a subscriber opens a DM with you it'll appear here."
                   />
                 ) : (
                   <Stack gap={1}>
-                    {filtered.map((c) => (
+                    {filtered.map(({ thread, subscriber, unread }) => (
                       <Card
-                        key={c._id}
+                        key={thread._id}
                         hover
                         pad="sm"
-                        onClick={() => setActiveId(c._id)}
+                        onClick={() => setActiveId(thread._id)}
                       >
                         <PersonRow
-                          name={`Conversation ${c._id.slice(-6)}`}
+                          name={subscriber?.name ?? 'Subscriber'}
                           sub={
-                            c.lastMessageAt
-                              ? `Last activity ${fmtTime(c.lastMessageAt)}`
+                            thread.lastMessageAt
+                              ? fmtTime(thread.lastMessageAt)
                               : 'No messages yet'
                           }
-                          mono={monogram(c._id)}
+                          mono={monogram(subscriber?.name)}
                           color="#3A4F7A"
+                          trailing={
+                            unread > 0 ? (
+                              <Badge tone="blue" dot>
+                                {unread}
+                              </Badge>
+                            ) : null
+                          }
                         />
                       </Card>
                     ))}
@@ -147,17 +178,17 @@ export function Messages() {
                 <Card>
                   <EmptyState
                     icon="message"
-                    title="Pick a conversation"
-                    subtitle="Select a thread on the left to view the full message history."
+                    title="Pick a thread"
+                    subtitle="Select a conversation on the left to read and reply."
                   />
                 </Card>
               ) : (
                 <Card>
                   <CardHead
-                    title={`Conversation ${active._id.slice(-6)}`}
+                    title={active.subscriber?.name ?? 'Subscriber'}
                     sub={
-                      active.lastMessageAt
-                        ? `Last activity ${fmtTime(active.lastMessageAt)}`
+                      active.thread.lastMessageAt
+                        ? `Last activity ${fmtTime(active.thread.lastMessageAt)}`
                         : 'No messages yet'
                     }
                     action={
@@ -166,47 +197,18 @@ export function Messages() {
                       </Button>
                     }
                   />
-                  <Stack gap={3}>
-                    {messages === undefined ? (
-                      <EmptyState icon="message" title="Loading messages…" />
-                    ) : messages.length === 0 ? (
-                      <EmptyState
-                        icon="message"
-                        title="No messages yet"
-                        subtitle="Send the first message to start this thread."
-                      />
-                    ) : (
-                      messages.map((m) => (
-                        <Card key={m._id} pad="sm">
-                          <Stack gap={1}>
-                            <Muted>{fmtTime(m.createdAt)}</Muted>
-                            <span>{m.body}</span>
-                          </Stack>
-                        </Card>
-                      ))
-                    )}
-
-                    <Field label="Reply">
-                      <TextArea
-                        rows={3}
-                        value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
-                        placeholder="Write a reply…"
-                      />
-                    </Field>
-                    {error && <Muted>{error}</Muted>}
-                    <Row gap={2}>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleSend}
-                        disabled={sending || !draft.trim()}
-                      >
-                        <Icon name="arrow-right" size={13} />
-                        Send
-                      </Button>
-                    </Row>
-                  </Stack>
+                  {error && <Muted>{error}</Muted>}
+                  <ChatPanel
+                    messages={chatMessages}
+                    loading={messages === undefined}
+                    draft={draft}
+                    onDraftChange={setDraft}
+                    onSend={handleSend}
+                    sending={sending}
+                    placeholder="Reply to subscriber…"
+                    emptyTitle="No messages yet"
+                    emptySubtitle="Send the first message to start this thread."
+                  />
                 </Card>
               )}
             </Col>
