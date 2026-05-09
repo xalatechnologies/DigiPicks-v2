@@ -28,6 +28,8 @@ export type {
 export { VerifiedMark } from './components/atoms/VerifiedMark/VerifiedMark';
 export { SportTag } from './components/atoms/SportTag/SportTag';
 export { Tag } from './components/atoms/Tag/Tag';
+export { TrustScoreBadge } from './components/atoms/TrustScoreBadge/TrustScoreBadge';
+export type { TrustScoreBadgeProps } from './components/atoms/TrustScoreBadge/TrustScoreBadge';
 
 export { SkipLink } from './components/atoms/SkipLink/SkipLink';
 export type { SkipLinkProps } from './components/atoms/SkipLink/SkipLink';
@@ -105,6 +107,16 @@ export { AISummary } from './components/surfaces/AISummary/AISummary';
 export type { AISummaryProps } from './components/surfaces/AISummary/AISummary';
 export { LockedChannelPanel } from './components/surfaces/LockedChannelPanel/LockedChannelPanel';
 export type { LockedChannelPanelProps } from './components/surfaces/LockedChannelPanel/LockedChannelPanel';
+export { AIAssistPanel } from './components/surfaces/AIAssistPanel/AIAssistPanel';
+export type {
+  AIAssistPanelProps,
+  AISuggestion,
+} from './components/surfaces/AIAssistPanel/AIAssistPanel';
+export { TrendingCarousel } from './components/surfaces/TrendingCarousel/TrendingCarousel';
+export type {
+  TrendingCarouselProps,
+  TrendingItem,
+} from './components/surfaces/TrendingCarousel/TrendingCarousel';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';

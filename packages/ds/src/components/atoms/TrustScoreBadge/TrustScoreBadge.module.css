@@ -1,0 +1,64 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--t-2);
+}
+
+.sm {
+  padding: 1px var(--space-2);
+  font-size: var(--text-2xs);
+  gap: var(--space-1);
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  color: var(--t-1);
+}
+
+.tier {
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.muted {
+  color: var(--t-3);
+}
+
+.gold {
+  border-color: color-mix(in srgb, var(--gold) 50%, var(--line));
+  background: color-mix(in srgb, var(--gold) 8%, var(--bg-2));
+  color: var(--gold);
+}
+
+.green {
+  border-color: color-mix(in srgb, var(--ok) 50%, var(--line));
+  background: color-mix(in srgb, var(--ok) 8%, var(--bg-2));
+  color: var(--ok);
+}
+
+.blue {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--line));
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-2));
+  color: var(--primary);
+}
+
+.amber {
+  border-color: color-mix(in srgb, var(--warn) 50%, var(--line));
+  background: color-mix(in srgb, var(--warn) 8%, var(--bg-2));
+  color: var(--warn);
+}
+
+.red {
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--line));
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-2));
+  color: var(--danger);
+}
