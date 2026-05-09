@@ -35,3 +35,53 @@ export const markRead = mutation({
     await ctx.db.patch(args.id, { readAt: Date.now() });
   },
 });
+
+// Auth-only.
+/** Recent notifications (read + unread) for the dropdown surface. */
+export const listMine = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    return await ctx.db
+      .query('notifications')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .take(args.limit ?? 30);
+  },
+});
+
+// Auth-only.
+/** Unread badge count — capped at 99 for display. */
+export const unreadCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const rows = await ctx.db
+      .query('notifications')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .take(200);
+    const count = rows.filter((n) => n.readAt === undefined).length;
+    return count > 99 ? 99 : count;
+  },
+});
+
+// Auth-only.
+/** Mark every unread notification for the current user as read. */
+export const markAllRead = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const unread = await ctx.db
+      .query('notifications')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .take(500);
+    const now = Date.now();
+    let count = 0;
+    for (const row of unread) {
+      if (row.readAt !== undefined) continue;
+      await ctx.db.patch(row._id, { readAt: now });
+      count++;
+    }
+    return { count };
+  },
+});

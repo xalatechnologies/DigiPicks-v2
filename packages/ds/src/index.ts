@@ -20,12 +20,19 @@ export { Badge } from './components/atoms/Badge/Badge';
 export type { BadgeProps, BadgeTone } from './components/atoms/Badge/Badge';
 export { AccessBadge } from './components/atoms/AccessBadge/AccessBadge';
 export { GradeBadge } from './components/atoms/GradeBadge/GradeBadge';
+export { EventSourceBadge } from './components/atoms/EventSourceBadge/EventSourceBadge';
+export type {
+  EventSourceBadgeProps,
+  EventSourceType,
+} from './components/atoms/EventSourceBadge/EventSourceBadge';
 export { VerifiedMark } from './components/atoms/VerifiedMark/VerifiedMark';
 export { SportTag } from './components/atoms/SportTag/SportTag';
 export { Tag } from './components/atoms/Tag/Tag';
 
 export { Bar } from './components/atoms/Bar/Bar';
 export { ConfidenceBar } from './components/atoms/ConfidenceBar/ConfidenceBar';
+export { ConfidenceGauge } from './components/atoms/ConfidenceGauge/ConfidenceGauge';
+export type { ConfidenceGaugeProps } from './components/atoms/ConfidenceGauge/ConfidenceGauge';
 export { FormDots } from './components/atoms/FormDots/FormDots';
 export { Sparkline } from './components/atoms/Sparkline/Sparkline';
 
@@ -55,6 +62,12 @@ export { PasswordInput } from './components/forms/PasswordInput/PasswordInput';
 export type { PasswordInputProps } from './components/forms/PasswordInput/PasswordInput';
 export { AuthMethodButton, AuthSavedGroup } from './components/forms/AuthMethodButton/AuthMethodButton';
 export type { AuthMethodButtonProps } from './components/forms/AuthMethodButton/AuthMethodButton';
+export { EventForm } from './components/forms/EventForm/EventForm';
+export type {
+  EventFormProps,
+  EventFormValue,
+  EventFormVisibility,
+} from './components/forms/EventForm/EventForm';
 
 // ── surfaces ─────────────────────────────────────────────────────────────
 export { Card } from './components/surfaces/Card/Card';
@@ -77,6 +90,8 @@ export type { SplitCTAProps, SplitCTAPanel } from './components/surfaces/SplitCT
 export { PriceCard } from './components/surfaces/PriceCard/PriceCard';
 export { AuthCard, AuthDivider, AuthFooterLink } from './components/surfaces/AuthCard/AuthCard';
 export type { AuthCardProps } from './components/surfaces/AuthCard/AuthCard';
+export { AISummary } from './components/surfaces/AISummary/AISummary';
+export type { AISummaryProps } from './components/surfaces/AISummary/AISummary';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';
@@ -84,6 +99,13 @@ export { KV } from './components/data/KV/KV';
 export { DataPair } from './components/data/DataPair/DataPair';
 export { Stat } from './components/data/Stat/Stat';
 export { BigStat } from './components/data/BigStat/BigStat';
+export { OddsGrid } from './components/data/OddsGrid/OddsGrid';
+export type {
+  OddsGridProps,
+  OddsRow,
+  OddsCell,
+  OddsBook,
+} from './components/data/OddsGrid/OddsGrid';
 
 // ── nav ──────────────────────────────────────────────────────────────────
 export { AppHeader } from './components/nav/AppHeader/AppHeader';
@@ -172,3 +194,19 @@ export type {
   EventCardCreatorAvatar,
 } from './components/domain/EventCard/EventCard';
 export { PickCard } from './components/domain/PickCard/PickCard';
+export { ChatPanel } from './components/domain/ChatPanel/ChatPanel';
+export type {
+  ChatPanelProps,
+  ChatPanelMessage,
+} from './components/domain/ChatPanel/ChatPanel';
+export { StreamEmbed } from './components/domain/StreamEmbed/StreamEmbed';
+export type {
+  StreamEmbedProps,
+  StreamPlatform,
+} from './components/domain/StreamEmbed/StreamEmbed';
+export { PricingModal } from './components/domain/PricingModal/PricingModal';
+export type {
+  PricingModalProps,
+  PricingTier,
+  PricingPlan,
+} from './components/domain/PricingModal/PricingModal';

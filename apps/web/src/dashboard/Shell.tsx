@@ -36,6 +36,7 @@ function buildNavSections(subscriberCount: string): StudioNavSection[] {
         { to: '/dashboard', label: 'Overview', sub: 'Today across your business', icon: 'home', end: true },
         { to: '/dashboard/picks', label: 'Posts & Picks', sub: 'Drafts, scheduled, graded', icon: 'feed' },
         { to: '/dashboard/create', label: 'Create Pick', sub: 'Publish before cutoff', icon: 'plus' },
+        { to: '/dashboard/events', label: 'My Events', sub: 'Author custom events for review', icon: 'calendar' },
         { to: '/dashboard/products', label: 'Products', sub: 'Plans & pricing tiers', icon: 'tag' },
       ],
     },

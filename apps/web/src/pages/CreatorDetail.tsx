@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { useConvexAuth } from '@convex-dev/auth/react';
 import {
   Container,
   Section,
@@ -20,6 +22,7 @@ import {
   Metric,
   PriceCard,
   PickCard,
+  PricingModal,
   CreatorCard,
   EmptyState,
   ResponsibleSection,
@@ -27,8 +30,11 @@ import {
   Sparkline,
   Breadcrumb,
   Divider,
+  StreamEmbed,
+  type PricingPlan,
+  type PricingTier,
 } from '@digipicks/ds';
-import { CREATORS, FEED_PICKS, type Creator } from '@/data/mock';
+import { api } from '../../../../convex/_generated/api';
 
 function formatWinRate(v: number): string {
   return `${(v * 100).toFixed(1)}%`;
@@ -39,51 +45,6 @@ function formatSubs(v: number): string {
   return v.toLocaleString();
 }
 
-function buildTiers(c: Creator) {
-  const base = c.startingPrice;
-  return [
-    {
-      name: 'Free',
-      price: '$0',
-      period: 'forever',
-      features: [
-        'Public picks and grades',
-        'Win-rate transparency',
-        'Notification preferences',
-      ],
-      cta: 'Follow',
-      featured: false,
-    },
-    {
-      name: 'Premium',
-      price: `$${base}`,
-      period: 'per month',
-      features: [
-        'Every pre-game pick',
-        'Full reasoning + units sizing',
-        'Confidence + CLV tracking',
-        'Priority pick alerts',
-      ],
-      cta: 'Subscribe',
-      featured: true,
-    },
-    {
-      name: 'VIP',
-      price: `$${base + 40}`,
-      period: 'per month',
-      features: [
-        'Everything in Premium',
-        'Real-time DMs with the creator',
-        'VIP-only chat room',
-        'Tax-ready unit reports',
-      ],
-      cta: 'Go VIP',
-      featured: false,
-    },
-  ];
-}
-
-// Synthetic sparkline trend (last 30 graded picks rolling units).
 function buildTrend(seed: number): number[] {
   const out: number[] = [];
   let v = 0;
@@ -97,20 +58,156 @@ function buildTrend(seed: number): number[] {
 export function CreatorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const creator = CREATORS.find((c) => c.id === id) ?? CREATORS[0];
+  const { isAuthenticated } = useConvexAuth();
 
-  const others = CREATORS.filter((c) => c.id !== creator.id).slice(0, 3);
-  const recent = FEED_PICKS.filter((p) => p.creator === creator.id).slice(0, 4);
-  const tiers = buildTiers(creator);
-  const trend = buildTrend(creator.id.charCodeAt(0) + creator.id.length);
-  const cssVars = { '--av-color': creator.avatar.color } as React.CSSProperties;
+  const creator = useQuery(
+    api.creators.getByHandle,
+    id ? { handle: id } : 'skip',
+  );
+  const recentPicks = useQuery(
+    api.picks.byCreator,
+    creator?._id ? { creatorId: creator._id, limit: 4 } : 'skip',
+  );
+  const allCreators = useQuery(api.creators.list, {});
+  const isSubscribed = useQuery(
+    api.subscriptions.isSubscribed,
+    creator?._id && isAuthenticated ? { creatorId: creator._id } : 'skip',
+  );
+
+  const createCheckout = useAction(api.stripe.createCheckoutSession);
+  const subscribeFree = useMutation(api.subscriptions.subscribe);
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [busyPlan, setBusyPlan] = React.useState<PricingPlan | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  if (id && creator === null) {
+    return (
+      <main>
+        <Container size="xl">
+          <Section>
+            <EmptyState
+              icon="search"
+              title="Creator not found."
+              subtitle={`We couldn't find a creator with the handle "${id}". They may have changed their handle or moved their profile.`}
+              action={
+                <Button
+                  variant="primary"
+                  iconRight="arrow-right"
+                  onClick={() => navigate('/creators')}
+                >
+                  Browse creators
+                </Button>
+              }
+            />
+          </Section>
+        </Container>
+      </main>
+    );
+  }
+
+  if (!creator) {
+    return (
+      <main>
+        <Container size="xl">
+          <Section>
+            <EmptyState icon="user" title="Loading creator…" />
+          </Section>
+        </Container>
+      </main>
+    );
+  }
+
+  const others = (allCreators ?? [])
+    .filter((c) => c._id !== creator._id)
+    .slice(0, 3);
+  const recent = recentPicks ?? [];
+  const trend = buildTrend(creator.handle.charCodeAt(0) + creator.handle.length);
+  const cssVars = { '--av-color': creator.avatarColor } as React.CSSProperties;
   const streakDown = creator.streak.startsWith('L');
   const unitsDown = creator.units.startsWith('-');
+
+  const tiers: PricingTier[] = [
+    {
+      plan: 'free',
+      name: 'Free',
+      price: '$0',
+      period: 'forever',
+      features: [
+        'Public picks and grades',
+        'Win-rate transparency',
+        'Notification preferences',
+      ],
+      featured: false,
+      available: true,
+    },
+    {
+      plan: 'premium',
+      name: 'Premium',
+      price: `$${creator.startingPrice}`,
+      period: 'mo',
+      features: [
+        'Every pre-game pick',
+        'Full reasoning + units sizing',
+        'Confidence + CLV tracking',
+        'Priority pick alerts',
+      ],
+      featured: true,
+      available: Boolean(creator.stripePriceIdPremium),
+    },
+    {
+      plan: 'vip',
+      name: 'VIP',
+      price: `$${creator.startingPrice + 40}`,
+      period: 'mo',
+      features: [
+        'Everything in Premium',
+        'Real-time DMs with the creator',
+        'VIP-only chat room',
+        'Tax-ready unit reports',
+      ],
+      featured: false,
+      available: Boolean(creator.stripePriceIdVip),
+    },
+  ];
+
+  async function handleSubscribe(plan: PricingPlan) {
+    if (!isAuthenticated) {
+      navigate(`/auth?next=/creators/${creator!.handle}`);
+      return;
+    }
+    setError(null);
+    setBusyPlan(plan);
+    try {
+      if (plan === 'free') {
+        await subscribeFree({ creatorId: creator!._id, plan: 'free' });
+        setModalOpen(false);
+      } else {
+        const { url } = await createCheckout({
+          creatorId: creator!._id,
+          plan,
+        });
+        window.location.assign(url);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start checkout.');
+    } finally {
+      setBusyPlan(null);
+    }
+  }
+
+  function openSubscribe() {
+    if (!isAuthenticated) {
+      navigate(`/auth?next=/creators/${creator!.handle}`);
+      return;
+    }
+    setError(null);
+    setModalOpen(true);
+  }
 
   return (
     <main>
       <Container size="xl">
-        {/* ── Crumbs ────────────────────────────────────────────────────── */}
         <Section noReveal>
           <Breadcrumb
             items={[
@@ -120,16 +217,14 @@ export function CreatorDetail() {
           />
         </Section>
 
-        {/* ── Profile hero — split: identity + key stats ────────────────── */}
         <Section noReveal>
           <Card pad="xl" style={cssVars}>
             <Grid cols={2} gap={8} stagger={false}>
-              {/* left: identity */}
               <Stack gap={5}>
                 <Row gap={5}>
                   <Avatar
-                    mono={creator.avatar.mono}
-                    color={creator.avatar.color}
+                    mono={creator.avatarMono}
+                    color={creator.avatarColor}
                     size={88}
                   />
                   <Stack gap={2}>
@@ -138,17 +233,22 @@ export function CreatorDetail() {
                         <Badge tone="gold" icon="flame">Trending</Badge>
                       )}
                       <Badge tone={streakDown ? 'red' : 'green'} dot>
-                        Streak {creator.streak}
+                        Streak {creator.streak || '—'}
                       </Badge>
                       {creator.verified && (
                         <Badge tone="blue" icon="verified">Verified</Badge>
+                      )}
+                      {isSubscribed && (
+                        <Badge tone="violet" dot>
+                          Subscribed
+                        </Badge>
                       )}
                     </Row>
                     <Heading level={1} size="3xl" balance>
                       {creator.name}
                     </Heading>
                     <Row gap={2} wrap>
-                      <Mono>{creator.handle}</Mono>
+                      <Mono>@{creator.handle}</Mono>
                       <Muted>·</Muted>
                       <Muted>{creator.niche}</Muted>
                     </Row>
@@ -166,9 +266,18 @@ export function CreatorDetail() {
                   ))}
                 </Row>
 
+                {error && <Muted>{error}</Muted>}
+
                 <Row gap={3} wrap>
-                  <Button variant="primary" iconRight="arrow-right">
-                    Subscribe — ${creator.startingPrice}/mo
+                  <Button
+                    variant="primary"
+                    iconRight="arrow-right"
+                    onClick={openSubscribe}
+                    disabled={busyPlan !== null}
+                  >
+                    {isSubscribed
+                      ? 'Manage subscription'
+                      : `Subscribe — $${creator.startingPrice}/mo`}
                   </Button>
                   <Button variant="outline" iconLeft="bell">
                     Notify me
@@ -179,7 +288,6 @@ export function CreatorDetail() {
                 </Row>
               </Stack>
 
-              {/* right: key stats grid */}
               <Stack gap={4}>
                 <Eyebrow>Performance · 90 days</Eyebrow>
                 <Grid cols={2} gap={4} stagger={false}>
@@ -193,11 +301,11 @@ export function CreatorDetail() {
                     value={creator.units}
                     delta={{ value: unitsDown ? '-' : '+', dir: unitsDown ? 'down' : 'up' }}
                   />
-                  <Metric label="Subscribers" value={formatSubs(creator.subs)} />
                   <Metric
-                    label="W·L·P record"
-                    value={creator.record}
+                    label="Subscribers"
+                    value={formatSubs(creator.subscriberCount)}
                   />
+                  <Metric label="W·L·P record" value={creator.record} />
                 </Grid>
                 <Card pad="md">
                   <Row between>
@@ -218,13 +326,16 @@ export function CreatorDetail() {
           </Card>
         </Section>
 
-        {/* ── Recent picks (feed) ─────────────────────────────────────────── */}
         <Section
           eyebrow="Recent picks"
           title={`What ${creator.name} is calling now.`}
           sub="Pre-game only · graded by the platform · published in real time."
           action={
-            <Button variant="ghost" iconRight="arrow-right" onClick={() => navigate('/events')}>
+            <Button
+              variant="ghost"
+              iconRight="arrow-right"
+              onClick={() => navigate('/events')}
+            >
               See tonight's slate
             </Button>
           }
@@ -233,17 +344,17 @@ export function CreatorDetail() {
             <Stack gap={4}>
               {recent.map((p) => (
                 <PickCard
-                  key={p.id}
+                  key={p._id}
                   creatorName={creator.name}
                   creatorHandle={creator.handle}
-                  creatorMono={creator.avatar.mono}
-                  creatorColor={creator.avatar.color}
+                  creatorMono={creator.avatarMono}
+                  creatorColor={creator.avatarColor}
                   creatorVerified={creator.verified}
                   access={p.access}
                   sport={p.sport}
-                  event={p.event}
+                  event={p.eventName}
                   eventTime={p.eventTime}
-                  posted={p.posted}
+                  posted={new Date(p.publishedAt ?? p.createdAt).toLocaleDateString()}
                   title={p.title}
                   market={p.market}
                   selection={p.selection}
@@ -251,8 +362,13 @@ export function CreatorDetail() {
                   units={p.units}
                   body={p.body}
                   teaser={p.teaser}
-                  status={p.status}
-                  locked={p.access !== 'free'}
+                  status={p.grade ?? 'pending'}
+                  aiSummary={p.aiSummary}
+                  aiConfidence={p.aiConfidence}
+                  aiReasoning={p.aiReasoning}
+                  aiModel={p.aiModel}
+                  locked={p.access !== 'free' && !isSubscribed}
+                  onOpen={() => p.access !== 'free' && !isSubscribed ? openSubscribe() : undefined}
                 />
               ))}
             </Stack>
@@ -262,7 +378,11 @@ export function CreatorDetail() {
               title="No public picks yet."
               subtitle="This creator hasn't posted a public pick recently. Subscribe to see premium picks the moment they go live."
               action={
-                <Button variant="primary" iconRight="arrow-right">
+                <Button
+                  variant="primary"
+                  iconRight="arrow-right"
+                  onClick={openSubscribe}
+                >
                   Subscribe — ${creator.startingPrice}/mo
                 </Button>
               }
@@ -270,7 +390,21 @@ export function CreatorDetail() {
           )}
         </Section>
 
-        {/* ── Performance breakdown ─────────────────────────────────────── */}
+        {creator.streamPlatform && creator.streamHandle && (
+          <Section
+            eyebrow="Live stream"
+            title={`Watch ${creator.name} on ${creator.streamPlatform}.`}
+            sub="Embedded directly so you can follow live commentary without leaving DigiPicks."
+          >
+            <Card pad="md">
+              <StreamEmbed
+                platform={creator.streamPlatform}
+                handle={creator.streamHandle}
+              />
+            </Card>
+          </Section>
+        )}
+
         <Section
           eyebrow="Performance breakdown"
           title="Independently graded — every record real."
@@ -281,7 +415,7 @@ export function CreatorDetail() {
               <CardHead title="Last 10 results" sub="Oldest left, newest right" />
               <Stack gap={4}>
                 <Row gap={1} wrap>
-                  {creator.last10.split('').map((c, i) => (
+                  {(creator.last10 || '').split('').map((c, i) => (
                     <Badge
                       key={i}
                       tone={c === 'W' ? 'green' : c === 'L' ? 'red' : 'mute'}
@@ -294,7 +428,7 @@ export function CreatorDetail() {
                 <Row between>
                   <Muted>Current streak</Muted>
                   <Badge tone={streakDown ? 'red' : 'green'} dot>
-                    {creator.streak}
+                    {creator.streak || '—'}
                   </Badge>
                 </Row>
               </Stack>
@@ -338,7 +472,6 @@ export function CreatorDetail() {
           </Grid>
         </Section>
 
-        {/* ── Subscribe ─────────────────────────────────────────────────── */}
         <Section
           eyebrow="Subscribe"
           title={`Pick a plan that fits how you follow ${creator.name}.`}
@@ -347,7 +480,7 @@ export function CreatorDetail() {
           <Grid cols={3} gap={5}>
             {tiers.map((t) => (
               <PriceCard
-                key={t.name}
+                key={t.plan}
                 name={t.name}
                 price={t.price}
                 period={t.period}
@@ -358,8 +491,16 @@ export function CreatorDetail() {
                     variant={t.featured ? 'primary' : 'outline'}
                     block
                     iconRight="arrow-right"
+                    disabled={t.available === false || busyPlan !== null}
+                    onClick={() => handleSubscribe(t.plan)}
                   >
-                    {t.cta}
+                    {t.available === false
+                      ? 'Not available'
+                      : t.plan === 'free'
+                        ? 'Follow'
+                        : busyPlan === t.plan
+                          ? 'Opening checkout…'
+                          : 'Subscribe'}
                   </Button>
                 }
               />
@@ -367,7 +508,6 @@ export function CreatorDetail() {
           </Grid>
         </Section>
 
-        {/* ── Similar creators ─────────────────────────────────────────── */}
         <Section
           eyebrow="Similar creators"
           title="Other operators worth following."
@@ -377,30 +517,30 @@ export function CreatorDetail() {
               onClick={() => navigate('/creators')}
               iconRight="arrow-right"
             >
-              Browse all 142
+              Browse all creators
             </Button>
           }
         >
           <Grid cols={3} gap={5}>
             {others.map((c) => (
               <CreatorCard
-                key={c.id}
+                key={c._id}
                 name={c.name}
                 handle={c.handle}
-                mono={c.avatar.mono}
-                color={c.avatar.color}
+                mono={c.avatarMono}
+                color={c.avatarColor}
                 verified={c.verified}
                 bio={c.bio}
                 winRate={c.winRate}
                 record={c.record}
                 units={c.units}
-                subs={c.subs}
+                subs={c.subscriberCount}
                 last10={c.last10}
                 streak={c.streak}
                 trending={c.trending}
                 startingPrice={c.startingPrice}
                 tags={c.tags}
-                onClick={() => navigate(`/creators/${c.id}`)}
+                onClick={() => navigate(`/creators/${c.handle}`)}
               />
             ))}
           </Grid>
@@ -408,9 +548,17 @@ export function CreatorDetail() {
 
         <ResponsibleSection />
       </Container>
+
+      <PricingModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        creatorName={creator.name}
+        tiers={tiers}
+        onSubscribe={handleSubscribe}
+        busyPlan={busyPlan}
+      />
     </main>
   );
 }
 
-// Reserve unused imports.
 void Col;

@@ -1,0 +1,58 @@
+.wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.empty {
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.cornerHead,
+.bookHead {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider, 0.04em);
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+.bookHead {
+  text-align: right;
+}
+
+.rowLabel {
+  padding: var(--space-2) var(--space-3);
+  white-space: nowrap;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+.cell {
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.cellBest {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: var(--weight-medium);
+}
+
+.point {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--muted-foreground);
+}

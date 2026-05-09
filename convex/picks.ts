@@ -2,6 +2,7 @@ import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { pickAccess, pickConfidence, pickStatus, pickGrade } from './shared/validators';
 import { requireCreatorOwnership } from './shared/permissions';
+import { internal } from './_generated/api';
 
 // =============================================================================
 // Pick Queries & Mutations
@@ -75,7 +76,8 @@ export const create = mutation({
     await requireCreatorOwnership(ctx, args.creatorId);
 
     const now = Date.now();
-    return await ctx.db.insert('picks', {
+    const status = args.status ?? 'draft';
+    const pickId = await ctx.db.insert('picks', {
       creatorId: args.creatorId,
       access: args.access,
       sport: args.sport,
@@ -91,10 +93,18 @@ export const create = mutation({
       confidence: args.confidence,
       body: args.body,
       teaser: args.teaser,
-      status: args.status ?? 'draft',
+      status,
       grade: 'pending',
+      publishedAt: status === 'published' ? now : undefined,
       createdAt: now,
     });
+
+    // AI analysis is best-effort: schedule async, don't block the publish.
+    if (status === 'published') {
+      await ctx.scheduler.runAfter(0, internal.ai.analyzePick, { pickId });
+    }
+
+    return pickId;
   },
 });
 
@@ -116,5 +126,27 @@ export const grade = internalMutation({
       gradedAt: Date.now(),
     });
     return args.id;
+  },
+});
+
+// Internal-only.
+/** Persist AI analysis on a pick. Called by ai.analyzePick. */
+export const _setAiAnalysis = internalMutation({
+  args: {
+    pickId: v.id('picks'),
+    summary: v.string(),
+    confidence: v.number(),
+    reasoning: v.string(),
+    model: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.pickId, {
+      aiSummary: args.summary,
+      aiConfidence: args.confidence,
+      aiReasoning: args.reasoning,
+      aiModel: args.model,
+      aiAnalyzedAt: Date.now(),
+    });
+    return args.pickId;
   },
 });

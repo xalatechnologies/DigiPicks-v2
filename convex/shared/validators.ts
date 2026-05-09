@@ -92,8 +92,47 @@ export const applicationStatus = v.union(
 
 export const eventStatus = v.union(
   v.literal('upcoming'),
+  v.literal('draft'),
   v.literal('live'),
   v.literal('completed'),
+  v.literal('cancelled'),
+  v.literal('disputed'),
+);
+
+export const eventSourceType = v.union(
+  v.literal('provider'),
+  v.literal('sport_source'),
+  v.literal('federation'),
+  v.literal('platform'),
+  v.literal('creator'),
+  v.literal('community'),
+);
+
+export const eventVisibility = v.union(
+  v.literal('public'),
+  v.literal('premium'),
+  v.literal('private'),
+);
+
+export const eventVerificationStatus = v.union(
+  v.literal('unverified'),
+  v.literal('creator_submitted'),
+  v.literal('source_verified'),
+  v.literal('admin_verified'),
+);
+
+export const eventResultSource = v.union(
+  v.literal('provider'),
+  v.literal('manual_creator'),
+  v.literal('manual_admin'),
+  v.literal('community_confirmed'),
+);
+
+export const eventParticipantType = v.union(
+  v.literal('team'),
+  v.literal('player'),
+  v.literal('creator'),
+  v.literal('custom'),
 );
 
 export const orderStatus = v.union(
@@ -110,4 +149,15 @@ export const paymentProvider = v.union(
   v.literal('vipps'),
   v.literal('nets'),
   v.literal('manual'),
+);
+
+export const payoutStatus = v.union(
+  v.literal('pending'),
+  v.literal('paid'),
+  v.literal('failed'),
+);
+
+export const channelType = v.union(
+  v.literal('public'),
+  v.literal('subscriber'),
 );

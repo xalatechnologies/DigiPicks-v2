@@ -8,13 +8,17 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
+import type * as ai from "../ai.js";
 import type * as applications from "../applications.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
+import type * as channels from "../channels.js";
 import type * as creators from "../creators.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as feed from "../feed.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as listings from "../listings.js";
@@ -22,12 +26,19 @@ import type * as liveScores from "../liveScores.js";
 import type * as messages from "../messages.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
+import type * as odds from "../odds.js";
+import type * as oddsApi from "../oddsApi.js";
+import type * as payouts from "../payouts.js";
 import type * as picks from "../picks.js";
+import type * as savedPicks from "../savedPicks.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_validators from "../shared/validators.js";
+import type * as streams from "../streams.js";
+import type * as stripe from "../stripe.js";
 import type * as subscriptions from "../subscriptions.js";
+import type * as teamLogos from "../teamLogos.js";
 import type * as users from "../users.js";
 
 import type {
@@ -37,13 +48,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
+  ai: typeof ai;
   applications: typeof applications;
   audit: typeof audit;
   auth: typeof auth;
   categories: typeof categories;
+  channels: typeof channels;
   creators: typeof creators;
   crons: typeof crons;
   events: typeof events;
+  feed: typeof feed;
   files: typeof files;
   http: typeof http;
   listings: typeof listings;
@@ -51,12 +66,19 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   migrations: typeof migrations;
   notifications: typeof notifications;
+  odds: typeof odds;
+  oddsApi: typeof oddsApi;
+  payouts: typeof payouts;
   picks: typeof picks;
+  savedPicks: typeof savedPicks;
   search: typeof search;
   seed: typeof seed;
   "shared/permissions": typeof shared_permissions;
   "shared/validators": typeof shared_validators;
+  streams: typeof streams;
+  stripe: typeof stripe;
   subscriptions: typeof subscriptions;
+  teamLogos: typeof teamLogos;
   users: typeof users;
 }>;
 

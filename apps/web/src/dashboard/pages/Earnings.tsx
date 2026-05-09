@@ -1,6 +1,5 @@
-// TODO: convex — needs api.earnings.summary, api.earnings.invoices, and
-// api.payouts.method endpoints. Today the entire page reads from mocks.
 import React from 'react';
+import { useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -23,9 +22,10 @@ import {
   Th,
   Td,
   StatGrid,
+  EmptyState,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
-import { INVOICES } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   paid: 'green',
@@ -33,7 +33,49 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   failed: 'red',
 };
 
+const PLATFORM_FEE_RATE = 0.13; // 87% to creator (10% platform + ~3% Stripe)
+
+function formatCurrency(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+}
+
+function formatDate(ms: number): string {
+  return new Date(ms).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function Earnings() {
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const subs = useQuery(
+    api.subscriptions.byCreator,
+    me?.creatorId ? { creatorId: me.creatorId, limit: 1000 } : 'skip',
+  );
+  const payouts = useQuery(api.payouts.byMe, { limit: 100 });
+  const summary = useQuery(api.payouts.summary, {});
+
+  const activeSubs = (subs ?? []).filter((s) => s.status === 'active');
+  const startingPrice = creator?.startingPrice ?? 0;
+  const mrrGross = activeSubs.length * startingPrice;
+  const mrrNet = mrrGross * (1 - PLATFORM_FEE_RATE);
+  const currency = summary?.currency ?? 'USD';
+  const paidTotal = summary?.paidTotal ?? 0;
+  const pendingTotal = summary?.pendingTotal ?? 0;
+
   return (
     <>
       <PageHeader
@@ -45,7 +87,7 @@ export function Earnings() {
               <Icon name="filter" size={13} />
               Export
             </Button>
-            <Button variant="primary" size="sm">
+            <Button variant="primary" size="sm" disabled>
               <Icon name="dollar" size={13} />
               Withdraw
             </Button>
@@ -58,42 +100,83 @@ export function Earnings() {
           <PageHead
             eyebrow="Growth"
             title="Earnings"
-            sub="MRR, payouts, and historical invoices — net of platform and processing fees."
+            sub="MRR derived from active subscriptions; payouts arrive monthly via Stripe. Withdraw flow lights up once Stripe Connect is configured (Phase 7)."
           />
 
           <StatGrid
             items={[
-              { id: 'mrr', label: 'MRR', value: <Mono>$12,480</Mono>, sub: <Badge tone="green" dot>+18.4%</Badge> },
-              { id: 'pending', label: 'Pending payout', value: <Mono>$3,148.20</Mono>, sub: <Muted>arrives May 31</Muted> },
-              { id: 'lifetime', label: 'Lifetime', value: <Mono>$84,210</Mono>, sub: <Muted>since Jan 2024</Muted> },
-              { id: 'take', label: 'Take rate', value: <Mono>87%</Mono>, sub: <Muted>creator share</Muted> },
+              {
+                id: 'mrr',
+                label: 'MRR (net)',
+                value: <Mono>{formatCurrency(mrrNet, currency)}</Mono>,
+                sub: <Muted>{activeSubs.length} active subscribers</Muted>,
+              },
+              {
+                id: 'pending',
+                label: 'Pending payout',
+                value: <Mono>{formatCurrency(pendingTotal, currency)}</Mono>,
+                sub: <Muted>queued from Stripe</Muted>,
+              },
+              {
+                id: 'lifetime',
+                label: 'Lifetime paid',
+                value: <Mono>{formatCurrency(paidTotal, currency)}</Mono>,
+                sub: <Muted>{summary?.count ?? 0} payouts</Muted>,
+              },
+              {
+                id: 'take',
+                label: 'Take rate',
+                value: <Mono>87%</Mono>,
+                sub: <Muted>creator share after fees</Muted>,
+              },
             ]}
           />
 
           <Row gap={5} wrap>
             <Col gap={4}>
               <Card>
-                <CardHead title="This month" sub="May 2026" />
+                <CardHead
+                  title="This month (estimated)"
+                  sub="Derived from active subscriptions × creator price"
+                />
                 <Stack gap={2}>
-                  <KV k="Subscriptions billed" v={<Mono>426</Mono>} />
-                  <KV k="Gross revenue" v={<Mono>$14,346.00</Mono>} />
-                  <KV k="Platform fee · 10%" v={<Mono>−$1,434.60</Mono>} />
-                  <KV k="Stripe processing" v={<Mono>−$431.00</Mono>} />
-                  <KV k="Net to creator" v={<Mono>$12,480.40</Mono>} />
+                  <KV
+                    k="Active subscribers"
+                    v={<Mono>{activeSubs.length}</Mono>}
+                  />
+                  <KV
+                    k="Gross revenue"
+                    v={<Mono>{formatCurrency(mrrGross, currency)}</Mono>}
+                  />
+                  <KV
+                    k="Platform + Stripe (~13%)"
+                    v={
+                      <Mono>−{formatCurrency(mrrGross * PLATFORM_FEE_RATE, currency)}</Mono>
+                    }
+                  />
+                  <KV
+                    k="Net to creator"
+                    v={<Mono>{formatCurrency(mrrNet, currency)}</Mono>}
+                  />
                 </Stack>
               </Card>
             </Col>
 
             <Col gap={4}>
               <Card>
-                <CardHead title="Payout method" sub="Default destination for monthly payouts" />
-                <Stack gap={2}>
-                  <KV k="Bank" v="Chase Business Checking" />
-                  <KV k="Account" v={<Mono>•••• 4391</Mono>} />
-                  <KV k="Schedule" v="1st of each month" />
+                <CardHead
+                  title="Payout method"
+                  sub="Stripe Connect handles direct deposits"
+                />
+                <Stack gap={3}>
+                  <Muted>
+                    Connect a Stripe account to receive monthly payouts. Until
+                    then, earnings accumulate as “pending” and we'll route
+                    payouts manually.
+                  </Muted>
                   <Row gap={2}>
-                    <Button variant="secondary" size="sm">
-                      Change method
+                    <Button variant="secondary" size="sm" disabled>
+                      Connect with Stripe
                     </Button>
                   </Row>
                 </Stack>
@@ -102,39 +185,53 @@ export function Earnings() {
           </Row>
 
           <Card pad="sm">
-            <CardHead title="Invoices" sub="Monthly payouts and statements" />
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>Invoice</Th>
-                  <Th>Date</Th>
-                  <Th>Description</Th>
-                  <Th numeric>Amount</Th>
-                  <Th>Status</Th>
-                </Tr>
-              </THead>
-              <TBody>
-                {INVOICES.map((i) => (
-                  <Tr key={i.id}>
-                    <Td>
-                      <Mono>{i.id}</Mono>
-                    </Td>
-                    <Td>
-                      <Muted>{i.date}</Muted>
-                    </Td>
-                    <Td>{i.description}</Td>
-                    <Td numeric>
-                      <Mono>{i.amount}</Mono>
-                    </Td>
-                    <Td>
-                      <Badge tone={STATUS_TONE[i.status] ?? 'mute'} dot>
-                        {i.status}
-                      </Badge>
-                    </Td>
+            <CardHead title="Payouts" sub="Monthly payouts and statements" />
+            {payouts === undefined ? (
+              <EmptyState icon="dollar" title="Loading payouts…" />
+            ) : payouts.length === 0 ? (
+              <EmptyState
+                icon="dollar"
+                title="No payouts yet."
+                subtitle="Once subscribers pay through Stripe, paid invoices will land here automatically."
+              />
+            ) : (
+              <Table>
+                <THead>
+                  <Tr>
+                    <Th>Stripe ID</Th>
+                    <Th>Period</Th>
+                    <Th>Paid</Th>
+                    <Th numeric>Amount</Th>
+                    <Th>Status</Th>
                   </Tr>
-                ))}
-              </TBody>
-            </Table>
+                </THead>
+                <TBody>
+                  {payouts.map((p) => (
+                    <Tr key={p._id}>
+                      <Td>
+                        <Mono>{p.stripePayoutId ?? '—'}</Mono>
+                      </Td>
+                      <Td>
+                        <Muted>
+                          {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
+                        </Muted>
+                      </Td>
+                      <Td>
+                        <Muted>{p.paidAt ? formatDate(p.paidAt) : '—'}</Muted>
+                      </Td>
+                      <Td numeric>
+                        <Mono>{formatCurrency(p.amount, p.currency)}</Mono>
+                      </Td>
+                      <Td>
+                        <Badge tone={STATUS_TONE[p.status] ?? 'mute'} dot>
+                          {p.status}
+                        </Badge>
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            )}
           </Card>
         </Stack>
       </Container>

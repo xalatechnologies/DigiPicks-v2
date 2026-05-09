@@ -1,4 +1,4 @@
-import { mutation, query } from './_generated/server';
+import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { requireUser, getCurrentUser } from './shared/permissions';
 
@@ -46,5 +46,18 @@ export const updateProfile = mutation({
       await ctx.db.patch(user._id, updates);
     }
     return user._id;
+  },
+});
+
+// Internal-only.
+/** Persist a Stripe customer ID on the user. Called by stripe.createCheckoutSession. */
+export const _setStripeCustomerId = internalMutation({
+  args: {
+    userId: v.id('users'),
+    stripeCustomerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, { stripeCustomerId: args.stripeCustomerId });
+    return args.userId;
   },
 });

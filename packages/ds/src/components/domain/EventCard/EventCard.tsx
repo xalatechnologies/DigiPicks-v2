@@ -4,6 +4,10 @@ import { SportTag } from '../../atoms/SportTag/SportTag';
 import { Avatar } from '../../atoms/Avatar/Avatar';
 import { AvatarStack } from '../../atoms/AvatarStack/AvatarStack';
 import { Button } from '../../atoms/Button/Button';
+import {
+  EventSourceBadge,
+  type EventSourceType,
+} from '../../atoms/EventSourceBadge/EventSourceBadge';
 import s from './EventCard.module.css';
 
 export interface EventCardCreatorAvatar {
@@ -30,6 +34,8 @@ export interface EventCardProps extends Omit<React.HTMLAttributes<HTMLDivElement
   compact?: boolean;
   /** Render a small "Live" indicator next to the time. */
   live?: boolean;
+  /** Federated source. When set and not 'provider', renders a source badge. */
+  sourceType?: EventSourceType;
   /** Click handler for the whole card. */
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   /** Click handler for the primary "View picks" button. */
@@ -109,6 +115,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(functi
     featured,
     compact,
     live,
+    sourceType,
     onClick,
     onViewPicks,
     onNotify,
@@ -147,6 +154,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(functi
         <div className={s.headLeft}>
           {!compact && <SportTag sport={sport} />}
           {!compact && league && <span className={s.league}>{league}</span>}
+          {sourceType && <EventSourceBadge source={sourceType} />}
         </div>
         <div className={s.headRight}>
           {live && (

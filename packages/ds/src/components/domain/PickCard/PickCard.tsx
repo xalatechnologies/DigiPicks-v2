@@ -6,6 +6,7 @@ import { SportTag } from '../../atoms/SportTag/SportTag';
 import { AccessBadge } from '../../atoms/AccessBadge/AccessBadge';
 import { GradeBadge } from '../../atoms/GradeBadge/GradeBadge';
 import { DataPair } from '../../data/DataPair/DataPair';
+import { AISummary } from '../../surfaces/AISummary/AISummary';
 import { CreatorChip } from '../CreatorChip/CreatorChip';
 import s from './PickCard.module.css';
 
@@ -32,6 +33,14 @@ export interface PickCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   status?: string;
   locked?: boolean;
   saved?: boolean;
+  /** AI-generated 1-line summary. Renders an AISummary card under the body. */
+  aiSummary?: string;
+  /** AI confidence 0–100. Shown as a gauge inside the AISummary card. */
+  aiConfidence?: number;
+  /** AI long-form reasoning, shown via expandable toggle. */
+  aiReasoning?: string;
+  /** Model id, e.g. "claude-haiku-4-5". Shown as a small label. */
+  aiModel?: string;
   onOpen?: React.MouseEventHandler<HTMLDivElement>;
   onSave?: React.MouseEventHandler<HTMLButtonElement>;
 }
@@ -58,6 +67,10 @@ export const PickCard = React.forwardRef<HTMLDivElement, PickCardProps>(function
     status,
     locked,
     saved,
+    aiSummary,
+    aiConfidence,
+    aiReasoning,
+    aiModel,
     onOpen,
     onSave,
     className,
@@ -131,7 +144,17 @@ export const PickCard = React.forwardRef<HTMLDivElement, PickCardProps>(function
             </Button>
           </div>
         ) : (
-          (body || teaser) && <p className={s.text}>{body ?? teaser}</p>
+          <>
+            {(body || teaser) && <p className={s.text}>{body ?? teaser}</p>}
+            {aiSummary && (
+              <AISummary
+                summary={aiSummary}
+                confidence={aiConfidence}
+                reasoning={aiReasoning}
+                model={aiModel}
+              />
+            )}
+          </>
         )}
 
         <div className={s.foot}>

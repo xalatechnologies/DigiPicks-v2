@@ -1,0 +1,141 @@
+import { v } from 'convex/values';
+import { action, internalQuery } from './_generated/server';
+import { internal } from './_generated/api';
+import { subscriptionPlan } from './shared/validators';
+import { getCurrentUser } from './shared/permissions';
+
+// =============================================================================
+// Stripe Checkout — V8 runtime, raw fetch (no SDK).
+//
+// Required env vars (set via `npx convex env set`):
+//   - STRIPE_SECRET_KEY      sk_test_...
+//   - STRIPE_WEBHOOK_SECRET  whsec_... (used by /stripe-webhook in http.ts)
+//   - WEB_BASE_URL           https://app.digipicks.com (no trailing slash)
+//
+// Each creator must have a Stripe Price ID per plan tier on their creator
+// record (`stripePriceIdPremium`, `stripePriceIdVip`). Free plans skip
+// Stripe entirely and use the existing subscriptions.subscribe mutation.
+// =============================================================================
+
+const STRIPE_API = 'https://api.stripe.com/v1';
+
+async function stripeFetch(
+  path: string,
+  init: { method?: string; body?: URLSearchParams } = {},
+): Promise<Record<string, unknown>> {
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) throw new Error('STRIPE_SECRET_KEY not configured');
+
+  const res = await fetch(`${STRIPE_API}${path}`, {
+    method: init.method ?? 'POST',
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: init.body?.toString(),
+  });
+
+  const json = (await res.json()) as Record<string, unknown>;
+  if (!res.ok) {
+    const errMsg =
+      (json.error as { message?: string } | undefined)?.message ??
+      `Stripe ${path} failed (${res.status})`;
+    throw new Error(errMsg);
+  }
+  return json;
+}
+
+// ─── Internal helpers (private to this module) ──────────────────────────────
+
+export const _meForCheckout = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await getCurrentUser(ctx);
+  },
+});
+
+export const _creatorForCheckout = internalQuery({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.creatorId);
+  },
+});
+
+/**
+ * Create a Stripe Checkout Session for a subscriber to subscribe to a
+ * creator on the chosen plan tier. Returns the redirect URL — the
+ * frontend should `window.location.assign(url)`.
+ *
+ * Free plan callers should use `subscriptions.subscribe` directly; this
+ * action only supports premium / vip.
+ */
+export const createCheckoutSession = action({
+  args: {
+    creatorId: v.id('creators'),
+    plan: subscriptionPlan,
+  },
+  handler: async (ctx, args): Promise<{ url: string }> => {
+    if (args.plan === 'free') {
+      throw new Error('Use subscriptions.subscribe for free plans.');
+    }
+
+    const me = await ctx.runQuery(internal.stripe._meForCheckout, {});
+    if (!me) throw new Error('Unauthorized');
+
+    const creator = await ctx.runQuery(internal.stripe._creatorForCheckout, {
+      creatorId: args.creatorId,
+    });
+    if (!creator) throw new Error('Creator not found');
+
+    const priceId =
+      args.plan === 'premium'
+        ? creator.stripePriceIdPremium
+        : creator.stripePriceIdVip;
+    if (!priceId) {
+      throw new Error(
+        `Creator has no Stripe price configured for the ${args.plan} plan.`,
+      );
+    }
+
+    // Get or create the Stripe customer for this user.
+    let customerId = me.stripeCustomerId;
+    if (!customerId) {
+      const customer = await stripeFetch('/customers', {
+        body: new URLSearchParams({
+          ...(me.email ? { email: me.email } : {}),
+          ...(me.name ? { name: me.name } : {}),
+          'metadata[userId]': me._id,
+        }),
+      });
+      customerId = customer.id as string;
+      await ctx.runMutation(internal.users._setStripeCustomerId, {
+        userId: me._id,
+        stripeCustomerId: customerId,
+      });
+    }
+
+    const baseUrl = process.env.WEB_BASE_URL ?? 'http://localhost:5173';
+    const successUrl = `${baseUrl}/creators/${args.creatorId}?subscribed=1&session={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/creators/${args.creatorId}?cancelled=1`;
+
+    const params = new URLSearchParams();
+    params.set('mode', 'subscription');
+    params.set('customer', customerId);
+    params.set('line_items[0][price]', priceId);
+    params.set('line_items[0][quantity]', '1');
+    params.set('success_url', successUrl);
+    params.set('cancel_url', cancelUrl);
+    params.set('metadata[creatorId]', args.creatorId);
+    params.set('metadata[plan]', args.plan);
+    params.set('metadata[userId]', me._id);
+    params.set('subscription_data[metadata][creatorId]', args.creatorId);
+    params.set('subscription_data[metadata][plan]', args.plan);
+    params.set('subscription_data[metadata][userId]', me._id);
+
+    const session = await stripeFetch('/checkout/sessions', { body: params });
+    const url = session.url as string | undefined;
+    if (!url) throw new Error('Stripe did not return a checkout URL.');
+
+    return { url };
+  },
+});

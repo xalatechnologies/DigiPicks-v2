@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useConvexAuth, useAuthActions } from '@convex-dev/auth/react';
+import { useQuery } from 'convex/react';
 import {
   PublicLayout,
   Container,
@@ -12,24 +13,73 @@ import {
   Footer,
   Input,
   Icon,
+  Badge,
   Spacer,
   EmptyState,
 } from '@digipicks/ds';
+import { api } from '../../../convex/_generated/api';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
 import { Creators } from './pages/Creators';
-import { CreatorDetail } from './pages/CreatorDetail';
-import { Apply } from './pages/Apply';
-import { Auth } from './pages/Auth';
 import { AuthGate } from './auth/AuthGate';
 
-// Code-split the entire creator studio so public visitors never download it.
+// Critical-path public pages (Landing, Events, Creators) ship in the main
+// bundle. Everything else is route-level code-split — a first-time visitor
+// only downloads the homepage chunk.
+const CreatorDetail = React.lazy(() =>
+  import('./pages/CreatorDetail').then((m) => ({ default: m.CreatorDetail })),
+);
+const OddsIntel = React.lazy(() =>
+  import('./pages/OddsIntel').then((m) => ({ default: m.OddsIntel })),
+);
+const Apply = React.lazy(() =>
+  import('./pages/Apply').then((m) => ({ default: m.Apply })),
+);
+const Auth = React.lazy(() =>
+  import('./pages/Auth').then((m) => ({ default: m.Auth })),
+);
+const Feed = React.lazy(() =>
+  import('./pages/Feed').then((m) => ({ default: m.Feed })),
+);
+const Saved = React.lazy(() =>
+  import('./pages/Saved').then((m) => ({ default: m.Saved })),
+);
+const Community = React.lazy(() =>
+  import('./pages/Community').then((m) => ({ default: m.Community })),
+);
+const Notifications = React.lazy(() =>
+  import('./pages/Notifications').then((m) => ({ default: m.Notifications })),
+);
+const Admin = React.lazy(() =>
+  import('./pages/admin/Admin').then((m) => ({ default: m.Admin })),
+);
+const AdminEventReview = React.lazy(() =>
+  import('./pages/admin/EventReview').then((m) => ({
+    default: m.AdminEventReview,
+  })),
+);
 const DashboardRoutes = React.lazy(() => import('./dashboard/Routes'));
+
+// Shared fallback for lazy-loaded pages, rendered inside the public layout.
+function PageFallback({ title = 'Loading…' }: { title?: string }) {
+  return (
+    <main>
+      <Container size="xl">
+        <Section noReveal>
+          <EmptyState icon="lock" title={title} />
+        </Section>
+      </Container>
+    </main>
+  );
+}
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/', label: 'Home' },
   { to: '/events', label: "Today's Events" },
   { to: '/creators', label: 'Creators' },
+  { to: '/odds', label: 'Odds' },
+  { to: '/feed', label: 'Feed' },
+  { to: '/community', label: 'Community' },
 ];
 
 function AuthHeaderButton() {
@@ -46,6 +96,38 @@ function AuthHeaderButton() {
   ) : (
     <Button variant="primary" onClick={() => navigate('/auth')}>
       Sign in
+    </Button>
+  );
+}
+
+function NotificationsBell() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useConvexAuth();
+  const unread = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated ? {} : 'skip',
+  );
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      iconOnly
+      iconLeft="bell"
+      aria-label={
+        unread && unread > 0
+          ? `${unread} unread notifications`
+          : 'Notifications'
+      }
+      onClick={() => navigate('/notifications')}
+    >
+      {unread && unread > 0 ? (
+        <Badge tone="red" dot>
+          {unread > 9 ? '9+' : String(unread)}
+        </Badge>
+      ) : null}
     </Button>
   );
 }
@@ -84,6 +166,7 @@ function PublicHeader() {
         <Spacer />
 
         <Row gap={2}>
+          <NotificationsBell />
           <ThemeIconButton />
           <Button
             variant="outline"
@@ -185,7 +268,9 @@ function PublicFooter() {
 function PublicShell() {
   return (
     <PublicLayout header={<PublicHeader />} footer={<PublicFooter />}>
-      <Outlet />
+      <React.Suspense fallback={<PageFallback />}>
+        <Outlet />
+      </React.Suspense>
     </PublicLayout>
   );
 }
@@ -198,6 +283,7 @@ export function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/creators" element={<Creators />} />
         <Route path="/creators/:id" element={<CreatorDetail />} />
+        <Route path="/odds" element={<OddsIntel />} />
         <Route
           path="/apply"
           element={
@@ -209,25 +295,88 @@ export function App() {
             </AuthGate>
           }
         />
+        <Route
+          path="/feed"
+          element={
+            <AuthGate
+              forbiddenTitle="Sign in to follow picks"
+              forbiddenSubtitle="Your feed pulls picks from the creators you've subscribed to. Sign in to personalize it."
+            >
+              <Feed />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/saved"
+          element={
+            <AuthGate
+              forbiddenTitle="Sign in to view your library"
+              forbiddenSubtitle="Saved picks are tied to your account. Sign in to bookmark and track picks."
+            >
+              <Saved />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/community"
+          element={
+            <AuthGate
+              forbiddenTitle="Sign in to join community channels"
+              forbiddenSubtitle="Posting in community rooms requires an account. Sign in to read and reply."
+            >
+              <Community />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <AuthGate
+              forbiddenTitle="Sign in to view notifications"
+              forbiddenSubtitle="Your notification inbox is tied to your account."
+            >
+              <Notifications />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AuthGate
+              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
+              forbiddenTitle="Admin access required"
+              forbiddenSubtitle="The admin portal is restricted to platform admins."
+            >
+              <Admin />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/admin/events/review"
+          element={
+            <AuthGate
+              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
+              forbiddenTitle="Admin access required"
+              forbiddenSubtitle="Event review is restricted to platform admins."
+            >
+              <AdminEventReview />
+            </AuthGate>
+          }
+        />
       </Route>
-      <Route path="/auth" element={<Auth />} />
+      <Route
+        path="/auth"
+        element={
+          <React.Suspense fallback={<PageFallback title="Loading sign in…" />}>
+            <Auth />
+          </React.Suspense>
+        }
+      />
       <Route
         path="/dashboard/*"
         element={
           <React.Suspense
-            fallback={
-              <main>
-                <Container size="xl">
-                  <Section noReveal>
-                    <EmptyState
-                      icon="lock"
-                      title="Loading your studio…"
-                      subtitle="One moment while we boot the dashboard."
-                    />
-                  </Section>
-                </Container>
-              </main>
-            }
+            fallback={<PageFallback title="Loading your studio…" />}
           >
             <DashboardRoutes />
           </React.Suspense>

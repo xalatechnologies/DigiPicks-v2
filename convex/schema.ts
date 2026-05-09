@@ -15,8 +15,15 @@ import {
   subscriptionStatus,
   applicationStatus,
   eventStatus,
+  eventSourceType,
+  eventVisibility,
+  eventVerificationStatus,
+  eventResultSource,
+  eventParticipantType,
   orderStatus,
   paymentProvider,
+  payoutStatus,
+  channelType,
 } from './shared/validators';
 
 // =============================================================================
@@ -50,9 +57,11 @@ export default defineSchema({
     locale: v.optional(v.union(v.literal('nb'), v.literal('en'))),
     isActive: v.optional(v.boolean()),
     creatorId: v.optional(v.id('creators')),
+    stripeCustomerId: v.optional(v.string()),
   })
     .index('email', ['email'])
-    .index('by_role', ['role']),
+    .index('by_role', ['role'])
+    .index('by_stripeCustomerId', ['stripeCustomerId']),
 
   tenants: defineTable({
     name: v.string(),
@@ -165,14 +174,34 @@ export default defineSchema({
     .index('by_seller', ['sellerUserId']),
 
   messages: defineTable({
-    conversationId: v.id('conversations'),
+    // Polymorphic message — exactly one target should be set:
+    //   conversationId  → legacy listing buyer/seller threads
+    //   channelId       → creator community channel (Phase 4)
+    conversationId: v.optional(v.id('conversations')),
+    channelId: v.optional(v.id('channels')),
     senderUserId: v.id('users'),
     body: v.string(),
     readAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_conversation', ['conversationId'])
+    .index('by_channel_and_createdAt', ['channelId', 'createdAt'])
     .index('by_sender', ['senderUserId']),
+
+  channels: defineTable({
+    creatorId: v.id('creators'),
+    slug: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    type: channelType,
+    isActive: v.boolean(),
+    memberCount: v.number(),
+    lastMessageAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_creator', ['creatorId', 'createdAt'])
+    .index('by_slug', ['slug'])
+    .index('by_type', ['type', 'lastMessageAt']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COMMERCE — Orders
@@ -248,6 +277,14 @@ export default defineSchema({
     trending: v.boolean(),
     status: creatorStatus,
     createdAt: v.number(),
+    // ── Stripe pricing (Phase 3) ──
+    stripePriceIdPremium: v.optional(v.string()),
+    stripePriceIdVip: v.optional(v.string()),
+    // ── Livestream (Phase 7) ──
+    streamPlatform: v.optional(
+      v.union(v.literal('twitch'), v.literal('youtube'), v.literal('kick')),
+    ),
+    streamHandle: v.optional(v.string()),
   })
     .index('by_handle', ['handle'])
     .index('by_verified', ['verified'])
@@ -279,6 +316,12 @@ export default defineSchema({
     gradedAt: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
     createdAt: v.number(),
+    // ── AI Intelligence (PRD M9, Phase 5) ──
+    aiSummary: v.optional(v.string()),
+    aiConfidence: v.optional(v.number()),
+    aiReasoning: v.optional(v.string()),
+    aiAnalyzedAt: v.optional(v.number()),
+    aiModel: v.optional(v.string()),
   })
     .index('by_creator', ['creatorId', 'createdAt'])
     .index('by_sport', ['sport', 'createdAt'])
@@ -302,11 +345,69 @@ export default defineSchema({
     gameStatus: v.optional(v.string()),
     lastScoreUpdate: v.optional(v.number()),
     externalId: v.optional(v.string()),
+    // ── Team logos (backfilled by teamLogos.resolveOne) ──
+    homeLogo: v.optional(v.string()),
+    awayLogo: v.optional(v.string()),
+    // ── Federated event engine (PRD §7.1, SRSD FR-EVT-001 → FR-EVT-005) ──
+    sourceType: v.optional(eventSourceType),
+    providerName: v.optional(v.string()),
+    sourceUrl: v.optional(v.string()),
+    createdByUserId: v.optional(v.id('users')),
+    reviewedByAdminId: v.optional(v.id('users')),
+    title: v.optional(v.string()),
+    endTime: v.optional(v.number()),
+    visibility: v.optional(eventVisibility),
+    verificationStatus: v.optional(eventVerificationStatus),
+    resultSource: v.optional(eventResultSource),
+    participants: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          type: eventParticipantType,
+        }),
+      ),
+    ),
+    metadata: v.optional(v.any()),
   })
     .index('by_sport_and_startsAt', ['sport', 'startsAt'])
     .index('by_featured_and_startsAt', ['featured', 'startsAt'])
     .index('by_status_and_startsAt', ['status', 'startsAt'])
-    .index('by_external_id', ['externalId']),
+    .index('by_external_id', ['externalId'])
+    .index('by_sourceType_and_startsAt', ['sourceType', 'startsAt'])
+    .index('by_createdByUserId', ['createdByUserId'])
+    .index('by_verificationStatus', ['verificationStatus']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TEAM LOGOS — Cached badge URLs from TheSportsDB (populated async)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ODDS SNAPSHOTS — Per-bookmaker line history for line-movement analysis
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  oddsSnapshots: defineTable({
+    eventId: v.id('events'),
+    externalEventId: v.optional(v.string()),
+    market: v.string(), // 'h2h' | 'spreads' | 'totals'
+    book: v.string(), // bookmaker key, e.g. 'fanduel'
+    bookTitle: v.string(),
+    side: v.string(), // outcome name (team name or 'Over' / 'Under')
+    price: v.number(), // decimal odds from The Odds API
+    point: v.optional(v.number()), // spread / total line
+    capturedAt: v.number(),
+  })
+    .index('by_event_and_capturedAt', ['eventId', 'capturedAt'])
+    .index('by_event_market_book', ['eventId', 'market', 'book', 'capturedAt']),
+
+  teamLogos: defineTable({
+    sport: v.string(),
+    normalizedName: v.string(), // lowercased, accent-stripped, suffix-stripped
+    displayName: v.string(), // original name for reference
+    badgeUrl: v.optional(v.string()),
+    source: v.optional(v.string()), // "thesportsdb" / "manual"
+    resolvedAt: v.number(),
+    notFound: v.optional(v.boolean()), // true when TheSportsDB returned no result
+  }).index('by_sport_and_normalizedName', ['sport', 'normalizedName']),
 
   subscriptions: defineTable({
     subscriberId: v.id('users'),
@@ -317,9 +418,35 @@ export default defineSchema({
     renewsAt: v.optional(v.number()),
     cancelledAt: v.optional(v.number()),
     stripeSubscriptionId: v.optional(v.string()),
+    stripeCustomerId: v.optional(v.string()),
   })
     .index('by_creator', ['creatorId'])
-    .index('by_subscriber_and_creator', ['subscriberId', 'creatorId']),
+    .index('by_subscriber_and_creator', ['subscriberId', 'creatorId'])
+    .index('by_stripeSubscriptionId', ['stripeSubscriptionId']),
+
+  payouts: defineTable({
+    creatorId: v.id('creators'),
+    amount: v.number(),
+    currency: v.string(),
+    status: payoutStatus,
+    stripePayoutId: v.optional(v.string()),
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    paidAt: v.optional(v.number()),
+    metadata: v.optional(v.any()),
+  })
+    .index('by_creator', ['creatorId', 'periodStart'])
+    .index('by_status', ['status'])
+    .index('by_stripePayoutId', ['stripePayoutId']),
+
+  savedPicks: defineTable({
+    userId: v.id('users'),
+    pickId: v.id('picks'),
+    savedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_and_pick', ['userId', 'pickId'])
+    .index('by_pick', ['pickId']),
 
   applications: defineTable({
     name: v.string(),

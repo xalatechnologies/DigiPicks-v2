@@ -136,7 +136,23 @@ export const upsertEvent = internalMutation({
     }) + ' ET';
 
     if (event) {
-      // Update existing
+      // Update existing — also self-heal federated fields if missing on
+      // pre-migration rows. The 60s polling cron acts as a continuous
+      // backfill so any row touched by the provider becomes federated.
+      const heal: Record<string, unknown> = {};
+      if (event.sourceType === undefined) heal.sourceType = 'provider';
+      if (event.providerName === undefined) heal.providerName = 'the-odds-api';
+      if (event.verificationStatus === undefined) heal.verificationStatus = 'source_verified';
+      if (event.visibility === undefined) heal.visibility = 'public';
+      if (event.resultSource === undefined) heal.resultSource = 'provider';
+      if (event.title === undefined) heal.title = `${event.home} vs ${event.away}`;
+      if (event.participants === undefined) {
+        heal.participants = [
+          { name: event.home, type: 'team' },
+          { name: event.away, type: 'team' },
+        ];
+      }
+
       await ctx.db.patch(event._id, {
         homeScore: args.homeScore,
         awayScore: args.awayScore,
@@ -144,6 +160,7 @@ export const upsertEvent = internalMutation({
         lastScoreUpdate: Date.now(),
         externalId: args.externalId,
         status,
+        ...heal,
       });
     } else {
       // Create new event from API
@@ -163,6 +180,16 @@ export const upsertEvent = internalMutation({
         gameStatus: args.gameStatus,
         lastScoreUpdate: Date.now(),
         externalId: args.externalId,
+        title: `${args.homeTeam} vs ${args.awayTeam}`,
+        sourceType: 'provider',
+        providerName: 'the-odds-api',
+        visibility: 'public',
+        verificationStatus: 'source_verified',
+        resultSource: 'provider',
+        participants: [
+          { name: args.homeTeam, type: 'team' },
+          { name: args.awayTeam, type: 'team' },
+        ],
       });
     }
   },

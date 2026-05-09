@@ -1,4 +1,6 @@
 import { internalMutation } from './_generated/server';
+import { internal } from './_generated/api';
+import { v } from 'convex/values';
 
 /**
  * One-off: delete all events so the cron + seed can repopulate.
@@ -56,9 +58,82 @@ export const seedEvents = internalMutation({
 
     let count = 0;
     for (const event of events) {
-      await ctx.db.insert('events', event);
+      await ctx.db.insert('events', {
+        ...event,
+        title: `${event.home} vs ${event.away}`,
+        sourceType: 'platform',
+        visibility: 'public',
+        verificationStatus: 'admin_verified',
+        resultSource: 'manual_admin',
+        participants: [
+          { name: event.home, type: 'team' as const },
+          { name: event.away, type: 'team' as const },
+        ],
+      });
       count++;
     }
     return { seeded: count };
+  },
+});
+
+/**
+ * Phase 1 — Backfill federated event fields onto pre-migration rows.
+ *
+ * Idempotent: skips rows that already have `sourceType` set. Self-reschedules
+ * via the scheduler when more pages remain. Run once from the Convex dashboard
+ * after the schema-widen deploy lands.
+ *
+ * Provider-style defaults are applied to rows with an `externalId` (came from
+ * The Odds API); platform-style defaults are applied to rows without one
+ * (legacy seed events).
+ */
+export const backfillFederatedEvents = internalMutation({
+  args: {
+    cursor: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query('events')
+      .order('asc')
+      .paginate({ numItems: 200, cursor: args.cursor ?? null });
+
+    let patched = 0;
+    for (const event of result.page) {
+      if (event.sourceType !== undefined) continue;
+
+      const fromProvider = Boolean(event.externalId);
+      const patch: Record<string, unknown> = {
+        sourceType: fromProvider ? 'provider' : 'platform',
+        visibility: 'public',
+        verificationStatus: fromProvider ? 'source_verified' : 'admin_verified',
+        resultSource: fromProvider ? 'provider' : 'manual_admin',
+      };
+      if (fromProvider) patch.providerName = 'the-odds-api';
+      if (event.title === undefined) {
+        patch.title = `${event.home} vs ${event.away}`;
+      }
+      if (event.participants === undefined) {
+        patch.participants = [
+          { name: event.home, type: 'team' as const },
+          { name: event.away, type: 'team' as const },
+        ];
+      }
+      await ctx.db.patch(event._id, patch);
+      patched++;
+    }
+
+    if (!result.isDone) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.migrations.backfillFederatedEvents,
+        { cursor: result.continueCursor },
+      );
+    }
+
+    return {
+      patched,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });

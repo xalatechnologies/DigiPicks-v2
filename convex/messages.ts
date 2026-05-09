@@ -81,3 +81,83 @@ export const send = mutation({
     return messageId;
   },
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Community channels (PRD M12, Phase 4)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Read messages in a channel — most recent last for natural chat ordering. */
+export const listByChannel = query({
+  args: {
+    channelId: v.id('channels'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 100, 500);
+
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel || !channel.isActive) return [];
+
+    const rows = await ctx.db
+      .query('messages')
+      .withIndex('by_channel_and_createdAt', (q) =>
+        q.eq('channelId', args.channelId),
+      )
+      .order('desc')
+      .take(limit);
+
+    // Enrich with sender display info for the chat panel.
+    const enriched = await Promise.all(
+      rows.map(async (m) => {
+        const sender = await ctx.db.get(m.senderUserId);
+        const creator = sender?.creatorId
+          ? await ctx.db.get(sender.creatorId)
+          : null;
+        return {
+          ...m,
+          senderName: creator?.name ?? sender?.name ?? 'Member',
+          senderHandle: creator?.handle,
+          senderMono: creator?.avatarMono ?? sender?.name?.[0]?.toUpperCase() ?? '·',
+          senderColor: creator?.avatarColor ?? '#3A4F7A',
+          senderVerified: Boolean(creator?.verified),
+        };
+      }),
+    );
+
+    // Reverse so callers can render top-to-bottom oldest → newest.
+    return enriched.reverse();
+  },
+});
+
+/** Post a message to a channel. Phase 4 allows any authenticated user. */
+export const postToChannel = mutation({
+  args: {
+    channelId: v.id('channels'),
+    body: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) throw new Error('Channel not found');
+    if (!channel.isActive) throw new Error('Channel is archived');
+
+    const trimmed = args.body.trim();
+    if (!trimmed) throw new Error('Message body required');
+    if (trimmed.length > 2000) {
+      throw new Error('Messages must be under 2000 characters');
+    }
+
+    const now = Date.now();
+    const messageId = await ctx.db.insert('messages', {
+      channelId: args.channelId,
+      senderUserId: user._id,
+      body: trimmed,
+      createdAt: now,
+    });
+
+    await ctx.db.patch(args.channelId, { lastMessageAt: now });
+
+    return messageId;
+  },
+});

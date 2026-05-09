@@ -36,6 +36,17 @@ crons.interval(
   internal.liveScores.pollActive,
 );
 
+// ─── Poll upcoming events from The Odds API ─────────────────────────────
+// Runs hourly. The /events endpoint is cheap (1 quota credit per call),
+// and the upcoming list changes slowly. Gracefully no-ops when
+// THE_ODDS_API_KEY is not set.
+
+crons.interval(
+  'poll-upcoming-events',
+  { hours: 1 },
+  internal.oddsApi.pollUpcoming,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

@@ -6,6 +6,8 @@ import { DashboardShell } from './Shell';
 import { Overview } from './pages/Overview';
 import { Picks } from './pages/Picks';
 import { CreatePick } from './pages/CreatePick';
+import { MyEvents } from './pages/MyEvents';
+import { CreateEvent } from './pages/CreateEvent';
 import { Subscribers } from './pages/Subscribers';
 import { Performance } from './pages/Performance';
 import { Products } from './pages/Products';
@@ -28,6 +30,8 @@ export function DashboardRoutes() {
           <Route index element={<Overview />} />
           <Route path="picks" element={<Picks />} />
           <Route path="create" element={<CreatePick />} />
+          <Route path="events" element={<MyEvents />} />
+          <Route path="events/new" element={<CreateEvent />} />
           <Route path="subscribers" element={<Subscribers />} />
           <Route path="performance" element={<Performance />} />
           <Route path="products" element={<Products />} />

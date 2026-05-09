@@ -163,6 +163,7 @@ export function Events() {
                     awayLogo={awayLogo}
                     creators={ev.creatorCount}
                     picks={ev.pickCount}
+                    sourceType={ev.sourceType}
                     live
                   />
                 );
@@ -186,6 +187,7 @@ export function Events() {
                 awayLogo={logoFor(heroFeatured).awayLogo}
                 creators={heroFeatured.creatorCount}
                 picks={heroFeatured.pickCount}
+                sourceType={heroFeatured.sourceType}
                 creatorsAvatars={avatars}
               />
               {otherFeatured.length > 0 && (
@@ -205,6 +207,7 @@ export function Events() {
                         awayLogo={awayLogo}
                         creators={ev.creatorCount}
                         picks={ev.pickCount}
+                        sourceType={ev.sourceType}
                         creatorsAvatars={avatars}
                       />
                     );
@@ -248,6 +251,7 @@ export function Events() {
                         awayLogo={awayLogo}
                         creators={ev.creatorCount}
                         picks={ev.pickCount}
+                        sourceType={ev.sourceType}
                         compact
                       />
                     );
@@ -290,6 +294,7 @@ export function Events() {
                     awayLogo={awayLogo}
                     creators={ev.creatorCount}
                     picks={ev.pickCount}
+                    sourceType={ev.sourceType}
                     compact
                   />
                 );
