@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { internalAction, internalQuery } from './_generated/server';
 import { internal } from './_generated/api';
+import { parseAnalysis, type AnalysisResult } from './shared/aiParse';
 
 // =============================================================================
 // AI Intelligence Engine (PRD M9, Phase 5) — Anthropic Claude.
@@ -36,12 +37,6 @@ const SYSTEM_PROMPT = [
   '- Output strict JSON only. No prose before or after.',
 ].join('\n');
 
-interface AnalysisResult {
-  summary: string;
-  confidence: number;
-  reasoning: string;
-}
-
 interface AnthropicMessageResponse {
   content?: Array<{ type: string; text?: string }>;
   model?: string;
@@ -76,26 +71,6 @@ function buildPickPrompt(pick: {
   ]
     .filter(Boolean)
     .join('\n');
-}
-
-function parseAnalysis(raw: string): AnalysisResult {
-  // Pull the first JSON object out of the response defensively. Claude is
-  // instructed to return JSON only, but we defend against accidental prose.
-  const start = raw.indexOf('{');
-  const end = raw.lastIndexOf('}');
-  if (start === -1 || end === -1 || end <= start) {
-    throw new Error('AI response did not contain a JSON object');
-  }
-  const json = raw.slice(start, end + 1);
-  const parsed = JSON.parse(json) as Partial<AnalysisResult>;
-  if (typeof parsed.summary !== 'string') throw new Error('Missing summary');
-  if (typeof parsed.confidence !== 'number') throw new Error('Missing confidence');
-  if (typeof parsed.reasoning !== 'string') throw new Error('Missing reasoning');
-  return {
-    summary: parsed.summary.trim().slice(0, 280),
-    confidence: Math.max(0, Math.min(100, Math.round(parsed.confidence))),
-    reasoning: parsed.reasoning.trim().slice(0, 1200),
-  };
 }
 
 export const _pickForAi = internalQuery({

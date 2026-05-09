@@ -33,6 +33,7 @@ import type * as picks from "../picks.js";
 import type * as savedPicks from "../savedPicks.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
+import type * as shared_aiParse from "../shared/aiParse.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_validators from "../shared/validators.js";
 import type * as streams from "../streams.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   savedPicks: typeof savedPicks;
   search: typeof search;
   seed: typeof seed;
+  "shared/aiParse": typeof shared_aiParse;
   "shared/permissions": typeof shared_permissions;
   "shared/validators": typeof shared_validators;
   streams: typeof streams;
