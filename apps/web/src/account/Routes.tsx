@@ -1,18 +1,18 @@
 import React from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { AuthGate } from '../auth/AuthGate';
 import { SubscriberShell } from './Shell';
 
 // Existing pages (re-used inside account layout)
-import { Feed } from '../pages/Feed';
 import { Saved } from '../pages/Saved';
 import { Community } from '../pages/Community';
 import { Notifications } from '../pages/Notifications';
 import { Events } from '../pages/Events';
 import { Creators } from '../pages/Creators';
 
-// New account-specific pages
+// Account-specific pages
+import { Dashboard } from './pages/Dashboard';
 import { Subscriptions } from './pages/Subscriptions';
 import { Results } from './pages/Results';
 import { AccountSettings } from './pages/AccountSettings';
@@ -25,8 +25,7 @@ export function AccountRoutes() {
     >
       <Routes>
         <Route element={<SubscriberShell />}>
-          <Route index element={<Feed />} />
-          <Route path="feed" element={<Feed />} />
+          <Route index element={<Dashboard />} />
           <Route path="discover" element={<Creators />} />
           <Route path="events" element={<Events />} />
           <Route path="results" element={<Results />} />
@@ -41,5 +40,4 @@ export function AccountRoutes() {
   );
 }
 
-// Default export so the route file can be code-split via React.lazy().
 export default AccountRoutes;

@@ -1,0 +1,39 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr var(--dash-aside, 380px);
+  gap: var(--space-5);
+  align-items: start;
+  width: 100%;
+}
+
+.reverse {
+  grid-template-columns: var(--dash-aside, 380px) 1fr;
+}
+
+.reverse .aside {
+  order: -1;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reverse .aside {
+    order: 0;
+  }
+}

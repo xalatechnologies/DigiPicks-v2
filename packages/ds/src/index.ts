@@ -60,12 +60,18 @@ export { FilterGroup } from './components/forms/FilterGroup/FilterGroup';
 export { FilterRadio } from './components/forms/FilterRadio/FilterRadio';
 export { FilterCheck } from './components/forms/FilterCheck/FilterCheck';
 export { FilterChips } from './components/forms/FilterChips/FilterChips';
-export type { FilterChipsProps, FilterChipsOption } from './components/forms/FilterChips/FilterChips';
+export type {
+  FilterChipsProps,
+  FilterChipsOption,
+} from './components/forms/FilterChips/FilterChips';
 export { SwitchRow } from './components/forms/SwitchRow/SwitchRow';
 export type { SwitchRowProps } from './components/forms/SwitchRow/SwitchRow';
 export { PasswordInput } from './components/forms/PasswordInput/PasswordInput';
 export type { PasswordInputProps } from './components/forms/PasswordInput/PasswordInput';
-export { AuthMethodButton, AuthSavedGroup } from './components/forms/AuthMethodButton/AuthMethodButton';
+export {
+  AuthMethodButton,
+  AuthSavedGroup,
+} from './components/forms/AuthMethodButton/AuthMethodButton';
 export type { AuthMethodButtonProps } from './components/forms/AuthMethodButton/AuthMethodButton';
 export { EventForm } from './components/forms/EventForm/EventForm';
 export type {
@@ -156,6 +162,8 @@ export type { StatGridProps, StatGridItem } from './components/layout/StatGrid/S
 export { Footer } from './components/layout/Footer/Footer';
 export { Row } from './components/layout/Row/Row';
 export { Col } from './components/layout/Col/Col';
+export { DashGrid } from './components/layout/DashGrid/DashGrid';
+export type { DashGridProps } from './components/layout/DashGrid/DashGrid';
 export { Stack } from './components/layout/Stack/Stack';
 export { Spacer } from './components/layout/Spacer/Spacer';
 export { Divider } from './components/layout/Divider/Divider';
@@ -198,7 +206,10 @@ export { CreatorChip } from './components/domain/CreatorChip/CreatorChip';
 export { PersonRow } from './components/domain/PersonRow/PersonRow';
 export type { PersonRowProps } from './components/domain/PersonRow/PersonRow';
 export { HeroLivePanel } from './components/domain/HeroLivePanel/HeroLivePanel';
-export type { HeroLiveEvent, HeroLivePanelProps } from './components/domain/HeroLivePanel/HeroLivePanel';
+export type {
+  HeroLiveEvent,
+  HeroLivePanelProps,
+} from './components/domain/HeroLivePanel/HeroLivePanel';
 export { CreatorCard } from './components/domain/CreatorCard/CreatorCard';
 export { EventCard } from './components/domain/EventCard/EventCard';
 export type {
@@ -207,15 +218,9 @@ export type {
 } from './components/domain/EventCard/EventCard';
 export { PickCard } from './components/domain/PickCard/PickCard';
 export { ChatPanel } from './components/domain/ChatPanel/ChatPanel';
-export type {
-  ChatPanelProps,
-  ChatPanelMessage,
-} from './components/domain/ChatPanel/ChatPanel';
+export type { ChatPanelProps, ChatPanelMessage } from './components/domain/ChatPanel/ChatPanel';
 export { StreamEmbed } from './components/domain/StreamEmbed/StreamEmbed';
-export type {
-  StreamEmbedProps,
-  StreamPlatform,
-} from './components/domain/StreamEmbed/StreamEmbed';
+export type { StreamEmbedProps, StreamPlatform } from './components/domain/StreamEmbed/StreamEmbed';
 export { PricingModal } from './components/domain/PricingModal/PricingModal';
 export type {
   PricingModalProps,

@@ -32,27 +32,17 @@ const CreatorDetail = React.lazy(() =>
 const OddsIntel = React.lazy(() =>
   import('./pages/OddsIntel').then((m) => ({ default: m.OddsIntel })),
 );
-const Apply = React.lazy(() =>
-  import('./pages/Apply').then((m) => ({ default: m.Apply })),
-);
-const Auth = React.lazy(() =>
-  import('./pages/Auth').then((m) => ({ default: m.Auth })),
-);
-const Feed = React.lazy(() =>
-  import('./pages/Feed').then((m) => ({ default: m.Feed })),
-);
-const Saved = React.lazy(() =>
-  import('./pages/Saved').then((m) => ({ default: m.Saved })),
-);
+const Apply = React.lazy(() => import('./pages/Apply').then((m) => ({ default: m.Apply })));
+const Auth = React.lazy(() => import('./pages/Auth').then((m) => ({ default: m.Auth })));
+const Feed = React.lazy(() => import('./pages/Feed').then((m) => ({ default: m.Feed })));
+const Saved = React.lazy(() => import('./pages/Saved').then((m) => ({ default: m.Saved })));
 const Community = React.lazy(() =>
   import('./pages/Community').then((m) => ({ default: m.Community })),
 );
 const Notifications = React.lazy(() =>
   import('./pages/Notifications').then((m) => ({ default: m.Notifications })),
 );
-const Admin = React.lazy(() =>
-  import('./pages/admin/Admin').then((m) => ({ default: m.Admin })),
-);
+const Admin = React.lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Admin })));
 const AdminEventReview = React.lazy(() =>
   import('./pages/admin/EventReview').then((m) => ({
     default: m.AdminEventReview,
@@ -79,8 +69,6 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/events', label: "Today's Events" },
   { to: '/creators', label: 'Creators' },
   { to: '/odds', label: 'Odds' },
-  { to: '/feed', label: 'Feed' },
-  { to: '/community', label: 'Community' },
 ];
 
 function AuthHeaderButton() {
@@ -109,10 +97,7 @@ function AuthHeaderButton() {
 function NotificationsBell() {
   const navigate = useNavigate();
   const { isAuthenticated } = useConvexAuth();
-  const unread = useQuery(
-    api.notifications.unreadCount,
-    isAuthenticated ? {} : 'skip',
-  );
+  const unread = useQuery(api.notifications.unreadCount, isAuthenticated ? {} : 'skip');
 
   if (!isAuthenticated) return null;
 
@@ -122,11 +107,7 @@ function NotificationsBell() {
       size="sm"
       iconOnly
       iconLeft="bell"
-      aria-label={
-        unread && unread > 0
-          ? `${unread} unread notifications`
-          : 'Notifications'
-      }
+      aria-label={unread && unread > 0 ? `${unread} unread notifications` : 'Notifications'}
       onClick={() => navigate('/notifications')}
     >
       {unread && unread > 0 ? (
@@ -145,12 +126,7 @@ function PublicHeader() {
   return (
     <Container size="xl">
       <Row gap={6}>
-        <Logo
-          size={36}
-          showWord
-          onClick={() => navigate('/')}
-          aria-label="DigiPicks home"
-        />
+        <Logo size={36} showWord onClick={() => navigate('/')} aria-label="DigiPicks home" />
 
         <Spacer />
 
@@ -174,11 +150,7 @@ function PublicHeader() {
         <Row gap={2}>
           <NotificationsBell />
           <ThemeIconButton />
-          <Button
-            variant="outline"
-            iconRight="sparkles"
-            onClick={() => navigate('/apply')}
-          >
+          <Button variant="outline" iconRight="sparkles" onClick={() => navigate('/apply')}>
             Become a creator
           </Button>
           <AuthHeaderButton />
@@ -239,7 +211,7 @@ function PublicFooter() {
         { href: '#', label: 'Email', icon: <Icon name="inbox" size={16} /> },
       ]}
       newsletter={{
-        title: 'Get tonight\'s slate in your inbox.',
+        title: "Get tonight's slate in your inbox.",
         sub: "A weekly digest of the network's top picks, win-rate movers, and new creators. No spam — unsubscribe anytime.",
         form: (
           <Row gap={2}>
@@ -381,9 +353,7 @@ export function App() {
       <Route
         path="/account/*"
         element={
-          <React.Suspense
-            fallback={<PageFallback title="Loading your account…" />}
-          >
+          <React.Suspense fallback={<PageFallback title="Loading your account…" />}>
             <AccountRoutes />
           </React.Suspense>
         }
@@ -391,9 +361,7 @@ export function App() {
       <Route
         path="/dashboard/*"
         element={
-          <React.Suspense
-            fallback={<PageFallback title="Loading your studio…" />}
-          >
+          <React.Suspense fallback={<PageFallback title="Loading your studio…" />}>
             <DashboardRoutes />
           </React.Suspense>
         }

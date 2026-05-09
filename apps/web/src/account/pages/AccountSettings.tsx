@@ -1,22 +1,26 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
   Stack,
   Row,
-  Col,
   Card,
   CardHead,
   Button,
   Icon,
-  PageHead,
+  Badge,
+  Muted,
+  Mono,
+  KV,
+  Divider,
+  SwitchRow,
+  PersonRow,
+  DashGrid,
   Field,
   Input,
   Select,
-  Muted,
-  Divider,
-  SwitchRow,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -27,31 +31,68 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'nb', label: 'Norsk bokmål' },
 ];
 
-interface NotificationToggle {
-  id: 'pickAlerts' | 'billingAlerts' | 'growthAlerts';
-  label: string;
-  sub: string;
-}
-
-const NOTIFICATIONS: NotificationToggle[] = [
+const NOTIFICATION_SECTIONS = [
   {
-    id: 'pickAlerts',
-    label: 'New pick alerts',
-    sub: 'When a subscribed creator publishes a new pick',
+    title: 'Pick notifications',
+    items: [
+      {
+        id: 'newPick',
+        label: 'New pick alerts',
+        sub: 'When a subscribed creator publishes a new pick',
+        defaultOn: true,
+      },
+      {
+        id: 'gradeAlert',
+        label: 'Grading updates',
+        sub: 'When your followed picks are graded',
+        defaultOn: true,
+      },
+      {
+        id: 'urgentPick',
+        label: 'Urgent picks',
+        sub: 'Push notifications for picks with cutoffs under 1h',
+        defaultOn: true,
+      },
+    ],
   },
   {
-    id: 'billingAlerts',
-    label: 'Billing alerts',
-    sub: 'Failed payments, renewals, refunds',
+    title: 'Billing notifications',
+    items: [
+      {
+        id: 'billing',
+        label: 'Billing alerts',
+        sub: 'Failed payments, renewals, and refund confirmations',
+        defaultOn: true,
+      },
+      {
+        id: 'priceChange',
+        label: 'Price changes',
+        sub: 'When a creator updates their subscription pricing',
+        defaultOn: true,
+      },
+    ],
   },
   {
-    id: 'growthAlerts',
-    label: 'Weekly digest',
-    sub: 'Top picks, new creators, and win-rate movers',
+    title: 'Community notifications',
+    items: [
+      {
+        id: 'digest',
+        label: 'Weekly digest',
+        sub: 'Top picks, new creators, and win-rate movers',
+        defaultOn: false,
+      },
+      {
+        id: 'community',
+        label: 'Community mentions',
+        sub: 'When someone replies to your message',
+        defaultOn: false,
+      },
+    ],
   },
 ];
 
 export function AccountSettings() {
+  const navigate = useNavigate();
   const me = useQuery(api.users.me);
   const updateProfile = useMutation(api.users.updateProfile);
 
@@ -61,20 +102,28 @@ export function AccountSettings() {
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
 
-  const [toggles, setToggles] = React.useState<Record<NotificationToggle['id'], boolean>>({
-    pickAlerts: true,
-    billingAlerts: true,
-    growthAlerts: false,
+  const [toggles, setToggles] = React.useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const section of NOTIFICATION_SECTIONS) {
+      for (const item of section.items) {
+        initial[item.id] = item.defaultOn;
+      }
+    }
+    return initial;
   });
+
+  const [weeklyCap, setWeeklyCap] = React.useState(false);
+  const [cooldown, setCooldown] = React.useState(false);
+  const [privateProfile, setPrivateProfile] = React.useState(false);
 
   React.useEffect(() => {
     if (me?.name) setName(me.name);
     if (me?.locale) setLocale(me.locale);
   }, [me?.name, me?.locale]);
 
-  const setToggle = (id: NotificationToggle['id']) => (next: boolean) => {
-    setToggles((prev) => ({ ...prev, [id]: next }));
-  };
+  function setToggle(id: string) {
+    return (next: boolean) => setToggles((prev) => ({ ...prev, [id]: next }));
+  }
 
   async function handleSave() {
     setError(null);
@@ -83,6 +132,7 @@ export function AccountSettings() {
     try {
       await updateProfile({ name, locale });
       setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save profile.');
     } finally {
@@ -90,135 +140,266 @@ export function AccountSettings() {
     }
   }
 
+  // ── Sidebar ──────────────────────────────────────────────────────────
+  const aside = (
+    <>
+      {/* Connected accounts */}
+      <Card>
+        <CardHead title="Connected accounts" />
+        <Stack gap={0}>
+          <PersonRow
+            name="Google"
+            sub={me?.email ?? 'Not connected'}
+            mono="G"
+            color="#4285F4"
+            trailing={<Badge tone="green">Connected</Badge>}
+          />
+          <Divider />
+          <PersonRow
+            name="Discord"
+            sub="Not connected"
+            mono="D"
+            color="#5865F2"
+            trailing={
+              <Button variant="outline" size="sm">
+                Connect
+              </Button>
+            }
+          />
+          <Divider />
+          <PersonRow
+            name="Apple"
+            sub="Not connected"
+            mono="A"
+            color="#333"
+            trailing={
+              <Button variant="outline" size="sm">
+                Connect
+              </Button>
+            }
+          />
+        </Stack>
+      </Card>
+
+      {/* Responsible betting */}
+      <Card>
+        <CardHead title="Responsible betting" action={<Badge tone="green">Recommended</Badge>} />
+        <Stack gap={0}>
+          <SwitchRow
+            label="Weekly play cap"
+            sub="Limit follows to 20 per week"
+            checked={weeklyCap}
+            onChange={setWeeklyCap}
+          />
+          <Divider />
+          <SwitchRow
+            label="Cooldown period"
+            sub="Pause follows for 24h after 3+ losses"
+            checked={cooldown}
+            onChange={setCooldown}
+          />
+        </Stack>
+      </Card>
+
+      {/* Privacy */}
+      <Card>
+        <CardHead title="Privacy" />
+        <Stack gap={0}>
+          <SwitchRow
+            label="Private profile"
+            sub="Hide your portfolio from other users"
+            checked={privateProfile}
+            onChange={setPrivateProfile}
+          />
+          <Divider />
+          <SwitchRow
+            label="Hide from leaderboards"
+            sub="Exclude from subscriber rankings"
+            checked={false}
+            onChange={() => {}}
+          />
+        </Stack>
+      </Card>
+
+      {/* Account info */}
+      <Card>
+        <CardHead title="Account info" />
+        <Stack gap={0}>
+          <KV k="User ID" v={<Mono>{me?._id ? String(me._id).slice(0, 16) + '…' : '—'}</Mono>} />
+          <Divider />
+          <KV
+            k="Role"
+            v={
+              <Badge tone={me?.creatorId ? 'green' : 'blue'}>
+                {me?.creatorId ? 'Creator' : 'Subscriber'}
+              </Badge>
+            }
+          />
+          <Divider />
+          <KV k="Auth" v={<Mono>Google OAuth</Mono>} />
+          <Divider />
+          <KV
+            k="Since"
+            v={
+              <Mono>
+                {me?._creationTime ? new Date(me._creationTime).toLocaleDateString() : '—'}
+              </Mono>
+            }
+          />
+        </Stack>
+      </Card>
+
+      {/* Danger zone */}
+      <Card>
+        <CardHead title="Danger zone" />
+        <Stack gap={3}>
+          <Muted>Pausing hides your activity. Deleting is permanent and cannot be undone.</Muted>
+          <Row gap={2}>
+            <Button variant="outline" size="sm">
+              Export data
+            </Button>
+            <Button variant="outline" size="sm">
+              Pause
+            </Button>
+            <Button variant="danger" size="sm">
+              Delete
+            </Button>
+          </Row>
+        </Stack>
+      </Card>
+    </>
+  );
+
   return (
     <>
       <PageHeader
         title="Settings"
         crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            <Icon name="check" size={13} />
-            {saving ? 'Saving…' : 'Save changes'}
-          </Button>
+          <Row gap={2}>
+            {saved && (
+              <Badge tone="green" dot>
+                Saved
+              </Badge>
+            )}
+            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+              <Icon name="check" size={13} />
+              {saving ? 'Saving…' : 'Save changes'}
+            </Button>
+          </Row>
         }
       />
 
-      <Container size="xl">
+      <Container size="2xl">
         <Stack gap={5}>
-          <PageHead
-            eyebrow="Account"
-            title="Settings"
-            sub="Account, notifications, and responsible-betting preferences."
-          />
+          {error && (
+            <Card>
+              <PersonRow
+                name="Error saving"
+                sub={error}
+                mono="!"
+                color="var(--red)"
+                trailing={
+                  <Button variant="ghost" size="sm" onClick={() => setError(null)}>
+                    Dismiss
+                  </Button>
+                }
+              />
+            </Card>
+          )}
 
-          {error && <Muted>{error}</Muted>}
-          {saved && <Muted>Profile saved.</Muted>}
+          <DashGrid aside={aside}>
+            {/* Profile */}
+            <Card>
+              <CardHead
+                title="Profile"
+                sub="Your public identity"
+                action={
+                  me?.creatorId ? (
+                    <Badge tone="green">Creator</Badge>
+                  ) : (
+                    <Badge tone="blue">Subscriber</Badge>
+                  )
+                }
+              />
+              <Stack gap={4}>
+                <PersonRow
+                  name={me?.name ?? 'Loading…'}
+                  sub={me?.email ?? ''}
+                  mono={me?.name?.[0]?.toUpperCase() ?? 'U'}
+                  color="var(--primary)"
+                  trailing={
+                    <Muted>
+                      Since{' '}
+                      {me?._creationTime
+                        ? new Date(me._creationTime).toLocaleDateString(undefined, {
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : '—'}
+                    </Muted>
+                  }
+                />
+                <Divider />
+                <Field label="Display name" required>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} />
+                </Field>
+                <Field label="Email">
+                  <Input value={me?.email ?? ''} readOnly />
+                </Field>
+                <Field label="Language">
+                  <Select value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
+                    {LOCALE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              </Stack>
+            </Card>
 
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead title="Profile" sub="Your account details" />
-                <Stack gap={4}>
-                  <Field label="Display name" required>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} />
-                  </Field>
-                  <Field label="Email">
-                    <Input value={me?.email ?? ''} readOnly />
-                  </Field>
-                  <Field label="Locale">
-                    <Select
-                      value={locale}
-                      onChange={(e) => setLocale(e.target.value as Locale)}
-                    >
-                      {LOCALE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                </Stack>
-              </Card>
-
-              <Card>
-                <CardHead title="Notifications" sub="How we reach you about activity" />
-                <Stack gap={3}>
-                  {NOTIFICATIONS.map((n, i) => (
-                    <React.Fragment key={n.id}>
+            {/* Notification preferences */}
+            {NOTIFICATION_SECTIONS.map((section) => (
+              <Card key={section.title}>
+                <CardHead title={section.title} />
+                <Stack gap={0}>
+                  {section.items.map((item, i) => (
+                    <React.Fragment key={item.id}>
                       {i > 0 && <Divider />}
                       <SwitchRow
-                        label={n.label}
-                        sub={n.sub}
-                        checked={toggles[n.id]}
-                        onChange={setToggle(n.id)}
+                        label={item.label}
+                        sub={item.sub}
+                        checked={toggles[item.id] ?? false}
+                        onChange={setToggle(item.id)}
                       />
                     </React.Fragment>
                   ))}
                 </Stack>
               </Card>
-            </Col>
+            ))}
 
-            <Col gap={4}>
+            {/* Creator application CTA */}
+            {!me?.creatorId && (
               <Card>
-                <CardHead title="Responsible betting" sub="Optional safeguards" />
-                <Stack gap={3}>
-                  <SwitchRow
-                    label="Weekly play cap"
-                    sub="Limit the number of plays you follow per week"
-                    checked={false}
-                    onChange={() => {}}
-                  />
-                  <Divider />
-                  <SwitchRow
-                    label="Cooldown period"
-                    sub="After a losing streak, pause new follows for 24h"
-                    checked={false}
-                    onChange={() => {}}
-                  />
-                  <Divider />
-                  <Muted>
-                    These tools are optional and can be turned off at any time. For
-                    more resources visit the responsible gambling page.
-                  </Muted>
-                </Stack>
-              </Card>
-
-              <Card>
-                <CardHead title="Privacy" sub="Control your visibility" />
-                <Stack gap={3}>
-                  <SwitchRow
-                    label="Private profile"
-                    sub="Hide your followed plays from other users"
-                    checked={false}
-                    onChange={() => {}}
-                  />
-                </Stack>
-              </Card>
-
-              <Card>
-                <CardHead title="Danger zone" />
+                <CardHead title="Become a creator" />
                 <Stack gap={2}>
                   <Muted>
-                    Pausing your account hides your activity. You can reactivate
-                    at any time. Deleting is permanent.
+                    Have a track record? Apply to publish picks on DigiPicks. Set your pricing, keep
+                    87% of revenue.
                   </Muted>
-                  <Row gap={2}>
-                    <Button variant="outline" size="sm">
-                      Pause account
-                    </Button>
-                    <Button variant="danger" size="sm">
-                      Delete account
-                    </Button>
-                  </Row>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    iconRight="arrow-right"
+                    onClick={() => navigate('/apply')}
+                  >
+                    Apply for creator access
+                  </Button>
                 </Stack>
               </Card>
-            </Col>
-          </Row>
+            )}
+          </DashGrid>
         </Stack>
       </Container>
     </>
