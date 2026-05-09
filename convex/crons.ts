@@ -47,6 +47,18 @@ crons.interval(
   internal.oddsApi.pollUpcoming,
 );
 
+// ─── Poll bookmaker odds snapshots ──────────────────────────────────────
+// Runs daily and only writes rows when ODDS_SNAPSHOTS_ENABLED=true. The
+// /odds endpoint is more expensive than /events (h2h+spreads+totals × 3
+// regions = ~9 credits per sport per call), so we keep this opt-in and
+// run at most once per day to stay inside reasonable quota.
+
+crons.interval(
+  'poll-odds-snapshots',
+  { hours: 24 },
+  internal.oddsApi.pollOddsSnapshots,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────
