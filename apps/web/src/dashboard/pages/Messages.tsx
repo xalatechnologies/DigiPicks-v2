@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -10,43 +11,73 @@ import {
   Button,
   Icon,
   PageHead,
-  Badge,
   Muted,
   Search,
   EmptyState,
   PersonRow,
+  Field,
+  TextArea,
 } from '@digipicks/ds';
-import { CONVERSATIONS } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
+import type { Id } from '../../../../../convex/_generated/dataModel';
 
-interface MessageEntry {
-  id: string;
-  time: string;
-  body: string;
+function fmtTime(ms: number): string {
+  return new Date(ms).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
-const ACTIVE_THREAD: MessageEntry[] = [
-  {
-    id: 'm1',
-    time: 'Yesterday · 6:42 PM',
-    body: "Quick q on the Lakers H1 line — what's your read on Denver's pace tonight?",
-  },
-  {
-    id: 'm2',
-    time: 'Yesterday · 6:51 PM',
-    body: "Pace tier suggests over still has value at -110 — Murray's minutes are the swing factor.",
-  },
-];
+function monogram(name: string | undefined): string {
+  if (!name) return '·';
+  const trimmed = name.trim();
+  if (!trimmed) return '·';
+  return trimmed[0]!.toUpperCase();
+}
 
 export function Messages() {
   const [query, setQuery] = React.useState('');
-  const [activeId, setActiveId] = React.useState<string | null>(CONVERSATIONS[0]?.id ?? null);
+  const [activeId, setActiveId] = React.useState<Id<'conversations'> | null>(null);
+  const [draft, setDraft] = React.useState('');
+  const [sending, setSending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const filtered = CONVERSATIONS.filter((c) => {
+  const conversations = useQuery(api.messages.listConversations);
+  const messages = useQuery(
+    api.messages.getMessages,
+    activeId ? { conversationId: activeId } : 'skip',
+  );
+  const sendMessage = useMutation(api.messages.send);
+
+  // Auto-pick the first conversation once data lands.
+  React.useEffect(() => {
+    if (!activeId && conversations && conversations.length > 0) {
+      setActiveId(conversations[0]!._id);
+    }
+  }, [activeId, conversations]);
+
+  const filtered = (conversations ?? []).filter((c) => {
     if (!query) return true;
-    return c.name.toLowerCase().includes(query.toLowerCase());
+    return c._id.toLowerCase().includes(query.toLowerCase());
   });
 
-  const active = CONVERSATIONS.find((c) => c.id === activeId);
+  const active = conversations?.find((c) => c._id === activeId) ?? null;
+
+  async function handleSend() {
+    if (!activeId || !draft.trim()) return;
+    setError(null);
+    setSending(true);
+    try {
+      await sendMessage({ conversationId: activeId, body: draft.trim() });
+      setDraft('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send message.');
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <>
@@ -77,37 +108,58 @@ export function Messages() {
                 onChange={(e) => setQuery(e.target.value)}
               />
               <Card pad="sm">
-                <Stack gap={1}>
-                  {filtered.map((c) => (
-                    <Card key={c.id} hover pad="sm" onClick={() => setActiveId(c.id)}>
-                      <PersonRow
-                        name={c.name}
-                        sub={c.preview}
-                        mono={c.mono}
-                        color={c.color}
-                        trailing={
-                          <Stack gap={1}>
-                            <Muted>{c.time}</Muted>
-                            {c.unread && (
-                              <Badge tone="green" dot>
-                                new
-                              </Badge>
-                            )}
-                          </Stack>
-                        }
-                      />
-                    </Card>
-                  ))}
-                </Stack>
+                {conversations === undefined ? (
+                  <EmptyState icon="message" title="Loading conversations…" />
+                ) : filtered.length === 0 ? (
+                  <EmptyState
+                    icon="message"
+                    title="No conversations yet"
+                    subtitle="DMs from your subscribers will appear here."
+                  />
+                ) : (
+                  <Stack gap={1}>
+                    {filtered.map((c) => (
+                      <Card
+                        key={c._id}
+                        hover
+                        pad="sm"
+                        onClick={() => setActiveId(c._id)}
+                      >
+                        <PersonRow
+                          name={`Conversation ${c._id.slice(-6)}`}
+                          sub={
+                            c.lastMessageAt
+                              ? `Last activity ${fmtTime(c.lastMessageAt)}`
+                              : 'No messages yet'
+                          }
+                          mono={monogram(c._id)}
+                          color="#3A4F7A"
+                        />
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
               </Card>
             </Col>
 
             <Col gap={3}>
-              {active ? (
+              {!active ? (
+                <Card>
+                  <EmptyState
+                    icon="message"
+                    title="Pick a conversation"
+                    subtitle="Select a thread on the left to view the full message history."
+                  />
+                </Card>
+              ) : (
                 <Card>
                   <CardHead
-                    title={active.name}
-                    sub="VIP subscriber · joined 94d ago"
+                    title={`Conversation ${active._id.slice(-6)}`}
+                    sub={
+                      active.lastMessageAt
+                        ? `Last activity ${fmtTime(active.lastMessageAt)}`
+                        : 'No messages yet'
+                    }
                     action={
                       <Button variant="ghost" size="sm" iconOnly aria-label="More">
                         <Icon name="more" size={14} />
@@ -115,23 +167,46 @@ export function Messages() {
                     }
                   />
                   <Stack gap={3}>
-                    {ACTIVE_THREAD.map((m) => (
-                      <Card key={m.id} pad="sm">
-                        <Stack gap={1}>
-                          <Muted>{m.time}</Muted>
-                          <span>{m.body}</span>
-                        </Stack>
-                      </Card>
-                    ))}
+                    {messages === undefined ? (
+                      <EmptyState icon="message" title="Loading messages…" />
+                    ) : messages.length === 0 ? (
+                      <EmptyState
+                        icon="message"
+                        title="No messages yet"
+                        subtitle="Send the first message to start this thread."
+                      />
+                    ) : (
+                      messages.map((m) => (
+                        <Card key={m._id} pad="sm">
+                          <Stack gap={1}>
+                            <Muted>{fmtTime(m.createdAt)}</Muted>
+                            <span>{m.body}</span>
+                          </Stack>
+                        </Card>
+                      ))
+                    )}
+
+                    <Field label="Reply">
+                      <TextArea
+                        rows={3}
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        placeholder="Write a reply…"
+                      />
+                    </Field>
+                    {error && <Muted>{error}</Muted>}
+                    <Row gap={2}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleSend}
+                        disabled={sending || !draft.trim()}
+                      >
+                        <Icon name="arrow-right" size={13} />
+                        Send
+                      </Button>
+                    </Row>
                   </Stack>
-                </Card>
-              ) : (
-                <Card>
-                  <EmptyState
-                    icon="message"
-                    title="Pick a conversation"
-                    subtitle="Select a thread on the left to view the full message history."
-                  />
                 </Card>
               )}
             </Col>

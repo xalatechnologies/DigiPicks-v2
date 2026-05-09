@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -20,12 +21,20 @@ import {
   Divider,
   SwitchRow,
 } from '@digipicks/ds';
+import { api } from '../../../../../convex/_generated/api';
 
 const NICHE_OPTIONS = [
-  'NBA Player Props',
-  'NFL Sides & Totals',
+  'Soccer Goalscorer Props',
+  'Cricket Match Totals',
+  'Tennis Sides & Totals',
   'Cross-sport Props',
-  'Soccer & Tennis',
+];
+
+type Locale = 'en' | 'nb';
+
+const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
+  { value: 'en', label: 'English' },
+  { value: 'nb', label: 'Norsk bokmål' },
 ];
 
 interface NotificationToggle {
@@ -34,6 +43,8 @@ interface NotificationToggle {
   sub: string;
 }
 
+// TODO: convex — notification preferences need a real
+// api.users.notificationPrefs query + mutation.
 const NOTIFICATIONS: NotificationToggle[] = [
   {
     id: 'pickAlerts',
@@ -53,20 +64,55 @@ const NOTIFICATIONS: NotificationToggle[] = [
 ];
 
 export function Settings() {
-  const [name, setName] = React.useState('CourtVision Pro');
-  const [handle, setHandle] = React.useState('@courtvisionpro');
-  const [bio, setBio] = React.useState(
-    'Player props specialist. Pace and matchup-driven. Pre-game only, no live bets.',
+  const me = useQuery(api.users.me);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
   );
+  const updateProfile = useMutation(api.users.updateProfile);
+
+  const [name, setName] = React.useState('');
+  const [locale, setLocale] = React.useState<Locale>('en');
+  const [bio, setBio] = React.useState('');
+  const [niche, setNiche] = React.useState(NICHE_OPTIONS[0]!);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [saved, setSaved] = React.useState(false);
+
   const [toggles, setToggles] = React.useState<Record<NotificationToggle['id'], boolean>>({
     pickAlerts: true,
     billingAlerts: true,
     growthAlerts: false,
   });
 
+  // Hydrate from Convex once the queries land.
+  React.useEffect(() => {
+    if (me?.name) setName(me.name);
+    if (me?.locale) setLocale(me.locale);
+  }, [me?.name, me?.locale]);
+
+  React.useEffect(() => {
+    if (creator?.bio) setBio(creator.bio);
+    if (creator?.niche) setNiche(creator.niche);
+  }, [creator?.bio, creator?.niche]);
+
   const setToggle = (id: NotificationToggle['id']) => (next: boolean) => {
     setToggles((prev) => ({ ...prev, [id]: next }));
   };
+
+  async function handleSave() {
+    setError(null);
+    setSaved(false);
+    setSaving(true);
+    try {
+      await updateProfile({ name, locale });
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save profile.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <>
@@ -74,9 +120,14 @@ export function Settings() {
         title="Settings"
         crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
-          <Button variant="primary" size="sm">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+          >
             <Icon name="check" size={13} />
-            Save changes
+            {saving ? 'Saving…' : 'Save changes'}
           </Button>
         }
       />
@@ -89,6 +140,9 @@ export function Settings() {
             sub="Public profile, payout details, and notification preferences."
           />
 
+          {error && <Muted>{error}</Muted>}
+          {saved && <Muted>Profile saved.</Muted>}
+
           <Row gap={5} wrap>
             <Col gap={4}>
               <Card>
@@ -97,14 +151,27 @@ export function Settings() {
                   <Field label="Display name" required>
                     <Input value={name} onChange={(e) => setName(e.target.value)} />
                   </Field>
-                  <Field label="Handle">
-                    <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
+                  <Field label="Email">
+                    <Input value={me?.email ?? ''} readOnly />
                   </Field>
+                  <Field label="Locale">
+                    <Select
+                      value={locale}
+                      onChange={(e) => setLocale(e.target.value as Locale)}
+                    >
+                      {LOCALE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  {/* TODO: convex — bio + niche need api.creators.updateProfile. */}
                   <Field label="Bio" help="Up to 280 characters.">
                     <TextArea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
                   </Field>
                   <Field label="Niche">
-                    <Select defaultValue="NBA Player Props">
+                    <Select value={niche} onChange={(e) => setNiche(e.target.value)}>
                       {NICHE_OPTIONS.map((n) => (
                         <option key={n} value={n}>
                           {n}
@@ -134,6 +201,7 @@ export function Settings() {
             </Col>
 
             <Col gap={4}>
+              {/* TODO: convex — payout method needs api.payouts.method. */}
               <Card>
                 <CardHead title="Payout" sub="Current default destination" />
                 <Stack gap={2}>
@@ -151,9 +219,12 @@ export function Settings() {
               <Card>
                 <CardHead title="Verification" sub="Your platform status" />
                 <Stack gap={2}>
-                  <KV k="Identity" v="Verified · Apr 2024" />
-                  <KV k="Track record" v="Verified · 2 years public log" />
-                  <KV k="Content review" v="Approved" />
+                  <KV
+                    k="Identity"
+                    v={creator?.verified ? 'Verified' : 'Not verified'}
+                  />
+                  <KV k="Status" v={creator?.status ?? '—'} />
+                  <KV k="Handle" v={creator?.handle ?? '—'} />
                 </Stack>
               </Card>
 

@@ -1,3 +1,5 @@
+// TODO: convex — access matrix and defaults are mocked. Needs an
+// api.access.matrixByCreator query + api.access.update mutation.
 import React from 'react';
 import {
   PageHeader,
@@ -30,12 +32,12 @@ interface AccessRow {
 }
 
 const ROWS: AccessRow[] = [
-  { market: 'NBA · Player Props', free: false, premium: true, vip: true, cap: 'Unlimited' },
-  { market: 'NBA · Totals', free: true, premium: true, vip: true, cap: '1 free / week' },
-  { market: 'NBA · Moneyline', free: true, premium: true, vip: true, cap: '1 free / week' },
-  { market: 'NFL · Spreads', free: false, premium: true, vip: true, cap: 'Unlimited' },
-  { market: 'NHL · Goalie Props', free: false, premium: true, vip: true, cap: 'Unlimited' },
-  { market: 'EPL · Goalscorer', free: false, premium: false, vip: true, cap: 'VIP only' },
+  { market: 'Soccer · Goalscorer', free: false, premium: true, vip: true, cap: 'Unlimited' },
+  { market: 'Soccer · Totals', free: true, premium: true, vip: true, cap: '1 free / week' },
+  { market: 'Soccer · Moneyline', free: true, premium: true, vip: true, cap: '1 free / week' },
+  { market: 'Cricket · Match Winner', free: false, premium: true, vip: true, cap: 'Unlimited' },
+  { market: 'Tennis · Match Totals', free: false, premium: true, vip: true, cap: 'Unlimited' },
+  { market: 'Tennis · Set Spread', free: false, premium: false, vip: true, cap: 'VIP only' },
 ];
 
 interface DefaultEntry {

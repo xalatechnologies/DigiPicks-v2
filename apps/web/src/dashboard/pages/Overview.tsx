@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -20,14 +21,42 @@ import {
   PersonRow,
   TitleSub,
   PickCard,
+  EmptyState,
 } from '@digipicks/ds';
-import { FEED_PICKS, CREATORS, STUDIO_SUBSCRIBERS, creatorById } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
 
 export function Overview() {
   const navigate = useNavigate();
 
-  const recentPicks = FEED_PICKS.slice(0, 3);
-  const recentSubs = STUDIO_SUBSCRIBERS.slice(0, 5);
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const recentPicks = useQuery(
+    api.picks.byCreator,
+    creator?._id ? { creatorId: creator._id, limit: 6 } : 'skip',
+  );
+  const subCount = useQuery(
+    api.subscriptions.countByCreator,
+    creator?._id ? { creatorId: creator._id } : 'skip',
+  );
+
+  const recentSubsRaw = useQuery(
+    api.subscriptions.byCreator,
+    creator?._id ? { creatorId: creator._id, limit: 5 } : 'skip',
+  );
+  const recentSubs = (recentSubsRaw ?? []).map((s) => ({
+    id: s._id,
+    name: s.subscriberName,
+    mono: s.subscriberMono,
+    color: '#3A4F7A',
+    email: s.subscriberEmail,
+    plan: s.plan === 'premium' ? 'Premium' as const : s.plan === 'vip' ? 'VIP' as const : 'Trial' as const,
+    ltv: '—',
+  }));
+
+  const displayName = creator?.name ?? me?.name ?? 'creator';
 
   return (
     <>
@@ -36,7 +65,11 @@ export function Overview() {
         crumbs={[{ label: 'Studio' }, { label: 'Overview' }]}
         actions={
           <Row gap={2}>
-            <Button variant="secondary" size="sm">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/dashboard/messages')}
+            >
               <Icon name="message" size={13} />
               Message subscribers
             </Button>
@@ -51,9 +84,9 @@ export function Overview() {
       <Container size="2xl">
         <Stack gap={6}>
           <Section
-            eyebrow="Tuesday, May 14 · 7 picks pending grade · 2 events tonight"
-            title="Good evening, Marco."
-            sub="A quick read on your studio, audience, and growth — tonight's slate is loaded."
+            eyebrow="A quick read on your studio, audience, and growth"
+            title={`Welcome back, ${displayName}.`}
+            sub="Tonight's slate, your in-flight picks, and your fastest-growing levers."
           />
 
           <MetricGrid
@@ -61,6 +94,7 @@ export function Overview() {
               {
                 id: 'mrr',
                 label: 'Monthly recurring revenue',
+                // TODO: convex — needs api.earnings.mrr(creatorId).
                 value: <Mono>$12,480</Mono>,
                 delta: { value: '+18.4%', dir: 'up' },
                 icon: <Icon name="dollar" size={14} />,
@@ -68,22 +102,25 @@ export function Overview() {
               {
                 id: 'subs',
                 label: 'Active subscribers',
-                value: <Mono>426</Mono>,
-                delta: { value: '+34 this mo', dir: 'up' },
+                value: (
+                  <Mono>{typeof subCount === 'number' ? subCount.toLocaleString() : '—'}</Mono>
+                ),
                 icon: <Icon name="users" size={14} />,
               },
               {
                 id: 'win',
-                label: 'Win rate · 30d',
-                value: <Mono>61.2%</Mono>,
-                delta: { value: '+1.8 pts', dir: 'up' },
+                label: 'Win rate',
+                value: (
+                  <Mono>
+                    {creator ? `${(creator.winRate * 100).toFixed(1)}%` : '—'}
+                  </Mono>
+                ),
                 icon: <Icon name="trophy" size={14} />,
               },
               {
-                id: 'roi',
-                label: 'ROI · 30d',
-                value: <Mono>+11.4%</Mono>,
-                delta: { value: '+2.1 pts', dir: 'up' },
+                id: 'units',
+                label: 'Units',
+                value: <Mono>{creator?.units ?? '—'}</Mono>,
                 icon: <Icon name="chart" size={14} />,
               },
             ]}
@@ -102,22 +139,39 @@ export function Overview() {
                     </Button>
                   }
                 />
-                <Stack gap={3}>
-                  {recentPicks.map((p) => {
-                    const c = creatorById(p.creator) ?? CREATORS[0];
-                    return (
+                {recentPicks === undefined ? (
+                  <EmptyState icon="inbox" title="Loading picks…" />
+                ) : recentPicks.length === 0 ? (
+                  <EmptyState
+                    icon="inbox"
+                    title="No picks yet"
+                    subtitle="Publish your first pick to start building a track record."
+                    action={
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate('/dashboard/create')}
+                      >
+                        <Icon name="plus" size={13} />
+                        Create pick
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <Stack gap={3}>
+                    {recentPicks.map((p) => (
                       <PickCard
-                        key={p.id}
-                        creatorName={c.name}
-                        creatorHandle={c.handle}
-                        creatorMono={c.avatar.mono}
-                        creatorColor={c.avatar.color}
-                        creatorVerified={c.verified}
+                        key={p._id}
+                        creatorName={creator?.name ?? ''}
+                        creatorHandle={creator?.handle ?? ''}
+                        creatorMono={creator?.avatarMono ?? ''}
+                        creatorColor={creator?.avatarColor ?? ''}
+                        creatorVerified={creator?.verified ?? false}
                         access={p.access}
                         sport={p.sport}
-                        event={p.event}
+                        event={p.eventName}
                         eventTime={p.eventTime}
-                        posted={p.posted}
+                        posted={new Date(p.createdAt).toLocaleString()}
                         title={p.title}
                         market={p.market}
                         selection={p.selection}
@@ -125,11 +179,11 @@ export function Overview() {
                         units={p.units}
                         body={p.body}
                         teaser={p.teaser}
-                        status={p.status}
+                        status={p.grade ?? p.status}
                       />
-                    );
-                  })}
-                </Stack>
+                    ))}
+                  </Stack>
+                )}
               </Card>
             </Col>
 
@@ -188,14 +242,20 @@ export function Overview() {
 
               <Card>
                 <CardHead
-                  title="Top market · last 30d"
-                  sub="Player Props · NBA"
-                  action={<Badge tone="green">+24.6u</Badge>}
+                  title="Track record"
+                  sub={creator?.niche ?? '—'}
+                  action={<Badge tone="green">{creator?.units ?? '—'}</Badge>}
                 />
                 <Row gap={4} between>
                   <Stack gap={1}>
                     <Eyebrow>Win rate</Eyebrow>
-                    <Mono>64.3%</Mono>
+                    <Mono>
+                      {creator ? `${(creator.winRate * 100).toFixed(1)}%` : '—'}
+                    </Mono>
+                  </Stack>
+                  <Stack gap={1}>
+                    <Eyebrow>Record</Eyebrow>
+                    <Mono>{creator?.record ?? '—'}</Mono>
                   </Stack>
                   <Sparkline values={[3, 5, 4, 6, 8, 7, 10, 12, 11, 14]} width={140} height={36} />
                 </Row>

@@ -31,14 +31,14 @@ export interface StudioPick {
 }
 
 export const STUDIO_PICKS: StudioPick[] = [
-  { id: 'sp1', title: 'Lakers vs Nuggets — H1 Total Over 112.5', sport: 'NBA', market: 'Totals', access: 'premium', status: 'pending', date: 'Today 6:48 PM', views: 1284, saves: 312, units: '2u', odds: '-110' },
-  { id: 'sp2', title: 'Dončić Over 7.5 assists', sport: 'NBA', market: 'Player Prop', access: 'premium', status: 'pending', date: 'Today 5:22 PM', views: 856, saves: 188, units: '1.5u', odds: '+105' },
-  { id: 'sp3', title: 'Free preview · Knicks ML', sport: 'NBA', market: 'Moneyline', access: 'free', status: 'pending', date: 'Today 2:10 PM', views: 4012, saves: 522, units: '1u', odds: '-135' },
-  { id: 'sp4', title: 'Friday slate notes', sport: 'NBA', market: 'Analysis', access: 'premium', status: 'scheduled', date: 'Tomorrow 9:00 AM', views: 0, saves: 0, units: '—', odds: '—' },
-  { id: 'sp5', title: 'Bills vs Chiefs preview', sport: 'NFL', market: 'Spread', access: 'premium', status: 'draft', date: 'Draft', views: 0, saves: 0, units: '—', odds: '—' },
-  { id: 'sp6', title: 'Celtics ML at home', sport: 'NBA', market: 'Moneyline', access: 'premium', status: 'win', date: 'Yesterday', views: 2104, saves: 318, units: '2u', odds: '-145' },
-  { id: 'sp7', title: 'Tatum Over 4.5 threes', sport: 'NBA', market: 'Player Prop', access: 'premium', status: 'loss', date: '2d ago', views: 1820, saves: 210, units: '1u', odds: '+110' },
-  { id: 'sp8', title: 'Rangers PL -1.5', sport: 'NHL', market: 'Puckline', access: 'premium', status: 'win', date: '3d ago', views: 1402, saves: 244, units: '1.5u', odds: '+165' },
+  { id: 'sp1', title: 'Arsenal vs Man City — BTTS Yes', sport: 'Soccer', market: 'BTTS', access: 'premium', status: 'pending', date: 'Today 6:48 PM', views: 1284, saves: 312, units: '2u', odds: '-110' },
+  { id: 'sp2', title: 'Saka Anytime Goalscorer', sport: 'Soccer', market: 'Goalscorer', access: 'premium', status: 'pending', date: 'Today 5:22 PM', views: 856, saves: 188, units: '1.5u', odds: '+165' },
+  { id: 'sp3', title: 'Free preview · Liverpool ML', sport: 'Soccer', market: 'Moneyline', access: 'free', status: 'pending', date: 'Today 2:10 PM', views: 4012, saves: 522, units: '1u', odds: '-135' },
+  { id: 'sp4', title: 'Weekend slate notes', sport: 'Soccer', market: 'Analysis', access: 'premium', status: 'scheduled', date: 'Tomorrow 9:00 AM', views: 0, saves: 0, units: '—', odds: '—' },
+  { id: 'sp5', title: 'Mumbai vs Chennai preview', sport: 'Cricket', market: 'Match Total', access: 'premium', status: 'draft', date: 'Draft', views: 0, saves: 0, units: '—', odds: '—' },
+  { id: 'sp6', title: 'Arsenal Over 1.5 Goals', sport: 'Soccer', market: 'Totals', access: 'premium', status: 'win', date: 'Yesterday', views: 2104, saves: 318, units: '2u', odds: '-145' },
+  { id: 'sp7', title: 'Alcaraz Match Total Over 3.5 Sets', sport: 'Tennis', market: 'Set Totals', access: 'premium', status: 'loss', date: '2d ago', views: 1820, saves: 210, units: '1u', odds: '+110' },
+  { id: 'sp8', title: 'Leverkusen ML', sport: 'Soccer', market: 'Moneyline', access: 'premium', status: 'win', date: '3d ago', views: 1402, saves: 244, units: '1.5u', odds: '+165' },
   { id: 'sp9', title: 'Arsenal/Spurs Over 2.5', sport: 'Soccer', market: 'Totals', access: 'free', status: 'win', date: '4d ago', views: 5210, saves: 612, units: '1u', odds: '-120' },
 ];
 
@@ -74,10 +74,10 @@ export interface MarketPerf {
 }
 
 export const MARKET_PERF: MarketPerf[] = [
-  { market: 'Player Props · NBA', picks: 84, winRate: 0.643, units: '+24.6u', trend: [3, 5, 4, 6, 8, 7, 10, 12, 11, 14] },
-  { market: 'Totals · NBA', picks: 42, winRate: 0.595, units: '+11.2u', trend: [2, 3, 5, 4, 6, 8, 7, 9, 8, 11] },
-  { market: 'Moneyline · NBA', picks: 28, winRate: 0.571, units: '+6.8u', trend: [1, 2, 1, 3, 2, 4, 5, 4, 6, 7] },
-  { market: 'Spreads · NFL', picks: 12, winRate: 0.500, units: '−1.2u', trend: [0, 1, 0, -1, 0, 1, 0, -1, 1, 0] },
+  { market: 'Goalscorer · Soccer', picks: 84, winRate: 0.643, units: '+24.6u', trend: [3, 5, 4, 6, 8, 7, 10, 12, 11, 14] },
+  { market: 'Totals · Soccer', picks: 42, winRate: 0.595, units: '+11.2u', trend: [2, 3, 5, 4, 6, 8, 7, 9, 8, 11] },
+  { market: 'Match Totals · Cricket', picks: 28, winRate: 0.571, units: '+6.8u', trend: [1, 2, 1, 3, 2, 4, 5, 4, 6, 7] },
+  { market: 'Set Totals · Tennis', picks: 12, winRate: 0.500, units: '−1.2u', trend: [0, 1, 0, -1, 0, 1, 0, -1, 1, 0] },
 ];
 
 export interface Conversation {

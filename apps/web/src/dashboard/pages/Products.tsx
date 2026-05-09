@@ -1,4 +1,7 @@
+// TODO: convex — pricing tiers need a real tiers table (api.tiers.byCreator).
+// Today we read creator.startingPrice for the entry tier; the rest stays mock.
 import React from 'react';
+import { useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -17,6 +20,7 @@ import {
   TitleSub,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
+import { api } from '../../../../../convex/_generated/api';
 
 interface PlanDef {
   id: string;
@@ -29,53 +33,56 @@ interface PlanDef {
   ctaVariant: 'primary' | 'outline';
 }
 
-const PLANS: PlanDef[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'mo',
-    features: [
-      '1–2 free picks per week',
-      'Discoverable in feed',
-      'No analysis attached',
-      'Sample of voice and edge',
-    ],
-    ctaLabel: 'Configure',
-    ctaVariant: 'outline',
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: '$39',
-    period: 'mo',
-    featured: true,
-    features: [
-      'All picks · pre-game only',
-      'Full analysis & confidence',
-      'Direct messages with creator',
-      'Discord access (subscribers-only)',
-      'Cancel anytime',
-    ],
-    ctaLabel: 'Edit plan',
-    ctaVariant: 'primary',
-  },
-  {
-    id: 'vip',
-    name: 'VIP',
-    price: '$99',
-    period: 'mo',
-    features: [
-      'Everything in Premium',
-      'Early access · 30 min head-start',
-      'Live events & voice rooms',
-      'Quarterly 1:1 strategy call',
-      'Priority replies on DMs',
-    ],
-    ctaLabel: 'Edit plan',
-    ctaVariant: 'outline',
-  },
-];
+function buildPlans(startingPrice: number | undefined): PlanDef[] {
+  const premiumPrice = typeof startingPrice === 'number' ? `$${startingPrice}` : '$39';
+  return [
+    {
+      id: 'free',
+      name: 'Free',
+      price: '$0',
+      period: 'mo',
+      features: [
+        '1–2 free picks per week',
+        'Discoverable in feed',
+        'No analysis attached',
+        'Sample of voice and edge',
+      ],
+      ctaLabel: 'Configure',
+      ctaVariant: 'outline',
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: premiumPrice,
+      period: 'mo',
+      featured: true,
+      features: [
+        'All picks · pre-game only',
+        'Full analysis & confidence',
+        'Direct messages with creator',
+        'Discord access (subscribers-only)',
+        'Cancel anytime',
+      ],
+      ctaLabel: 'Edit plan',
+      ctaVariant: 'primary',
+    },
+    {
+      id: 'vip',
+      name: 'VIP',
+      price: '$99',
+      period: 'mo',
+      features: [
+        'Everything in Premium',
+        'Early access · 30 min head-start',
+        'Live events & voice rooms',
+        'Quarterly 1:1 strategy call',
+        'Priority replies on DMs',
+      ],
+      ctaLabel: 'Edit plan',
+      ctaVariant: 'outline',
+    },
+  ];
+}
 
 interface DiscountDef {
   code: string;
@@ -94,6 +101,13 @@ const DISCOUNTS: DiscountDef[] = [
 ];
 
 export function Products() {
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const plans = buildPlans(creator?.startingPrice);
+
   return (
     <>
       <PageHeader
@@ -116,7 +130,7 @@ export function Products() {
           />
 
           <Row gap={4} wrap>
-            {PLANS.map((plan) => (
+            {plans.map((plan) => (
               <Col key={plan.id} gap={0}>
                 <PriceCard
                   name={plan.name}

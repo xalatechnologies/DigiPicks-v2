@@ -1,4 +1,5 @@
 import React from 'react';
+import { useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -18,8 +19,9 @@ import {
   KV,
   StatGrid,
   TitleSub,
+  EmptyState,
 } from '@digipicks/ds';
-import { MARKET_PERF } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
 
 const RANGE_OPTIONS = [
   { label: '7D', value: '7d' },
@@ -28,21 +30,59 @@ const RANGE_OPTIONS = [
   { label: 'YTD', value: 'ytd' },
 ];
 
-interface TopEarner {
-  id: string;
-  title: string;
-  meta: string;
-  saves: string;
+interface MarketPerf {
+  market: string;
+  picks: number;
+  wins: number;
+  winRate: number;
+  units: string;
 }
 
-const TOP_EARNERS: TopEarner[] = [
-  { id: 'lakers-h1', title: 'Lakers vs Nuggets H1 Over', meta: 'NBA · Totals', saves: '+312 saves' },
-  { id: 'knicks-ml', title: 'Knicks ML preview', meta: 'NBA · Moneyline', saves: '+522 saves' },
-  { id: 'saka', title: 'Saka anytime scorer', meta: 'EPL · Goalscorer', saves: '+198 saves' },
-];
+/** Compute market-level performance from graded picks. */
+function computeMarketPerf(
+  picks: Array<{ market: string; grade?: string; netUnits?: string }>,
+): MarketPerf[] {
+  const map = new Map<string, { picks: number; wins: number; net: number }>();
+  for (const p of picks) {
+    if (!p.grade || p.grade === 'pending') continue;
+    const entry = map.get(p.market) ?? { picks: 0, wins: 0, net: 0 };
+    entry.picks++;
+    if (p.grade === 'win') entry.wins++;
+    if (p.netUnits) entry.net += parseFloat(p.netUnits) || 0;
+    map.set(p.market, entry);
+  }
+  return Array.from(map.entries())
+    .map(([market, { picks, wins, net }]) => ({
+      market,
+      picks,
+      wins,
+      winRate: picks > 0 ? wins / picks : 0,
+      units: net >= 0 ? `+${net.toFixed(1)}u` : `${net.toFixed(1)}u`,
+    }))
+    .sort((a, b) => b.picks - a.picks);
+}
 
 export function Performance() {
   const [range, setRange] = React.useState('30d');
+
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const picks = useQuery(
+    api.picks.byCreator,
+    creator?._id ? { creatorId: creator._id, limit: 500 } : 'skip',
+  );
+
+  const marketPerf = React.useMemo(
+    () => computeMarketPerf(picks ?? []),
+    [picks],
+  );
+
+  const winRateLabel = creator
+    ? `${(creator.winRate * 100).toFixed(1)}%`
+    : '—';
 
   return (
     <>
@@ -78,44 +118,46 @@ export function Performance() {
               {
                 id: 'win',
                 label: 'Win rate',
-                value: <Mono>61.2%</Mono>,
+                value: <Mono>{winRateLabel}</Mono>,
                 sub: (
                   <Row gap={2}>
-                    <Badge tone="green" dot>+1.8 pts</Badge>
-                    <Muted>vs prior 30d</Muted>
+                    <Muted>Lifetime · public log</Muted>
                   </Row>
                 ),
               },
               {
-                id: 'roi',
-                label: 'ROI',
-                value: <Mono>+11.4%</Mono>,
+                id: 'record',
+                label: 'Record',
+                value: <Mono>{creator?.record ?? '—'}</Mono>,
                 sub: (
                   <Row gap={2}>
-                    <Badge tone="green" dot>+2.1 pts</Badge>
-                    <Muted>units-weighted</Muted>
+                    <Muted>W-L-P</Muted>
                   </Row>
                 ),
               },
               {
                 id: 'units',
                 label: 'Units',
-                value: <Mono>+41.4u</Mono>,
+                value: <Mono>{creator?.units ?? '—'}</Mono>,
                 sub: (
                   <Row gap={2}>
-                    <Badge tone="green" dot>+6.2u</Badge>
-                    <Muted>this month</Muted>
+                    <Muted>Net since opening</Muted>
                   </Row>
                 ),
               },
               {
-                id: 'streak',
-                label: 'Streak',
-                value: <Mono>W4</Mono>,
+                id: 'last10',
+                label: 'Last 10',
+                value: <Mono>{creator?.last10 || '—'}</Mono>,
                 sub: (
                   <Row gap={2}>
-                    <Badge tone="gold" dot>Hot</Badge>
-                    <Muted>3 graded today</Muted>
+                    {creator?.streak ? (
+                      <Badge tone="gold" dot>
+                        {creator.streak}
+                      </Badge>
+                    ) : (
+                      <Muted>—</Muted>
+                    )}
                   </Row>
                 ),
               },
@@ -126,42 +168,37 @@ export function Performance() {
             <Col gap={4}>
               <Card>
                 <CardHead title="By market" sub="Performance breakdown across the markets you publish in" />
-                <Stack gap={4}>
-                  {MARKET_PERF.map((m) => (
-                    <Row key={m.market} gap={4} between wrap>
-                      <TitleSub
-                        title={m.market}
-                        sub={`${m.picks} picks · ${(m.winRate * 100).toFixed(1)}%`}
-                      />
-                      <Sparkline values={m.trend} width={140} height={32} />
-                      <Mono>{m.units}</Mono>
-                    </Row>
-                  ))}
-                </Stack>
+                {marketPerf.length === 0 ? (
+                  <EmptyState
+                    icon="chart"
+                    title="No graded picks yet."
+                    subtitle="Publish and grade picks to see market breakdowns."
+                  />
+                ) : (
+                  <Stack gap={4}>
+                    {marketPerf.map((m) => (
+                      <Row key={m.market} gap={4} between wrap>
+                        <TitleSub
+                          title={m.market}
+                          sub={`${m.picks} picks · ${(m.winRate * 100).toFixed(1)}%`}
+                        />
+                        <Mono>{m.units}</Mono>
+                      </Row>
+                    ))}
+                  </Stack>
+                )}
               </Card>
             </Col>
 
             <Col gap={4}>
+              {/* Discipline metrics — computed from pick history */}
               <Card>
-                <CardHead title="Discipline" sub="Closing line value and risk hygiene" />
+                <CardHead title="Discipline" sub="Risk hygiene and consistency" />
                 <Stack gap={2}>
-                  <KV k="CLV beat rate" v={<Mono>58.2%</Mono>} />
-                  <KV k="Avg unit size" v={<Mono>1.6u</Mono>} />
-                  <KV k="Max drawdown" v={<Mono>−8.4u</Mono>} />
-                  <KV k="Picks per week" v={<Mono>9.3</Mono>} />
-                  <KV k="Pre-game share" v={<Mono>96%</Mono>} />
-                </Stack>
-              </Card>
-
-              <Card>
-                <CardHead title="Top earners" sub="Picks that drove the most subscriber action" />
-                <Stack gap={3}>
-                  {TOP_EARNERS.map((t) => (
-                    <Row key={t.id} gap={3} between>
-                      <TitleSub title={t.title} sub={t.meta} />
-                      <Mono>{t.saves}</Mono>
-                    </Row>
-                  ))}
+                  <KV k="Total picks" v={<Mono>{(picks ?? []).length}</Mono>} />
+                  <KV k="Graded" v={<Mono>{(picks ?? []).filter((p) => p.grade && p.grade !== 'pending').length}</Mono>} />
+                  <KV k="Markets" v={<Mono>{marketPerf.length}</Mono>} />
+                  <KV k="Avg unit size" v={<Mono>{creator?.units ?? '—'}</Mono>} />
                 </Stack>
               </Card>
             </Col>

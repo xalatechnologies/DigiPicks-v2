@@ -1,3 +1,5 @@
+// TODO: convex — needs api.earnings.summary, api.earnings.invoices, and
+// api.payouts.method endpoints. Today the entire page reads from mocks.
 import React from 'react';
 import {
   PageHeader,

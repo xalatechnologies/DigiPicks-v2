@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -19,21 +20,25 @@ import {
   Muted,
   Eyebrow,
   Divider,
+  Badge,
 } from '@digipicks/ds';
-import { CREATORS, SPORTS, creatorById } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
+
+const SPORTS = ['Soccer', 'Cricket', 'Tennis'];
 
 type PickAccess = 'free' | 'premium' | 'vip';
+type PickConfidence = 'Low' | 'Medium' | 'High';
 
-const ACCESS_OPTIONS = [
+const ACCESS_OPTIONS: { label: string; value: PickAccess }[] = [
   { label: 'Free', value: 'free' },
   { label: 'Premium', value: 'premium' },
   { label: 'VIP', value: 'vip' },
 ];
 
-const CONFIDENCE_OPTIONS = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
+const CONFIDENCE_OPTIONS: { value: PickConfidence; label: string }[] = [
+  { value: 'Low', label: 'Low' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'High', label: 'High' },
 ];
 
 const MARKET_OPTIONS = [
@@ -48,12 +53,22 @@ const MARKET_OPTIONS = [
 export function CreatePick() {
   const navigate = useNavigate();
 
-  const [sport, setSport] = React.useState('NBA');
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const createPick = useMutation(api.picks.create);
+
+  const [sport, setSport] = React.useState('Soccer');
+  const [league, setLeague] = React.useState('Premier League');
+  const [eventName, setEventName] = React.useState('Arsenal vs Chelsea');
+  const [eventTime, setEventTime] = React.useState('Saturday 3:00 PM');
   const [market, setMarket] = React.useState('1H Over/Under');
   const [selection, setSelection] = React.useState('Over 112.5');
   const [odds, setOdds] = React.useState('-110');
   const [units, setUnits] = React.useState('2u');
-  const [confidence, setConfidence] = React.useState('high');
+  const [confidence, setConfidence] = React.useState<PickConfidence>('High');
   const [title, setTitle] = React.useState(
     'Lakers vs Nuggets — First Half Total Over 112.5',
   );
@@ -61,8 +76,40 @@ export function CreatePick() {
     'Both teams hovering 53–55% pace tier vs quality defenses. Denver on a back-to-back, Murray played 38 minutes Thursday.\n\nLakers 6-1 on H1 over at home this season when line sits 110.5–113.5.',
   );
   const [access, setAccess] = React.useState<PickAccess>('premium');
+  const [error, setError] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
 
-  const me = creatorById('courtvision') ?? CREATORS[0];
+  async function handleSubmit(status: 'draft' | 'published') {
+    if (!creator?._id) {
+      setError('No creator profile is attached to your account yet.');
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      await createPick({
+        creatorId: creator._id,
+        access,
+        sport,
+        league,
+        eventName,
+        eventTime,
+        title,
+        market,
+        selection,
+        odds,
+        units,
+        confidence,
+        body: body || undefined,
+        status,
+      });
+      navigate('/dashboard/picks');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save pick.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <>
@@ -75,13 +122,28 @@ export function CreatePick() {
         ]}
         actions={
           <Row gap={2}>
-            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard/picks')}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/dashboard/picks')}
+              disabled={submitting}
+            >
               Cancel
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSubmit('draft')}
+              disabled={submitting || !creator}
+            >
               Save draft
             </Button>
-            <Button variant="primary" size="sm">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleSubmit('published')}
+              disabled={submitting || !creator}
+            >
               Publish now
             </Button>
           </Row>
@@ -95,6 +157,17 @@ export function CreatePick() {
             title="Create a pick"
             sub="Compose, attach analysis, set access — preview live as you write."
           />
+
+          {error && (
+            <Card>
+              <Row gap={3}>
+                <Badge tone="red" dot>
+                  Error
+                </Badge>
+                <Muted>{error}</Muted>
+              </Row>
+            </Card>
+          )}
 
           <Row gap={5} wrap>
             <Col gap={4}>
@@ -122,6 +195,15 @@ export function CreatePick() {
                       </Field>
                     </Col>
                     <Col gap={0}>
+                      <Field label="League">
+                        <Input
+                          value={league}
+                          onChange={(e) => setLeague(e.target.value)}
+                          placeholder="e.g. EPL"
+                        />
+                      </Field>
+                    </Col>
+                    <Col gap={0}>
                       <Field label="Market">
                         <Select value={market} onChange={(e) => setMarket(e.target.value)}>
                           {MARKET_OPTIONS.map((m) => (
@@ -130,6 +212,27 @@ export function CreatePick() {
                             </option>
                           ))}
                         </Select>
+                      </Field>
+                    </Col>
+                  </Row>
+
+                  <Row gap={3} wrap>
+                    <Col gap={0}>
+                      <Field label="Event" required>
+                        <Input
+                          value={eventName}
+                          onChange={(e) => setEventName(e.target.value)}
+                          placeholder="Lakers vs Nuggets"
+                        />
+                      </Field>
+                    </Col>
+                    <Col gap={0}>
+                      <Field label="Event time">
+                        <Input
+                          value={eventTime}
+                          onChange={(e) => setEventTime(e.target.value)}
+                          placeholder="Tonight 7:30 PM ET"
+                        />
                       </Field>
                     </Col>
                   </Row>
@@ -167,7 +270,7 @@ export function CreatePick() {
                   <Field label="Confidence">
                     <Select
                       value={confidence}
-                      onChange={(e) => setConfidence(e.target.value)}
+                      onChange={(e) => setConfidence(e.target.value as PickConfidence)}
                     >
                       {CONFIDENCE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -212,15 +315,15 @@ export function CreatePick() {
               </Stack>
 
               <PickCard
-                creatorName={me.name}
-                creatorHandle={me.handle}
-                creatorMono={me.avatar.mono}
-                creatorColor={me.avatar.color}
-                creatorVerified={me.verified}
+                creatorName={creator?.name ?? me?.name ?? 'You'}
+                creatorHandle={creator?.handle ?? ''}
+                creatorMono={creator?.avatarMono ?? ''}
+                creatorColor={creator?.avatarColor ?? ''}
+                creatorVerified={creator?.verified ?? false}
                 access={access}
                 sport={sport}
-                event="Lakers vs Nuggets"
-                eventTime="Tonight 7:30 PM ET"
+                event={eventName}
+                eventTime={eventTime}
                 posted="just now"
                 title={title || 'Untitled pick'}
                 market={market}

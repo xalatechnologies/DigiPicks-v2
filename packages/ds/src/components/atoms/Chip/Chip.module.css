@@ -1,15 +1,15 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  height: var(--control-md);
-  padding: 0 var(--space-4);
+  gap: var(--space-3);
+  height: var(--control-lg);
+  padding: 0 var(--space-5);
   border-radius: var(--r-pill);
   background: var(--bg-2);
   border: 1px solid var(--line-soft);
   color: var(--t-2);
   font-family: var(--f-sans);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   cursor: pointer;
   user-select: none;
   font-weight: var(--weight-medium);
@@ -17,7 +17,12 @@
   transition:
     background var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.chip:active {
+  transform: scale(0.98);
 }
 
 .chip:hover {

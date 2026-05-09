@@ -122,13 +122,9 @@ export function Apply() {
                         <option value="" disabled>
                           Select a sport
                         </option>
-                        <option value="NFL">NFL</option>
-                        <option value="NBA">NBA</option>
-                        <option value="NHL">NHL</option>
-                        <option value="MLB">MLB</option>
                         <option value="Soccer">Soccer</option>
+                        <option value="Cricket">Cricket</option>
                         <option value="Tennis">Tennis</option>
-                        <option value="UFC">UFC</option>
                         <option value="Other">Other</option>
                       </Select>
                     </Field>
@@ -137,13 +133,13 @@ export function Apply() {
                   <Field
                     label="Niche / specialty"
                     required
-                    help="Be specific — e.g. 'NBA player props, pre-game only' or 'NFL totals with CLV-tracking since 2022'."
+                    help="Be specific — e.g. 'EPL goalscorer props, pre-game only' or 'Tennis match totals with CLV-tracking since 2023'."
                     htmlFor="apply-niche"
                   >
                     <Input
                       id="apply-niche"
                       name="niche"
-                      placeholder="NFL Sides & Totals, CLV-tracked"
+                      placeholder="EPL Goalscorer Props, CLV-tracked"
                       required
                     />
                   </Field>

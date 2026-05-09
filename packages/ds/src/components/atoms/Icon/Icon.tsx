@@ -51,7 +51,20 @@ export type IconName =
   | 'audit'
   | 'soccer'
   | 'cricket'
-  | 'tennis';
+  | 'tennis'
+  | 'football'
+  | 'basketball'
+  | 'baseball'
+  | 'hockey'
+  | 'ufc'
+  | 'racing'
+  | 'volleyball'
+  | 'golf'
+  | 'rugby'
+  | 'sliders'
+  | 'list'
+  | 'grid'
+  | 'sort';
 
 export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, 'name'> {
   name: IconName | (string & {});
@@ -424,6 +437,103 @@ export const Icon: React.FC<IconProps> = ({ name, size = 16, ...rest }) => {
           <path d="M5 4c2 4 2 12 0 16" />
           <path d="M19 4c-2 4-2 12 0 16" />
           <path d="M3 12h18" />
+        </svg>
+      );
+    case 'football':
+      return (
+        <svg {...common}>
+          <ellipse cx="12" cy="12" rx="9" ry="5.5" transform="rotate(-30 12 12)" />
+          <path d="M9 9l6 6M9 12h6M11 7v10" />
+        </svg>
+      );
+    case 'basketball':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3v18" />
+          <path d="M5 5c4 3 10 9 14 14M19 5c-4 3-10 9-14 14" />
+        </svg>
+      );
+    case 'baseball':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M5 8c2 1 4 2 7 2s5-1 7-2M5 16c2-1 4-2 7-2s5 1 7 2" />
+        </svg>
+      );
+    case 'hockey':
+      return (
+        <svg {...common}>
+          <ellipse cx="6" cy="18" rx="3.5" ry="1.5" />
+          <path d="M9 17l8-12 3 1-9 12" />
+        </svg>
+      );
+    case 'ufc':
+      return (
+        <svg {...common}>
+          <path d="M7 9V6a2 2 0 014 0v4" />
+          <path d="M11 9V5a2 2 0 014 0v5" />
+          <path d="M15 9V7a2 2 0 014 0v6c0 4-3 7-7 7H9c-3 0-5-2-5-5v-3a2 2 0 014 0v1" />
+        </svg>
+      );
+    case 'racing':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+        </svg>
+      );
+    case 'volleyball':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 3c4 5 4 13 0 18M3 12c5-4 13-4 18 0M5 5c4 5 14 5 14 14" />
+        </svg>
+      );
+    case 'golf':
+      return (
+        <svg {...common}>
+          <path d="M12 3v15M12 5l6 2-6 2" />
+          <path d="M9 19h6M8 21h8" />
+        </svg>
+      );
+    case 'rugby':
+      return (
+        <svg {...common}>
+          <ellipse cx="12" cy="12" rx="9" ry="5.5" transform="rotate(45 12 12)" />
+          <path d="M9 9l6 6M9 15l6-6" />
+        </svg>
+      );
+    case 'sliders':
+      return (
+        <svg {...common}>
+          <path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h12M20 17h0" />
+          <circle cx="16" cy="7" r="2" />
+          <circle cx="8" cy="12" r="2" />
+          <circle cx="18" cy="17" r="2" />
+        </svg>
+      );
+    case 'list':
+      return (
+        <svg {...common}>
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+        </svg>
+      );
+    case 'grid':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      );
+    case 'sort':
+      return (
+        <svg {...common}>
+          <path d="M7 4v16M3 8l4-4 4 4" />
+          <path d="M17 20V4M21 16l-4 4-4-4" />
         </svg>
       );
     default:

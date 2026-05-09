@@ -16,7 +16,6 @@ import {
   Icon,
   CreatorCard,
   EventCard,
-  FeaturedEventCard,
   BigStat,
   FAQList,
   HeroLivePanel,
@@ -54,7 +53,7 @@ const STEPS: Array<{
     step: 1,
     title: 'Find a creator that fits your edge.',
     body:
-      'Browse 142 verified operators across NFL, NBA, NHL, MLB, soccer, tennis, and UFC. Filter by sport, win rate, and pricing.',
+      'Browse verified creators across soccer, cricket, and tennis. Filter by sport, win rate, and pricing.',
     iconName: 'compass',
     tone: 'primary',
     hint: 'Takes ~2 minutes',
@@ -84,7 +83,7 @@ const TESTIMONIALS = [
     quote:
       "First platform where my real CLV-tracked record actually matters. The grading is independent — my numbers can't be massaged. Subscribers know exactly what they're paying for.",
     name: 'CourtVision Pro',
-    role: 'NBA props · Creator since Mar 2025',
+    role: 'Soccer props · Creator since Mar 2025',
     mono: 'CV',
     color: '#1c9cf0',
     verified: true,
@@ -106,7 +105,7 @@ const TESTIMONIALS = [
     quote:
       "I came over from a private Telegram with 4,000 followers. Migration was a Sunday afternoon — and I'm finally keeping more than a takerate. The dashboard is the cleanest in the space.",
     name: 'SharpEdge Bets',
-    role: 'NFL sides & totals · Creator since Jan 2026',
+    role: 'Tennis sides · Creator since Jan 2026',
     mono: 'SE',
     color: '#00ba7c',
     verified: true,
@@ -387,7 +386,8 @@ export function Landing() {
         >
           <Stack gap={4}>
             {featuredEvent && (
-              <FeaturedEventCard
+              <EventCard
+                featured
                 sport={featuredEvent.sport}
                 league={featuredEvent.league}
                 time={featuredEvent.time}

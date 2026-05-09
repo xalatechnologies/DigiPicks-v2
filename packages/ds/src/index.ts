@@ -167,5 +167,8 @@ export { HeroLivePanel } from './components/domain/HeroLivePanel/HeroLivePanel';
 export type { HeroLiveEvent, HeroLivePanelProps } from './components/domain/HeroLivePanel/HeroLivePanel';
 export { CreatorCard } from './components/domain/CreatorCard/CreatorCard';
 export { EventCard } from './components/domain/EventCard/EventCard';
-export { FeaturedEventCard } from './components/domain/FeaturedEventCard/FeaturedEventCard';
+export type {
+  EventCardProps,
+  EventCardCreatorAvatar,
+} from './components/domain/EventCard/EventCard';
 export { PickCard } from './components/domain/PickCard/PickCard';

@@ -12,37 +12,50 @@ import {
   Button,
   Badge,
   Icon,
+  type IconName,
   EventCard,
-  FeaturedEventCard,
+  EmptyState,
   FilterChips,
   ResponsibleSection,
 } from '@digipicks/ds';
+import { teamLogo } from '../lib/teamLogo';
 
 const SPORT_FILTERS = [
-  { label: 'Soccer', value: 'Soccer' },
-  { label: 'Cricket', value: 'Cricket' },
-  { label: 'Tennis', value: 'Tennis' },
+  { label: 'Soccer', value: 'Soccer', icon: <Icon name="soccer" size={14} /> },
+  { label: 'Cricket', value: 'Cricket', icon: <Icon name="cricket" size={14} /> },
+  { label: 'Tennis', value: 'Tennis', icon: <Icon name="tennis" size={14} /> },
 ];
 
-const INITIAL_FEATURED = 3;
 const INITIAL_PER_LEAGUE = 6;
+
+/** Map a sport name to a DS icon. Falls back to a calendar glyph for unknowns. */
+function sportIcon(sport: string): IconName {
+  const key = sport.toLowerCase();
+  if (key === 'soccer') return 'soccer';
+  if (key === 'cricket') return 'cricket';
+  if (key === 'tennis') return 'tennis';
+  return 'calendar';
+}
 
 export function Events() {
   const navigate = useNavigate();
   const [sport, setSport] = useState<string | null>(null);
-  const [showAllFeatured, setShowAllFeatured] = useState(false);
   const [expandedLeagues, setExpandedLeagues] = useState<Set<string>>(new Set());
 
   const allEvents = useQuery(api.events.today, sport ? { sport } : {});
   const featuredEvents = useQuery(api.events.featured, {});
+  const liveEvents = useQuery(api.events.live, {});
   const recentEvents = useQuery(api.events.recent, {});
   const creators = useQuery(api.creators.list, { verified: true });
 
   const featured = (featuredEvents ?? []).filter(
     (e) => !sport || e.sport === sport,
   );
+  const live = (liveEvents ?? []).filter((e) => !sport || e.sport === sport);
   const rest = (allEvents ?? []).filter(
-    (e) => !featured.some((f) => f._id === e._id),
+    (e) =>
+      !featured.some((f) => f._id === e._id) &&
+      !live.some((l) => l._id === e._id),
   );
   const recent = recentEvents ?? [];
 
@@ -58,7 +71,16 @@ export function Events() {
   }, {});
 
   const totalEvents = (allEvents ?? []).length;
-  const visibleFeatured = showAllFeatured ? featured : featured.slice(0, INITIAL_FEATURED);
+  const heroFeatured = featured[0];
+  const otherFeatured = featured.slice(1);
+
+  // TODO: convex — events.homeLogo / events.awayLogo are not yet on the schema.
+  // Until they are backfilled, every lookup returns undefined and the cards
+  // fall back to colored initials.
+  const logoFor = (ev: { sport: string; home: string; away: string }) => ({
+    homeLogo: teamLogo(ev.sport, ev.home),
+    awayLogo: teamLogo(ev.sport, ev.away),
+  });
 
   const toggleLeague = (league: string) => {
     setExpandedLeagues((prev) => {
@@ -68,6 +90,13 @@ export function Events() {
       return next;
     });
   };
+
+  const isLoading = allEvents === undefined;
+  const filteredEmpty =
+    allEvents !== undefined &&
+    featured.length === 0 &&
+    live.length === 0 &&
+    rest.length === 0;
 
   return (
     <main>
@@ -101,30 +130,88 @@ export function Events() {
           />
         </Section>
 
-        {visibleFeatured.length > 0 && (
+        {isLoading && (
+          <Section>
+            <EmptyState icon="calendar" title="Loading events…" />
+          </Section>
+        )}
+
+        {!isLoading && filteredEmpty && (
+          <Section>
+            <EmptyState
+              icon="calendar"
+              title="Nothing on the slate."
+              subtitle="No events scheduled for this filter."
+            />
+          </Section>
+        )}
+
+        {live.length > 0 && (
+          <Section eyebrow="Live now" title="In progress.">
+            <Grid cols={2} gap={4}>
+              {live.map((ev) => {
+                const { homeLogo, awayLogo } = logoFor(ev);
+                return (
+                  <EventCard
+                    key={ev._id}
+                    sport={ev.sport}
+                    league={ev.league}
+                    time={ev.gameStatus ?? ev.time}
+                    home={ev.home}
+                    away={ev.away}
+                    homeLogo={homeLogo}
+                    awayLogo={awayLogo}
+                    creators={ev.creatorCount}
+                    picks={ev.pickCount}
+                    live
+                  />
+                );
+              })}
+            </Grid>
+          </Section>
+        )}
+
+        {heroFeatured && (
           <Section eyebrow="Featured" title="Marquee matchups.">
             <Stack gap={4}>
-              {visibleFeatured.map((ev) => (
-                <FeaturedEventCard
-                  key={ev._id}
-                  sport={ev.sport}
-                  league={ev.league}
-                  time={ev.time}
-                  home={ev.home}
-                  away={ev.away}
-                  creators={ev.creatorCount}
-                  picks={ev.pickCount}
-                  creatorsAvatars={avatars}
-                />
-              ))}
+              <EventCard
+                featured
+                key={heroFeatured._id}
+                sport={heroFeatured.sport}
+                league={heroFeatured.league}
+                time={heroFeatured.time}
+                home={heroFeatured.home}
+                away={heroFeatured.away}
+                homeLogo={logoFor(heroFeatured).homeLogo}
+                awayLogo={logoFor(heroFeatured).awayLogo}
+                creators={heroFeatured.creatorCount}
+                picks={heroFeatured.pickCount}
+                creatorsAvatars={avatars}
+              />
+              {otherFeatured.length > 0 && (
+                <Grid cols={2} gap={4}>
+                  {otherFeatured.map((ev) => {
+                    const { homeLogo, awayLogo } = logoFor(ev);
+                    return (
+                      <EventCard
+                        featured
+                        key={ev._id}
+                        sport={ev.sport}
+                        league={ev.league}
+                        time={ev.time}
+                        home={ev.home}
+                        away={ev.away}
+                        homeLogo={homeLogo}
+                        awayLogo={awayLogo}
+                        creators={ev.creatorCount}
+                        picks={ev.pickCount}
+                        creatorsAvatars={avatars}
+                      />
+                    );
+                  })}
+                </Grid>
+              )}
             </Stack>
-            {featured.length > INITIAL_FEATURED && !showAllFeatured && (
-              <Row gap={2}>
-                <Button variant="outline" onClick={() => setShowAllFeatured(true)}>
-                  Show {featured.length - INITIAL_FEATURED} more
-                </Button>
-              </Row>
-            )}
           </Section>
         )}
 
@@ -132,35 +219,53 @@ export function Events() {
           const isExpanded = expandedLeagues.has(league);
           const visible = isExpanded ? events : events.slice(0, INITIAL_PER_LEAGUE);
           const hasMore = events.length > INITIAL_PER_LEAGUE;
+          const sport0 = events[0]?.sport ?? '';
 
           return (
             <Section
               key={league}
               eyebrow={league}
               title={`${events.length} ${events.length === 1 ? 'match' : 'matches'} scheduled.`}
+              action={
+                <Badge tone="blue" icon={<Icon name={sportIcon(sport0)} size={12} />}>
+                  League
+                </Badge>
+              }
             >
-              <Grid cols={3} gap={4}>
-                {visible.map((ev) => (
-                  <EventCard
-                    key={ev._id}
-                    sport={ev.sport}
-                    league={ev.league}
-                    time={ev.time}
-                    home={ev.home}
-                    away={ev.away}
-                    creators={ev.creatorCount}
-                    picks={ev.pickCount}
-                    compact
-                  />
-                ))}
-              </Grid>
-              {hasMore && !isExpanded && (
-                <Row gap={2}>
-                  <Button variant="outline" onClick={() => toggleLeague(league)}>
-                    Show {events.length - INITIAL_PER_LEAGUE} more
+              <Stack gap={4}>
+                <Grid cols={2} gap={4}>
+                  {visible.map((ev) => {
+                    const { homeLogo, awayLogo } = logoFor(ev);
+                    return (
+                      <EventCard
+                        key={ev._id}
+                        sport={ev.sport}
+                        league={ev.league}
+                        time={ev.time}
+                        home={ev.home}
+                        away={ev.away}
+                        homeLogo={homeLogo}
+                        awayLogo={awayLogo}
+                        creators={ev.creatorCount}
+                        picks={ev.pickCount}
+                        compact
+                      />
+                    );
+                  })}
+                </Grid>
+                {hasMore && (
+                  <Button
+                    variant="outline"
+                    block
+                    iconRight={isExpanded ? 'arrow-up' : 'arrow-down'}
+                    onClick={() => toggleLeague(league)}
+                  >
+                    {isExpanded
+                      ? `Show fewer ${league} matches`
+                      : `Show ${events.length - INITIAL_PER_LEAGUE} more ${league} matches`}
                   </Button>
-                </Row>
-              )}
+                )}
+              </Stack>
             </Section>
           );
         })}
@@ -170,20 +275,25 @@ export function Events() {
             eyebrow="Recently concluded"
             title="Final scores."
           >
-            <Grid cols={3} gap={4}>
-              {recent.map((ev) => (
-                <EventCard
-                  key={ev._id}
-                  sport={ev.sport}
-                  league={ev.league}
-                  time={ev.gameStatus ?? 'Final'}
-                  home={ev.home}
-                  away={ev.away}
-                  creators={ev.creatorCount}
-                  picks={ev.pickCount}
-                  compact
-                />
-              ))}
+            <Grid cols={2} gap={4}>
+              {recent.map((ev) => {
+                const { homeLogo, awayLogo } = logoFor(ev);
+                return (
+                  <EventCard
+                    key={ev._id}
+                    sport={ev.sport}
+                    league={ev.league}
+                    time={ev.gameStatus ?? 'Final'}
+                    home={ev.home}
+                    away={ev.away}
+                    homeLogo={homeLogo}
+                    awayLogo={awayLogo}
+                    creators={ev.creatorCount}
+                    picks={ev.pickCount}
+                    compact
+                  />
+                );
+              })}
             </Grid>
           </Section>
         )}

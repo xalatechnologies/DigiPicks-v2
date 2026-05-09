@@ -1,3 +1,5 @@
+// TODO: convex — entire page is mocked. Needs api.growth.opportunities,
+// api.growth.metrics, api.referrals.summary, api.campaigns.list endpoints.
 import React from 'react';
 import {
   PageHeader,

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useQuery } from 'convex/react';
 import {
   PageHeader,
   Container,
@@ -22,46 +23,82 @@ import {
   MetricGrid,
   FilterChips,
   TitleSub,
+  EmptyState,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
-import { STUDIO_SUBSCRIBERS } from '../data/studio';
+import { api } from '../../../../../convex/_generated/api';
 
 const PLAN_TONE: Record<string, BadgeTone> = {
-  Premium: 'gold',
-  VIP: 'violet',
-  Trial: 'blue',
+  premium: 'gold',
+  vip: 'violet',
+  trial: 'blue',
+};
+
+const PLAN_LABEL: Record<string, string> = {
+  premium: 'Premium',
+  vip: 'VIP',
+  trial: 'Trial',
 };
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   active: 'green',
   past_due: 'amber',
-  churned: 'red',
+  cancelled: 'red',
 };
 
 const STATUS_LABEL: Record<string, string> = {
   active: 'Active',
   past_due: 'Past due',
-  churned: 'Churned',
+  cancelled: 'Cancelled',
 };
 
-const PLAN_OPTIONS = ['Premium', 'VIP', 'Trial'];
+const PLAN_OPTIONS = [
+  { label: 'Premium', value: 'premium' },
+  { label: 'VIP', value: 'vip' },
+  { label: 'Trial', value: 'trial' },
+];
+
+function formatJoinedAgo(startedAt: number): string {
+  const days = Math.floor((Date.now() - startedAt) / (1000 * 60 * 60 * 24));
+  if (days < 1) return 'Today';
+  if (days === 1) return '1d ago';
+  return `${days}d ago`;
+}
 
 export function Subscribers() {
   const [query, setQuery] = React.useState('');
   const [plan, setPlan] = React.useState<string | null>(null);
 
-  const filtered = STUDIO_SUBSCRIBERS.filter((u) => {
+  const me = useQuery(api.users.meSafe);
+  const creator = useQuery(
+    api.creators.get,
+    me?.creatorId ? { id: me.creatorId } : 'skip',
+  );
+  const activeCount = useQuery(
+    api.subscriptions.countByCreator,
+    creator?._id ? { creatorId: creator._id } : 'skip',
+  );
+  const subsRaw = useQuery(
+    api.subscriptions.byCreator,
+    creator?._id ? { creatorId: creator._id } : 'skip',
+  );
+
+  const subs = subsRaw ?? [];
+
+  const filtered = subs.filter((u) => {
     if (plan && u.plan !== plan) return false;
     if (query) {
       const q = query.toLowerCase();
-      if (!u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+      if (
+        !u.subscriberName.toLowerCase().includes(q) &&
+        !u.subscriberEmail.toLowerCase().includes(q)
+      ) return false;
     }
     return true;
   });
 
-  const active = STUDIO_SUBSCRIBERS.filter((u) => u.status === 'active').length;
-  const pastDue = STUDIO_SUBSCRIBERS.filter((u) => u.status === 'past_due').length;
-  const churned = STUDIO_SUBSCRIBERS.filter((u) => u.status === 'churned').length;
+  const pastDue = subs.filter((u) => u.status === 'past_due').length;
+  const cancelled = subs.filter((u) => u.status === 'cancelled').length;
 
   return (
     <>
@@ -92,10 +129,18 @@ export function Subscribers() {
 
           <MetricGrid
             items={[
-              { id: 'active', label: 'Active', value: <Mono>{active}</Mono>, delta: { value: '+34 mo', dir: 'up' } },
+              {
+                id: 'active',
+                label: 'Active',
+                value: (
+                  <Mono>
+                    {typeof activeCount === 'number' ? activeCount.toLocaleString() : '—'}
+                  </Mono>
+                ),
+              },
               { id: 'past_due', label: 'Past due', value: <Mono>{pastDue}</Mono>, delta: { value: 'monitor', dir: 'flat' } },
-              { id: 'churned', label: 'Churned · 30d', value: <Mono>{churned}</Mono>, delta: { value: '−2 vs prev', dir: 'down' } },
-              { id: 'ltv', label: 'Avg LTV', value: <Mono>$184</Mono>, delta: { value: '+$12 mo', dir: 'up' } },
+              { id: 'cancelled', label: 'Cancelled', value: <Mono>{cancelled}</Mono> },
+              { id: 'total', label: 'Total', value: <Mono>{subs.length}</Mono> },
             ]}
           />
 
@@ -113,45 +158,55 @@ export function Subscribers() {
             />
           </Row>
 
-          <Card pad="sm">
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>Member</Th>
-                  <Th>Plan</Th>
-                  <Th>Status</Th>
-                  <Th>Joined</Th>
-                  <Th numeric>LTV</Th>
-                </Tr>
-              </THead>
-              <TBody>
-                {filtered.map((u) => (
-                  <Tr key={u.id}>
-                    <Td>
-                      <Row gap={3}>
-                        <Avatar mono={u.mono} color={u.color} size={32} />
-                        <TitleSub title={u.name} sub={u.email} />
-                      </Row>
-                    </Td>
-                    <Td>
-                      <Badge tone={PLAN_TONE[u.plan] ?? 'mute'}>{u.plan}</Badge>
-                    </Td>
-                    <Td>
-                      <Badge tone={STATUS_TONE[u.status] ?? 'mute'} dot>
-                        {STATUS_LABEL[u.status] ?? u.status}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <Muted>{u.joined} ago</Muted>
-                    </Td>
-                    <Td numeric>
-                      <Mono>{u.ltv}</Mono>
-                    </Td>
+          {subsRaw === undefined ? (
+            <Card pad="sm">
+              <EmptyState icon="inbox" title="Loading subscribers…" />
+            </Card>
+          ) : filtered.length === 0 ? (
+            <Card pad="sm">
+              <EmptyState
+                icon="users"
+                title="No subscribers yet."
+                subtitle="Share your creator link to start building your audience."
+              />
+            </Card>
+          ) : (
+            <Card pad="sm">
+              <Table>
+                <THead>
+                  <Tr>
+                    <Th>Member</Th>
+                    <Th>Plan</Th>
+                    <Th>Status</Th>
+                    <Th>Joined</Th>
                   </Tr>
-                ))}
-              </TBody>
-            </Table>
-          </Card>
+                </THead>
+                <TBody>
+                  {filtered.map((u) => (
+                    <Tr key={u._id}>
+                      <Td>
+                        <Row gap={3}>
+                          <Avatar mono={u.subscriberMono} color="#3A4F7A" size={32} />
+                          <TitleSub title={u.subscriberName} sub={u.subscriberEmail} />
+                        </Row>
+                      </Td>
+                      <Td>
+                        <Badge tone={PLAN_TONE[u.plan] ?? 'mute'}>{PLAN_LABEL[u.plan] ?? u.plan}</Badge>
+                      </Td>
+                      <Td>
+                        <Badge tone={STATUS_TONE[u.status] ?? 'mute'} dot>
+                          {STATUS_LABEL[u.status] ?? u.status}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Muted>{formatJoinedAgo(u.startedAt)}</Muted>
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            </Card>
+          )}
         </Stack>
       </Container>
     </>

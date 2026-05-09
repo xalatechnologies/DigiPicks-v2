@@ -6,6 +6,8 @@ import s from './FilterChips.module.css';
 export interface FilterChipsOption {
   label: string;
   value: string;
+  /** Optional icon to render before the label. */
+  icon?: React.ReactNode;
 }
 
 export interface FilterChipsProps {
@@ -47,6 +49,7 @@ export function FilterChips({
           active={value === opt.value}
           onClick={() => onChange(opt.value)}
         >
+          {opt.icon && <span className={s.chipIcon}>{opt.icon}</span>}
           {opt.label}
         </Chip>
       ))}

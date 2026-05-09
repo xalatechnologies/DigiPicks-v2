@@ -2,12 +2,12 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
   padding: var(--space-6);
   height: 100%;
   background: var(--bg-1);
   border: 1px solid var(--line-soft);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   overflow: hidden;
   isolation: isolate;
   animation: dp-fade-in-up var(--dur-base) var(--ease-out);
@@ -16,6 +16,22 @@
     background var(--dur-base) var(--ease-out),
     transform var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
+}
+
+/* Subtle aurora behind every card — much stronger when featured. */
+.aurora {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(40% 40% at 20% 30%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 60%),
+    radial-gradient(30% 30% at 80% 20%, color-mix(in srgb, var(--violet) 8%, transparent) 0%, transparent 60%),
+    radial-gradient(35% 35% at 60% 80%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 60%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  filter: blur(var(--blur-xl));
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+  animation: dp-aurora var(--dur-ambient-aurora-fast) var(--ease-in-out) infinite;
 }
 
 .shine {
@@ -43,12 +59,14 @@
 }
 .interactive:hover {
   border-color: var(--line);
-  background: var(--bg-2);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
 .interactive:hover .shine {
   transform: skewX(-20deg) translateX(280%);
+}
+.interactive:hover .teamBadge {
+  transform: scale(1.05);
 }
 .interactive:focus-visible {
   outline: var(--focus-ring);
@@ -58,19 +76,37 @@
 .featured {
   border-color: var(--blue-line);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, transparent), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 14%, transparent), transparent 60%),
     var(--bg-1);
-  box-shadow: 0 24px 48px -24px color-mix(in srgb, var(--blue) 30%, transparent);
+  box-shadow:
+    0 32px 64px -28px color-mix(in srgb, var(--blue) 36%, transparent),
+    var(--shadow-md);
+}
+.featured .aurora {
+  opacity: 0.85;
+  background:
+    radial-gradient(40% 40% at 20% 30%, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(30% 30% at 80% 20%, color-mix(in srgb, var(--violet) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(35% 35% at 60% 80%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 60%);
+}
+.featured .shine {
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.08) 60%,
+    transparent 100%
+  );
 }
 .interactive.featured:hover {
   border-color: var(--blue);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 16%, transparent), transparent 60%),
-    var(--bg-1);
   box-shadow:
-    0 32px 64px -24px color-mix(in srgb, var(--blue) 45%, transparent),
+    0 40px 80px -28px color-mix(in srgb, var(--blue) 50%, transparent),
     var(--shadow-lg);
 }
+
+/* ── Header ───────────────────────────────────────────────────────────── */
 
 .head {
   display: flex;
@@ -86,6 +122,13 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
+}
+
+.headRight {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
 }
 
 .league {
@@ -108,46 +151,165 @@
   white-space: nowrap;
 }
 
-.teams {
+.liveTag {
   display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  font-family: var(--f-sans);
-  font-size: var(--text-2xl);
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+}
+
+.liveDot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--red);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 50%, transparent);
+  animation: dp-live-pulse var(--dur-ambient-pulse) var(--ease-in-out) infinite;
+}
+
+.liveLabel {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-tight);
-  color: var(--t-1);
-  line-height: var(--leading-tight);
+  color: var(--red);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
+
+@keyframes dp-live-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 60%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--red) 0%, transparent);
+  }
+}
+
+/* ── Matchup — vertical sides (logo on top, full name below) ────────── */
+
+.matchup {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-3) 0;
   position: relative;
   z-index: 2;
 }
 
-.teamsFeatured {
-  font-size: var(--text-3xl);
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
 }
 
-.team {
-  white-space: nowrap;
+.teamBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-14);
+  height: var(--space-14);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--tb-color, var(--t-1)) 18%, transparent);
+  color: var(--tb-color, var(--t-1));
+  font-family: var(--f-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.teamBadgeLogo {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--t-1) 8%, transparent),
+    var(--shadow-sm);
+  overflow: hidden;
+  padding: var(--space-2);
+}
+
+.teamLogo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.teamName {
+  font-family: var(--f-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-tight);
+  text-align: center;
+  /* Wrap freely; never strip with ellipsis. */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: var(--leading-tight);
+  max-width: 100%;
+  text-wrap: balance;
 }
 
 .vs {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
   font-family: var(--f-mono);
-  font-size: var(--text-md);
-  font-weight: var(--weight-medium);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
   color: var(--t-4);
-  text-transform: lowercase;
-  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  margin-top: var(--space-3);
 }
 
+/* ── Footer — metrics on the left, actions / avatars on the right ─── */
+
 .foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-soft);
+  margin-top: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.footMetrics {
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line-soft);
-  position: relative;
-  z-index: 2;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .metric {
@@ -158,8 +320,8 @@
 
 .metricNum {
   font-family: var(--f-mono);
-  font-size: var(--text-md);
-  font-weight: var(--weight-medium);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
   color: var(--t-1);
   letter-spacing: var(--tracking-tight);
 }
@@ -180,4 +342,25 @@
   font-family: var(--f-mono);
   font-size: var(--text-sm);
   color: var(--t-4);
+}
+
+.stack {
+  flex-shrink: 0;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-4xl);
+  min-width: var(--size-4xl);
+  padding: 0 var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  color: var(--t-2);
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  margin-left: calc(var(--space-2) * -1);
 }

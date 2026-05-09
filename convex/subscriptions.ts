@@ -51,6 +51,34 @@ export const countByCreator = query({
   },
 });
 
+/** List subscriptions for a creator with subscriber details. */
+export const byCreator = query({
+  args: {
+    creatorId: v.id('creators'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { creatorId, limit }) => {
+    const subs = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_creator', (q) => q.eq('creatorId', creatorId))
+      .order('desc')
+      .take(limit ?? 50);
+
+    const enriched = await Promise.all(
+      subs.map(async (sub) => {
+        const user = await ctx.db.get(sub.subscriberId);
+        return {
+          ...sub,
+          subscriberName: user?.name ?? 'Unknown',
+          subscriberEmail: user?.email ?? '',
+          subscriberMono: user?.name?.[0]?.toUpperCase() ?? 'U',
+        };
+      }),
+    );
+    return enriched;
+  },
+});
+
 // Auth-only.
 /** Subscribe the current user to a creator. subscriberId derived from session. */
 export const subscribe = mutation({
