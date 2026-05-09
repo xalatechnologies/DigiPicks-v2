@@ -405,11 +405,15 @@ export default defineSchema({
     aiReasoning: v.optional(v.string()),
     aiAnalyzedAt: v.optional(v.number()),
     aiModel: v.optional(v.string()),
+    /** Trending score (Phase 12) — recomputed nightly. Higher = hotter. */
+    trendingScore: v.optional(v.number()),
+    trendingComputedAt: v.optional(v.number()),
   })
     .index('by_creator', ['creatorId', 'createdAt'])
     .index('by_sport', ['sport', 'createdAt'])
     .index('by_status', ['status', 'createdAt'])
     .index('by_status_and_publishAt', ['status', 'publishAt'])
+    .index('by_status_and_trending', ['status', 'trendingScore'])
     .index('by_access', ['access', 'createdAt']),
 
   events: defineTable({
@@ -531,6 +535,28 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_user_and_pick', ['userId', 'pickId'])
     .index('by_pick', ['pickId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REFERRALS (PRD M5 / FM-009, Phase 12) — one row per referral code.
+  // referredUserId / convertedAt set when the code is redeemed at checkout.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  referrals: defineTable({
+    referrerUserId: v.id('users'),
+    code: v.string(),
+    referredUserId: v.optional(v.id('users')),
+    convertedAt: v.optional(v.number()),
+    /** Cents earned by the referrer once conversion lands (Stripe webhook). */
+    payoutCents: v.optional(v.number()),
+    /** Stripe coupon ID used at checkout when the code is applied. */
+    stripeCouponId: v.optional(v.string()),
+    /** Free-form metadata: platform attributes, campaign tags, etc. */
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index('by_code', ['code'])
+    .index('by_referrer', ['referrerUserId', 'createdAt'])
+    .index('by_referred', ['referredUserId']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DISPUTES (PRD M16 / FM-011) — subscriber or creator can open a dispute

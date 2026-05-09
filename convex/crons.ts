@@ -101,6 +101,16 @@ crons.interval(
   internal.picks._publishDueScheduled,
 );
 
+// ─── Recompute trending scores (Phase 12) ───────────────────────────────
+// Nightly recomputation of picks.trendingScore so the Landing carousel
+// query is a bounded index lookup rather than a per-request scan.
+
+crons.interval(
+  'recompute-trending',
+  { hours: 12 },
+  internal.trending.recomputeTrending,
+);
+
 export default crons;
 
 // ─── Cron Handlers ──────────────────────────────────────────────────────────

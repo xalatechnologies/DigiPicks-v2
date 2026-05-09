@@ -41,6 +41,7 @@ import type * as picks from "../picks.js";
 import type * as pricingTiers from "../pricingTiers.js";
 import type * as push from "../push.js";
 import type * as pushSubscriptions from "../pushSubscriptions.js";
+import type * as referrals from "../referrals.js";
 import type * as savedPicks from "../savedPicks.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
@@ -57,6 +58,7 @@ import type * as subscriberStats from "../subscriberStats.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as teamLogos from "../teamLogos.js";
 import type * as telegram from "../telegram.js";
+import type * as trending from "../trending.js";
 import type * as trust from "../trust.js";
 import type * as users from "../users.js";
 
@@ -100,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   pricingTiers: typeof pricingTiers;
   push: typeof push;
   pushSubscriptions: typeof pushSubscriptions;
+  referrals: typeof referrals;
   savedPicks: typeof savedPicks;
   search: typeof search;
   seed: typeof seed;
@@ -116,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   subscriptions: typeof subscriptions;
   teamLogos: typeof teamLogos;
   telegram: typeof telegram;
+  trending: typeof trending;
   trust: typeof trust;
   users: typeof users;
 }>;
