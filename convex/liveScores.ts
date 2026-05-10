@@ -3,6 +3,14 @@ import { internal } from './_generated/api';
 import { v } from 'convex/values';
 import { withRetry } from './shared/retry';
 import { SPORT_KEY_MAP_LIVE as SPORT_KEY_MAP, sportKeyToName } from './shared/sportKeyMap';
+import {
+  checkCircuit,
+  closeCircuit,
+  openCircuit,
+  isUnrecoverableAuthStatus,
+} from './shared/circuit';
+
+const CIRCUIT_KEY = 'theOddsApi';
 
 // =============================================================================
 // Live Scores — Polls The Odds API and updates events with live game data.
@@ -28,10 +36,17 @@ export const pollActive = internalAction({
       return;
     }
 
+    const gate = await checkCircuit(ctx, CIRCUIT_KEY);
+    if (gate.shouldSkip) return;
+
     // Get all sport keys to poll (flatten arrays)
     const sportKeys = Object.values(SPORT_KEY_MAP).flat();
 
+    let sawAuthFailure = false;
+    let sawSuccess = false;
+
     for (const sportKey of sportKeys) {
+      if (sawAuthFailure) break;
       try {
         const url = `${ODDS_API_BASE}/sports/${sportKey}/scores/?apiKey=${apiKey}&daysFrom=3`;
         const res = await withRetry(() => fetch(url), {
@@ -40,9 +55,18 @@ export const pollActive = internalAction({
         });
 
         if (!res.ok) {
+          if (isUnrecoverableAuthStatus(res.status)) {
+            sawAuthFailure = true;
+            console.warn(
+              `Odds API auth failure (${res.status}) — opening circuit and skipping remaining sports`,
+            );
+            await openCircuit(ctx, CIRCUIT_KEY, `liveScores HTTP ${res.status}`);
+            break;
+          }
           console.warn(`Odds API error for ${sportKey}: ${res.status}`);
           continue;
         }
+        sawSuccess = true;
 
         const games: OddsApiScore[] = await res.json();
         const sportName = sportKeyToName(sportKey);
@@ -95,6 +119,11 @@ export const pollActive = internalAction({
       } catch (err) {
         console.error(`Failed to poll ${sportKey}:`, err);
       }
+    }
+
+    if (gate.isProbe && sawSuccess && !sawAuthFailure) {
+      await closeCircuit(ctx, CIRCUIT_KEY);
+      console.log('Odds API recovered — circuit closed');
     }
   },
 });

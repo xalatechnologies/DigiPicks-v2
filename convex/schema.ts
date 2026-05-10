@@ -1090,4 +1090,25 @@ export default defineSchema({
   })
     .index('by_status', ['status', 'submittedAt'])
     .index('by_email', ['email']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SYSTEM — circuit breakers for external providers
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * One row per external-provider circuit (e.g., `theOddsApi`). When a
+   * provider returns an unrecoverable auth/quota error, the caller opens
+   * the circuit by upserting a row here with `openedAt=now` and
+   * `reason='401'` (or similar). Pollers consult this table at the top of
+   * every run and quiet-no-op while the circuit is within its TTL window.
+   * The breaker self-heals: after the TTL elapses we let one probe pass
+   * through; if it fails the circuit re-opens, otherwise the row is
+   * deleted. Single-row-per-key access pattern — index on `key`.
+   */
+  systemCircuit: defineTable({
+    key: v.string(),
+    openedAt: v.number(),
+    status: v.union(v.literal('open'), v.literal('half_open')),
+    reason: v.string(),
+  }).index('by_key', ['key']),
 });

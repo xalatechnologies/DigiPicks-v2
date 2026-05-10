@@ -67,6 +67,7 @@ import type * as savedPicks from '../savedPicks.js';
 import type * as search from '../search.js';
 import type * as seed from '../seed.js';
 import type * as shared_aiParse from '../shared/aiParse.js';
+import type * as shared_circuit from '../shared/circuit.js';
 import type * as shared_permissions from '../shared/permissions.js';
 import type * as shared_platformFees from '../shared/platformFees.js';
 import type * as shared_rateLimit from '../shared/rateLimit.js';
@@ -150,6 +151,7 @@ declare const fullApi: ApiFromModules<{
   search: typeof search;
   seed: typeof seed;
   'shared/aiParse': typeof shared_aiParse;
+  'shared/circuit': typeof shared_circuit;
   'shared/permissions': typeof shared_permissions;
   'shared/platformFees': typeof shared_platformFees;
   'shared/rateLimit': typeof shared_rateLimit;

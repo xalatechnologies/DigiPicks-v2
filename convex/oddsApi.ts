@@ -3,6 +3,14 @@ import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
 import { withRetry } from './shared/retry';
 import { SPORT_KEY_MAP_FULL as SPORT_KEY_MAP, sportKeyToName } from './shared/sportKeyMap';
+import {
+  checkCircuit,
+  closeCircuit,
+  openCircuit,
+  isUnrecoverableAuthStatus,
+} from './shared/circuit';
+
+const CIRCUIT_KEY = 'theOddsApi';
 
 // =============================================================================
 // Odds API — Upcoming events importer.
@@ -51,11 +59,17 @@ export const pollUpcoming = internalAction({
       return;
     }
 
+    const gate = await checkCircuit(ctx, CIRCUIT_KEY);
+    if (gate.shouldSkip) return;
+
     const sportKeys = Object.values(SPORT_KEY_MAP).flat();
     let totalEvents = 0;
     let totalSports = 0;
+    let sawAuthFailure = false;
+    let sawSuccess = false;
 
     for (const sportKey of sportKeys) {
+      if (sawAuthFailure) break;
       try {
         const url = `${ODDS_API_BASE}/sports/${sportKey}/events?apiKey=${apiKey}`;
         const res = await withRetry(() => fetch(url), {
@@ -64,9 +78,18 @@ export const pollUpcoming = internalAction({
         });
 
         if (!res.ok) {
+          if (isUnrecoverableAuthStatus(res.status)) {
+            sawAuthFailure = true;
+            console.warn(
+              `Odds API auth failure (${res.status}) — opening circuit and skipping remaining sports`,
+            );
+            await openCircuit(ctx, CIRCUIT_KEY, `pollUpcoming HTTP ${res.status}`);
+            break;
+          }
           console.warn(`Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`);
           continue;
         }
+        sawSuccess = true;
 
         const events = (await res.json()) as OddsApiUpcomingEvent[];
         if (!Array.isArray(events)) {
@@ -115,6 +138,11 @@ export const pollUpcoming = internalAction({
       }
     }
 
+    if (gate.isProbe && sawSuccess && !sawAuthFailure) {
+      await closeCircuit(ctx, CIRCUIT_KEY);
+      console.log('Odds API recovered — circuit closed');
+    }
+
     console.log(`pollUpcoming: imported ${totalEvents} events across ${totalSports} sports`);
   },
 });
@@ -158,11 +186,17 @@ export const pollOddsSnapshots = internalAction({
       return;
     }
 
+    const gate = await checkCircuit(ctx, CIRCUIT_KEY);
+    if (gate.shouldSkip) return;
+
     const sportKeys = Object.values(SPORT_KEY_MAP).flat();
     let totalSnapshots = 0;
     let totalEventsTouched = 0;
+    let sawAuthFailure = false;
+    let sawSuccess = false;
 
     for (const sportKey of sportKeys) {
+      if (sawAuthFailure) break;
       try {
         const url =
           `${ODDS_API_BASE}/sports/${sportKey}/odds` +
@@ -172,9 +206,18 @@ export const pollOddsSnapshots = internalAction({
           maxAttempts: 3,
         });
         if (!res.ok) {
+          if (isUnrecoverableAuthStatus(res.status)) {
+            sawAuthFailure = true;
+            console.warn(
+              `Odds API auth failure (${res.status}) — opening circuit and skipping remaining sports`,
+            );
+            await openCircuit(ctx, CIRCUIT_KEY, `pollOddsSnapshots HTTP ${res.status}`);
+            break;
+          }
           console.warn(`Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`);
           continue;
         }
+        sawSuccess = true;
 
         const events = (await res.json()) as OddsApiOddsEvent[];
         if (!Array.isArray(events)) continue;
@@ -225,6 +268,11 @@ export const pollOddsSnapshots = internalAction({
       } catch (err) {
         console.error(`Failed pollOddsSnapshots for ${sportKey}:`, err);
       }
+    }
+
+    if (gate.isProbe && sawSuccess && !sawAuthFailure) {
+      await closeCircuit(ctx, CIRCUIT_KEY);
+      console.log('Odds API recovered — circuit closed');
     }
 
     console.log(
