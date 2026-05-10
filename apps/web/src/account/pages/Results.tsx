@@ -19,6 +19,7 @@ import {
   StatTile,
   SectionHead,
   InsightCard,
+  RowList,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -98,25 +99,24 @@ export function Results() {
           title="By creator"
           action={<Badge tone="green">{portfolio.byCreator.length}</Badge>}
         >
-          <Stack gap={0}>
-            {portfolio.byCreator.map((c, i) => (
-              <React.Fragment key={c.creatorId}>
-                {i > 0 && <Divider />}
-                <PersonRow
-                  name={c.creatorName}
-                  sub={`${c.wins}W-${c.losses}L · ${c.winRate}%`}
-                  mono={c.creatorMono}
-                  color={c.creatorColor}
-                  trailing={
-                    <Badge tone={c.netUnits >= 0 ? 'green' : 'red'}>
-                      {c.netUnits > 0 ? '+' : ''}
-                      {c.netUnits}u
-                    </Badge>
-                  }
-                />
-              </React.Fragment>
-            ))}
-          </Stack>
+          <RowList
+            items={portfolio.byCreator}
+            getKey={(c) => c.creatorId}
+            renderItem={(c) => (
+              <PersonRow
+                name={c.creatorName}
+                sub={`${c.wins}W-${c.losses}L · ${c.winRate}%`}
+                mono={c.creatorMono}
+                color={c.creatorColor}
+                trailing={
+                  <Badge tone={c.netUnits >= 0 ? 'green' : 'red'}>
+                    {c.netUnits > 0 ? '+' : ''}
+                    {c.netUnits}u
+                  </Badge>
+                }
+              />
+            )}
+          />
         </InsightCard>
       )}
 
@@ -127,25 +127,24 @@ export function Results() {
           title="By sport"
           action={<Badge tone="blue">{portfolio.bySport.length}</Badge>}
         >
-          <Stack gap={0}>
-            {portfolio.bySport.map((sp, i) => (
-              <React.Fragment key={sp.sport}>
-                {i > 0 && <Divider />}
-                <PersonRow
-                  name={sp.sport}
-                  sub={`${sp.wins}W-${sp.losses}L · ${sp.winRate}%`}
-                  mono={sp.sport[0] ?? 'S'}
-                  color="var(--primary)"
-                  trailing={
-                    <Badge tone={sp.netUnits >= 0 ? 'green' : 'red'}>
-                      {sp.netUnits > 0 ? '+' : ''}
-                      {sp.netUnits}u
-                    </Badge>
-                  }
-                />
-              </React.Fragment>
-            ))}
-          </Stack>
+          <RowList
+            items={portfolio.bySport}
+            getKey={(sp) => sp.sport}
+            renderItem={(sp) => (
+              <PersonRow
+                name={sp.sport}
+                sub={`${sp.wins}W-${sp.losses}L · ${sp.winRate}%`}
+                mono={sp.sport[0] ?? 'S'}
+                color="var(--primary)"
+                trailing={
+                  <Badge tone={sp.netUnits >= 0 ? 'green' : 'red'}>
+                    {sp.netUnits > 0 ? '+' : ''}
+                    {sp.netUnits}u
+                  </Badge>
+                }
+              />
+            )}
+          />
         </InsightCard>
       )}
 
@@ -219,7 +218,7 @@ export function Results() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PortfolioHero
             eyebrow="My results"
             title={hasData ? 'Track your edge over time' : 'Your results page'}
@@ -364,27 +363,26 @@ export function Results() {
                   {filteredResults.length === 0 ? (
                     <EmptyState icon="feed" title="No picks match this filter." />
                   ) : (
-                    <Stack gap={0}>
-                      {filteredResults.map((pick, i) => (
-                        <React.Fragment key={pick._id}>
-                          {i > 0 && <Divider />}
-                          <PersonRow
-                            name={pick.title}
-                            sub={`${pick.creatorName} · ${pick.sport} · ${fmtDate(pick.publishedAt ?? pick.createdAt)}`}
-                            mono={pick.creatorMono}
-                            color={pick.creatorColor}
-                            trailing={
-                              <Row gap={2}>
-                                <Badge tone="mute">{pick.odds}</Badge>
-                                <Badge tone={gradeColor(pick.grade)} dot>
-                                  {gradeLabel(pick.grade)}
-                                </Badge>
-                              </Row>
-                            }
-                          />
-                        </React.Fragment>
-                      ))}
-                    </Stack>
+                    <RowList
+                      items={filteredResults}
+                      getKey={(pick) => pick._id}
+                      renderItem={(pick) => (
+                        <PersonRow
+                          name={pick.title}
+                          sub={`${pick.creatorName} · ${pick.sport} · ${fmtDate(pick.publishedAt ?? pick.createdAt)}`}
+                          mono={pick.creatorMono}
+                          color={pick.creatorColor}
+                          trailing={
+                            <Row gap={2}>
+                              <Badge tone="mute">{pick.odds}</Badge>
+                              <Badge tone={gradeColor(pick.grade)} dot>
+                                {gradeLabel(pick.grade)}
+                              </Badge>
+                            </Row>
+                          }
+                        />
+                      )}
+                    />
                   )}
                   {filteredResults.length > 0 && filteredResults.length < counts.all && (
                     <>

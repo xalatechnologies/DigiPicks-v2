@@ -21,6 +21,7 @@ import {
   Select,
   SectionHead,
   InsightCard,
+  RowList,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -152,39 +153,52 @@ export function AccountSettings() {
         title="Sign-in providers"
         sub="Add backup providers to stay locked in."
       >
-        <Stack gap={0}>
-          <PersonRow
-            name="Google"
-            sub={me?.email ?? 'Not connected'}
-            mono="G"
-            color="var(--brand-google)"
-            trailing={<Badge tone="green">Connected</Badge>}
-          />
-          <Divider />
-          <PersonRow
-            name="Discord"
-            sub="Not connected"
-            mono="D"
-            color="var(--brand-discord)"
-            trailing={
-              <Button variant="outline" size="sm">
-                Connect
-              </Button>
-            }
-          />
-          <Divider />
-          <PersonRow
-            name="Apple"
-            sub="Not connected"
-            mono="A"
-            color="var(--brand-apple)"
-            trailing={
-              <Button variant="outline" size="sm">
-                Connect
-              </Button>
-            }
-          />
-        </Stack>
+        <RowList
+          items={[
+            {
+              id: 'google',
+              name: 'Google',
+              sub: me?.email ?? 'Not connected',
+              mono: 'G',
+              color: 'var(--brand-google)',
+              connected: true,
+            },
+            {
+              id: 'discord',
+              name: 'Discord',
+              sub: 'Not connected',
+              mono: 'D',
+              color: 'var(--brand-discord)',
+              connected: false,
+            },
+            {
+              id: 'apple',
+              name: 'Apple',
+              sub: 'Not connected',
+              mono: 'A',
+              color: 'var(--brand-apple)',
+              connected: false,
+            },
+          ]}
+          getKey={(p) => p.id}
+          renderItem={(p) => (
+            <PersonRow
+              name={p.name}
+              sub={p.sub}
+              mono={p.mono}
+              color={p.color}
+              trailing={
+                p.connected ? (
+                  <Badge tone="green">Connected</Badge>
+                ) : (
+                  <Button variant="outline" size="sm">
+                    Connect
+                  </Button>
+                )
+              }
+            />
+          )}
+        />
       </InsightCard>
 
       <InsightCard
@@ -193,39 +207,53 @@ export function AccountSettings() {
         title="Responsible betting"
         sub="Soft guards to stay disciplined when variance bites."
       >
-        <Stack gap={0}>
-          <SwitchRow
-            label="Weekly play cap"
-            sub="Limit to 20 plays per week"
-            checked={weeklyCap}
-            onChange={setWeeklyCap}
-          />
-          <Divider />
-          <SwitchRow
-            label="Cooldown period"
-            sub="Pause after 3+ losses in a row"
-            checked={cooldown}
-            onChange={setCooldown}
-          />
-        </Stack>
+        <RowList
+          items={[
+            {
+              id: 'weeklyCap',
+              label: 'Weekly play cap',
+              sub: 'Limit to 20 plays per week',
+              checked: weeklyCap,
+              onChange: setWeeklyCap,
+            },
+            {
+              id: 'cooldown',
+              label: 'Cooldown period',
+              sub: 'Pause after 3+ losses in a row',
+              checked: cooldown,
+              onChange: setCooldown,
+            },
+          ]}
+          getKey={(it) => it.id}
+          renderItem={(it) => (
+            <SwitchRow label={it.label} sub={it.sub} checked={it.checked} onChange={it.onChange} />
+          )}
+        />
       </InsightCard>
 
       <InsightCard tone="mute" eyebrow="Privacy" title="Profile visibility">
-        <Stack gap={0}>
-          <SwitchRow
-            label="Private profile"
-            sub="Hide portfolio from other subscribers"
-            checked={privateProfile}
-            onChange={setPrivateProfile}
-          />
-          <Divider />
-          <SwitchRow
-            label="Hide from leaderboards"
-            sub="Exclude me from public rankings"
-            checked={hideLeaderboards}
-            onChange={setHideLeaderboards}
-          />
-        </Stack>
+        <RowList
+          items={[
+            {
+              id: 'private',
+              label: 'Private profile',
+              sub: 'Hide portfolio from other subscribers',
+              checked: privateProfile,
+              onChange: setPrivateProfile,
+            },
+            {
+              id: 'leaderboard',
+              label: 'Hide from leaderboards',
+              sub: 'Exclude me from public rankings',
+              checked: hideLeaderboards,
+              onChange: setHideLeaderboards,
+            },
+          ]}
+          getKey={(it) => it.id}
+          renderItem={(it) => (
+            <SwitchRow label={it.label} sub={it.sub} checked={it.checked} onChange={it.onChange} />
+          )}
+        />
       </InsightCard>
 
       <InsightCard
@@ -270,7 +298,7 @@ export function AccountSettings() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PageHead
             eyebrow="Account"
             title="Settings"
@@ -341,19 +369,18 @@ export function AccountSettings() {
             {NOTIFICATION_SECTIONS.map((section) => (
               <Card key={section.title} pad="md">
                 <CardHead title={section.title} sub={section.sub} />
-                <Stack gap={0}>
-                  {section.items.map((item, i) => (
-                    <React.Fragment key={item.id}>
-                      {i > 0 && <Divider />}
-                      <SwitchRow
-                        label={item.label}
-                        sub={item.sub}
-                        checked={toggles[item.id] ?? false}
-                        onChange={setToggle(item.id)}
-                      />
-                    </React.Fragment>
-                  ))}
-                </Stack>
+                <RowList
+                  items={section.items}
+                  getKey={(item) => item.id}
+                  renderItem={(item) => (
+                    <SwitchRow
+                      label={item.label}
+                      sub={item.sub}
+                      checked={toggles[item.id] ?? false}
+                      onChange={setToggle(item.id)}
+                    />
+                  )}
+                />
               </Card>
             ))}
 

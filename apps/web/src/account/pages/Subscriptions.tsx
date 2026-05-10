@@ -13,12 +13,12 @@ import {
   Muted,
   PersonRow,
   EmptyState,
-  Divider,
   DashGrid,
   StatTile,
   SubscriptionTile,
   SectionHead,
   InsightCard,
+  RowList,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
@@ -91,23 +91,36 @@ export function Subscriptions() {
         title="Lifetime estimate"
         sub={`Across ${monthsActive || 0} month${monthsActive === 1 ? '' : 's'}`}
       >
-        <Stack gap={2}>
-          <PersonRow
-            name={`$${totalMonthly}`}
-            sub="This month"
-            mono="$"
-            color="var(--green)"
-            trailing={<Badge tone="green">Active</Badge>}
-          />
-          <Divider />
-          <PersonRow
-            name={`$${lifetimeEstimate}`}
-            sub={`Lifetime · ${monthsActive} mo`}
-            mono="∞"
-            color="var(--gold)"
-            trailing={<Badge tone="gold">Total</Badge>}
-          />
-        </Stack>
+        <RowList
+          items={[
+            {
+              name: `$${totalMonthly}`,
+              sub: 'This month',
+              mono: '$',
+              color: 'var(--green)',
+              tone: 'green' as const,
+              badge: 'Active',
+            },
+            {
+              name: `$${lifetimeEstimate}`,
+              sub: `Lifetime · ${monthsActive} mo`,
+              mono: '∞',
+              color: 'var(--gold)',
+              tone: 'gold' as const,
+              badge: 'Total',
+            },
+          ]}
+          getKey={(it) => it.name}
+          renderItem={(it) => (
+            <PersonRow
+              name={it.name}
+              sub={it.sub}
+              mono={it.mono}
+              color={it.color}
+              trailing={<Badge tone={it.tone}>{it.badge}</Badge>}
+            />
+          )}
+        />
       </InsightCard>
 
       <InsightCard
@@ -123,24 +136,23 @@ export function Subscriptions() {
         {active.length === 0 && cancelled.length === 0 ? (
           <Muted>No billing history yet.</Muted>
         ) : (
-          <Stack gap={0}>
-            {[...active, ...cancelled].slice(0, 5).map((sub, i) => (
-              <React.Fragment key={`bill-${sub._id}`}>
-                {i > 0 && <Divider />}
-                <PersonRow
-                  name={sub.creatorName}
-                  sub={sub.startedAt ? fmtDate(sub.startedAt) : '—'}
-                  mono={sub.creatorMono}
-                  color={sub.creatorColor}
-                  trailing={
-                    <Badge tone={sub.status === 'active' ? 'green' : 'mute'}>
-                      ${sub.creatorStartingPrice}
-                    </Badge>
-                  }
-                />
-              </React.Fragment>
-            ))}
-          </Stack>
+          <RowList
+            items={[...active, ...cancelled].slice(0, 5)}
+            getKey={(sub) => `bill-${sub._id}`}
+            renderItem={(sub) => (
+              <PersonRow
+                name={sub.creatorName}
+                sub={sub.startedAt ? fmtDate(sub.startedAt) : '—'}
+                mono={sub.creatorMono}
+                color={sub.creatorColor}
+                trailing={
+                  <Badge tone={sub.status === 'active' ? 'green' : 'mute'}>
+                    ${sub.creatorStartingPrice}
+                  </Badge>
+                }
+              />
+            )}
+          />
         )}
       </InsightCard>
 
@@ -150,31 +162,23 @@ export function Subscriptions() {
         title="Billing tools"
         sub="External portals & support"
       >
-        <Stack gap={0}>
-          <PersonRow
-            name="Stripe portal"
-            sub="Manage billing"
-            mono="S"
-            color="var(--primary)"
-            trailing={<Icon name="arrow-right" size={14} />}
-          />
-          <Divider />
-          <PersonRow
-            name="Download receipts"
-            sub="PDF export"
-            mono="R"
-            color="var(--blue)"
-            trailing={<Icon name="arrow-right" size={14} />}
-          />
-          <Divider />
-          <PersonRow
-            name="Billing support"
-            sub="Get help"
-            mono="H"
-            color="var(--green)"
-            trailing={<Icon name="arrow-right" size={14} />}
-          />
-        </Stack>
+        <RowList
+          items={[
+            { name: 'Stripe portal', sub: 'Manage billing', mono: 'S', color: 'var(--primary)' },
+            { name: 'Download receipts', sub: 'PDF export', mono: 'R', color: 'var(--blue)' },
+            { name: 'Billing support', sub: 'Get help', mono: 'H', color: 'var(--green)' },
+          ]}
+          getKey={(it) => it.name}
+          renderItem={(it) => (
+            <PersonRow
+              name={it.name}
+              sub={it.sub}
+              mono={it.mono}
+              color={it.color}
+              trailing={<Icon name="arrow-right" size={14} />}
+            />
+          )}
+        />
       </InsightCard>
     </>
   );
@@ -202,7 +206,7 @@ export function Subscriptions() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PageHead
             eyebrow="Account"
             title={active.length > 0 ? 'Your active subscriptions' : 'Your subscriptions'}

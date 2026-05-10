@@ -80,7 +80,7 @@ export function Overview() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PageHead
             eyebrow="Studio overview"
             title={`Welcome back, ${displayName}.`}

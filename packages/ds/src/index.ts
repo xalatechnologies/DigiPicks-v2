@@ -120,10 +120,7 @@ export type {
   TrendingItem,
 } from './components/surfaces/TrendingCarousel/TrendingCarousel';
 export { InsightCard } from './components/surfaces/InsightCard/InsightCard';
-export type {
-  InsightCardProps,
-  InsightTone,
-} from './components/surfaces/InsightCard/InsightCard';
+export type { InsightCardProps, InsightTone } from './components/surfaces/InsightCard/InsightCard';
 export { MfaEnrollmentCard } from './components/surfaces/MfaEnrollmentCard/MfaEnrollmentCard';
 export type {
   MfaEnrollmentCardProps,
@@ -143,6 +140,8 @@ export type {
   StatTileTone,
   StatTileTrend,
 } from './components/data/StatTile/StatTile';
+export { RowList } from './components/data/RowList/RowList';
+export type { RowListProps } from './components/data/RowList/RowList';
 export { OddsGrid } from './components/data/OddsGrid/OddsGrid';
 export type {
   OddsGridProps,

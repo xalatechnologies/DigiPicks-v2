@@ -1,0 +1,25 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.row {
+  display: contents;
+}
+
+.gap0 {
+  gap: var(--space-0);
+}
+.gap1 {
+  gap: var(--space-1);
+}
+.gap2 {
+  gap: var(--space-2);
+}
+.gap3 {
+  gap: var(--space-3);
+}
+.gap4 {
+  gap: var(--space-4);
+}

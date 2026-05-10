@@ -14,12 +14,12 @@ import {
   PersonRow,
   PickCard,
   EmptyState,
-  Divider,
   FilterChips,
   DashGrid,
   PortfolioHero,
   SectionHead,
   InsightCard,
+  RowList,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
@@ -133,20 +133,19 @@ export function Dashboard() {
             }
           />
         ) : (
-          <Stack gap={0}>
-            {activeSubs.slice(0, 4).map((sub, i) => (
-              <React.Fragment key={sub._id}>
-                {i > 0 && <Divider />}
-                <PersonRow
-                  name={sub.creatorName}
-                  sub={sub.plan}
-                  mono={sub.creatorMono}
-                  color={sub.creatorColor}
-                  trailing={<Badge tone="green">${sub.creatorStartingPrice}/mo</Badge>}
-                />
-              </React.Fragment>
-            ))}
-          </Stack>
+          <RowList
+            items={activeSubs.slice(0, 4)}
+            getKey={(sub) => sub._id}
+            renderItem={(sub) => (
+              <PersonRow
+                name={sub.creatorName}
+                sub={sub.plan}
+                mono={sub.creatorMono}
+                color={sub.creatorColor}
+                trailing={<Badge tone="green">${sub.creatorStartingPrice}/mo</Badge>}
+              />
+            )}
+          />
         )}
       </InsightCard>
 
@@ -166,67 +165,74 @@ export function Dashboard() {
             </Button>
           }
         >
-          <Stack gap={0}>
-            {recent.slice(0, 5).map((pick, i) => (
-              <React.Fragment key={pick._id}>
-                {i > 0 && <Divider />}
-                <PersonRow
-                  name={pick.title}
-                  sub={`${pick.creatorName} · ${pick.sport}`}
-                  mono={pick.creatorMono}
-                  color={pick.creatorColor}
-                  trailing={
-                    <Badge
-                      tone={
-                        pick.grade === 'win'
-                          ? 'green'
-                          : pick.grade === 'loss'
-                            ? 'red'
-                            : pick.grade === 'push'
-                              ? 'gold'
-                              : 'mute'
-                      }
-                      dot
-                    >
-                      {pick.grade ?? 'pending'}
-                    </Badge>
-                  }
-                />
-              </React.Fragment>
-            ))}
-          </Stack>
+          <RowList
+            items={recent.slice(0, 5)}
+            getKey={(pick) => pick._id}
+            renderItem={(pick) => (
+              <PersonRow
+                name={pick.title}
+                sub={`${pick.creatorName} · ${pick.sport}`}
+                mono={pick.creatorMono}
+                color={pick.creatorColor}
+                trailing={
+                  <Badge
+                    tone={
+                      pick.grade === 'win'
+                        ? 'green'
+                        : pick.grade === 'loss'
+                          ? 'red'
+                          : pick.grade === 'push'
+                            ? 'gold'
+                            : 'mute'
+                    }
+                    dot
+                  >
+                    {pick.grade ?? 'pending'}
+                  </Badge>
+                }
+              />
+            )}
+          />
         </InsightCard>
       )}
 
       <InsightCard tone="blue" eyebrow="Shortcuts" title="Jump to" sub="Frequent destinations">
-        <Stack gap={0}>
-          <PersonRow
-            name="Saved picks"
-            sub="Review bookmarks"
-            mono="B"
-            color="var(--blue)"
-            trailing={<Icon name="arrow-right" size={14} />}
-            onClick={() => navigate('/account/saved')}
-          />
-          <Divider />
-          <PersonRow
-            name="Discover creators"
-            sub="Find your next edge"
-            mono="D"
-            color="var(--green)"
-            trailing={<Icon name="arrow-right" size={14} />}
-            onClick={() => navigate('/account/discover')}
-          />
-          <Divider />
-          <PersonRow
-            name="Community"
-            sub="Join the conversation"
-            mono="C"
-            color="var(--amber)"
-            trailing={<Icon name="arrow-right" size={14} />}
-            onClick={() => navigate('/account/community')}
-          />
-        </Stack>
+        <RowList
+          items={[
+            {
+              name: 'Saved picks',
+              sub: 'Review bookmarks',
+              mono: 'B',
+              color: 'var(--blue)',
+              to: '/account/saved',
+            },
+            {
+              name: 'Discover creators',
+              sub: 'Find your next edge',
+              mono: 'D',
+              color: 'var(--green)',
+              to: '/account/discover',
+            },
+            {
+              name: 'Community',
+              sub: 'Join the conversation',
+              mono: 'C',
+              color: 'var(--amber)',
+              to: '/account/community',
+            },
+          ]}
+          getKey={(it) => it.to}
+          renderItem={(it) => (
+            <PersonRow
+              name={it.name}
+              sub={it.sub}
+              mono={it.mono}
+              color={it.color}
+              trailing={<Icon name="arrow-right" size={14} />}
+              onClick={() => navigate(it.to)}
+            />
+          )}
+        />
       </InsightCard>
     </>
   );
@@ -259,7 +265,7 @@ export function Dashboard() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PortfolioHero
             eyebrow={hasPortfolio ? 'Portfolio · live' : 'Welcome'}
             title={`Welcome back, ${displayName}`}

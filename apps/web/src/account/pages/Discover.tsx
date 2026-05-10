@@ -104,7 +104,7 @@ export function Discover() {
       />
 
       <Container size="2xl">
-        <Stack gap={6}>
+        <Stack gap={5}>
           <PageHead
             eyebrow="Discover"
             title="Find your next edge"
