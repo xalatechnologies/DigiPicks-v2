@@ -1,6 +1,8 @@
-import { query, internalMutation } from './_generated/server';
+import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { creatorStatus } from './shared/validators';
+import { internal } from './_generated/api';
+import { requireAdmin } from './shared/permissions';
 
 // =============================================================================
 // Creator Queries & Mutations
@@ -53,6 +55,65 @@ export const get = query({
   args: { id: v.id('creators') },
   handler: async (ctx, { id }) => {
     return await ctx.db.get(id);
+  },
+});
+
+// Public.
+/**
+ * Currently-promoted creators (Phase 15a). Drives the Landing rotation
+ * + featured rail. Returns creators whose promotedUntil is still in the
+ * future, ordered by promotedRank desc so highest-bidder wins the slot.
+ */
+export const promoted = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const rows = await ctx.db
+      .query('creators')
+      .withIndex('by_promoted', (q) => q.gt('promotedUntil', now))
+      .take(50);
+    rows.sort((a, b) => (b.promotedRank ?? 0) - (a.promotedRank ?? 0));
+    return rows.slice(0, args.limit ?? 6);
+  },
+});
+
+// Admin-only.
+/**
+ * Promote / un-promote a creator. Admin-only. `untilMs=0` removes the
+ * promotion immediately. Audit-logged.
+ */
+export const setPromotion = mutation({
+  args: {
+    creatorId: v.id('creators'),
+    untilMs: v.number(),
+    rank: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await requireAdmin(ctx);
+    const creator = await ctx.db.get(args.creatorId);
+    if (!creator) throw new Error('Creator not found');
+
+    if (args.untilMs <= Date.now()) {
+      await ctx.db.patch(args.creatorId, {
+        promotedUntil: undefined,
+        promotedRank: undefined,
+      });
+    } else {
+      await ctx.db.patch(args.creatorId, {
+        promotedUntil: args.untilMs,
+        promotedRank: args.rank ?? 0,
+      });
+    }
+
+    await ctx.runMutation(internal.audit.log, {
+      actorUserId: admin._id,
+      entityType: 'creator',
+      entityId: args.creatorId,
+      action: args.untilMs <= Date.now() ? 'creator.unpromoted' : 'creator.promoted',
+      metadata: { untilMs: args.untilMs, rank: args.rank ?? 0 },
+    });
+
+    return args.creatorId;
   },
 });
 

@@ -28,27 +28,35 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   },
 
   // ── Community channel posting (FM-006): 30/min per user — anti-spam.
+  // NFR-005 readiness — sharded for hot-channel events (live streams /
+  // marquee creators) so the bucket can sustain 10k+ rps cumulatively.
   channelsPost: {
     kind: 'token bucket',
     rate: 30,
     period: MINUTE,
     capacity: 30,
+    shards: 8,
   },
 
   // ── Stripe checkout creation (FM-009): 5 per 10min per user — Stripe
   //    itself dedupes via Idempotency-Key, this is just an anti-abuse cap.
+  //    Same bucket reused by ai.suggestPick — capped Anthropic spend.
   stripeCheckout: {
     kind: 'token bucket',
     rate: 5,
     period: 10 * MINUTE,
     capacity: 5,
+    shards: 4,
   },
 
   // ── GDPR export (NFR-003): 3/hour per user — full-table scans are heavy.
+  // Sharded so the global bucket doesn't bottleneck during compliance
+  // audits when many users export simultaneously.
   gdprExport: {
     kind: 'fixed window',
     rate: 3,
     period: HOUR,
+    shards: 4,
   },
 
 });

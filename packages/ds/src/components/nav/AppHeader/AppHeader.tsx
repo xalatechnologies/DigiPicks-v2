@@ -57,7 +57,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      <div className={s.actions}>
+      <div className={s.actions} role="region" aria-live="polite">
         {actions}
         <button type="button" className={s.iconBtn} aria-label="Bookmarks">
           <Icon name="bookmark" size={18} />

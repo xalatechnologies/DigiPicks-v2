@@ -7,6 +7,20 @@ export interface SparklineProps extends Omit<React.SVGProps<SVGSVGElement>, 'val
   color?: string;
   width?: number;
   height?: number;
+  /** Accessible label — defaults to a numeric trend description. */
+  ariaLabel?: string;
+  /** Optional unit suffix used in the auto-generated aria-label (e.g. "u"). */
+  unit?: string;
+}
+
+function describeTrend(values: number[], unit = ''): string {
+  if (values.length === 0) return 'Empty trend';
+  const first = values[0]!;
+  const last = values[values.length - 1]!;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const direction = last > first ? 'up' : last < first ? 'down' : 'flat';
+  return `Trend ${direction}, ${values.length} points, range ${min}${unit} to ${max}${unit}, ending at ${last}${unit}.`;
 }
 
 export const Sparkline: React.FC<SparklineProps> = ({
@@ -15,10 +29,22 @@ export const Sparkline: React.FC<SparklineProps> = ({
   width = 80,
   height = 22,
   className,
+  ariaLabel,
+  unit,
   ...rest
 }) => {
+  const label = ariaLabel ?? describeTrend(values ?? [], unit);
   if (!values || values.length === 0) {
-    return <svg width={width} height={height} className={cx(s.spark, className)} {...rest} />;
+    return (
+      <svg
+        width={width}
+        height={height}
+        className={cx(s.spark, className)}
+        role="img"
+        aria-label={label}
+        {...rest}
+      />
+    );
   }
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -32,7 +58,14 @@ export const Sparkline: React.FC<SparklineProps> = ({
     })
     .join(' ');
   return (
-    <svg width={width} height={height} className={cx(s.spark, className)} {...rest}>
+    <svg
+      width={width}
+      height={height}
+      className={cx(s.spark, className)}
+      role="img"
+      aria-label={label}
+      {...rest}
+    >
       <polyline fill="none" stroke={color} strokeWidth="1.5" points={pts} />
     </svg>
   );

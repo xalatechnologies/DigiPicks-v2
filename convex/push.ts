@@ -4,6 +4,7 @@ import webpush from 'web-push';
 import { v } from 'convex/values';
 import { internalAction } from './_generated/server';
 import { internal } from './_generated/api';
+import { withSentry } from './shared/sentryNode';
 
 // =============================================================================
 // Web Push delivery (VAPID) — node-only action.
@@ -44,11 +45,12 @@ export const sendToUser = internalAction({
       data: v.optional(v.any()),
     }),
   },
-  handler: async (ctx, args): Promise<{ sent: number; removed: number }> => {
-    if (!process.env.VAPID_SUBJECT) {
-      return { sent: 0, removed: 0 };
-    }
-    configureVapid();
+  handler: async (ctx, args): Promise<{ sent: number; removed: number }> =>
+    withSentry('push.sendToUser', async () => {
+      if (!process.env.VAPID_SUBJECT) {
+        return { sent: 0, removed: 0 };
+      }
+      configureVapid();
 
     const subs = await ctx.runQuery(
       internal.pushSubscriptions._subscriptionsForUser,
@@ -87,6 +89,6 @@ export const sendToUser = internalAction({
       }
     }
 
-    return { sent, removed };
-  },
+      return { sent, removed };
+    }),
 });

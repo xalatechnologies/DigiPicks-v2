@@ -9,6 +9,7 @@ import { ThemeProvider } from '@digipicks/app-shell';
 import { Container, Heading, Muted, Stack } from '@digipicks/ds';
 import '@digipicks/ds/styles';
 import { App } from './App';
+import { I18nProvider } from './lib/i18n';
 
 // Sentry — opt-in via VITE_SENTRY_DSN. Quiet no-op when unset so dev
 // environments don't ship spurious events.
@@ -42,7 +43,9 @@ const Tree = (
     <ConvexAuthProvider client={convex as unknown as AnyConvexClient}>
       <BrowserRouter>
         <ThemeProvider>
-          <App />
+          <I18nProvider>
+            <App />
+          </I18nProvider>
         </ThemeProvider>
       </BrowserRouter>
     </ConvexAuthProvider>

@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import { internalAction } from '../_generated/server';
 import { internal } from '../_generated/api';
 import { withRetry } from '../shared/retry';
+import { withSentry } from '../shared/sentryNode';
 
 // =============================================================================
 // ESPNcricinfo sport-source ingester (PRD §7.1, SRSD FR-EVT-002).
@@ -36,10 +37,11 @@ interface ScrapedFixture {
 
 export const pollCricketFixtures = internalAction({
   args: {},
-  handler: async (ctx) => {
-    if (process.env.SPORT_SOURCE_CRICKET_ENABLED !== 'true') {
-      return { skipped: true as const, reason: 'flag-off' };
-    }
+  handler: async (ctx) =>
+    withSentry('sources.espncricinfo.pollCricketFixtures', async () => {
+      if (process.env.SPORT_SOURCE_CRICKET_ENABLED !== 'true') {
+        return { skipped: true as const, reason: 'flag-off' };
+      }
 
     let html: string;
     try {
@@ -94,8 +96,8 @@ export const pollCricketFixtures = internalAction({
     console.log(
       `pollCricketFixtures: parsed ${fixtures.length} · inserted ${inserted} · updated ${updated}`,
     );
-    return { skipped: false as const, parsed: fixtures.length, inserted, updated };
-  },
+      return { skipped: false as const, parsed: fixtures.length, inserted, updated };
+    }),
 });
 
 // ─── Parser ─────────────────────────────────────────────────────────────────

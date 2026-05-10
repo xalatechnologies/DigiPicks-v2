@@ -385,10 +385,16 @@ export default defineSchema({
         sampleSize: v.number(),
       }),
     ),
+    // ── Promoted placement (Phase 15a, PRD §12 revenue) ──
+    /** Boost expires at this timestamp. UI rotation reads creators with
+     *  promotedUntil > now() ordered by promotedRank desc. */
+    promotedUntil: v.optional(v.number()),
+    promotedRank: v.optional(v.number()),
   })
     .index('by_handle', ['handle'])
     .index('by_verified', ['verified'])
     .index('by_trending', ['trending'])
+    .index('by_promoted', ['promotedUntil'])
     .searchIndex('search_name', {
       searchField: 'name',
       filterFields: ['verified', 'status'],

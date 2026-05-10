@@ -26,7 +26,15 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({
   const pct = Math.max(0, Math.min(100, Math.round(value)));
   const tone = toneFor(pct);
   return (
-    <div className={cx(s.gauge, className)} aria-label={`${label}: ${pct}%`}>
+    <div
+      className={cx(s.gauge, className)}
+      role="meter"
+      aria-label={label}
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuetext={`${pct} percent`}
+    >
       <div className={s.head}>
         <span className={s.label}>{label}</span>
         <span className={s.value}>{pct}%</span>

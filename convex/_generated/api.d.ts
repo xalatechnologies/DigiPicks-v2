@@ -50,6 +50,7 @@ import type * as shared_aiParse from "../shared/aiParse.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_rateLimit from "../shared/rateLimit.js";
 import type * as shared_retry from "../shared/retry.js";
+import type * as shared_sentryNode from "../shared/sentryNode.js";
 import type * as shared_validators from "../shared/validators.js";
 import type * as sources_cricketWriter from "../sources/cricketWriter.js";
 import type * as sources_espncricinfo from "../sources/espncricinfo.js";
@@ -113,6 +114,7 @@ declare const fullApi: ApiFromModules<{
   "shared/permissions": typeof shared_permissions;
   "shared/rateLimit": typeof shared_rateLimit;
   "shared/retry": typeof shared_retry;
+  "shared/sentryNode": typeof shared_sentryNode;
   "shared/validators": typeof shared_validators;
   "sources/cricketWriter": typeof sources_cricketWriter;
   "sources/espncricinfo": typeof sources_espncricinfo;
