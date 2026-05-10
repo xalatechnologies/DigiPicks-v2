@@ -67,10 +67,20 @@ flowchart TD
   `discordId` + `discordUsername` on the existing row. No new audit row
   is written (this is a link, not a signup) and no welcome notify
   fires.
-- **Email verification is DEFERRED** — `users.emailVerificationTime` is
-  reserved on the schema but no flow writes it today. Enabling
-  verification requires wiring an email provider (e.g. Resend) into a
-  verification mutation; not in scope for v1.
+- **Email verification** — Password signups schedule
+  `internal.emailVerification._initiate` from the auth callback. The
+  action generates a 32-byte token, hashes it (sha-256), stamps
+  `emailVerificationTokenHash` + `emailVerificationExpiresAt` on the
+  user, and emails the user a `WEB_BASE_URL/auth/verify?token=…` link
+  via Resend. The user's click hits `auth.confirm({ token })` which
+  validates the hash, checks the 24h expiry, and stamps
+  `emailVerificationTime`. Discord OAuth signups skip this — Discord
+  vouches for the email. Quiet no-op when `RESEND_API_KEY` is unset
+  (signup still succeeds; admins see the unverified state).
+- **Verification link expired or wrong** → `auth.confirm` returns
+  `{ ok: false, reason: 'expired' | 'invalid-token' }` and the UI
+  prompts for a re-send via `auth.requestVerification` (rate-limited
+  via the `applicationsSubmit` bucket).
 - **Welcome notify fails** → fire-and-forget, swallowed at the dispatch
   layer; signup completes regardless.
 

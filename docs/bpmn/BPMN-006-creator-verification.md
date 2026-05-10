@@ -85,9 +85,20 @@ flowchart TD
 
 ## AI interactions
 
-- AI authenticity scoring of application narratives is DEFERRED. The
-  schema reserves `applications.aiAuthenticityScore` but no flow
-  populates it today; admin review is fully manual.
+- `internal.ai.scoreApplicationAuthenticity` (Anthropic Haiku, prompt-
+  cached) is scheduled async from `applications.submit`. It reads the
+  applicant's narrative + claimed niche/proof/win-rate and returns a
+  `{ score: 0..100, reasoning: string }` object. The mutation
+  `applications._setAuthenticityScore` patches
+  `aiAuthenticityScore`, `aiAuthenticityReasoning`, and
+  `aiAuthenticityScoredAt` on the application row so admins see it in
+  the review queue.
+- **Output is advisory only.** The score never auto-suspends, never
+  auto-rejects, never reads back into the application status field.
+  Admins still own the decision.
+- Quietly skips when `ANTHROPIC_API_KEY` is unset or the response fails
+  to parse (the application status remains `submitted`; admins can re-
+  trigger by resubmitting).
 
 ## Module mapping
 

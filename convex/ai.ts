@@ -274,6 +274,132 @@ export const gradingExplanation = internalAction({
 });
 
 // =============================================================================
+// Application authenticity scoring (BPMN-006 §AI interactions).
+//
+// Advisory only — produces a 0..100 authenticity score + reasoning that
+// admins see in the review queue. Never auto-suspends, never auto-
+// rejects. Quietly skips when ANTHROPIC_API_KEY is unset.
+// =============================================================================
+
+const APPLICATION_SYSTEM_PROMPT = [
+  'You are a trust-and-safety analyst at DigiPicks reviewing a new creator',
+  'application. The platform monetizes sports intelligence; bad actors',
+  'sometimes apply with fabricated bona fides.',
+  '',
+  'Read the application narrative + claimed niche/proof and produce an',
+  'authenticity heuristic.',
+  '',
+  'Return ONLY a single JSON object with these exact keys:',
+  '{',
+  '  "score": <integer 0-100, 0 = obvious red flag, 100 = highly credible>,',
+  '  "reasoning": "<2-3 sentences citing specific signals from the application>"',
+  '}',
+  '',
+  'Rules:',
+  '- Be skeptical. score > 80 only when claims are concrete and verifiable.',
+  '- Flag vague boilerplate ("years of experience", "guaranteed wins") low.',
+  '- Be harsher on win-rate claims that lack proof count.',
+  '- Output strict JSON only. No prose before or after.',
+  '- Never recommend a specific decision — admins decide.',
+].join('\n');
+
+interface ApplicationAnalysis {
+  score: number;
+  reasoning: string;
+}
+
+function parseApplicationAnalysis(text: string): ApplicationAnalysis | null {
+  try {
+    const trimmed = text.trim().replace(/^```(?:json)?\s*|\s*```$/g, '');
+    const parsed = JSON.parse(trimmed) as Partial<ApplicationAnalysis>;
+    if (typeof parsed.score !== 'number' || typeof parsed.reasoning !== 'string') {
+      return null;
+    }
+    const clamped = Math.max(0, Math.min(100, Math.round(parsed.score)));
+    return { score: clamped, reasoning: parsed.reasoning.slice(0, 600) };
+  } catch {
+    return null;
+  }
+}
+
+export const _applicationForScoring = internalQuery({
+  args: { applicationId: v.id('applications') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.applicationId);
+  },
+});
+
+export const scoreApplicationAuthenticity = internalAction({
+  args: {
+    applicationId: v.id('applications'),
+    model: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<ApplicationAnalysis | { skipped: true }> => {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return { skipped: true };
+
+    const app = await ctx.runQuery(internal.ai._applicationForScoring, {
+      applicationId: args.applicationId,
+    });
+    if (!app) return { skipped: true };
+
+    const userPrompt = [
+      `Applicant name: ${app.name}`,
+      `Handle: ${app.handle}`,
+      `Sport: ${app.sport}`,
+      `Niche: ${app.niche}`,
+      app.existingFollowing ? `Claimed audience: ${app.existingFollowing}` : '',
+      app.priceHint ? `Pricing intent: ${app.priceHint}` : '',
+      `Proof count provided: ${app.proofCount}`,
+      app.winClaim ? `Win-rate claim: ${app.winClaim}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const model = args.model ?? DEFAULT_MODEL;
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 400,
+        system: [
+          {
+            type: 'text',
+            text: APPLICATION_SYSTEM_PROMPT,
+            cache_control: { type: 'ephemeral' },
+          },
+        ],
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    const body = (await res.json()) as AnthropicMessageResponse;
+    if (!res.ok) {
+      console.warn(
+        `scoreApplicationAuthenticity Anthropic error: ${body.error?.message ?? res.status}`,
+      );
+      return { skipped: true };
+    }
+
+    const text = body.content?.find((b) => b.type === 'text')?.text ?? '';
+    const parsed = parseApplicationAnalysis(text);
+    if (!parsed) return { skipped: true };
+
+    await ctx.runMutation(internal.applications._setAuthenticityScore, {
+      applicationId: args.applicationId,
+      score: parsed.score,
+      reasoning: parsed.reasoning,
+    });
+    return parsed;
+  },
+});
+
+// =============================================================================
 // AI Co-write — pre-publish suggestion (PRD M9 differentiator, Phase 12).
 //
 // CreatePick form calls this action with the in-progress sketch (sport,

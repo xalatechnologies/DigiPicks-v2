@@ -101,8 +101,8 @@ export const _insertInApp = internalMutation({
 
 /**
  * Fan a single notification out to a single user across every enabled
- * channel. Runs as an internalAction so it can call both push (node) and
- * telegram (V8) sub-actions.
+ * channel. Runs as an internalAction so it can call push, telegram, and
+ * email sub-actions.
  */
 export const dispatch = internalAction({
   args: {
@@ -124,12 +124,21 @@ export const dispatch = internalAction({
       entityKey: v.optional(v.string()),
     }),
   },
-  handler: async (ctx, args): Promise<{ inApp: boolean; push: boolean; telegram: boolean }> => {
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{
+    inApp: boolean;
+    push: boolean;
+    telegram: boolean;
+    email: boolean;
+    deferred?: boolean;
+  }> => {
     const user: Doc<'users'> | null = await ctx.runQuery(internal.notify._userPrefs, {
       userId: args.userId,
     });
     if (!user || user.isActive === false) {
-      return { inApp: false, push: false, telegram: false };
+      return { inApp: false, push: false, telegram: false, email: false };
     }
 
     const prefs = user.notifyPrefs ?? {};
@@ -151,11 +160,17 @@ export const dispatch = internalAction({
           ? prefs.pickGraded !== false
           : prefs.lineMoved !== false);
     if (!kindEnabled) {
-      return { inApp: false, push: false, telegram: false };
+      return { inApp: false, push: false, telegram: false, email: false };
     }
 
     const payload: NotifyPayload = args.payload;
-    const result = { inApp: false, push: false, telegram: false };
+    const result = {
+      inApp: false,
+      push: false,
+      telegram: false,
+      email: false,
+      deferred: false,
+    };
 
     // 1. In-app row — always written for kindEnabled users.
     await ctx.runMutation(internal.notify._insertInApp, {
@@ -168,39 +183,106 @@ export const dispatch = internalAction({
     });
     result.inApp = true;
 
-    // 2. Web push — opt-in via prefs.push.
-    if (prefs.push) {
-      try {
-        await ctx.runAction(internal.push.sendToUser, {
+    // BPMN-015 §quiet hours — push + telegram only fire outside the
+    // configured window. Lifecycle kinds bypass quiet hours so the user
+    // can't miss a transactional alert (welcome, payment-failed). Email
+    // + in-app always fire; the inbox is silent enough to not disturb.
+    const deferUntil = isLifecycle ? null : computeQuietHoursDeferral(prefs);
+    if (deferUntil !== null && !isLifecycle) {
+      // Defer push + telegram via scheduler; the in-app row is already
+      // written so the user sees it on next visit. Lifecycle kinds were
+      // ruled out above, so the cast is sound.
+      await ctx.scheduler.runAfter(
+        deferUntil - Date.now(),
+        internal.notify._dispatchAfterQuietHours,
+        {
           userId: args.userId,
-          payload: {
-            title: payload.title,
-            body: payload.body,
-            url: payload.url,
-            tag: payload.entityKey ?? args.kind,
-          },
-        });
-        result.push = true;
-      } catch (err) {
-        console.warn('push fanout failed:', err);
+          kind: args.kind as 'pick_published' | 'pick_graded' | 'line_moved',
+          payload: args.payload,
+        },
+      );
+      result.deferred = true;
+    } else {
+      // 2. Web push — opt-in via prefs.push.
+      if (prefs.push) {
+        try {
+          await ctx.runAction(internal.push.sendToUser, {
+            userId: args.userId,
+            payload: {
+              title: payload.title,
+              body: payload.body,
+              url: payload.url,
+              tag: payload.entityKey ?? args.kind,
+            },
+          });
+          result.push = true;
+        } catch (err) {
+          console.warn('push fanout failed:', err);
+        }
+      }
+
+      // 3. Telegram — opt-in + linked chatId.
+      if (prefs.telegram && user.telegramChatId) {
+        try {
+          const text = formatTelegram(args.kind, payload);
+          await ctx.runAction(internal.telegram.sendToChat, {
+            chatId: user.telegramChatId,
+            text,
+          });
+          result.telegram = true;
+        } catch (err) {
+          console.warn('telegram fanout failed:', err);
+        }
       }
     }
 
-    // 3. Telegram — opt-in + linked chatId.
-    if (prefs.telegram && user.telegramChatId) {
+    // 4. Email — opt-in via prefs.email OR transactional lifecycle kind.
+    //    Lifecycle mails (welcome / subscription_*) always send so the
+    //    user has an out-of-band record of payment + access changes.
+    const emailEnabled = prefs.email === true || isLifecycle;
+    if (emailEnabled && user.email) {
       try {
-        const text = formatTelegram(args.kind, payload);
-        await ctx.runAction(internal.telegram.sendToChat, {
-          chatId: user.telegramChatId,
-          text,
+        const { subject, html } = formatEmail(args.kind, payload);
+        await ctx.runAction(internal.email.sendToAddress, {
+          to: user.email,
+          subject,
+          html,
         });
-        result.telegram = true;
+        result.email = true;
       } catch (err) {
-        console.warn('telegram fanout failed:', err);
+        console.warn('email fanout failed:', err);
       }
     }
 
     return result;
+  },
+});
+
+/**
+ * Replays a dispatch after the user's quiet hours close. Scheduled by
+ * `dispatch` itself when push + telegram need deferral. The in-app row
+ * was already written in the original call; this hop only re-fires the
+ * push + telegram + email branches (inApp short-circuits via the
+ * existing 5-min entityKey dedup).
+ */
+export const _dispatchAfterQuietHours = internalAction({
+  args: {
+    userId: v.id('users'),
+    kind: v.union(v.literal('pick_published'), v.literal('pick_graded'), v.literal('line_moved')),
+    payload: v.object({
+      title: v.string(),
+      body: v.optional(v.string()),
+      url: v.optional(v.string()),
+      data: v.optional(v.any()),
+      entityKey: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runAction(internal.notify.dispatch, {
+      userId: args.userId,
+      kind: args.kind,
+      payload: args.payload,
+    });
   },
 });
 
@@ -427,6 +509,126 @@ export const myPrefs = query({
 });
 
 // ─── Formatters ─────────────────────────────────────────────────────────────
+
+// ─── Quiet hours helper (BPMN-015) ─────────────────────────────────────────
+
+/**
+ * Decide whether the calling user's push + telegram dispatch should be
+ * deferred. Returns the timestamp (ms) when the quiet window closes, or
+ * `null` if no deferral is needed.
+ *
+ * Quiet hours are stored as HH:MM strings in the user's
+ * `quietHoursTimezone` (defaults to UTC). Edge cases:
+ *   - start === end → no quiet hours.
+ *   - start < end   → window is the same calendar day.
+ *   - start > end   → window crosses midnight (e.g. 22:00 → 07:00).
+ *
+ * If the timezone string is invalid, we fall back to UTC so a typo can't
+ * silently disable the feature.
+ */
+function computeQuietHoursDeferral(prefs: {
+  quietHoursStart?: string;
+  quietHoursEnd?: string;
+  quietHoursTimezone?: string;
+}): number | null {
+  const start = prefs.quietHoursStart;
+  const end = prefs.quietHoursEnd;
+  if (!start || !end || start === end) return null;
+  const startMin = parseHHMM(start);
+  const endMin = parseHHMM(end);
+  if (startMin === null || endMin === null) return null;
+
+  const tz = prefs.quietHoursTimezone || 'UTC';
+  const now = new Date();
+  let nowMin: number;
+  try {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: tz,
+    });
+    const parts = fmt.formatToParts(now);
+    const h = Number(parts.find((p) => p.type === 'hour')?.value ?? '0');
+    const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0');
+    nowMin = (h % 24) * 60 + m;
+  } catch {
+    nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+  }
+
+  const inWindow =
+    startMin < endMin
+      ? nowMin >= startMin && nowMin < endMin
+      : nowMin >= startMin || nowMin < endMin;
+  if (!inWindow) return null;
+
+  // Compute minutes until window close, allowing for cross-midnight.
+  const minutesUntilEnd = endMin > nowMin ? endMin - nowMin : endMin + (24 * 60 - nowMin);
+  // Add a 1-minute cushion so we land just past the boundary, not exactly on it.
+  return Date.now() + (minutesUntilEnd + 1) * 60 * 1000;
+}
+
+function parseHHMM(s: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const mm = Number(m[2]);
+  if (!Number.isFinite(h) || !Number.isFinite(mm)) return null;
+  if (h < 0 || h > 23 || mm < 0 || mm > 59) return null;
+  return h * 60 + mm;
+}
+
+// ─── Email formatter ───────────────────────────────────────────────────────
+
+/**
+ * Render a notification payload as an email (subject + HTML body). Kept
+ * intentionally simple — the goal is a lightweight transactional mail,
+ * not a marketing template. A future iteration can swap this for a
+ * templated MJML pipeline without touching dispatch.
+ */
+function formatEmail(kind: NotifyKind, payload: NotifyPayload): { subject: string; html: string } {
+  const subjectPrefix =
+    kind === 'welcome'
+      ? 'Welcome'
+      : kind === 'subscription_active'
+        ? 'Subscription active'
+        : kind === 'subscription_past_due'
+          ? 'Payment failed'
+          : kind === 'subscription_cancelled'
+            ? 'Subscription ended'
+            : kind === 'pick_published'
+              ? 'New pick'
+              : kind === 'pick_graded'
+                ? 'Pick graded'
+                : 'Line moved';
+  const subject = `${subjectPrefix} · ${payload.title}`;
+  const safeTitle = escapeHtml(payload.title);
+  const safeBody = payload.body ? escapeHtml(payload.body) : '';
+  const safeUrl = payload.url ? encodeURI(payload.url) : null;
+  const html = [
+    `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;line-height:1.5;">`,
+    `<h2 style="margin:0 0 12px 0;font-size:18px;">${safeTitle}</h2>`,
+    safeBody ? `<p style="margin:0 0 16px 0;color:#334155;">${safeBody}</p>` : '',
+    safeUrl
+      ? `<p><a href="${safeUrl}" style="display:inline-block;padding:8px 14px;background:#1c9cf0;color:#fff;text-decoration:none;border-radius:6px;font-weight:500;">Open in DigiPicks</a></p>`
+      : '',
+    `<hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0;"/>`,
+    `<p style="font-size:12px;color:#64748b;">DigiPicks — sports intelligence, not gambling advice.</p>`,
+    `</div>`,
+  ]
+    .filter(Boolean)
+    .join('');
+  return { subject, html };
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function formatTelegram(kind: NotifyKind, payload: NotifyPayload): string {
   const title = escapeMarkdownV2(payload.title);

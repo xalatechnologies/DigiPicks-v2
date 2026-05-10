@@ -68,10 +68,22 @@ export default defineSchema({
       v.object({
         push: v.optional(v.boolean()),
         telegram: v.optional(v.boolean()),
+        /** Email channel — default off (opt-in, since email is unsolicited
+         *  from the user's view). Lifecycle kinds (welcome / subscription_*)
+         *  bypass this toggle so transactional mails always send. */
+        email: v.optional(v.boolean()),
         // Per-kind toggles — default true.
         pickPublished: v.optional(v.boolean()),
         pickGraded: v.optional(v.boolean()),
         lineMoved: v.optional(v.boolean()),
+        /** Quiet hours — when set, push + telegram dispatches inside the
+         *  window are deferred to the next allowed minute. Email + in-app
+         *  inbox still fire immediately. Times are HH:MM (24h) in the
+         *  user's timezone (`quietHoursTimezone`, defaults to 'UTC').
+         *  Lifecycle kinds bypass quiet hours. */
+        quietHoursStart: v.optional(v.string()),
+        quietHoursEnd: v.optional(v.string()),
+        quietHoursTimezone: v.optional(v.string()),
       }),
     ),
     telegramChatId: v.optional(v.string()),
@@ -84,6 +96,12 @@ export default defineSchema({
     mfaEnrolledAt: v.optional(v.number()),
     mfaLastVerifiedAt: v.optional(v.number()),
     mfaRecoveryCodes: v.optional(v.array(v.string())),
+    /** Email verification (BPMN-001). emailVerificationToken is hashed
+     *  (sha-256, hex) so a leaked DB row can't be turned into a
+     *  one-click takeover. Cleared once verified. */
+    emailVerificationTokenHash: v.optional(v.string()),
+    emailVerificationSentAt: v.optional(v.number()),
+    emailVerificationExpiresAt: v.optional(v.number()),
   })
     .index('email', ['email'])
     .index('by_role', ['role'])
@@ -91,7 +109,8 @@ export default defineSchema({
     .index('by_stripeCustomerId', ['stripeCustomerId'])
     .index('by_discordId', ['discordId'])
     .index('by_telegramLinkCode', ['telegramLinkCode'])
-    .index('by_telegramChatId', ['telegramChatId']),
+    .index('by_telegramChatId', ['telegramChatId'])
+    .index('by_emailVerificationTokenHash', ['emailVerificationTokenHash']),
 
   tenants: defineTable({
     name: v.string(),
@@ -1061,6 +1080,13 @@ export default defineSchema({
     reviewNotes: v.optional(v.string()),
     submittedAt: v.number(),
     reviewedAt: v.optional(v.number()),
+    /** BPMN-006 §AI authenticity. Advisory score (0..100) produced by
+     *  internal.ai.scoreApplicationAuthenticity. Never auto-suspends —
+     *  surfaced to admins in the review queue alongside the freeform
+     *  reasoning. Quietly stays undefined when ANTHROPIC_API_KEY is unset. */
+    aiAuthenticityScore: v.optional(v.number()),
+    aiAuthenticityReasoning: v.optional(v.string()),
+    aiAuthenticityScoredAt: v.optional(v.number()),
   })
     .index('by_status', ['status', 'submittedAt'])
     .index('by_email', ['email']),

@@ -345,6 +345,68 @@ export const byCreator = query({
 });
 
 /**
+ * BPMN-016 §postponement — admin-only mutation that flips a live or
+ * upcoming event back to upcoming with a new startsAt. Picks already
+ * attached stay pending; subscribers see the rescheduled time live via
+ * the existing `events.*` queries.
+ *
+ * MFA-gated to match the rest of the moderation surface (BPMN-010).
+ * Audit-logged so the rescheduling trail is preserved.
+ */
+export const postpone = mutation({
+  args: {
+    eventId: v.id('events'),
+    newStartsAt: v.number(),
+    newTime: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await requireAdmin(ctx);
+    await gateOnMfaIfEnrolled(ctx, admin._id);
+
+    const event = await ctx.db.get(args.eventId);
+    if (!event) throw new Error('Event not found');
+    if (event.status === 'completed') {
+      throw new Error('Cannot postpone an event that has already completed');
+    }
+    if (event.status === 'cancelled') {
+      throw new Error('Cannot postpone a cancelled event');
+    }
+    if (args.newStartsAt < Date.now()) {
+      throw new Error('newStartsAt must be in the future');
+    }
+
+    const previousStartsAt = event.startsAt;
+    const baseMeta = (event.metadata ?? {}) as Record<string, unknown>;
+    await ctx.db.patch(args.eventId, {
+      status: 'upcoming',
+      startsAt: args.newStartsAt,
+      time: args.newTime ?? event.time,
+      metadata: {
+        ...baseMeta,
+        postponedAt: Date.now(),
+        previousStartsAt,
+        ...(args.notes ? { postponeNotes: args.notes } : {}),
+      },
+    });
+
+    await ctx.runMutation(internal.audit.log, {
+      actorUserId: admin._id,
+      entityType: 'event',
+      entityId: args.eventId,
+      action: 'event.postponed',
+      metadata: {
+        previousStartsAt,
+        newStartsAt: args.newStartsAt,
+        notes: args.notes ?? null,
+      },
+    });
+
+    return { ok: true };
+  },
+});
+
+/**
  * Admin queue: creator-submitted events awaiting review.
  */
 export const pendingReview = query({

@@ -93,11 +93,18 @@ flowchart TD
 
 ## Alternative flows
 
-- **Postponement / forfeit / no-contest (DEFERRED)** — there is no
-  dedicated postponement state machine or forfeit handler today. Manual
-  remediation routes through admin moderation (BPMN-010) +
-  dispute-driven grade override (BPMN-011). Automated postponement and
-  forfeit-aware void grading are reserved for a future iteration.
+- **Postponement** — `events.postpone(eventId, newStartsAt, newTime?,
+notes?)` admin mutation flips the event back to `upcoming` with the
+  new start time. MFA-gated (`gateOnMfaIfEnrolled`), audit-logged with
+  `event.postponed` carrying both the previous and new `startsAt`.
+  Pre-existing picks stay attached and pending; subscribers see the
+  rescheduled time live via the existing `events.*` queries. Rejects
+  postponement on `completed` or `cancelled` events and on
+  `newStartsAt` in the past.
+- **Forfeit / no-contest (DEFERRED)** — there is no automated forfeit
+  state machine; manual remediation routes through admin moderation
+  (BPMN-010) + dispute-driven grade override (BPMN-011). Forfeit-aware
+  void grading is reserved for a future iteration.
 - **Late-data dedup (DEFERRED)** — there is no automated dedup of
   near-identical events that arrive after the federated row was
   imported. Today, conflicts are caught by the duplicate guard on

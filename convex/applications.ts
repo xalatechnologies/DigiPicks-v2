@@ -1,4 +1,4 @@
-import { query, mutation } from './_generated/server';
+import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { applicationStatus } from './shared/validators';
 import { requireUser, requireAdmin } from './shared/permissions';
@@ -61,6 +61,11 @@ export const submit = mutation({
       action: 'application.submitted',
       metadata: { email: args.email, handle: args.handle },
     });
+
+    // BPMN-006 §AI authenticity — advisory score on the applicant's
+    // narrative. Fire-and-forget; submit always completes, even when
+    // Anthropic is down. Output is advisory only, never auto-rejecting.
+    await ctx.scheduler.runAfter(0, internal.ai.scoreApplicationAuthenticity, { applicationId });
 
     return applicationId;
   },
@@ -166,5 +171,26 @@ export const review = mutation({
     });
 
     return args.id;
+  },
+});
+
+/**
+ * BPMN-006 §AI authenticity — persist the advisory score from
+ * internal.ai.scoreApplicationAuthenticity. Idempotent: a re-run just
+ * overwrites the previous score + reasoning.
+ */
+export const _setAuthenticityScore = internalMutation({
+  args: {
+    applicationId: v.id('applications'),
+    score: v.number(),
+    reasoning: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.applicationId, {
+      aiAuthenticityScore: args.score,
+      aiAuthenticityReasoning: args.reasoning,
+      aiAuthenticityScoredAt: Date.now(),
+    });
+    return null;
   },
 });

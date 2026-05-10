@@ -1,4 +1,4 @@
-import { mutation, query, internalMutation } from './_generated/server';
+import { mutation, query, internalMutation, internalQuery } from './_generated/server';
 import { v } from 'convex/values';
 import { requireUser, getCurrentUser } from './shared/permissions';
 
@@ -46,6 +46,16 @@ export const updateProfile = mutation({
       await ctx.db.patch(user._id, updates);
     }
     return user._id;
+  },
+});
+
+// Internal-only.
+/** Internal — fetch a user row by id. Used by email verification + other
+ *  internal actions that need to read user state. */
+export const meSafeById = internalQuery({
+  args: { userId: v.id('users') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.userId);
   },
 });
 

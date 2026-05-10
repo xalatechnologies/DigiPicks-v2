@@ -132,9 +132,16 @@ flowchart TD
 - **External 5xx / network** → exponential backoff with cap; after the
   cap, a `notify.failed` audit row is written and a Sentry breadcrumb
   fires.
-- **Quiet hours (DEFERRED)** — recipient-side quiet-hour deferral is
-  reserved for a future iteration; today every channel fires
-  immediately when its toggle is on.
+- **Quiet hours** — when `notifyPrefs.quietHoursStart`/`End` are set
+  (HH:MM in `quietHoursTimezone`, defaults to UTC), `dispatch` checks
+  the user's local time before firing push + telegram. If inside the
+  window, push + telegram are deferred via
+  `scheduler.runAfter(internal.notify._dispatchAfterQuietHours, …)`
+  to land 1 minute past the window close. In-app inbox, email, and the
+  audit row still fire immediately (the inbox is silent enough not to
+  disturb). Lifecycle kinds (welcome / subscription\_\*) bypass quiet
+  hours so the user can't miss a transactional alert. Cross-midnight
+  windows (e.g. 22:00→07:00) are handled correctly.
 - **Per-channel rate limit** — sharded buckets prevent one creator's
   fanout from starving another's. `channelsPost` is sharded across 8
   shards; other inbound/outbound paths use their own shard counts.

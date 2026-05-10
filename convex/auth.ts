@@ -56,6 +56,14 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       await ctx.scheduler.runAfter(0, internal.notify.onUserSignup, {
         userId,
       });
+      // BPMN-001 — Password signups send an email-verification link.
+      // Discord OAuth signups skip this; Discord vouches for the email.
+      // Fire-and-forget; quiet no-op when RESEND_API_KEY is unset.
+      if (!args.profile?.discordId && args.profile?.email) {
+        await ctx.scheduler.runAfter(0, internal.emailVerification._initiate, {
+          userId,
+        });
+      }
       return userId;
     },
   },
