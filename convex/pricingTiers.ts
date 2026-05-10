@@ -50,6 +50,7 @@ export const create = mutation({
     interval: tierInterval,
     perks: v.array(v.string()),
     stripePriceId: v.optional(v.string()),
+    trialDays: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireCreatorOwnership(ctx, args.creatorId);
@@ -67,6 +68,7 @@ export const create = mutation({
       interval: args.interval,
       perks: args.perks,
       stripePriceId: args.stripePriceId,
+      trialDays: args.trialDays,
       archived: false,
       sortOrder,
       createdAt: Date.now(),
@@ -74,7 +76,7 @@ export const create = mutation({
   },
 });
 
-/** Creator-only: edit tier name / perks / Stripe link. */
+/** Creator-only: edit tier name / perks / Stripe link / trial. */
 export const update = mutation({
   args: {
     tierId: v.id('pricingTiers'),
@@ -83,6 +85,7 @@ export const update = mutation({
     interval: v.optional(tierInterval),
     perks: v.optional(v.array(v.string())),
     stripePriceId: v.optional(v.string()),
+    trialDays: v.optional(v.number()),
     sortOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -96,6 +99,7 @@ export const update = mutation({
     if (args.interval !== undefined) patch.interval = args.interval;
     if (args.perks !== undefined) patch.perks = args.perks;
     if (args.stripePriceId !== undefined) patch.stripePriceId = args.stripePriceId;
+    if (args.trialDays !== undefined) patch.trialDays = args.trialDays;
     if (args.sortOrder !== undefined) patch.sortOrder = args.sortOrder;
 
     if (Object.keys(patch).length > 0) await ctx.db.patch(args.tierId, patch);

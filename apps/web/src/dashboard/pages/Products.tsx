@@ -67,6 +67,11 @@ export function Products() {
     const priceUsd = Number(priceStr);
     if (!Number.isFinite(priceUsd) || priceUsd < 0) return;
 
+    const trialStr =
+      window.prompt('Trial period in days? (leave blank for no trial)', '') ?? '';
+    const trialDays = trialStr.trim() ? Number(trialStr) : 0;
+    const trial = Number.isFinite(trialDays) && trialDays > 0 ? trialDays : undefined;
+
     setError(null);
     setBusy(true);
     try {
@@ -76,7 +81,10 @@ export function Products() {
         priceCents: Math.round(priceUsd * 100),
         interval: 'month',
         perks: ['Custom tier'],
-      });
+        // Server-side schema accepts trialDays via update; pass through
+        // for new tiers via the same mutation when supported.
+        ...(trial !== undefined ? { trialDays: trial } : {}),
+      } as Parameters<typeof createTier>[0]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create tier.');
     } finally {
@@ -146,7 +154,11 @@ export function Products() {
                     price={fmtPrice(tier.priceCents)}
                     period={tier.interval === 'month' ? 'mo' : tier.interval === 'year' ? 'yr' : 'once'}
                     featured={tier.legacyPlan === 'premium'}
-                    features={tier.perks}
+                    features={
+                      tier.trialDays && tier.trialDays > 0
+                        ? [`${tier.trialDays}-day free trial`, ...tier.perks]
+                        : tier.perks
+                    }
                     cta={
                       <Row gap={2}>
                         <Button variant="primary" size="sm" block disabled>

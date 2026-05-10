@@ -38,6 +38,7 @@ function formatTime(ms: number): string {
 export function Admin() {
   const navigate = useNavigate();
   const summary = useQuery(api.admin.summary, {});
+  const auditMetrics = useQuery(api.audit.metrics, {});
   const isLoading = summary === undefined;
 
   return (
@@ -164,6 +165,54 @@ export function Admin() {
               </Stack>
             </Card>
           </Grid>
+        </Section>
+
+        <Section eyebrow="Retention" title="Audit log size by age.">
+          <Card pad="lg">
+            <CardHead
+              title="Retention buckets"
+              sub={
+                auditMetrics
+                  ? `${auditMetrics.total.toLocaleString()} total entries · retention policy ${auditMetrics.retentionDays}d`
+                  : 'Loading…'
+              }
+              action={
+                <Badge tone="blue" dot>
+                  Append-only
+                </Badge>
+              }
+            />
+            {auditMetrics ? (
+              <Grid cols={3} gap={3}>
+                <Metric
+                  label="Last 7 days"
+                  value={auditMetrics.last7d.toLocaleString()}
+                />
+                <Metric
+                  label="Last 30 days"
+                  value={auditMetrics.last30d.toLocaleString()}
+                />
+                <Metric
+                  label="Last 90 days"
+                  value={auditMetrics.last90d.toLocaleString()}
+                />
+                <Metric
+                  label="Last 1 year"
+                  value={auditMetrics.last1y.toLocaleString()}
+                />
+                <Metric
+                  label="Older than 1 year"
+                  value={auditMetrics.olderThan1y.toLocaleString()}
+                />
+                <Metric
+                  label="Older than 2 years"
+                  value={auditMetrics.olderThan2y.toLocaleString()}
+                />
+              </Grid>
+            ) : (
+              <EmptyState icon="audit" title="Loading retention metrics…" />
+            )}
+          </Card>
         </Section>
 
         <Section eyebrow="Audit" title="Recent platform activity.">

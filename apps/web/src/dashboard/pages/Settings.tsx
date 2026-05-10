@@ -27,6 +27,7 @@ import {
   type MfaState,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import type { Id } from '../../../../../convex/_generated/dataModel';
 import { urlBase64ToUint8Array } from '../../lib/pushKey';
 
 const NICHE_OPTIONS = [
@@ -565,6 +566,8 @@ export function Settings() {
                 </Stack>
               </Card>
 
+              {creator?._id && <DiscordIntegrationsCard creatorId={creator._id} />}
+
               <MfaEnrollmentCard
                 state={mfaState}
                 secrets={mfaSecrets ?? undefined}
@@ -627,5 +630,115 @@ export function Settings() {
         </Stack>
       </Container>
     </>
+  );
+}
+
+/**
+ * Discord-inbound integrations (Phase 17d, M20).
+ * Manual connect form until OAuth ships — admin enters guildId +
+ * guildName from Discord. Lists existing integrations with pause toggle.
+ */
+function DiscordIntegrationsCard({ creatorId }: { creatorId: Id<'creators'> }) {
+  const integrations = useQuery(api.discordInbound.listForCreator, { creatorId });
+  const connect = useMutation(api.discordInbound.connectGuild);
+  const pause = useMutation(api.discordInbound.pauseIntegration);
+  const [guildId, setGuildId] = React.useState('');
+  const [guildName, setGuildName] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState<string | null>(null);
+
+  async function handleConnect() {
+    setMsg(null);
+    if (!guildId.trim() || !guildName.trim()) {
+      setMsg('Both guild ID and guild name are required.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await connect({
+        creatorId,
+        guildId: guildId.trim(),
+        guildName: guildName.trim(),
+      });
+      setGuildId('');
+      setGuildName('');
+      setMsg('Connected.');
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : 'Could not connect.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handlePause(id: Id<'discordIntegrations'>) {
+    try {
+      await pause({ integrationId: id });
+    } catch (err) {
+      console.warn('pause integration:', err);
+    }
+  }
+
+  const list = integrations ?? [];
+
+  return (
+    <Card>
+      <CardHead
+        title="Discord integrations"
+        sub="Connect a guild for inbound discussion sync (channel reading + sentiment summaries). OAuth flow ships in a follow-up — manual connect for now."
+      />
+      <Stack gap={3}>
+        {list.length === 0 ? (
+          <Muted>No integrations yet.</Muted>
+        ) : (
+          <Stack gap={2}>
+            {list.map((row) => (
+              <Row key={row._id} gap={3} between>
+                <Stack gap={1}>
+                  <KV k="Guild" v={row.guildName} />
+                  <Muted>
+                    <Mono>{row.guildId}</Mono> · {row.status}
+                  </Muted>
+                </Stack>
+                {row.status === 'connected' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePause(row._id)}
+                  >
+                    Pause
+                  </Button>
+                )}
+              </Row>
+            ))}
+          </Stack>
+        )}
+        <Field label="Guild ID">
+          <Input
+            value={guildId}
+            onChange={(e) => setGuildId(e.target.value)}
+            placeholder="123456789012345678"
+          />
+        </Field>
+        <Field label="Guild name">
+          <Input
+            value={guildName}
+            onChange={(e) => setGuildName(e.target.value)}
+            placeholder="My Discord server"
+          />
+        </Field>
+        {msg && <Muted>{msg}</Muted>}
+        <Row gap={2}>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleConnect}
+            disabled={busy}
+          >
+            <Icon name="discord" size={13} />
+            Connect guild
+          </Button>
+        </Row>
+      </Stack>
+    </Card>
   );
 }

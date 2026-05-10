@@ -268,6 +268,12 @@ export type {
   ChatPanelMessage,
   ChatPanelReaction,
 } from './components/domain/ChatPanel/ChatPanel';
+export { CopilotChat } from './components/domain/CopilotChat/CopilotChat';
+export type {
+  CopilotChatProps,
+  CopilotMessage,
+  CopilotCitation,
+} from './components/domain/CopilotChat/CopilotChat';
 export { StreamEmbed } from './components/domain/StreamEmbed/StreamEmbed';
 export type { StreamEmbedProps, StreamPlatform } from './components/domain/StreamEmbed/StreamEmbed';
 export { PricingModal } from './components/domain/PricingModal/PricingModal';
