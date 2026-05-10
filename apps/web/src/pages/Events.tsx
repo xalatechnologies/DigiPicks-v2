@@ -5,7 +5,6 @@ import { api } from '../../../../convex/_generated/api';
 import {
   Container,
   Section,
-  PageHead,
   Row,
   Stack,
   Grid,
@@ -13,9 +12,13 @@ import {
   Badge,
   Icon,
   type IconName,
+  Eyebrow,
+  Heading,
+  Muted,
   EventCard,
   EmptyState,
   FilterChips,
+  Reveal,
   ResponsibleSection,
 } from '@digipicks/ds';
 import { teamLogo } from '../lib/teamLogo';
@@ -48,14 +51,10 @@ export function Events() {
   const recentEvents = useQuery(api.events.recent, {});
   const creators = useQuery(api.creators.list, { verified: true });
 
-  const featured = (featuredEvents ?? []).filter(
-    (e) => !sport || e.sport === sport,
-  );
+  const featured = (featuredEvents ?? []).filter((e) => !sport || e.sport === sport);
   const live = (liveEvents ?? []).filter((e) => !sport || e.sport === sport);
   const rest = (allEvents ?? []).filter(
-    (e) =>
-      !featured.some((f) => f._id === e._id) &&
-      !live.some((l) => l._id === e._id),
+    (e) => !featured.some((f) => f._id === e._id) && !live.some((l) => l._id === e._id),
   );
   const recent = recentEvents ?? [];
 
@@ -74,12 +73,18 @@ export function Events() {
   const heroFeatured = featured[0];
   const otherFeatured = featured.slice(1);
 
-  // TODO: convex — events.homeLogo / events.awayLogo are not yet on the schema.
-  // Until they are backfilled, every lookup returns undefined and the cards
-  // fall back to colored initials.
-  const logoFor = (ev: { sport: string; home: string; away: string }) => ({
-    homeLogo: teamLogo(ev.sport, ev.home),
-    awayLogo: teamLogo(ev.sport, ev.away),
+  // Prefer the backend-resolved logo URLs (downloaded into Convex storage
+  // by `internal.teamLogos.resolveOne`) and fall back to the synchronous
+  // hand-curated mapping for teams that haven't been resolved yet.
+  const logoFor = (ev: {
+    sport: string;
+    home: string;
+    away: string;
+    homeLogo?: string;
+    awayLogo?: string;
+  }) => ({
+    homeLogo: ev.homeLogo ?? teamLogo(ev.sport, ev.home),
+    awayLogo: ev.awayLogo ?? teamLogo(ev.sport, ev.away),
   });
 
   const toggleLeague = (league: string) => {
@@ -93,33 +98,39 @@ export function Events() {
 
   const isLoading = allEvents === undefined;
   const filteredEmpty =
-    allEvents !== undefined &&
-    featured.length === 0 &&
-    live.length === 0 &&
-    rest.length === 0;
+    allEvents !== undefined && featured.length === 0 && live.length === 0 && rest.length === 0;
 
   return (
     <main>
-      <Container size="xl">
-        <PageHead
-          eyebrow="Events"
-          title="Every game on the board."
-          sub="Live and upcoming events across Soccer, Cricket, and Tennis — with creator coverage."
-          actions={
-            <Row gap={2}>
-              <Badge tone="blue" dot>
-                {totalEvents} events
-              </Badge>
-              <Button
-                variant="primary"
-                iconRight="arrow-right"
-                onClick={() => navigate('/apply')}
-              >
-                Get started
-              </Button>
+      <Container size="xl" pad="page">
+        <Reveal direction="up">
+          <Section>
+            <Row between gap={3}>
+              <Stack gap={2} maxWidth="prose">
+                <Eyebrow>Events</Eyebrow>
+                <Heading level={1} size="4xl" weight="bold">
+                  Every game on the board.
+                </Heading>
+                <Muted>
+                  Live and upcoming events across Soccer, Cricket, and Tennis — with creator
+                  coverage.
+                </Muted>
+              </Stack>
+              <Row gap={2}>
+                <Badge tone="blue" dot>
+                  {totalEvents} events
+                </Badge>
+                <Button
+                  variant="primary"
+                  iconRight="arrow-right"
+                  onClick={() => navigate('/apply')}
+                >
+                  Get started
+                </Button>
+              </Row>
             </Row>
-          }
-        />
+          </Section>
+        </Reveal>
 
         <Section>
           <FilterChips
@@ -275,10 +286,7 @@ export function Events() {
         })}
 
         {recent.length > 0 && !sport && (
-          <Section
-            eyebrow="Recently concluded"
-            title="Final scores."
-          >
+          <Section eyebrow="Recently concluded" title="Final scores.">
             <Grid cols={2} gap={4}>
               {recent.map((ev) => {
                 const { homeLogo, awayLogo } = logoFor(ev);

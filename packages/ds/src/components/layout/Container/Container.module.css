@@ -21,3 +21,18 @@
 .size2xl {
   max-width: var(--container-2xl);
 }
+
+/* Vertical-padding variants. `padPage` sets top + bottom space so
+   top-level route pages (Odds, Creators, Events, Discover…) don't sit
+   flush against the AppHeader. */
+.padPage {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+
+@media (max-width: 768px) {
+  .padPage {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+}

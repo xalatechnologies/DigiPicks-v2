@@ -1,7 +1,9 @@
-import { internalAction } from './_generated/server';
+import { action, internalAction, internalMutation } from './_generated/server';
 import { internal } from './_generated/api';
+import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { withRetry } from './shared/retry';
+import { requireAdmin } from './shared/permissions';
 import { SPORT_KEY_MAP_FULL as SPORT_KEY_MAP, sportKeyToName } from './shared/sportKeyMap';
 import {
   checkCircuit,
@@ -78,15 +80,10 @@ export const pollUpcoming = internalAction({
         });
 
         if (!res.ok) {
-          if (isUnrecoverableAuthStatus(res.status)) {
-            sawAuthFailure = true;
-            console.warn(
-              `Odds API auth failure (${res.status}) — opening circuit and skipping remaining sports`,
-            );
-            await openCircuit(ctx, CIRCUIT_KEY, `pollUpcoming HTTP ${res.status}`);
-            break;
-          }
-          if (res.status !== 404) {
+          // Per-sport 401/403 means "this sport key isn't on the active
+          // /sports list for this API tier" — NOT a global auth failure.
+          // Skip the sport silently and keep going.
+          if (res.status !== 404 && !isUnrecoverableAuthStatus(res.status)) {
             console.warn(`Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`);
           }
           continue;
@@ -175,9 +172,14 @@ const SNAPSHOT_REGIONS = 'us,uk,eu';
 const SNAPSHOT_MARKETS = 'h2h,spreads,totals';
 
 export const pollOddsSnapshots = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    if (process.env.ODDS_SNAPSHOTS_ENABLED !== 'true') {
+  args: {
+    /** Bypass the ODDS_SNAPSHOTS_ENABLED env-var gate. Used by the public
+     *  admin-callable `refreshSnapshotsNow` action so an operator can
+     *  populate odds on demand without first setting the env var. */
+    force: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    if (!args.force && process.env.ODDS_SNAPSHOTS_ENABLED !== 'true') {
       console.log('pollOddsSnapshots disabled — set ODDS_SNAPSHOTS_ENABLED=true to enable.');
       return;
     }
@@ -208,15 +210,12 @@ export const pollOddsSnapshots = internalAction({
           maxAttempts: 3,
         });
         if (!res.ok) {
-          if (isUnrecoverableAuthStatus(res.status)) {
-            sawAuthFailure = true;
-            console.warn(
-              `Odds API auth failure (${res.status}) — opening circuit and skipping remaining sports`,
-            );
-            await openCircuit(ctx, CIRCUIT_KEY, `pollOddsSnapshots HTTP ${res.status}`);
-            break;
-          }
-          if (res.status !== 404) {
+          // Per-sport 401/403 means "this sport key isn't on the active
+          // /sports list for this API tier" — NOT a global auth failure.
+          // Treat 401/403/404 as "skip this sport" without tripping the
+          // circuit; it would otherwise prevent the rest of the slate
+          // from polling.
+          if (res.status !== 404 && !isUnrecoverableAuthStatus(res.status)) {
             console.warn(`Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`);
           }
           continue;
@@ -282,5 +281,36 @@ export const pollOddsSnapshots = internalAction({
     console.log(
       `pollOddsSnapshots: wrote ${totalSnapshots} rows across ${totalEventsTouched} events`,
     );
+  },
+});
+
+// ─── Manual admin trigger ──────────────────────────────────────────────────
+
+/** Admin gate for the public action — actions can't call requireAdmin
+ *  directly because it needs db access. */
+export const _adminGate = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return { ok: true as const };
+  },
+});
+
+/**
+ * One-shot admin trigger that forces an odds-snapshot poll regardless of
+ * the `ODDS_SNAPSHOTS_ENABLED` env-var gate. Useful for populating an
+ * empty `/odds` page on demand without first flipping the env var (the
+ * cron remains gated, so this is the supported manual path).
+ *
+ * Quota cost: roughly 1 credit × markets × regions × sports per call.
+ * With h2h+spreads+totals × us,uk,eu × ~20 sports that is ~180 credits
+ * per invocation — keep call frequency low.
+ */
+export const refreshSnapshotsNow = action({
+  args: {},
+  handler: async (ctx): Promise<{ ok: true }> => {
+    await ctx.runMutation(internal.oddsApi._adminGate, {});
+    await ctx.runAction(internal.oddsApi.pollOddsSnapshots, { force: true });
+    return { ok: true };
   },
 });

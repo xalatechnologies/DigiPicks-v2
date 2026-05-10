@@ -190,6 +190,8 @@ export { NavDivider } from './components/nav/NavDivider/NavDivider';
 export { RoleSwitcher } from './components/nav/RoleSwitcher/RoleSwitcher';
 export { ThemeToggle } from './components/nav/ThemeToggle/ThemeToggle';
 export { ThemeIconButton } from './components/nav/ThemeIconButton/ThemeIconButton';
+export { UserMenu } from './components/nav/UserMenu/UserMenu';
+export type { UserMenuProps, UserMenuItem } from './components/nav/UserMenu/UserMenu';
 export { Segmented } from './components/nav/Segmented/Segmented';
 export { Tabs } from './components/nav/Tabs/Tabs';
 export { Breadcrumb } from './components/nav/Breadcrumb/Breadcrumb';

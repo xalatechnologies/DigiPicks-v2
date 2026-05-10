@@ -535,11 +535,23 @@ export default defineSchema({
     sport: v.string(),
     normalizedName: v.string(), // lowercased, accent-stripped, suffix-stripped
     displayName: v.string(), // original name for reference
+    /** Origin URL from TheSportsDB. Kept for traceability; the UI prefers
+     *  storageUrl below so the asset is served from our own bucket. */
     badgeUrl: v.optional(v.string()),
+    /** Convex Storage id — set once the asset is downloaded into the
+     *  bucket. Frontend reads `storageUrl` for the actual <img src=>. */
+    storageId: v.optional(v.id('_storage')),
+    /** Stable URL over the storage asset, generated via ctx.storage.getUrl
+     *  at write time. Refreshed lazily on resolve to handle expiring URLs. */
+    storageUrl: v.optional(v.string()),
+    /** Asset bytes mime — populated from the upstream Content-Type header. */
+    storageMime: v.optional(v.string()),
     source: v.optional(v.string()), // "thesportsdb" / "manual"
     resolvedAt: v.number(),
     notFound: v.optional(v.boolean()), // true when TheSportsDB returned no result
-  }).index('by_sport_and_normalizedName', ['sport', 'normalizedName']),
+  })
+    .index('by_sport_and_normalizedName', ['sport', 'normalizedName'])
+    .index('by_storageId', ['storageId']),
 
   subscriptions: defineTable({
     subscriberId: v.id('users'),

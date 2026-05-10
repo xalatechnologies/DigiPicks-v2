@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-6);
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-7);
   height: 100%;
   background: var(--bg-1);
   border: 1px solid var(--line-soft);
@@ -18,33 +18,34 @@
     box-shadow var(--dur-base) var(--ease-out);
 }
 
+/* Persistent left accent stripe — quietly there at rest, brightens on
+   hover. Direction-coloured by the wrapping `.up` / `.down` modifier
+   on the metric itself; defaults to a muted line for flat / neutral. */
 .metric::before {
   content: '';
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--blue), transparent);
-  opacity: 0;
-  transform: translateY(-2px);
-  transition:
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+  width: 3px;
+  background: var(--line-soft);
+  transition: background var(--dur-base) var(--ease-out);
   pointer-events: none;
   z-index: 2;
 }
 
+/* Soft directional wash behind content — keeps the card from feeling
+   flat; intensity bumps on hover. */
 .metric::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--blue) 8%, transparent) 0%,
+    color-mix(in srgb, var(--blue) 6%, transparent) 0%,
     transparent 60%
   );
-  opacity: 0;
+  opacity: 0.4;
   transition: opacity var(--dur-base) var(--ease-out);
   pointer-events: none;
   z-index: 0;
@@ -55,12 +56,20 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
-.metric:hover::before {
-  opacity: 1;
-  transform: translateY(0);
-}
 .metric:hover::after {
   opacity: 1;
+}
+
+/* Direction-keyed accent stripes. Wrapping the metric in a class
+   means the modifier reads cleanly from props (`metric ${dir}`). */
+.metricUp::before {
+  background: var(--green);
+}
+.metricDown::before {
+  background: var(--red);
+}
+.metricFlat::before {
+  background: var(--line-soft);
 }
 
 .label {

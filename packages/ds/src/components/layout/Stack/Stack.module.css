@@ -3,13 +3,65 @@
   flex-direction: column;
 }
 
-.gap0 { gap: 0; }
-.gap1 { gap: var(--space-1); }
-.gap2 { gap: var(--space-2); }
-.gap3 { gap: var(--space-3); }
-.gap4 { gap: var(--space-4); }
-.gap5 { gap: var(--space-5); }
-.gap6 { gap: var(--space-6); }
-.gap8 { gap: var(--space-8); }
-.gap10 { gap: var(--space-10); }
-.gap12 { gap: var(--space-12); }
+.gap0 {
+  gap: 0;
+}
+.gap1 {
+  gap: var(--space-1);
+}
+.gap2 {
+  gap: var(--space-2);
+}
+.gap3 {
+  gap: var(--space-3);
+}
+.gap4 {
+  gap: var(--space-4);
+}
+.gap5 {
+  gap: var(--space-5);
+}
+.gap6 {
+  gap: var(--space-6);
+}
+.gap8 {
+  gap: var(--space-8);
+}
+.gap10 {
+  gap: var(--space-10);
+}
+.gap12 {
+  gap: var(--space-12);
+}
+
+/* Cross-axis alignment. Defaults to `stretch` (CSS default); explicit
+   modifiers let a Stack right-align its children — used for the right
+   column of page heroes so a narrow Badge above a wider Button stays
+   visually anchored to the right edge. */
+.alignStart {
+  align-items: flex-start;
+}
+.alignCenter {
+  align-items: center;
+}
+.alignEnd {
+  align-items: flex-end;
+}
+.alignStretch {
+  align-items: stretch;
+}
+
+/* Reading-width caps. Used on hero title columns so a long Muted line
+   doesn't stretch the column and push the action group onto a wrap. */
+.mwNarrow {
+  max-width: 40ch;
+}
+.mwSub {
+  max-width: 50ch;
+}
+.mwProse {
+  max-width: 60ch;
+}
+.mwWide {
+  max-width: 72ch;
+}

@@ -35,7 +35,7 @@ crons.interval('poll-upcoming-events', { hours: 1 }, internal.oddsApi.pollUpcomi
 // regions = ~9 credits per sport per call), so we keep this opt-in and
 // run at most once per day to stay inside reasonable quota.
 
-crons.interval('poll-odds-snapshots', { hours: 24 }, internal.oddsApi.pollOddsSnapshots);
+crons.interval('poll-odds-snapshots', { hours: 24 }, internal.oddsApi.pollOddsSnapshots, {});
 
 // ─── Poll Twitch / YouTube / Kick for creator stream live state ─────────
 // Runs every 5 minutes (Phase 10). Per-platform credentials are optional —

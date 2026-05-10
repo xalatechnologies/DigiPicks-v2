@@ -42,7 +42,6 @@ const TRUST_BRANDS = [
   'BetIQ',
 ];
 
-
 const STEPS: Array<{
   step: number;
   title: string;
@@ -54,8 +53,7 @@ const STEPS: Array<{
   {
     step: 1,
     title: 'Find a creator that fits your edge.',
-    body:
-      'Browse verified creators across soccer, cricket, and tennis. Filter by sport, win rate, and pricing.',
+    body: 'Browse verified creators across soccer, cricket, and tennis. Filter by sport, win rate, and pricing.',
     iconName: 'compass',
     tone: 'primary',
     hint: 'Takes ~2 minutes',
@@ -63,8 +61,7 @@ const STEPS: Array<{
   {
     step: 2,
     title: 'Subscribe and unlock their picks.',
-    body:
-      'Pay once, monthly, or by season. Get full reasoning, units, and confidence — delivered the moment a pick goes live.',
+    body: 'Pay once, monthly, or by season. Get full reasoning, units, and confidence — delivered the moment a pick goes live.',
     iconName: 'card',
     tone: 'violet',
     hint: 'Cancel anytime',
@@ -72,8 +69,7 @@ const STEPS: Array<{
   {
     step: 3,
     title: 'Track every play, transparently.',
-    body:
-      'Wins, losses, and pushes are graded by the platform. Your portfolio, ROI, and CLV are tracked automatically.',
+    body: 'Wins, losses, and pushes are graded by the platform. Your portfolio, ROI, and CLV are tracked automatically.',
     iconName: 'chart',
     tone: 'green',
     hint: 'Independent grading',
@@ -196,15 +192,10 @@ function TrendingPicksRail() {
     sub: creator ? `${creator.name} · ${pick.eventName}` : pick.eventName,
     sport: pick.sport,
     score: pick.trendingScore,
-    onClick: () =>
-      navigate(creator ? `/creators/${creator.handle}` : '/feed'),
+    onClick: () => navigate(creator ? `/creators/${creator.handle}` : '/feed'),
   }));
   return (
-    <TrendingCarousel
-      items={items}
-      loading={data === undefined}
-      sub="Updated every 12 hours"
-    />
+    <TrendingCarousel items={items} loading={data === undefined} sub="Updated every 12 hours" />
   );
 }
 
@@ -241,7 +232,8 @@ export function Landing() {
       <Hero
         title={
           <>
-            Follow verified <em>sports creators.</em><br />
+            Follow verified <em>sports creators.</em>
+            <br />
             Track every play.
           </>
         }
@@ -338,26 +330,14 @@ export function Landing() {
           }
         >
           <Grid cols={4} gap={5}>
-            <BigStat
-              label="Verified creators"
-              value="142"
-              sub="across 7 major sports"
-            />
-            <BigStat
-              label="Network win rate"
-              value="58.4%"
-              sub="rolling 90-day, units-weighted"
-            />
+            <BigStat label="Verified creators" value="142" sub="across 7 major sports" />
+            <BigStat label="Network win rate" value="58.4%" sub="rolling 90-day, units-weighted" />
             <BigStat
               label="Active subscribers"
               value="38,420"
               sub="paying for premium picks this week"
             />
-            <BigStat
-              label="Tracked plays"
-              value="2.1M"
-              sub="graded by the platform since launch"
-            />
+            <BigStat label="Tracked plays" value="2.1M" sub="graded by the platform since launch" />
           </Grid>
         </Section>
 
@@ -367,11 +347,7 @@ export function Landing() {
           title="Verified, transparent, and actually good."
           sub="Two of the network's standout operators. Win rates are independently graded — every record is real, every line has CLV behind it."
           action={
-            <Button
-              variant="outline"
-              iconRight="arrow-right"
-              onClick={() => navigate('/creators')}
-            >
+            <Button variant="outline" iconRight="arrow-right" onClick={() => navigate('/creators')}>
               Browse all 142 creators
             </Button>
           }
@@ -407,11 +383,7 @@ export function Landing() {
           title="Tonight's biggest plays."
           sub="The marquee games on tonight's board — every creator covering them, every pick they're calling."
           action={
-            <Button
-              variant="ghost"
-              iconRight="arrow-right"
-              onClick={() => navigate('/events')}
-            >
+            <Button variant="ghost" iconRight="arrow-right" onClick={() => navigate('/events')}>
               See full slate
             </Button>
           }
@@ -425,14 +397,17 @@ export function Landing() {
                 time={featuredEvent.time}
                 home={featuredEvent.home}
                 away={featuredEvent.away}
+                homeLogo={featuredEvent.homeLogo}
+                awayLogo={featuredEvent.awayLogo}
                 creators={featuredEvent.creatorCount}
                 picks={featuredEvent.pickCount}
+                sourceType={featuredEvent.sourceType}
                 creatorsAvatars={heroCreators}
                 onClick={() => navigate('/events')}
               />
             )}
 
-            <Grid cols={3} gap={4}>
+            <Grid cols={2} gap={4}>
               {otherEvents.map((ev) => (
                 <EventCard
                   key={ev._id}
@@ -441,8 +416,11 @@ export function Landing() {
                   time={ev.time}
                   home={ev.home}
                   away={ev.away}
+                  homeLogo={ev.homeLogo}
+                  awayLogo={ev.awayLogo}
                   creators={ev.creatorCount}
                   picks={ev.pickCount}
+                  sourceType={ev.sourceType}
                   onClick={() => navigate('/events')}
                 />
               ))}
@@ -511,8 +489,7 @@ export function Landing() {
                 icon: <Icon name="sparkles" size={22} />,
                 eyebrow: 'For creators',
                 title: 'Bring your edge — keep more of it.',
-                body:
-                  'Apply once, get verified, start publishing. Stripe-backed weekly payouts and real records that build your audience.',
+                body: 'Apply once, get verified, start publishing. Stripe-backed weekly payouts and real records that build your audience.',
                 bullets: [
                   '87% revenue share, no tiered take-rate',
                   'Independent grading and CLV tracking',
@@ -533,12 +510,11 @@ export function Landing() {
                 variant: 'subscribers',
                 icon: <Icon name="bookmark" size={22} />,
                 eyebrow: 'For subscribers',
-                title: "Follow the sharps you actually trust.",
-                body:
-                  'Subscribe to up to 5 creators on Premium, unlimited on VIP. Your portfolio, ROI, and CLV are tracked automatically.',
+                title: 'Follow the sharps you actually trust.',
+                body: 'Subscribe to up to 5 creators on Premium, unlimited on VIP. Your portfolio, ROI, and CLV are tracked automatically.',
                 bullets: [
                   'Picks delivered before the line moves',
-                  'Live tracker for tonight\'s slate',
+                  "Live tracker for tonight's slate",
                   'Cancel anytime — no retention games',
                 ],
                 actions: (
@@ -568,8 +544,8 @@ export function Landing() {
                 Questions, answered straight.
               </Heading>
               <Muted>
-                No fine-print games. If something is unclear, the answer is here —
-                or one click away in our docs.
+                No fine-print games. If something is unclear, the answer is here — or one click away
+                in our docs.
               </Muted>
               <Row gap={3} wrap>
                 <Button
@@ -587,7 +563,6 @@ export function Landing() {
             <FAQList items={FAQ_ITEMS} />
           </Grid>
         </Section>
-
       </Container>
     </main>
   );
