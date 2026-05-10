@@ -95,6 +95,14 @@
   --brand-stripe: #635bff;
   --brand-x: #0f1419;
 
+  /* Discord brand expanded — for the M20 integration surfaces.
+     `--discord-blurple` is the Discord-blurple identity color (theme-stable).
+     `--discord-blurple-hover` is the documented darker hover shade.
+     `--discord-surface` is the translucent overlay used on connected tiles. */
+  --discord-blurple: #5865f2;
+  --discord-blurple-hover: #4752c4;
+  --discord-surface: rgba(88, 101, 242, 0.08);
+
   /* ─────────────────────────────────────────────────────────────────────────
      Typography
      ───────────────────────────────────────────────────────────────────────── */
@@ -377,6 +385,12 @@
   --accent-c: var(--blue);
   --accent-soft: var(--blue-soft);
   --accent-line: var(--blue-line);
+
+  /* Discord brand — identity colors are theme-stable; surface is slightly
+     hotter on dark to keep the blurple readable against deep surfaces. */
+  --discord-blurple: #5865f2;
+  --discord-blurple-hover: #4752c4;
+  --discord-surface: rgba(88, 101, 242, 0.14);
 
   --shadow-2xs: 0 1px 0 rgba(0, 0, 0, 0.4);
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);

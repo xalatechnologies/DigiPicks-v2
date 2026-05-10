@@ -2,6 +2,7 @@ import { internalAction } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
 import { withRetry } from './shared/retry';
+import { SPORT_KEY_MAP_FULL as SPORT_KEY_MAP, sportKeyToName } from './shared/sportKeyMap';
 
 // =============================================================================
 // Odds API — Upcoming events importer.
@@ -14,34 +15,12 @@ import { withRetry } from './shared/retry';
 // the home + away teams so badge URLs get backfilled asynchronously.
 //
 // Cron schedule: hourly. The upcoming list changes slowly.
+//
+// Sport key registry lives in convex/shared/sportKeyMap.ts so oddsApi +
+// liveScores can't drift on which key maps to which schema sport name.
 // =============================================================================
 
 const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
-
-/**
- * Wide map from our schema sport names to The Odds API sport keys.
- * Add / remove keys here to expand coverage.
- */
-const SPORT_KEY_MAP: Record<string, string[]> = {
-  Soccer: [
-    'soccer_epl',
-    'soccer_spain_la_liga',
-    'soccer_germany_bundesliga',
-    'soccer_italy_serie_a',
-    'soccer_france_ligue_one',
-    'soccer_uefa_champs_league',
-    'soccer_uefa_europa_league',
-    'soccer_usa_mls',
-  ],
-  Football: ['americanfootball_nfl'],
-  Basketball: ['basketball_nba', 'basketball_euroleague'],
-  Baseball: ['baseball_mlb'],
-  Hockey: ['icehockey_nhl'],
-  Cricket: ['cricket_ipl', 'cricket_international_t20'],
-  Tennis: ['tennis_atp_australian_open', 'tennis_wta_australian_open'],
-  MMA: ['mma_mixed_martial_arts'],
-  Rugby: ['rugbyleague_nrl'],
-};
 
 interface OddsApiUpcomingEvent {
   id: string;
@@ -50,17 +29,6 @@ interface OddsApiUpcomingEvent {
   commence_time: string;
   home_team: string;
   away_team: string;
-}
-
-/**
- * Reverse-map an API sport key back to our schema sport name.
- * Falls back to 'Other' so we never silently drop an event.
- */
-function sportKeyToName(key: string): string {
-  for (const [name, keys] of Object.entries(SPORT_KEY_MAP)) {
-    if (keys.includes(key)) return name;
-  }
-  return 'Other';
 }
 
 /**
@@ -96,9 +64,7 @@ export const pollUpcoming = internalAction({
         });
 
         if (!res.ok) {
-          console.warn(
-            `Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`,
-          );
+          console.warn(`Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`);
           continue;
         }
 
@@ -141,10 +107,7 @@ export const pollUpcoming = internalAction({
               name: event.away_team,
             });
           } catch (err) {
-            console.error(
-              `Failed to upsert event ${event.id} for ${sportKey}:`,
-              err,
-            );
+            console.error(`Failed to upsert event ${event.id} for ${sportKey}:`, err);
           }
         }
       } catch (err) {
@@ -152,9 +115,7 @@ export const pollUpcoming = internalAction({
       }
     }
 
-    console.log(
-      `pollUpcoming: imported ${totalEvents} events across ${totalSports} sports`,
-    );
+    console.log(`pollUpcoming: imported ${totalEvents} events across ${totalSports} sports`);
   },
 });
 
@@ -211,9 +172,7 @@ export const pollOddsSnapshots = internalAction({
           maxAttempts: 3,
         });
         if (!res.ok) {
-          console.warn(
-            `Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`,
-          );
+          console.warn(`Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`);
           continue;
         }
 
@@ -255,14 +214,11 @@ export const pollOddsSnapshots = internalAction({
 
           if (snapshots.length === 0) continue;
 
-          const written = await ctx.runMutation(
-            internal.odds._writeSnapshots,
-            {
-              eventId,
-              externalEventId: ev.id,
-              snapshots,
-            },
-          );
+          const written = await ctx.runMutation(internal.odds._writeSnapshots, {
+            eventId,
+            externalEventId: ev.id,
+            snapshots,
+          });
           totalSnapshots += written;
           totalEventsTouched++;
         }

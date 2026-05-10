@@ -1,0 +1,56 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.glyph {
+  width: var(--size-10xl);
+  height: var(--size-10xl);
+  border-radius: var(--r-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--discord-surface);
+  color: var(--discord-blurple);
+  border: 1px solid color-mix(in srgb, var(--discord-blurple) 30%, var(--line));
+  flex-shrink: 0;
+}
+
+.subRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-1);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line-soft);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.statLabel {
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-weight: var(--weight-semibold);
+}
+
+.statValue {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-md);
+  color: var(--t-1);
+  font-weight: var(--weight-semibold);
+}

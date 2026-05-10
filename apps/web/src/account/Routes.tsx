@@ -16,6 +16,9 @@ import { Discover } from './pages/Discover';
 import { Subscriptions } from './pages/Subscriptions';
 import { Results } from './pages/Results';
 import { AccountSettings } from './pages/AccountSettings';
+import { Watchlists } from './pages/Watchlists';
+import { Copilot } from './pages/Copilot';
+import { AccountMessages } from './pages/Messages';
 
 export function AccountRoutes() {
   return (
@@ -33,6 +36,9 @@ export function AccountRoutes() {
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="community" element={<Community />} />
+          <Route path="messages" element={<AccountMessages />} />
+          <Route path="watchlists" element={<Watchlists />} />
+          <Route path="copilot" element={<Copilot />} />
           <Route path="settings" element={<AccountSettings />} />
         </Route>
       </Routes>

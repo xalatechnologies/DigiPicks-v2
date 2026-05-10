@@ -62,6 +62,11 @@
   --color-violet-soft: var(--violet-soft);
   --color-violet-line: var(--violet-line);
 
+  /* Discord brand — exposed for utility classes (UI authors via DS only). */
+  --color-discord-blurple: var(--discord-blurple);
+  --color-discord-blurple-hover: var(--discord-blurple-hover);
+  --color-discord-surface: var(--discord-surface);
+
   /* fonts */
   --font-sans: var(--f-sans);
   --font-mono: var(--f-mono);

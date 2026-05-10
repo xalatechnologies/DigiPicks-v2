@@ -259,13 +259,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     type: channelType,
     /** Subscription tier required to read+post. 'public' is open. */
-    access: v.optional(
-      v.union(
-        v.literal('public'),
-        v.literal('subscriber'),
-        v.literal('vip'),
-      ),
-    ),
+    access: v.optional(v.union(v.literal('public'), v.literal('subscriber'), v.literal('vip'))),
     isActive: v.boolean(),
     /**
      * Phase 14g — stream-linked rooms. When set, the channel is a
@@ -666,19 +660,30 @@ export default defineSchema({
 
   aiMessages: defineTable({
     conversationId: v.id('aiConversations'),
-    role: v.union(
-      v.literal('user'),
-      v.literal('assistant'),
-      v.literal('tool'),
-    ),
+    role: v.union(v.literal('user'), v.literal('assistant'), v.literal('tool')),
     body: v.string(),
     /** When role='tool' — the tool name + arg payload echoed back. */
     toolName: v.optional(v.string()),
     toolArgs: v.optional(v.any()),
+    /** Anthropic tool_use id linking assistant tool_use ↔ tool_result blocks. */
+    toolCallId: v.optional(v.string()),
     /** Model + token usage metadata for assistant turns. */
     model: v.optional(v.string()),
     inputTokens: v.optional(v.number()),
     outputTokens: v.optional(v.number()),
+    cacheReadTokens: v.optional(v.number()),
+    stopReason: v.optional(v.string()),
+    /** Tool-loop iteration index (0 = user msg, 1+ = assistant turns). */
+    iter: v.optional(v.number()),
+    /** Streaming flag + buffer for in-progress assistant turns (M24). The
+     *  respond action patches `streamingBuffer` while Anthropic streams text
+     *  deltas; on completion the buffer is moved into `body` and `streaming`
+     *  is cleared so the message becomes its final form. UI subscribes via
+     *  useQuery and re-renders on each patch. */
+    streaming: v.optional(v.boolean()),
+    streamingBuffer: v.optional(v.string()),
+    /** PII-scrubbed user-message hash (first 16 hex chars of sha-256). */
+    piiHash: v.optional(v.string()),
     /** Citation list — entity refs the assistant grounded its answer on. */
     citations: v.optional(
       v.array(
@@ -686,12 +691,38 @@ export default defineSchema({
           kind: v.string(),
           id: v.string(),
           label: v.string(),
+          /** Tool that produced the citation (e.g. 'creatorPerformance'). */
+          tool: v.optional(v.string()),
+          /** Sample size behind the claim — required by skeptical templates. */
+          sampleSize: v.optional(v.number()),
+          /** Snapshot timestamp of the underlying query. */
+          at: v.optional(v.number()),
         }),
       ),
     ),
     createdAt: v.number(),
+  }).index('by_conversation', ['conversationId', 'createdAt']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AI TOOL CALLS (M24) — high-cardinality observability table separate from
+  // aiMessages. Stores the tool result payload (capped) + duration + error
+  // for admin debugging via ToolCallTrace.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  aiToolCalls: defineTable({
+    messageId: v.id('aiMessages'),
+    conversationId: v.id('aiConversations'),
+    toolName: v.string(),
+    args: v.optional(v.any()),
+    /** First 500 chars of the JSON-stringified result; truncate marker on cut. */
+    resultPreview: v.optional(v.string()),
+    durationMs: v.number(),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
   })
-    .index('by_conversation', ['conversationId', 'createdAt']),
+    .index('by_conversation', ['conversationId', 'createdAt'])
+    .index('by_message', ['messageId'])
+    .index('by_tool_and_createdAt', ['toolName', 'createdAt']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DISCORD INBOUND (Phase 16e, M20) — guild integrations + channel sync
@@ -703,12 +734,21 @@ export default defineSchema({
     creatorId: v.id('creators'),
     guildId: v.string(),
     guildName: v.string(),
-    status: v.union(
-      v.literal('connected'),
-      v.literal('paused'),
-      v.literal('revoked'),
-    ),
+    /** Optional Discord guild icon hash → CDN URL on the client. */
+    guildIconHash: v.optional(v.string()),
+    status: v.union(v.literal('connected'), v.literal('paused'), v.literal('revoked')),
+    /** Whether the DigiPicks Discord bot is installed in this guild. */
+    botInstalled: v.optional(v.boolean()),
+    /** AES-256-GCM encrypted OAuth tokens (key from DISCORD_OAUTH_ENC_KEY). */
+    oauthAccessTokenEnc: v.optional(v.string()),
+    oauthRefreshTokenEnc: v.optional(v.string()),
+    oauthExpiresAt: v.optional(v.number()),
+    /** Discord OAuth scopes granted by the installer. */
+    scopes: v.optional(v.array(v.string())),
+    /** Surfaced from Discord app config — gates inbound message-content reads. */
+    messageContentIntent: v.optional(v.boolean()),
     connectedByUserId: v.id('users'),
+    revokedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -718,29 +758,51 @@ export default defineSchema({
 
   discordChannelSyncs: defineTable({
     integrationId: v.id('discordIntegrations'),
+    /** Denormalized for fast creator-scoped queries (skip extra hop through
+     *  the integration row when fanning outbound deliveries). */
+    creatorId: v.optional(v.id('creators')),
     channelId: v.string(),
     channelName: v.string(),
-    syncDirection: v.union(
-      v.literal('outbound'),
-      v.literal('inbound'),
-      v.literal('two_way'),
-    ),
+    /** Discord channel type code (0 text, 5 announce, 15 forum, …). */
+    channelType: v.optional(v.number()),
+    syncDirection: v.union(v.literal('outbound'), v.literal('inbound'), v.literal('two_way')),
     /** Optional link to a DigiPicks entity (event / pick / livestream / creator). */
     linkedEntityType: v.optional(v.string()),
     linkedEntityId: v.optional(v.string()),
+    /** Per-channel outbound alert toggles + thresholds. Defaults applied at
+     *  configure time; missing object means "all alerts on". */
+    alertRules: v.optional(
+      v.object({
+        newPick: v.optional(v.boolean()),
+        pickGraded: v.optional(v.boolean()),
+        oddsMovement: v.optional(v.boolean()),
+        creatorLive: v.optional(v.boolean()),
+        aiInsight: v.optional(v.boolean()),
+        announcement: v.optional(v.boolean()),
+        /** 'Low' | 'Medium' | 'High' — gate alerts at or above. */
+        minConfidence: v.optional(v.string()),
+      }),
+    ),
     isEnabled: v.boolean(),
+    /** Cron stamp — last successful inbound import for this channel. */
+    lastImportedAt: v.optional(v.number()),
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
-    .index('by_integration', ['integrationId'])
+    .index('by_integration', ['integrationId', 'isEnabled'])
+    .index('by_creator_and_direction', ['creatorId', 'syncDirection'])
     .index('by_channel', ['channelId'])
+    .index('by_enabled_and_lastImported', ['isEnabled', 'lastImportedAt'])
     .index('by_linked_entity', ['linkedEntityType', 'linkedEntityId']),
 
   discordMessageImports: defineTable({
     integrationId: v.id('discordIntegrations'),
+    channelSyncId: v.optional(v.id('discordChannelSyncs')),
     channelId: v.string(),
     threadId: v.optional(v.string()),
     discordMessageId: v.string(),
-    /** Hashed author identifier — never raw Discord user ID. */
+    /** Hashed author identifier — never raw Discord user ID. sha-256 over
+     *  authorId + DISCORD_AUTHOR_SALT (platform-wide). */
     authorHash: v.string(),
     /** Summarized content; raw never stored by default. */
     contentSummary: v.optional(v.string()),
@@ -748,39 +810,124 @@ export default defineSchema({
     linkedEntityType: v.optional(v.string()),
     linkedEntityId: v.optional(v.string()),
     sentimentScore: v.optional(v.number()),
+    reactionCount: v.optional(v.number()),
+    replyCount: v.optional(v.number()),
+    /** Discord-side timestamp; importedAt is when DigiPicks recorded it. */
+    createdAtDiscord: v.optional(v.number()),
     importedAt: v.number(),
   })
     .index('by_integration', ['integrationId'])
     .index('by_channel_and_imported', ['channelId', 'importedAt'])
-    .index('by_linked_entity', ['linkedEntityType', 'linkedEntityId']),
+    .index('by_thread', ['threadId'])
+    .index('by_messageId', ['discordMessageId'])
+    .index('by_linked_entity', ['linkedEntityType', 'linkedEntityId', 'importedAt']),
 
   discordSentimentSummaries: defineTable({
     integrationId: v.id('discordIntegrations'),
     channelId: v.string(),
+    /** Optional entity binding so customer surfaces (event/pick detail) can
+     *  pull "what is the community saying about this match" rollups. */
+    linkedEntityType: v.optional(v.string()),
+    linkedEntityId: v.optional(v.string()),
     windowStart: v.number(),
     windowEnd: v.number(),
     messageCount: v.number(),
     /** Aggregate score in [-1, 1]; positive is bullish on the linked entity. */
     avgSentiment: v.number(),
+    /** Volume × sentiment magnitude — a "loudness" indicator for hot threads. */
+    heatScore: v.optional(v.number()),
+    /** Top recurring themes/keywords (≤5) extracted by the summarizer. */
+    topThemes: v.optional(v.array(v.string())),
     summary: v.string(),
+    /** Anthropic model that produced the summary, for audit + cost attribution. */
+    aiModel: v.optional(v.string()),
+    generatedAt: v.optional(v.number()),
     createdAt: v.number(),
-  }).index('by_channel_and_window', ['channelId', 'windowStart']),
+  })
+    .index('by_channel_and_window', ['channelId', 'windowStart'])
+    .index('by_entity_and_generated', ['linkedEntityType', 'linkedEntityId', 'generatedAt'])
+    .index('by_integration', ['integrationId', 'generatedAt']),
 
   discordDeliveryLogs: defineTable({
-    integrationId: v.id('discordIntegrations'),
-    channelId: v.string(),
+    /** Null for legacy webhook-URL deliveries (pre-integration migration). */
+    integrationId: v.optional(v.id('discordIntegrations')),
+    creatorId: v.optional(v.id('creators')),
+    channelId: v.optional(v.string()),
+    /** Masked webhook URL (last 6 chars) for legacy/per-creator deliveries. */
+    webhookUrlMasked: v.optional(v.string()),
     eventType: v.string(),
+    /** Source entity that triggered the delivery (pick / event / stream / …). */
+    relatedEntityType: v.optional(v.string()),
+    relatedEntityId: v.optional(v.string()),
     status: v.union(
       v.literal('pending'),
       v.literal('sent'),
       v.literal('failed'),
       v.literal('retrying'),
     ),
+    /** Number of send attempts so the retry cron knows when to give up. */
+    attemptCount: v.optional(v.number()),
     errorMessage: v.optional(v.string()),
+    /** Discord message ID returned on success — enables thread linking later. */
+    discordMessageId: v.optional(v.string()),
+    deliveredAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_integration_and_created', ['integrationId', 'createdAt'])
-    .index('by_status', ['status']),
+    .index('by_creator_and_created', ['creatorId', 'createdAt'])
+    .index('by_status', ['status', 'createdAt']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DISCORD THREAD LINKS (M20) — explicit two-way binding between a Discord
+  // thread and a DigiPicks entity. A pick page renders the linked thread
+  // summary; new replies bump messageCount + lastActivityAt.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  discordThreadLinks: defineTable({
+    integrationId: v.id('discordIntegrations'),
+    threadId: v.string(),
+    channelId: v.string(),
+    threadName: v.optional(v.string()),
+    linkedEntityType: v.union(
+      v.literal('event'),
+      v.literal('pick'),
+      v.literal('creator'),
+      v.literal('livestream'),
+    ),
+    linkedEntityId: v.string(),
+    createdByUserId: v.id('users'),
+    isActive: v.boolean(),
+    messageCount: v.number(),
+    lastActivityAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_thread', ['threadId'])
+    .index('by_entity', ['linkedEntityType', 'linkedEntityId'])
+    .index('by_integration', ['integrationId', 'isActive']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DISCORD WEBHOOK EVENTS (M20) — raw inbound interaction/event ingest queue.
+  // Discord posts here on /discord/interactions; processIncomingEvent dequeues
+  // and dispatches to the appropriate handler. payloadHash de-duplicates
+  // retries from Discord.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  discordWebhookEvents: defineTable({
+    integrationId: v.optional(v.id('discordIntegrations')),
+    discordEventId: v.string(),
+    /** 'INTERACTION_CREATE' | 'MESSAGE_CREATE' | 'THREAD_CREATE' | … */
+    eventType: v.string(),
+    guildId: v.optional(v.string()),
+    channelId: v.optional(v.string()),
+    /** sha-256 of the raw body for replay/idempotency. */
+    payloadHash: v.string(),
+    processedAt: v.optional(v.number()),
+    processingError: v.optional(v.string()),
+    receivedAt: v.number(),
+  })
+    .index('by_eventId', ['discordEventId'])
+    .index('by_processed', ['processedAt', 'receivedAt'])
+    .index('by_payloadHash', ['payloadHash']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COUPON CODES (Phase 16d, M19) — admin-issued promotional codes.

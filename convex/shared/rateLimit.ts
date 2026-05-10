@@ -49,6 +49,18 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
     shards: 4,
   },
 
+  // ── AI Copilot turns (M24): per-user copilot turns; multiplies via
+  //    tool fan-out so the cap is per-turn not per-tool. 20 turns refilled
+  //    per hour with a small burst capacity for back-to-back follow-ups.
+  //    Sharded so a marquee user doesn't hot-spot the bucket.
+  aiCopilot: {
+    kind: 'token bucket',
+    rate: 20,
+    period: HOUR,
+    capacity: 6,
+    shards: 4,
+  },
+
   // ── GDPR export (NFR-003): 3/hour per user — full-table scans are heavy.
   // Sharded so the global bucket doesn't bottleneck during compliance
   // audits when many users export simultaneously.
@@ -58,5 +70,4 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
     period: HOUR,
     shards: 4,
   },
-
 });

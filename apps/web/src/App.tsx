@@ -48,6 +48,14 @@ const AdminEventReview = React.lazy(() =>
     default: m.AdminEventReview,
   })),
 );
+const AdminDisputeQueue = React.lazy(() =>
+  import('./pages/admin/DisputeQueue').then((m) => ({
+    default: m.DisputeQueue,
+  })),
+);
+const AdminCoupons = React.lazy(() =>
+  import('./pages/admin/Coupons').then((m) => ({ default: m.Coupons })),
+);
 const DashboardRoutes = React.lazy(() => import('./dashboard/Routes'));
 const AccountRoutes = React.lazy(() => import('./account/Routes'));
 
@@ -338,6 +346,30 @@ export function App() {
               forbiddenSubtitle="Event review is restricted to platform admins."
             >
               <AdminEventReview />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/admin/disputes"
+          element={
+            <AuthGate
+              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
+              forbiddenTitle="Admin access required"
+              forbiddenSubtitle="The dispute queue is restricted to platform admins."
+            >
+              <AdminDisputeQueue />
+            </AuthGate>
+          }
+        />
+        <Route
+          path="/admin/coupons"
+          element={
+            <AuthGate
+              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
+              forbiddenTitle="Admin access required"
+              forbiddenSubtitle="Promo coupons are restricted to platform admins."
+            >
+              <AdminCoupons />
             </AuthGate>
           }
         />

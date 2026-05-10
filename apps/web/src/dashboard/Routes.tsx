@@ -16,6 +16,9 @@ import { Access } from './pages/Access';
 import { Earnings } from './pages/Earnings';
 import { Messages } from './pages/Messages';
 import { Settings } from './pages/Settings';
+import { DiscordSettings } from './pages/DiscordSettings';
+import { DiscordDiscussions } from './pages/DiscordDiscussions';
+import { CreatorCopilot } from './pages/Copilot';
 
 export function DashboardRoutes() {
   return (
@@ -39,7 +42,10 @@ export function DashboardRoutes() {
           <Route path="access" element={<Access />} />
           <Route path="earnings" element={<Earnings />} />
           <Route path="messages" element={<Messages />} />
+          <Route path="copilot" element={<CreatorCopilot />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="settings/discord" element={<DiscordSettings />} />
+          <Route path="discord/discussions" element={<DiscordDiscussions />} />
         </Route>
       </Routes>
     </AuthGate>

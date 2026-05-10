@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, usePaginatedQuery } from 'convex/react';
 import {
   Container,
   Stack,
@@ -26,11 +26,15 @@ import type { Id } from '../../../../../convex/_generated/dataModel';
  * "Show tool trace" toggle is for power users + debugging.
  */
 export function Copilot() {
-  const conversations = useQuery(api.copilot.myConversations);
-  const startConversation = useMutation(api.copilot.startConversation);
-  const appendUserMessage = useMutation(api.copilot.appendUserMessage);
-  const archive = useMutation(api.copilot.archiveConversation);
-  const respond = useAction(api.copilot.respond);
+  const {
+    results: conversations,
+    status: convStatus,
+    loadMore: loadMoreConvs,
+  } = usePaginatedQuery(api.aiCopilot.queries.listConversations, {}, { initialNumItems: 20 });
+  const startConversation = useMutation(api.aiCopilot.mutations.startConversation);
+  const appendUserMessage = useMutation(api.aiCopilot.mutations.appendUserMessage);
+  const archive = useMutation(api.aiCopilot.mutations.archiveConversation);
+  const respond = useAction(api.aiCopilot.respond.respond);
 
   const [activeId, setActiveId] = React.useState<Id<'aiConversations'> | null>(null);
   const [draft, setDraft] = React.useState('');
@@ -38,13 +42,14 @@ export function Copilot() {
   const [error, setError] = React.useState<string | null>(null);
   const [showTrace, setShowTrace] = React.useState(false);
 
-  const messages = useQuery(
-    api.copilot.messages,
+  const { results: messages, status: msgStatus } = usePaginatedQuery(
+    api.aiCopilot.queries.messages,
     activeId ? { conversationId: activeId } : 'skip',
+    { initialNumItems: 50 },
   );
 
   React.useEffect(() => {
-    if (!activeId && conversations && conversations.length > 0) {
+    if (!activeId && conversations.length > 0) {
       setActiveId(conversations[0]!._id);
     }
   }, [activeId, conversations]);
@@ -66,13 +71,11 @@ export function Copilot() {
     const body = draft.trim();
     setDraft('');
     try {
-      await appendUserMessage({ conversationId: activeId, body });
-      const result = await respond({ conversationId: activeId });
-      if ('skipped' in result) {
-        setError(
-          'Copilot is unavailable in this environment (ANTHROPIC_API_KEY not configured).',
-        );
-      }
+      const userMessageId = await appendUserMessage({
+        conversationId: activeId,
+        body,
+      });
+      await respond({ conversationId: activeId, userMessageId });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Copilot request failed.');
     } finally {
@@ -90,21 +93,20 @@ export function Copilot() {
     }
   }
 
-  const chatMessages: CopilotMessage[] = (messages ?? []).map((m) => ({
+  const chatMessages: CopilotMessage[] = messages.map((m) => ({
     id: m._id,
     role: m.role,
-    body: m.body,
+    body: m.streaming && m.streamingBuffer ? m.streamingBuffer : m.body,
+    streaming: m.streaming,
     toolName: m.toolName,
     citations: m.citations as CopilotMessage['citations'],
     modelLabel: m.model
-      ? `${m.model}${
-          m.outputTokens ? ` · ${m.outputTokens} out` : ''
-        }`
+      ? `${m.model}${m.outputTokens ? ` · ${m.outputTokens} out` : ''}`
       : undefined,
     createdAt: m.createdAt,
   }));
 
-  const list = conversations ?? [];
+  const list = conversations;
 
   return (
     <Container size="2xl">
@@ -125,7 +127,7 @@ export function Copilot() {
           <Col gap={3}>
             <Card pad="sm">
               <CardHead title="Conversations" sub={`${list.length} active`} />
-              {conversations === undefined ? (
+              {convStatus === 'LoadingFirstPage' ? (
                 <EmptyState icon="sparkles" title="Loading…" />
               ) : list.length === 0 ? (
                 <EmptyState
@@ -136,12 +138,7 @@ export function Copilot() {
               ) : (
                 <Stack gap={1}>
                   {list.map((c) => (
-                    <Card
-                      key={c._id}
-                      hover
-                      pad="sm"
-                      onClick={() => setActiveId(c._id)}
-                    >
+                    <Card key={c._id} hover pad="sm" onClick={() => setActiveId(c._id)}>
                       <Row gap={3} between>
                         <PersonRow
                           name={c.title}
@@ -191,7 +188,7 @@ export function Copilot() {
                 {error && <Muted>{error}</Muted>}
                 <CopilotChat
                   messages={chatMessages}
-                  loading={messages === undefined}
+                  loading={msgStatus === 'LoadingFirstPage'}
                   draft={draft}
                   onDraftChange={setDraft}
                   onSend={handleSend}

@@ -24,6 +24,12 @@ export interface CopilotMessage {
   citations?: CopilotCitation[];
   /** Optional model + token count for the assistant footer. */
   modelLabel?: string;
+  /**
+   * When true, the bubble is in a streaming / partial state — the
+   * component renders an animated typing indicator at the end of the
+   * bubble. Switch this off once the full body has arrived.
+   */
+  streaming?: boolean;
   createdAt: number;
 }
 
@@ -72,7 +78,7 @@ export function CopilotChat({
   disabled,
   placeholder = 'Ask anything about a creator, event, or pick…',
   emptyTitle = 'How can I help?',
-  emptySubtitle = "Try \"Who's the best NFL creator this month?\" or \"Show my last 5 graded picks.\"",
+  emptySubtitle = 'Try "Who\'s the best NFL creator this month?" or "Show my last 5 graded picks."',
   className,
 }: CopilotChatProps) {
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -82,9 +88,7 @@ export function CopilotChat({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  const visible = showToolTurns
-    ? messages
-    : messages.filter((m) => m.role !== 'tool');
+  const visible = showToolTurns ? messages : messages.filter((m) => m.role !== 'tool');
 
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -99,11 +103,7 @@ export function CopilotChat({
     <div className={cx(s.panel, className)}>
       {onToggleToolTurns && (
         <div className={s.toolbar}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onToggleToolTurns(!showToolTurns)}
-          >
+          <Button variant="ghost" size="sm" onClick={() => onToggleToolTurns(!showToolTurns)}>
             <Icon name="audit" size={13} />
             {showToolTurns ? 'Hide tool trace' : 'Show tool trace'}
           </Button>
@@ -125,9 +125,7 @@ export function CopilotChat({
                   m.role === 'user' ? s.user : m.role === 'tool' ? s.tool : s.assistant,
                 )}
               >
-                {m.role === 'assistant' && (
-                  <Avatar mono="AI" color="var(--primary)" size={28} />
-                )}
+                {m.role === 'assistant' && <Avatar mono="AI" color="var(--primary)" size={28} />}
                 <div className={s.bubbleWrap}>
                   <div className={s.meta}>
                     <span className={s.who}>
@@ -144,12 +142,17 @@ export function CopilotChat({
                       s.bubble,
                       m.role === 'user' && s.bubbleUser,
                       m.role === 'tool' && s.bubbleTool,
+                      m.streaming && s.streaming,
                     )}
+                    aria-busy={m.streaming || undefined}
                   >
-                    {m.role === 'tool' ? (
-                      <pre className={s.toolBody}>{m.body}</pre>
-                    ) : (
-                      m.body
+                    {m.role === 'tool' ? <pre className={s.toolBody}>{m.body}</pre> : m.body}
+                    {m.streaming && (
+                      <span className={s.typing} aria-label="Copilot is typing" role="status">
+                        <span className={s.dot} />
+                        <span className={s.dot} />
+                        <span className={s.dot} />
+                      </span>
                     )}
                   </div>
                   {m.citations && m.citations.length > 0 && (
@@ -168,13 +171,9 @@ export function CopilotChat({
                       ))}
                     </div>
                   )}
-                  {m.modelLabel && (
-                    <div className={s.model}>{m.modelLabel}</div>
-                  )}
+                  {m.modelLabel && <div className={s.model}>{m.modelLabel}</div>}
                 </div>
-                {m.role === 'user' && (
-                  <Avatar mono="U" color="var(--t-3)" size={28} />
-                )}
+                {m.role === 'user' && <Avatar mono="U" color="var(--t-3)" size={28} />}
               </div>
             ))}
           </div>

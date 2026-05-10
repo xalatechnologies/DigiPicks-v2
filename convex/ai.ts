@@ -100,10 +100,7 @@ export const analyzePick = internalAction({
     pickId: v.id('picks'),
     model: v.optional(v.string()),
   },
-  handler: async (
-    ctx,
-    args,
-  ): Promise<(AnalysisResult & { model: string }) | { skipped: true }> => {
+  handler: async (ctx, args): Promise<(AnalysisResult & { model: string }) | { skipped: true }> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       // Quiet no-op when the key isn't configured (dev / tests). Matches
@@ -130,7 +127,16 @@ export const analyzePick = internalAction({
       body: JSON.stringify({
         model,
         max_tokens: 600,
-        system: SYSTEM_PROMPT,
+        // Prompt-cached system block — same content as suggestPick so both
+        // actions share the cache entry and post-publish analyses get cache
+        // hits instead of re-billing the system prompt every call.
+        system: [
+          {
+            type: 'text',
+            text: SYSTEM_PROMPT,
+            cache_control: { type: 'ephemeral' },
+          },
+        ],
         messages: [{ role: 'user', content: userPrompt }],
       }),
     });
@@ -150,6 +156,27 @@ export const analyzePick = internalAction({
       confidence: result.confidence,
       reasoning: result.reasoning,
       model,
+    });
+
+    // M20 — Discord ai_insight fanout. Fire-and-forget; the action logs
+    // per-channel results and never throws back into the analysis chain.
+    await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+      creatorId: pick.creatorId,
+      eventType: 'ai_insight',
+      payload: {
+        title: `AI insight · ${pick.title}`,
+        description: result.summary,
+        fields: [
+          {
+            name: 'AI confidence',
+            value: `${result.confidence}%`,
+            inline: true,
+          },
+          { name: 'Model', value: model, inline: true },
+        ],
+        relatedEntityType: 'pick',
+        relatedEntityId: args.pickId,
+      },
     });
 
     return { ...result, model };
@@ -183,10 +210,7 @@ export const suggestPick = action({
     body: v.optional(v.string()),
     model: v.optional(v.string()),
   },
-  handler: async (
-    ctx,
-    args,
-  ): Promise<AnalysisResult & { model: string }> => {
+  handler: async (ctx, args): Promise<AnalysisResult & { model: string }> => {
     const user: Doc<'users'> | null = await ctx.runQuery(internal.ai._meForSuggest, {});
     if (!user) throw new Error('Unauthorized');
     await rateLimiter.limit(ctx, SUGGEST_RATE_BUCKET, {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useAction } from 'convex/react';
 import {
   PageHeader,
@@ -69,11 +70,9 @@ const NOTIFICATIONS: NotificationToggle[] = [
 ];
 
 export function Settings() {
+  const navigate = useNavigate();
   const me = useQuery(api.users.me);
-  const creator = useQuery(
-    api.creators.get,
-    me?.creatorId ? { id: me.creatorId } : 'skip',
-  );
+  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const updateProfile = useMutation(api.users.updateProfile);
   const setDiscordWebhook = useMutation(api.discordSettings.setWebhookUrl);
   const testDiscordWebhook = useAction(api.discordSettings.testWebhook);
@@ -89,11 +88,7 @@ export function Settings() {
   const [mfaBusy, setMfaBusy] = React.useState(false);
   const [mfaError, setMfaError] = React.useState<string | null>(null);
 
-  const mfaState: MfaState = mfaSecrets
-    ? 'enrolling'
-    : mfaStatus?.enrolled
-      ? 'enrolled'
-      : 'idle';
+  const mfaState: MfaState = mfaSecrets ? 'enrolling' : mfaStatus?.enrolled ? 'enrolled' : 'idle';
 
   async function handleMfaStart() {
     setMfaError(null);
@@ -184,7 +179,11 @@ export function Settings() {
   const [tgMsg, setTgMsg] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+    if (
+      typeof window === 'undefined' ||
+      !('Notification' in window) ||
+      !('serviceWorker' in navigator)
+    ) {
       setPushState('unsupported');
       return;
     }
@@ -383,12 +382,7 @@ export function Settings() {
         title="Settings"
         crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             <Icon name="check" size={13} />
             {saving ? 'Saving…' : 'Save changes'}
           </Button>
@@ -418,10 +412,7 @@ export function Settings() {
                     <Input value={me?.email ?? ''} readOnly />
                   </Field>
                   <Field label="Locale">
-                    <Select
-                      value={locale}
-                      onChange={(e) => setLocale(e.target.value as Locale)}
-                    >
+                    <Select value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
                       {LOCALE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
@@ -548,19 +539,37 @@ export function Settings() {
                       {webhookTesting ? 'Sending…' : 'Test webhook'}
                     </Button>
                   </Row>
-                  {me?.discordUsername && (
-                    <KV k="Discord" v={<Mono>{me.discordUsername}</Mono>} />
-                  )}
+                  {me?.discordUsername && <KV k="Discord" v={<Mono>{me.discordUsername}</Mono>} />}
+                </Stack>
+              </Card>
+
+              <Card>
+                <CardHead
+                  title="Advanced Discord"
+                  sub="Connect your guild for inbound messages, channel mapping, alert rules, and thread linking."
+                />
+                <Stack gap={2}>
+                  <Muted>
+                    The advanced surface uses a full OAuth-installed bot — keep the legacy webhook
+                    above active until you migrate.
+                  </Muted>
+                  <Row gap={2}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate('/dashboard/settings/discord')}
+                    >
+                      <Icon name="discord" size={13} />
+                      Open advanced
+                    </Button>
+                  </Row>
                 </Stack>
               </Card>
 
               <Card>
                 <CardHead title="Verification" sub="Your platform status" />
                 <Stack gap={2}>
-                  <KV
-                    k="Identity"
-                    v={creator?.verified ? 'Verified' : 'Not verified'}
-                  />
+                  <KV k="Identity" v={creator?.verified ? 'Verified' : 'Not verified'} />
                   <KV k="Status" v={creator?.status ?? '—'} />
                   <KV k="Handle" v={creator?.handle ?? '—'} />
                 </Stack>
@@ -614,7 +623,9 @@ export function Settings() {
               <Card>
                 <CardHead title="Danger zone" />
                 <Stack gap={2}>
-                  <Muted>Pausing hides your profile and stops new sign-ups. Existing subs keep access.</Muted>
+                  <Muted>
+                    Pausing hides your profile and stops new sign-ups. Existing subs keep access.
+                  </Muted>
                   <Row gap={2}>
                     <Button variant="outline" size="sm">
                       Pause profile
@@ -700,11 +711,7 @@ function DiscordIntegrationsCard({ creatorId }: { creatorId: Id<'creators'> }) {
                   </Muted>
                 </Stack>
                 {row.status === 'connected' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePause(row._id)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handlePause(row._id)}>
                     Pause
                   </Button>
                 )}
@@ -728,12 +735,7 @@ function DiscordIntegrationsCard({ creatorId }: { creatorId: Id<'creators'> }) {
         </Field>
         {msg && <Muted>{msg}</Muted>}
         <Row gap={2}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleConnect}
-            disabled={busy}
-          >
+          <Button variant="primary" size="sm" onClick={handleConnect} disabled={busy}>
             <Icon name="discord" size={13} />
             Connect guild
           </Button>

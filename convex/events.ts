@@ -1,16 +1,8 @@
 import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { Doc } from './_generated/dataModel';
-import {
-  eventStatus,
-  eventVisibility,
-  eventParticipantType,
-} from './shared/validators';
-import {
-  requireAdmin,
-  requireCreator,
-  isAdmin,
-} from './shared/permissions';
+import { eventStatus, eventVisibility, eventParticipantType } from './shared/validators';
+import { requireAdmin, requireCreator, isAdmin } from './shared/permissions';
 import { internal } from './_generated/api';
 
 // Public-read gate: only `public` + reviewed events surface on public
@@ -20,8 +12,7 @@ import { internal } from './_generated/api';
 // disappearing real events from view. Premium/private gating wires up in
 // Phase 3 alongside subscriptions.
 function isPublicEvent(event: Doc<'events'>): boolean {
-  const visibilityOk =
-    event.visibility === undefined || event.visibility === 'public';
+  const visibilityOk = event.visibility === undefined || event.visibility === 'public';
   const verificationOk =
     event.verificationStatus === undefined ||
     event.verificationStatus === 'source_verified' ||
@@ -263,6 +254,10 @@ export const createByCreator = mutation({
  * `verificationStatus: 'admin_verified'` (which makes it visible on the
  * public feed). On rejection, sets `verificationStatus: 'unverified'` and
  * `status: 'cancelled'` so it stays hidden and is marked terminal.
+ *
+ * Idempotency: rejects calls against events that are already past the
+ * `creator_submitted` state so an admin can't re-approve a finalized event.
+ * Records the decision in `auditLogs` and stamps `metadata.reviewedAt`.
  */
 export const reviewEvent = mutation({
   args: {
@@ -275,21 +270,42 @@ export const reviewEvent = mutation({
 
     const event = await ctx.db.get(args.eventId);
     if (!event) throw new Error('Event not found');
+    if (event.verificationStatus !== 'creator_submitted') {
+      throw new Error(
+        `Event is not pending review (current state: ${event.verificationStatus ?? 'unset'})`,
+      );
+    }
+
+    const reviewedAt = Date.now();
+    const baseMeta = (event.metadata ?? {}) as Record<string, unknown>;
+    const meta: Record<string, unknown> = {
+      ...baseMeta,
+      reviewedAt,
+      ...(args.notes ? { reviewNotes: args.notes } : {}),
+    };
 
     if (args.decision === 'approve') {
       await ctx.db.patch(args.eventId, {
         verificationStatus: 'admin_verified',
         reviewedByAdminId: admin._id,
-        ...(args.notes ? { metadata: { ...(event.metadata ?? {}), reviewNotes: args.notes } } : {}),
+        metadata: meta,
       });
     } else {
       await ctx.db.patch(args.eventId, {
         verificationStatus: 'unverified',
         status: 'cancelled',
         reviewedByAdminId: admin._id,
-        ...(args.notes ? { metadata: { ...(event.metadata ?? {}), reviewNotes: args.notes } } : {}),
+        metadata: meta,
       });
     }
+
+    await ctx.runMutation(internal.audit.log, {
+      actorUserId: admin._id,
+      entityType: 'event',
+      entityId: args.eventId,
+      action: `event.review.${args.decision}`,
+      metadata: { notes: args.notes ?? null },
+    });
 
     return { ok: true };
   },
@@ -311,18 +327,14 @@ export const byCreator = query({
     if (isAdmin(user)) {
       return await ctx.db
         .query('events')
-        .withIndex('by_sourceType_and_startsAt', (q) =>
-          q.eq('sourceType', 'creator'),
-        )
+        .withIndex('by_sourceType_and_startsAt', (q) => q.eq('sourceType', 'creator'))
         .order('desc')
         .take(limit);
     }
 
     return await ctx.db
       .query('events')
-      .withIndex('by_createdByUserId', (q) =>
-        q.eq('createdByUserId', user._id),
-      )
+      .withIndex('by_createdByUserId', (q) => q.eq('createdByUserId', user._id))
       .order('desc')
       .take(limit);
   },
@@ -341,9 +353,7 @@ export const pendingReview = query({
 
     return await ctx.db
       .query('events')
-      .withIndex('by_verificationStatus', (q) =>
-        q.eq('verificationStatus', 'creator_submitted'),
-      )
+      .withIndex('by_verificationStatus', (q) => q.eq('verificationStatus', 'creator_submitted'))
       .order('desc')
       .take(limit);
   },

@@ -45,6 +45,10 @@ export { Button } from './components/atoms/Button/Button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './components/atoms/Button/Button';
 export { FollowButton } from './components/atoms/FollowButton/FollowButton';
 export type { FollowButtonProps } from './components/atoms/FollowButton/FollowButton';
+export { DiscordConnectButton } from './components/atoms/DiscordConnectButton/DiscordConnectButton';
+export type { DiscordConnectButtonProps } from './components/atoms/DiscordConnectButton/DiscordConnectButton';
+export { DiscordThreadLinkBadge } from './components/atoms/DiscordThreadLinkBadge/DiscordThreadLinkBadge';
+export type { DiscordThreadLinkBadgeProps } from './components/atoms/DiscordThreadLinkBadge/DiscordThreadLinkBadge';
 export { Chip } from './components/atoms/Chip/Chip';
 export { Switch } from './components/atoms/Switch/Switch';
 export { Checkbox } from './components/atoms/Checkbox/Checkbox';
@@ -68,6 +72,24 @@ export type {
 } from './components/forms/FilterChips/FilterChips';
 export { SwitchRow } from './components/forms/SwitchRow/SwitchRow';
 export type { SwitchRowProps } from './components/forms/SwitchRow/SwitchRow';
+export { DiscordSyncDirectionSelector } from './components/forms/DiscordSyncDirectionSelector/DiscordSyncDirectionSelector';
+export type {
+  DiscordSyncDirectionSelectorProps,
+  DiscordSyncDirection,
+} from './components/forms/DiscordSyncDirectionSelector/DiscordSyncDirectionSelector';
+export { DiscordChannelMapper } from './components/forms/DiscordChannelMapper/DiscordChannelMapper';
+export type {
+  DiscordChannelMapperProps,
+  DiscordChannelMapperPatch,
+  DiscordChannelMapping,
+  DiscordChannelType,
+} from './components/forms/DiscordChannelMapper/DiscordChannelMapper';
+export { DiscordAlertRuleEditor } from './components/forms/DiscordAlertRuleEditor/DiscordAlertRuleEditor';
+export type {
+  DiscordAlertRuleEditorProps,
+  DiscordAlertRules,
+  DiscordAlertConfidence,
+} from './components/forms/DiscordAlertRuleEditor/DiscordAlertRuleEditor';
 export { PasswordInput } from './components/forms/PasswordInput/PasswordInput';
 export type { PasswordInputProps } from './components/forms/PasswordInput/PasswordInput';
 export {
@@ -127,6 +149,8 @@ export type {
   MfaState,
   MfaEnrollmentSecrets,
 } from './components/surfaces/MfaEnrollmentCard/MfaEnrollmentCard';
+export { DiscordDiscussionSummary } from './components/surfaces/DiscordDiscussionSummary/DiscordDiscussionSummary';
+export type { DiscordDiscussionSummaryProps } from './components/surfaces/DiscordDiscussionSummary/DiscordDiscussionSummary';
 
 // ── data ─────────────────────────────────────────────────────────────────
 export { Table, THead, TBody, Tr, Th, Td } from './components/data/Table/Table';
@@ -149,6 +173,12 @@ export type {
   OddsCell,
   OddsBook,
 } from './components/data/OddsGrid/OddsGrid';
+export { DiscordDeliveryLogTable } from './components/data/DiscordDeliveryLogTable/DiscordDeliveryLogTable';
+export type {
+  DiscordDeliveryLogTableProps,
+  DiscordDeliveryRow,
+  DiscordDeliveryStatus,
+} from './components/data/DiscordDeliveryLogTable/DiscordDeliveryLogTable';
 
 // ── nav ──────────────────────────────────────────────────────────────────
 export { AppHeader } from './components/nav/AppHeader/AppHeader';
@@ -221,6 +251,8 @@ export type { StaggerProps, StaggerItemProps } from './components/motion/Stagger
 export { ResponsibleNote } from './components/feedback/ResponsibleNote/ResponsibleNote';
 export { ResponsibleSection } from './components/feedback/ResponsibleSection/ResponsibleSection';
 export type { ResponsibleSectionProps } from './components/feedback/ResponsibleSection/ResponsibleSection';
+export { CopilotResponsibleNote } from './components/feedback/CopilotResponsibleNote/CopilotResponsibleNote';
+export type { CopilotResponsibleNoteProps } from './components/feedback/CopilotResponsibleNote/CopilotResponsibleNote';
 export { Accordion } from './components/feedback/Accordion/Accordion';
 export { AccordionItem } from './components/feedback/AccordionItem/AccordionItem';
 export { FAQList } from './components/feedback/FAQList/FAQList';
@@ -255,6 +287,11 @@ export type {
   SubscriptionTileProps,
   SubscriptionTileStatus,
 } from './components/domain/SubscriptionTile/SubscriptionTile';
+export { DiscordIntegrationCard } from './components/domain/DiscordIntegrationCard/DiscordIntegrationCard';
+export type {
+  DiscordIntegrationCardProps,
+  DiscordIntegrationStatus,
+} from './components/domain/DiscordIntegrationCard/DiscordIntegrationCard';
 export { CreatorCard } from './components/domain/CreatorCard/CreatorCard';
 export { EventCard } from './components/domain/EventCard/EventCard';
 export type {

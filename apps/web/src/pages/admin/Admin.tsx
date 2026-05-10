@@ -39,6 +39,7 @@ export function Admin() {
   const navigate = useNavigate();
   const summary = useQuery(api.admin.summary, {});
   const auditMetrics = useQuery(api.audit.metrics, {});
+  const autoGrader = useQuery(api.admin.autoGraderStats, {});
   const isLoading = summary === undefined;
 
   return (
@@ -50,11 +51,7 @@ export function Admin() {
           sub="Moderation queues, application review, and audit activity. All actions are logged."
           actions={
             <Row gap={2}>
-              <Button
-                variant="secondary"
-                iconLeft="audit"
-                disabled
-              >
+              <Button variant="secondary" iconLeft="audit" disabled>
                 Audit log
               </Button>
             </Row>
@@ -69,28 +66,18 @@ export function Admin() {
               <Metric
                 label="Pending event review"
                 value={String(summary.pendingEventReview)}
-                delta={
-                  summary.pendingEventReview > 0
-                    ? { value: 'queue', dir: 'up' }
-                    : undefined
-                }
+                delta={summary.pendingEventReview > 0 ? { value: 'queue', dir: 'up' } : undefined}
               />
               <Metric
                 label="Pending applications"
                 value={String(summary.pendingApplications)}
-                delta={
-                  summary.pendingApplications > 0
-                    ? { value: 'queue', dir: 'up' }
-                    : undefined
-                }
+                delta={summary.pendingApplications > 0 ? { value: 'queue', dir: 'up' } : undefined}
               />
               <Metric
                 label="Flagged applications"
                 value={String(summary.flaggedApplications)}
                 delta={
-                  summary.flaggedApplications > 0
-                    ? { value: 'attention', dir: 'up' }
-                    : undefined
+                  summary.flaggedApplications > 0 ? { value: 'attention', dir: 'up' } : undefined
                 }
               />
             </Grid>
@@ -117,9 +104,8 @@ export function Admin() {
               />
               <Stack gap={3}>
                 <Muted>
-                  Approve federated events before they surface on the public
-                  /events feed. Rejection cancels the event and notifies the
-                  creator.
+                  Approve federated events before they surface on the public /events feed. Rejection
+                  cancels the event and notifies the creator.
                 </Muted>
                 <Row gap={2}>
                   <Button
@@ -152,9 +138,8 @@ export function Admin() {
               />
               <Stack gap={3}>
                 <Muted>
-                  Application review UI lights up when the dedicated admin
-                  page ships. Until then, use the Convex dashboard
-                  (applications.review).
+                  Application review UI lights up when the dedicated admin page ships. Until then,
+                  use the Convex dashboard (applications.review).
                 </Muted>
                 <Row gap={2}>
                   <Button variant="secondary" size="sm" disabled>
@@ -184,22 +169,10 @@ export function Admin() {
             />
             {auditMetrics ? (
               <Grid cols={3} gap={3}>
-                <Metric
-                  label="Last 7 days"
-                  value={auditMetrics.last7d.toLocaleString()}
-                />
-                <Metric
-                  label="Last 30 days"
-                  value={auditMetrics.last30d.toLocaleString()}
-                />
-                <Metric
-                  label="Last 90 days"
-                  value={auditMetrics.last90d.toLocaleString()}
-                />
-                <Metric
-                  label="Last 1 year"
-                  value={auditMetrics.last1y.toLocaleString()}
-                />
+                <Metric label="Last 7 days" value={auditMetrics.last7d.toLocaleString()} />
+                <Metric label="Last 30 days" value={auditMetrics.last30d.toLocaleString()} />
+                <Metric label="Last 90 days" value={auditMetrics.last90d.toLocaleString()} />
+                <Metric label="Last 1 year" value={auditMetrics.last1y.toLocaleString()} />
                 <Metric
                   label="Older than 1 year"
                   value={auditMetrics.olderThan1y.toLocaleString()}
@@ -211,6 +184,86 @@ export function Admin() {
               </Grid>
             ) : (
               <EmptyState icon="audit" title="Loading retention metrics…" />
+            )}
+          </Card>
+        </Section>
+
+        <Section
+          eyebrow="Auto-grader"
+          title="Cron grading health."
+          sub="Counts of picks the hourly auto-grader resolved from this audit window. Spot-check the sample below to catch misgrades early."
+        >
+          <Card pad="lg">
+            <CardHead
+              title="Recent auto-grades"
+              sub={
+                autoGrader
+                  ? `Window: latest ${autoGrader.windowSize.toLocaleString()} audit entries · ${autoGrader.total.toLocaleString()} auto-graded`
+                  : 'Loading…'
+              }
+              action={
+                <Badge tone="blue" dot>
+                  Hourly cron
+                </Badge>
+              }
+            />
+            {autoGrader ? (
+              <Stack gap={4}>
+                <Grid cols={4} gap={3}>
+                  <Metric label="Wins" value={String(autoGrader.counts.win ?? 0)} />
+                  <Metric label="Losses" value={String(autoGrader.counts.loss ?? 0)} />
+                  <Metric label="Pushes" value={String(autoGrader.counts.push ?? 0)} />
+                  <Metric label="Voids" value={String(autoGrader.counts.void ?? 0)} />
+                </Grid>
+                {autoGrader.sample.length === 0 ? (
+                  <EmptyState
+                    icon="audit"
+                    title="No auto-grades in this window."
+                    subtitle="The cron may not have fired yet, or no events have completed since."
+                  />
+                ) : (
+                  <Table>
+                    <THead>
+                      <Tr>
+                        <Th>Pick</Th>
+                        <Th>Grade</Th>
+                        <Th>Net units</Th>
+                        <Th>When</Th>
+                      </Tr>
+                    </THead>
+                    <TBody>
+                      {autoGrader.sample.map((row) => (
+                        <Tr key={row.id}>
+                          <Td>
+                            <Mono>{row.pickId ?? '—'}</Mono>
+                          </Td>
+                          <Td>
+                            <Badge
+                              tone={
+                                row.grade === 'win'
+                                  ? 'green'
+                                  : row.grade === 'loss'
+                                    ? 'red'
+                                    : 'amber'
+                              }
+                            >
+                              {row.grade}
+                            </Badge>
+                          </Td>
+                          <Td>
+                            <Mono>{row.netUnits === null ? '—' : row.netUnits.toFixed(2)}</Mono>
+                          </Td>
+                          <Td>
+                            <Muted>{formatTime(row.createdAt)}</Muted>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </TBody>
+                  </Table>
+                )}
+              </Stack>
+            ) : (
+              <EmptyState icon="audit" title="Loading auto-grader stats…" />
             )}
           </Card>
         </Section>

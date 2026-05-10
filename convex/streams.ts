@@ -30,9 +30,7 @@ import { withRetry } from './shared/retry';
 export const setStream = mutation({
   args: {
     creatorId: v.id('creators'),
-    platform: v.optional(
-      v.union(v.literal('twitch'), v.literal('youtube'), v.literal('kick')),
-    ),
+    platform: v.optional(v.union(v.literal('twitch'), v.literal('youtube'), v.literal('kick'))),
     handle: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -72,9 +70,7 @@ export const liveNow = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const rows = await ctx.db.query('creators').take(500);
-    return rows
-      .filter((c) => c.streamLive)
-      .slice(0, args.limit ?? 12);
+    return rows.filter((c) => c.streamLive).slice(0, args.limit ?? 12);
   },
 });
 
@@ -126,9 +122,7 @@ export const _ensureStreamRoom = internalMutation({
 
     const existing = await ctx.db
       .query('channels')
-      .withIndex('by_linkedStream', (q) =>
-        q.eq('linkedStreamCreatorId', args.creatorId),
-      )
+      .withIndex('by_linkedStream', (q) => q.eq('linkedStreamCreatorId', args.creatorId))
       .first();
 
     if (existing) {
@@ -185,7 +179,10 @@ export const pollStreams = internalAction({
         else if (c.streamPlatform === 'youtube') result = await checkYouTube(handle);
         else if (c.streamPlatform === 'kick') result = await checkKick(handle);
       } catch (err) {
-        console.warn(`stream poll failed for ${c.handle}:`, err instanceof Error ? err.message : err);
+        console.warn(
+          `stream poll failed for ${c.handle}:`,
+          err instanceof Error ? err.message : err,
+        );
         continue;
       }
 
@@ -205,6 +202,17 @@ export const pollStreams = internalAction({
         // Notify subscribers — same dispatcher used for picks.
         await ctx.runAction(internal.streams.fanLiveNotification, {
           creatorId: c._id,
+        });
+        // M20 — Discord creator_live fanout. Fire-and-forget; never throws.
+        await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+          creatorId: c._id,
+          eventType: 'creator_live',
+          payload: {
+            title: `${c.name} is live now`,
+            description: result.title ?? 'Tap to watch the stream',
+            relatedEntityType: 'creator',
+            relatedEntityId: c._id,
+          },
         });
       } else if (result.live) {
         stillLive++;
@@ -266,9 +274,7 @@ export const _liveContext = internalQuery({
       .take(2000);
     return {
       creator,
-      subscriberIds: subs
-        .filter((s) => s.status === 'active')
-        .map((s) => s.subscriberId),
+      subscriberIds: subs.filter((s) => s.status === 'active').map((s) => s.subscriberId),
     };
   },
 });

@@ -2,11 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
-import {
-  requireUser,
-  requireAdmin,
-  isAdmin,
-} from './shared/permissions';
+import { requireUser, requireAdmin, isAdmin } from './shared/permissions';
 import { gateOnMfaIfEnrolled } from './mfa';
 
 // =============================================================================
@@ -56,10 +52,12 @@ export const open = mutation({
     }
 
     // Block duplicate open disputes from the same opener on the same pick.
+    // Bounded scan: a single opener can open at most a handful of disputes on
+    // one pick, so 50 is plenty of headroom while keeping the read bounded.
     const existing = await ctx.db
       .query('disputes')
       .withIndex('by_pick', (q) => q.eq('pickId', args.pickId))
-      .collect();
+      .take(50);
     const dup = existing.find(
       (d) => d.openedByUserId === user._id && d.status !== 'resolved' && d.status !== 'dismissed',
     );

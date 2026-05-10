@@ -11,41 +11,23 @@ const crons = cronJobs();
 // ─── Auto-grade picks after event completion ────────────────────────────────
 // Checks for events that should be completed and marks them.
 
-crons.interval(
-  'check completed events',
-  { hours: 1 },
-  internal.crons.checkCompletedEvents,
-  {},
-);
+crons.interval('check completed events', { hours: 1 }, internal.crons.checkCompletedEvents, {});
 
 // ─── Clean up expired listings ──────────────────────────────────────────────
 // Archives listings past their expiration date.
 
-crons.interval(
-  'archive expired listings',
-  { hours: 6 },
-  internal.crons.archiveExpiredListings,
-  {},
-);
+crons.interval('archive expired listings', { hours: 6 }, internal.crons.archiveExpiredListings, {});
 // ─── Poll live scores from The Odds API ─────────────────────────────────
 // Runs every 60 seconds. Gracefully no-ops when THE_ODDS_API_KEY is not set.
 
-crons.interval(
-  'poll-live-scores',
-  { seconds: 60 },
-  internal.liveScores.pollActive,
-);
+crons.interval('poll-live-scores', { seconds: 60 }, internal.liveScores.pollActive);
 
 // ─── Poll upcoming events from The Odds API ─────────────────────────────
 // Runs hourly. The /events endpoint is cheap (1 quota credit per call),
 // and the upcoming list changes slowly. Gracefully no-ops when
 // THE_ODDS_API_KEY is not set.
 
-crons.interval(
-  'poll-upcoming-events',
-  { hours: 1 },
-  internal.oddsApi.pollUpcoming,
-);
+crons.interval('poll-upcoming-events', { hours: 1 }, internal.oddsApi.pollUpcoming);
 
 // ─── Poll bookmaker odds snapshots ──────────────────────────────────────
 // Runs daily and only writes rows when ODDS_SNAPSHOTS_ENABLED=true. The
@@ -53,21 +35,13 @@ crons.interval(
 // regions = ~9 credits per sport per call), so we keep this opt-in and
 // run at most once per day to stay inside reasonable quota.
 
-crons.interval(
-  'poll-odds-snapshots',
-  { hours: 24 },
-  internal.oddsApi.pollOddsSnapshots,
-);
+crons.interval('poll-odds-snapshots', { hours: 24 }, internal.oddsApi.pollOddsSnapshots);
 
 // ─── Poll Twitch / YouTube / Kick for creator stream live state ─────────
 // Runs every 5 minutes (Phase 10). Per-platform credentials are optional —
 // missing env keys quietly skip that platform without breaking the rest.
 
-crons.interval(
-  'poll-creator-streams',
-  { minutes: 5 },
-  internal.streams.pollStreams,
-);
+crons.interval('poll-creator-streams', { minutes: 5 }, internal.streams.pollStreams);
 
 // ─── Poll sport-specific sources (ESPNcricinfo etc.) ────────────────────
 // Runs daily; each source checks its own enable flag. Cricket is gated by
@@ -85,40 +59,87 @@ crons.interval(
 // ratio, account age, and sample size. Cheap full-table scan for now —
 // re-evaluate when creator count outgrows the 2k batch.
 
-crons.interval(
-  'recompute-trust-scores',
-  { hours: 24 },
-  internal.trust.recomputeTrustScores,
-);
+crons.interval('recompute-trust-scores', { hours: 24 }, internal.trust.recomputeTrustScores);
 
 // ─── Publish scheduled picks (Phase 12) ─────────────────────────────────
 // Runs every minute. Flips scheduled → published when publishAt has
 // passed, and fires the same fan-out chain as picks.create.
 
-crons.interval(
-  'publish-scheduled-picks',
-  { minutes: 1 },
-  internal.picks._publishDueScheduled,
-);
+crons.interval('publish-scheduled-picks', { minutes: 1 }, internal.picks._publishDueScheduled);
 
 // ─── Recompute trending scores (Phase 12) ───────────────────────────────
 // Nightly recomputation of picks.trendingScore so the Landing carousel
 // query is a bounded index lookup rather than a per-request scan.
 
-crons.interval(
-  'recompute-trending',
-  { hours: 12 },
-  internal.trending.recomputeTrending,
-);
+crons.interval('recompute-trending', { hours: 12 }, internal.trending.recomputeTrending);
 
 // ─── Line-movement alert poller (Phase 14b) ─────────────────────────────
 // Hourly comparison of recent oddsSnapshots → notify.dispatch when
 // implied-probability shifts exceed LINE_MOVE_THRESHOLD_PCT (default 5%).
 
+crons.interval('poll-line-movements', { hours: 1 }, internal.lineMovement.pollLineMovements);
+
+// ─── Discord inbound: import recent messages (M20) ──────────────────────
+// Runs every 5 minutes. Pulls Bot-API messages from enabled inbound
+// discordChannelSyncs, summarizes via Anthropic, stores hashed-author
+// summaries (never raw content). Quiet no-op without DISCORD_BOT_TOKEN.
+
 crons.interval(
-  'poll-line-movements',
+  'discord-import-messages',
+  { minutes: 5 },
+  internal.discord.inbound.importEnabledChannels,
+);
+
+// ─── Discord sentiment recompute (M20) ──────────────────────────────────
+// Hourly rollup of the last 6h of imports → discordSentimentSummaries.
+// Skipped silently when ANTHROPIC_API_KEY isn't configured.
+
+crons.interval(
+  'discord-recompute-sentiment',
   { hours: 1 },
-  internal.lineMovement.pollLineMovements,
+  internal.discord.sentiment.recomputeRecent,
+);
+
+// ─── Discord delivery retry queue (M20) ─────────────────────────────────
+// Re-fires 'failed' deliveries (≤3 attempts). Outbound is fire-and-forget
+// in the publish chain; this catches transient Discord 5xx / 429.
+
+crons.interval(
+  'discord-retry-failed-deliveries',
+  { minutes: 10 },
+  internal.discord.delivery.retryQueue,
+);
+
+// ─── Discord webhook event purge (M20) ──────────────────────────────────
+// Removes processed discordWebhookEvents older than 90d. Bounded delete
+// (200/run) — self-schedules continuation if more remain.
+
+crons.interval(
+  'discord-purge-webhook-events',
+  { hours: 24 },
+  internal.discord.events.purgeProcessed,
+);
+
+// ─── AI Copilot 90-day archive (M24 §retention) ─────────────────────────
+// Idle conversations (lastMessageAt > 90d ago) get archivedAt stamped so
+// they fall off the sidebar without losing message history. Bounded
+// 100/run with self-scheduled continuation.
+
+crons.interval(
+  'ai-copilot-archive-stale',
+  { hours: 24 },
+  internal.aiCopilot.mutations._archiveStaleConversations,
+);
+
+// ─── AI Copilot tool-call purge (M24 §retention) ────────────────────────
+// Hard-deletes aiToolCalls rows older than 30d. Conversation messages +
+// citations are preserved; only the raw tool arg/result observability
+// data is dropped. Bounded 100/run with self-scheduled continuation.
+
+crons.interval(
+  'ai-copilot-purge-tool-calls',
+  { hours: 24 },
+  internal.aiCopilot.mutations._purgeStaleToolCalls,
 );
 
 export default crons;

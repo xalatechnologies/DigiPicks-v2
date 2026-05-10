@@ -80,9 +80,7 @@ export const gradingHistory = query({
   handler: async (ctx, args) => {
     const rows = await ctx.db
       .query('auditLogs')
-      .withIndex('by_entity', (q) =>
-        q.eq('entityType', 'pick').eq('entityId', args.pickId),
-      )
+      .withIndex('by_entity', (q) => q.eq('entityType', 'pick').eq('entityId', args.pickId))
       .order('asc')
       .take(50);
     return rows;
@@ -184,9 +182,27 @@ export const create = mutation({
     if (status === 'published') {
       await ctx.scheduler.runAfter(0, internal.ai.analyzePick, { pickId });
       // Per-creator Discord channel embed — one delivery per creator.
-      await ctx.scheduler.runAfter(0, internal.discord.deliverPickNotification, {
+      await ctx.scheduler.runAfter(0, internal.discord.delivery.deliverPickNotification, {
         pickId,
         creatorId: args.creatorId,
+      });
+      // M20 — also schedule the generic outbound fanout so creators with
+      // multi-channel integrations get the new_pick alert across every
+      // configured outbound sync. The legacy webhook still flows through
+      // deliverPickNotification above, so we don't double-post for them.
+      await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+        creatorId: args.creatorId,
+        eventType: 'new_pick',
+        payload: {
+          title: args.title,
+          description: args.teaser ?? args.body?.slice(0, 200) ?? '',
+          relatedEntityType: 'pick',
+          relatedEntityId: pickId,
+          confidence:
+            args.confidence === 'Low' || args.confidence === 'Medium' || args.confidence === 'High'
+              ? args.confidence
+              : undefined,
+        },
       });
       // Per-subscriber fanout (in-app + push + telegram per user prefs).
       await ctx.scheduler.runAfter(0, internal.notify.onPickPublished, { pickId });
@@ -224,9 +240,23 @@ export const _publishDueScheduled = internalMutation({
       await ctx.scheduler.runAfter(0, internal.ai.analyzePick, {
         pickId: pick._id,
       });
-      await ctx.scheduler.runAfter(0, internal.discord.deliverPickNotification, {
+      await ctx.scheduler.runAfter(0, internal.discord.delivery.deliverPickNotification, {
         pickId: pick._id,
         creatorId: pick.creatorId,
+      });
+      await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+        creatorId: pick.creatorId,
+        eventType: 'new_pick',
+        payload: {
+          title: pick.title,
+          description: pick.teaser ?? pick.body?.slice(0, 200) ?? '',
+          relatedEntityType: 'pick',
+          relatedEntityId: pick._id,
+          confidence:
+            pick.confidence === 'Low' || pick.confidence === 'Medium' || pick.confidence === 'High'
+              ? pick.confidence
+              : undefined,
+        },
       });
       await ctx.scheduler.runAfter(0, internal.notify.onPickPublished, {
         pickId: pick._id,
@@ -280,6 +310,21 @@ export const grade = internalMutation({
     if (args.grade !== 'pending') {
       await ctx.scheduler.runAfter(0, internal.notify.onPickGraded, {
         pickId: args.id,
+      });
+      // M20 — Discord pick_graded fanout. Fire-and-forget; the action
+      // logs every per-channel result and never throws.
+      await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+        creatorId: pick.creatorId,
+        eventType: 'pick_graded',
+        payload: {
+          title: `Pick graded · ${args.grade}`,
+          description: pick.title,
+          fields: args.netUnits
+            ? [{ name: 'Net units', value: args.netUnits, inline: true }]
+            : undefined,
+          relatedEntityType: 'pick',
+          relatedEntityId: args.id,
+        },
       });
     }
 

@@ -1,0 +1,134 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-base);
+  padding: 0 var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--f-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-snug);
+  cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--t-1);
+  user-select: none;
+  text-decoration: none;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
+}
+.btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* default ("connect") — solid Discord blurple. White text via the
+   --primary-foreground token, which is `#ffffff` in both themes and
+   keeps the contract token-only. */
+.connect {
+  background: var(--discord-blurple);
+  color: var(--primary-foreground);
+  border-color: var(--discord-blurple);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 14px -4px color-mix(in srgb, var(--discord-blurple) 35%, transparent);
+}
+.connect:hover {
+  background: var(--discord-blurple-hover);
+  border-color: var(--discord-blurple-hover);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 12px 28px -10px color-mix(in srgb, var(--discord-blurple) 60%, transparent);
+}
+
+/* connected ("disconnect") — muted blurple-tinted surface. */
+.connected {
+  background: var(--discord-surface);
+  color: var(--discord-blurple);
+  border-color: color-mix(in srgb, var(--discord-blurple) 30%, var(--line));
+}
+.connected:hover {
+  background: color-mix(in srgb, var(--discord-blurple) 16%, transparent);
+  border-color: var(--discord-blurple);
+}
+
+.loading {
+  cursor: progress;
+}
+
+/* size modifiers — mirror the canonical Button. */
+.sm {
+  height: var(--control-md);
+  padding: 0 var(--space-4);
+  font-size: var(--text-sm);
+  gap: var(--space-1);
+  border-radius: var(--r-xs);
+}
+.lg {
+  height: var(--control-lg);
+  padding: 0 var(--space-8);
+  font-size: var(--text-md);
+  border-radius: var(--r-md);
+  gap: var(--space-3);
+}
+.xl {
+  height: var(--control-xl);
+  padding: 0 var(--space-10);
+  font-size: var(--text-lg);
+  border-radius: var(--r-md);
+}
+
+.icon {
+  width: var(--control-base);
+  padding: 0;
+}
+.sm.icon {
+  width: var(--control-md);
+}
+.lg.icon {
+  width: var(--control-lg);
+}
+.xl.icon {
+  width: var(--control-xl);
+}
+.block {
+  width: 100%;
+}
+
+/* Loading dot — currentColor pulse. */
+.dot {
+  width: var(--size-sm);
+  height: var(--size-sm);
+  border-radius: 50%;
+  background: currentColor;
+  animation: dcbPulse var(--dur-ambient-pulse) var(--ease-in-out) infinite;
+}
+
+@keyframes dcbPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

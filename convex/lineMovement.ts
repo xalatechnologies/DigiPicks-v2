@@ -1,9 +1,5 @@
 import { v } from 'convex/values';
-import {
-  internalAction,
-  internalMutation,
-  internalQuery,
-} from './_generated/server';
+import { internalAction, internalMutation, internalQuery } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
 
@@ -50,10 +46,7 @@ export const _recentSnapshots = internalQuery({
   args: {},
   handler: async (ctx): Promise<Snapshot[]> => {
     const cutoff = Date.now() - SCAN_WINDOW_MS;
-    const rows = await ctx.db
-      .query('oddsSnapshots')
-      .order('desc')
-      .take(5000);
+    const rows = await ctx.db.query('oddsSnapshots').order('desc').take(5000);
     return rows.filter((r) => r.capturedAt >= cutoff);
   },
 });
@@ -195,6 +188,24 @@ export const pollLineMovements = internalAction({
         ),
       );
       dispatched += recipients.size;
+
+      // M20 — fan an odds_movement event into each affected creator's
+      // Discord channels (every creator with a published pick on this
+      // event). Fire-and-forget; per-channel filtering happens inside
+      // fanoutOutbound (alertRules.oddsMovement gate).
+      for (const cid of ctxData.creatorIds) {
+        await ctx.scheduler.runAfter(0, internal.discord.delivery.fanoutOutbound, {
+          creatorId: cid,
+          eventType: 'odds_movement',
+          payload: {
+            title: payload.title,
+            description: payload.body,
+            url: payload.url,
+            relatedEntityType: 'event',
+            relatedEntityId: c.eventId,
+          },
+        });
+      }
     }
 
     return { scanned: snapshots.length, dispatched };

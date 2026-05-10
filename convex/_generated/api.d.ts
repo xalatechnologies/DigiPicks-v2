@@ -8,87 +8,114 @@
  * @module
  */
 
-import type * as admin from "../admin.js";
-import type * as ai from "../ai.js";
-import type * as applications from "../applications.js";
-import type * as audit from "../audit.js";
-import type * as auth from "../auth.js";
-import type * as autoGrader from "../autoGrader.js";
-import type * as categories from "../categories.js";
-import type * as channels from "../channels.js";
-import type * as copilot from "../copilot.js";
-import type * as coupons from "../coupons.js";
-import type * as creators from "../creators.js";
-import type * as crons from "../crons.js";
-import type * as discord from "../discord.js";
-import type * as discordInbound from "../discordInbound.js";
-import type * as discordSettings from "../discordSettings.js";
-import type * as disputes from "../disputes.js";
-import type * as dmThreads from "../dmThreads.js";
-import type * as events from "../events.js";
-import type * as feed from "../feed.js";
-import type * as files from "../files.js";
-import type * as followedCreators from "../followedCreators.js";
-import type * as gdpr from "../gdpr.js";
-import type * as http from "../http.js";
-import type * as lineMovement from "../lineMovement.js";
-import type * as listings from "../listings.js";
-import type * as liveScores from "../liveScores.js";
-import type * as messages from "../messages.js";
-import type * as mfa from "../mfa.js";
-import type * as migrations from "../migrations.js";
-import type * as notifications from "../notifications.js";
-import type * as notify from "../notify.js";
-import type * as odds from "../odds.js";
-import type * as oddsApi from "../oddsApi.js";
-import type * as payouts from "../payouts.js";
-import type * as picks from "../picks.js";
-import type * as pricingTiers from "../pricingTiers.js";
-import type * as push from "../push.js";
-import type * as pushSubscriptions from "../pushSubscriptions.js";
-import type * as referrals from "../referrals.js";
-import type * as savedPicks from "../savedPicks.js";
-import type * as search from "../search.js";
-import type * as seed from "../seed.js";
-import type * as shared_aiParse from "../shared/aiParse.js";
-import type * as shared_permissions from "../shared/permissions.js";
-import type * as shared_rateLimit from "../shared/rateLimit.js";
-import type * as shared_retry from "../shared/retry.js";
-import type * as shared_sentryNode from "../shared/sentryNode.js";
-import type * as shared_validators from "../shared/validators.js";
-import type * as sources_cricketWriter from "../sources/cricketWriter.js";
-import type * as sources_espncricinfo from "../sources/espncricinfo.js";
-import type * as streams from "../streams.js";
-import type * as stripe from "../stripe.js";
-import type * as subscriberStats from "../subscriberStats.js";
-import type * as subscriptions from "../subscriptions.js";
-import type * as teamLogos from "../teamLogos.js";
-import type * as telegram from "../telegram.js";
-import type * as trending from "../trending.js";
-import type * as trust from "../trust.js";
-import type * as users from "../users.js";
-import type * as watchlists from "../watchlists.js";
+import type * as admin from '../admin.js';
+import type * as ai from '../ai.js';
+import type * as aiCopilot_mutations from '../aiCopilot/mutations.js';
+import type * as aiCopilot_prompt from '../aiCopilot/prompt.js';
+import type * as aiCopilot_queries from '../aiCopilot/queries.js';
+import type * as aiCopilot_respond from '../aiCopilot/respond.js';
+import type * as aiCopilot_scrub from '../aiCopilot/scrub.js';
+import type * as aiCopilot_tools from '../aiCopilot/tools.js';
+import type * as applications from '../applications.js';
+import type * as audit from '../audit.js';
+import type * as auth from '../auth.js';
+import type * as autoGrader from '../autoGrader.js';
+import type * as categories from '../categories.js';
+import type * as channels from '../channels.js';
+import type * as coupons from '../coupons.js';
+import type * as creators from '../creators.js';
+import type * as crons from '../crons.js';
+import type * as discord_channels from '../discord/channels.js';
+import type * as discord_delivery from '../discord/delivery.js';
+import type * as discord_events from '../discord/events.js';
+import type * as discord_gdpr from '../discord/gdpr.js';
+import type * as discord_inbound from '../discord/inbound.js';
+import type * as discord_integrations from '../discord/integrations.js';
+import type * as discord_integrationsDb from '../discord/integrationsDb.js';
+import type * as discord_oauth from '../discord/oauth.js';
+import type * as discord_retry from '../discord/retry.js';
+import type * as discord_sentiment from '../discord/sentiment.js';
+import type * as discord_threads from '../discord/threads.js';
+import type * as discordInbound from '../discordInbound.js';
+import type * as discordSettings from '../discordSettings.js';
+import type * as disputes from '../disputes.js';
+import type * as dmThreads from '../dmThreads.js';
+import type * as events from '../events.js';
+import type * as feed from '../feed.js';
+import type * as files from '../files.js';
+import type * as followedCreators from '../followedCreators.js';
+import type * as gdpr from '../gdpr.js';
+import type * as http from '../http.js';
+import type * as lineMovement from '../lineMovement.js';
+import type * as listings from '../listings.js';
+import type * as liveScores from '../liveScores.js';
+import type * as messages from '../messages.js';
+import type * as mfa from '../mfa.js';
+import type * as migrations from '../migrations.js';
+import type * as notifications from '../notifications.js';
+import type * as notify from '../notify.js';
+import type * as odds from '../odds.js';
+import type * as oddsApi from '../oddsApi.js';
+import type * as payouts from '../payouts.js';
+import type * as picks from '../picks.js';
+import type * as pricingTiers from '../pricingTiers.js';
+import type * as push from '../push.js';
+import type * as pushSubscriptions from '../pushSubscriptions.js';
+import type * as referrals from '../referrals.js';
+import type * as savedPicks from '../savedPicks.js';
+import type * as search from '../search.js';
+import type * as seed from '../seed.js';
+import type * as shared_aiParse from '../shared/aiParse.js';
+import type * as shared_permissions from '../shared/permissions.js';
+import type * as shared_rateLimit from '../shared/rateLimit.js';
+import type * as shared_retry from '../shared/retry.js';
+import type * as shared_sentryNode from '../shared/sentryNode.js';
+import type * as shared_sportKeyMap from '../shared/sportKeyMap.js';
+import type * as shared_validators from '../shared/validators.js';
+import type * as sources_cricketWriter from '../sources/cricketWriter.js';
+import type * as sources_espncricinfo from '../sources/espncricinfo.js';
+import type * as streams from '../streams.js';
+import type * as stripe from '../stripe.js';
+import type * as subscriberStats from '../subscriberStats.js';
+import type * as subscriptions from '../subscriptions.js';
+import type * as teamLogos from '../teamLogos.js';
+import type * as telegram from '../telegram.js';
+import type * as trending from '../trending.js';
+import type * as trust from '../trust.js';
+import type * as users from '../users.js';
+import type * as watchlists from '../watchlists.js';
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
+import type { ApiFromModules, FilterApi, FunctionReference } from 'convex/server';
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   ai: typeof ai;
+  'aiCopilot/mutations': typeof aiCopilot_mutations;
+  'aiCopilot/prompt': typeof aiCopilot_prompt;
+  'aiCopilot/queries': typeof aiCopilot_queries;
+  'aiCopilot/respond': typeof aiCopilot_respond;
+  'aiCopilot/scrub': typeof aiCopilot_scrub;
+  'aiCopilot/tools': typeof aiCopilot_tools;
   applications: typeof applications;
   audit: typeof audit;
   auth: typeof auth;
   autoGrader: typeof autoGrader;
   categories: typeof categories;
   channels: typeof channels;
-  copilot: typeof copilot;
   coupons: typeof coupons;
   creators: typeof creators;
   crons: typeof crons;
-  discord: typeof discord;
+  'discord/channels': typeof discord_channels;
+  'discord/delivery': typeof discord_delivery;
+  'discord/events': typeof discord_events;
+  'discord/gdpr': typeof discord_gdpr;
+  'discord/inbound': typeof discord_inbound;
+  'discord/integrations': typeof discord_integrations;
+  'discord/integrationsDb': typeof discord_integrationsDb;
+  'discord/oauth': typeof discord_oauth;
+  'discord/retry': typeof discord_retry;
+  'discord/sentiment': typeof discord_sentiment;
+  'discord/threads': typeof discord_threads;
   discordInbound: typeof discordInbound;
   discordSettings: typeof discordSettings;
   disputes: typeof disputes;
@@ -118,14 +145,15 @@ declare const fullApi: ApiFromModules<{
   savedPicks: typeof savedPicks;
   search: typeof search;
   seed: typeof seed;
-  "shared/aiParse": typeof shared_aiParse;
-  "shared/permissions": typeof shared_permissions;
-  "shared/rateLimit": typeof shared_rateLimit;
-  "shared/retry": typeof shared_retry;
-  "shared/sentryNode": typeof shared_sentryNode;
-  "shared/validators": typeof shared_validators;
-  "sources/cricketWriter": typeof sources_cricketWriter;
-  "sources/espncricinfo": typeof sources_espncricinfo;
+  'shared/aiParse': typeof shared_aiParse;
+  'shared/permissions': typeof shared_permissions;
+  'shared/rateLimit': typeof shared_rateLimit;
+  'shared/retry': typeof shared_retry;
+  'shared/sentryNode': typeof shared_sentryNode;
+  'shared/sportKeyMap': typeof shared_sportKeyMap;
+  'shared/validators': typeof shared_validators;
+  'sources/cricketWriter': typeof sources_cricketWriter;
+  'sources/espncricinfo': typeof sources_espncricinfo;
   streams: typeof streams;
   stripe: typeof stripe;
   subscriberStats: typeof subscriberStats;
@@ -146,10 +174,7 @@ declare const fullApi: ApiFromModules<{
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
+export declare const api: FilterApi<typeof fullApi, FunctionReference<any, 'public'>>;
 
 /**
  * A utility for referencing Convex functions in your app's internal API.
@@ -159,11 +184,8 @@ export declare const api: FilterApi<
  * const myFunctionReference = internal.myModule.myFunction;
  * ```
  */
-export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
+export declare const internal: FilterApi<typeof fullApi, FunctionReference<any, 'internal'>>;
 
 export declare const components: {
-  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
+  rateLimiter: import('@convex-dev/rate-limiter/_generated/component.js').ComponentApi<'rateLimiter'>;
 };

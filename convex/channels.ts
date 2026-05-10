@@ -73,11 +73,7 @@ async function checkChannelAccess(
     return { allowed: true, requiredTier: required };
   }
   // Admin bypass.
-  if (
-    user?.role === 'admin' ||
-    user?.role === 'tenant_admin' ||
-    user?.role === 'super_admin'
-  ) {
+  if (user?.role === 'admin' || user?.role === 'tenant_admin' || user?.role === 'super_admin') {
     return { allowed: true, requiredTier: required };
   }
 
@@ -146,6 +142,7 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     type: channelType,
+    access: v.optional(v.union(v.literal('public'), v.literal('subscriber'), v.literal('vip'))),
   },
   handler: async (ctx, args) => {
     await requireCreatorOwnership(ctx, args.creatorId);
@@ -164,6 +161,10 @@ export const create = mutation({
       name: args.name,
       description: args.description,
       type: args.type,
+      // Explicit access tier on every new channel — legacy rows fall back to
+      // 'public' on read, but new channels persist the chosen tier so the
+      // gating decision is auditable.
+      access: args.access ?? 'public',
       isActive: true,
       memberCount: 0,
       createdAt: Date.now(),
@@ -178,6 +179,7 @@ export const update = mutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     type: v.optional(channelType),
+    access: v.optional(v.union(v.literal('public'), v.literal('subscriber'), v.literal('vip'))),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -194,6 +196,7 @@ export const update = mutation({
     if (args.name !== undefined) patch.name = args.name;
     if (args.description !== undefined) patch.description = args.description;
     if (args.type !== undefined) patch.type = args.type;
+    if (args.access !== undefined) patch.access = args.access;
     if (args.isActive !== undefined) patch.isActive = args.isActive;
 
     if (Object.keys(patch).length > 0) {
