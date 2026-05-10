@@ -70,7 +70,7 @@ describe('channels', () => {
     ).rejects.toThrow('slug already exists');
   });
 
-  test('list filters out subscriber-only channels (Phase 4 visibility)', async () => {
+  test('list surfaces both public and subscriber channels with their tier', async () => {
     const t = convexTest(schema, modules);
     const { creatorId, ownerUserId } = await setup(t);
     const asOwner = t.withIdentity({ subject: ownerUserId });
@@ -86,10 +86,18 @@ describe('channels', () => {
       slug: 'vip-room',
       name: 'VIP',
       type: 'subscriber',
+      access: 'subscriber',
     });
 
     const listed = await t.query(api.channels.list, {});
-    expect(listed.map((l: any) => l.channel.slug)).toEqual(['public-room']);
+    // Both channels are discoverable; the access tier flows through
+    // requiredAccess so the UI can render the lock + subscribe CTA.
+    const slugs = listed.map((l: any) => l.channel.slug).sort();
+    expect(slugs).toEqual(['public-room', 'vip-room']);
+    const vip = listed.find((l: any) => l.channel.slug === 'vip-room');
+    expect(vip?.requiredAccess).toBe('subscriber');
+    const pub = listed.find((l: any) => l.channel.slug === 'public-room');
+    expect(pub?.requiredAccess).toBe('public');
   });
 
   test('non-owner creator cannot create a channel under another creator', async () => {

@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 import { Doc } from './_generated/dataModel';
 import { eventStatus, eventVisibility, eventParticipantType } from './shared/validators';
 import { requireAdmin, requireCreator, isAdmin } from './shared/permissions';
+import { gateOnMfaIfEnrolled } from './mfa';
 import { internal } from './_generated/api';
 
 // Public-read gate: only `public` + reviewed events surface on public
@@ -267,6 +268,9 @@ export const reviewEvent = mutation({
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
+    // BPMN-010 §preconditions — MFA freshness gate on sensitive admin
+    // mutations. No-op for admins who haven't enrolled MFA yet.
+    await gateOnMfaIfEnrolled(ctx, admin._id);
 
     const event = await ctx.db.get(args.eventId);
     if (!event) throw new Error('Event not found');

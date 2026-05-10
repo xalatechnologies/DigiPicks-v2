@@ -99,6 +99,7 @@ duplicates for the admin queue.
 
 ## Module mapping
 
-- [M05 — Federated events catalog](../modules/M05-federated-events.md)
-- [M16 — Admin & moderation](../modules/M16-admin-moderation.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M04 — Provider-agnostic event engine](../modules/M04-provider-agnostic-event-engine.md)
+- [M17 — Admin operations & moderation](../modules/M17-admin-operations-moderation.md)
+- [M23 — Custom event review & federation](../modules/M23-custom-event-review-federation.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

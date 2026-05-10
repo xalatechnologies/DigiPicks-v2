@@ -137,6 +137,11 @@ export const transition = mutation({
     disputeId: v.id('disputes'),
     status: disputeStatus,
     resolution: v.optional(v.string()),
+    /** BPMN-011 §override path. When set on a `resolved` transition, the
+     *  pick's grade is flipped to this value and a paired
+     *  `pick.grade.overridden` audit row is written so the immutable-grade
+     *  guarantee (NFR-006) has an explicit, auditable escape hatch. */
+    overrideGrade: v.optional(v.union(v.literal('win'), v.literal('loss'), v.literal('push'))),
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
@@ -157,12 +162,42 @@ export const transition = mutation({
     }
     await ctx.db.patch(args.disputeId, patch);
 
+    // Optional grade override — only meaningful on the resolved branch.
+    if (args.overrideGrade && args.status === 'resolved') {
+      const pick = await ctx.db.get(dispute.pickId);
+      if (pick) {
+        const previousGrade = pick.grade ?? 'pending';
+        await ctx.db.patch(dispute.pickId, {
+          grade: args.overrideGrade,
+          gradedAt: Date.now(),
+        });
+        // Paired audit row — mirrors BPMN-011 §postconditions: every
+        // override writes a `pick.grade.overridden` row alongside the
+        // dispute resolution so performance numbers can be reconciled.
+        await ctx.runMutation(internal.audit.log, {
+          actorUserId: admin._id,
+          entityType: 'pick',
+          entityId: dispute.pickId,
+          action: 'pick.grade.overridden',
+          metadata: {
+            disputeId: args.disputeId,
+            previousGrade,
+            newGrade: args.overrideGrade,
+            reason: args.resolution ?? null,
+          },
+        });
+      }
+    }
+
     await ctx.runMutation(internal.audit.log, {
       actorUserId: admin._id,
       entityType: 'dispute',
       entityId: args.disputeId,
       action: `dispute.${args.status}`,
-      metadata: args.resolution ? { resolution: args.resolution } : undefined,
+      metadata: {
+        ...(args.resolution ? { resolution: args.resolution } : {}),
+        ...(args.overrideGrade ? { overrideGrade: args.overrideGrade } : {}),
+      },
     });
 
     return args.disputeId;

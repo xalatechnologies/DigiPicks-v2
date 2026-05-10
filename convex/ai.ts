@@ -184,6 +184,96 @@ export const analyzePick = internalAction({
 });
 
 // =============================================================================
+// Grading explanation (BPMN-013 §AI interactions). Single-shot Haiku
+// summary that fills `picks.gradeExplanation` after a non-pending grade
+// is recorded. The output is descriptive — never recommends, never
+// editorializes — so we can surface it on the customer-facing pick
+// timeline without compliance issues.
+// =============================================================================
+
+const GRADING_SYSTEM_PROMPT = [
+  'You are a sports analyst at DigiPicks. You read a graded pick + final',
+  'event score and produce ONE neutral sentence describing why the pick',
+  'resolved the way it did.',
+  '',
+  'Return PLAIN TEXT only — no JSON, no markdown, no commentary, just the',
+  'one sentence. Maximum 160 characters. Examples:',
+  '- "Took Chiefs -3.5; final 27-21 covered by 2.5."',
+  '- "Over 8.5 lost on the slow-paced 6-0 result."',
+  '- "Pushed: spread of -7 met the exact 28-21 final."',
+  '',
+  'Rules:',
+  '- Be factual; do not characterize the bet as "good" or "bad".',
+  '- Never recommend gambling.',
+  '- If the score data is missing, return "Result confirmed; details unavailable."',
+].join('\n');
+
+export const gradingExplanation = internalAction({
+  args: {
+    pickId: v.id('picks'),
+    model: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<{ explanation?: string; skipped?: true }> => {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return { skipped: true };
+
+    const pick = await ctx.runQuery(internal.ai._pickForAi, { pickId: args.pickId });
+    if (!pick) return { skipped: true };
+    if (!pick.grade || pick.grade === 'pending') return { skipped: true };
+
+    const userPrompt = [
+      `Pick: ${pick.title}`,
+      `Sport / League: ${pick.sport} / ${pick.league}`,
+      `Event: ${pick.eventName}`,
+      `Market: ${pick.market}`,
+      `Selection: ${pick.selection}`,
+      `Odds: ${pick.odds}`,
+      `Final grade: ${pick.grade}`,
+      pick.netUnits ? `Net units: ${pick.netUnits}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const model = args.model ?? DEFAULT_MODEL;
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 200,
+        system: [
+          {
+            type: 'text',
+            text: GRADING_SYSTEM_PROMPT,
+            cache_control: { type: 'ephemeral' },
+          },
+        ],
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    const body = (await res.json()) as AnthropicMessageResponse;
+    if (!res.ok) {
+      console.warn(`gradingExplanation Anthropic error: ${body.error?.message ?? res.status}`);
+      return { skipped: true };
+    }
+
+    const text = body.content?.find((b) => b.type === 'text')?.text?.trim() ?? '';
+    if (!text) return { skipped: true };
+
+    await ctx.runMutation(internal.picks._setGradeExplanation, {
+      pickId: args.pickId,
+      explanation: text.slice(0, 200),
+    });
+    return { explanation: text };
+  },
+});
+
+// =============================================================================
 // AI Co-write — pre-publish suggestion (PRD M9 differentiator, Phase 12).
 //
 // CreatePick form calls this action with the in-progress sketch (sport,
@@ -220,7 +310,16 @@ export const suggestPick = action({
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY not configured');
+      // Symmetric with analyzePick — gracefully degrade rather than
+      // throw, so the UI can show a friendly "AI not enabled" state
+      // instead of a runtime error. Same pattern as oddsApi / streams /
+      // push / telegram.
+      return {
+        summary: '',
+        confidence: 0,
+        reasoning: 'AI suggestions are not enabled in this environment.',
+        model: 'skipped',
+      };
     }
 
     const model = args.model ?? DEFAULT_MODEL;

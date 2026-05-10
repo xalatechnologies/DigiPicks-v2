@@ -85,14 +85,13 @@ flowchart TD
 
 ## AI interactions
 
-- Optional: Anthropic Haiku scores the application narrative for
-  authenticity signals. Score lands on
-  `applications.aiAuthenticityScore`. Score never auto-rejects — it's a
-  hint for the admin queue.
+- AI authenticity scoring of application narratives is DEFERRED. The
+  schema reserves `applications.aiAuthenticityScore` but no flow
+  populates it today; admin review is fully manual.
 
 ## Module mapping
 
-- [M02 — Roles & permissions](../modules/M02-roles-permissions.md)
-- [M04 — Creator profile & onboarding](../modules/M04-creator-profile-onboarding.md)
-- [M16 — Admin & moderation](../modules/M16-admin-moderation.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M01 — Authentication, identity & roles](../modules/M01-authentication-identity-roles.md)
+- [M08 — Creator verification & trust](../modules/M08-creator-verification-trust.md)
+- [M17 — Admin operations & moderation](../modules/M17-admin-operations-moderation.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

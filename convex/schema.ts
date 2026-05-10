@@ -424,6 +424,11 @@ export default defineSchema({
     aiReasoning: v.optional(v.string()),
     aiAnalyzedAt: v.optional(v.number()),
     aiModel: v.optional(v.string()),
+    /** Post-grade neutral one-liner explaining the result. Populated by
+     *  internal.ai.gradingExplanation (BPMN-013). Quietly stays undefined
+     *  when ANTHROPIC_API_KEY is not configured. */
+    gradeExplanation: v.optional(v.string()),
+    gradeExplanationAt: v.optional(v.number()),
     /** Trending score (Phase 12) — recomputed nightly. Higher = hotter. */
     trendingScore: v.optional(v.number()),
     trendingComputedAt: v.optional(v.number()),
@@ -527,10 +532,36 @@ export default defineSchema({
     cancelledAt: v.optional(v.number()),
     stripeSubscriptionId: v.optional(v.string()),
     stripeCustomerId: v.optional(v.string()),
+    /** Set when status flips to 'past_due'. Until this timestamp, access
+     *  helpers treat the row as still-active so a transient payment hiccup
+     *  doesn't yank entitlement on the first failed retry (BPMN-003 §grace
+     *  period). Default window is GRACE_PERIOD_DAYS env (3 days). */
+    gracePeriodEndsAt: v.optional(v.number()),
   })
     .index('by_creator', ['creatorId'])
     .index('by_subscriber_and_creator', ['subscriberId', 'creatorId'])
     .index('by_stripeSubscriptionId', ['stripeSubscriptionId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STRIPE EVENTS — Webhook idempotency log (BPMN-003 §preconditions).
+  // Stripe re-delivers events on transient failures; the unique index on
+  // eventId short-circuits replays so subscription state never double-applies.
+  // payloadHash captures sha-256 of the raw body for forensics.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  stripeEvents: defineTable({
+    eventId: v.string(),
+    type: v.string(),
+    payloadHash: v.string(),
+    /** Set on the first time this event was processed. Subsequent deliveries
+     *  short-circuit by reading this row and returning early. */
+    processedAt: v.number(),
+    /** Optional summary of what we did with the event — useful for debugging
+     *  drift between Stripe state and our subscriptions table. */
+    outcome: v.optional(v.string()),
+  })
+    .index('by_eventId', ['eventId'])
+    .index('by_type_and_processed', ['type', 'processedAt']),
 
   payouts: defineTable({
     creatorId: v.id('creators'),

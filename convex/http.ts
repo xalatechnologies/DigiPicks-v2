@@ -137,6 +137,23 @@ http.route({
     const eventType = body.type as string;
     const obj = body.data?.object as Record<string, unknown> | undefined;
 
+    // BPMN-003 §preconditions — webhook idempotency. Stripe re-delivers
+    // events on transient failures; we short-circuit replays via the
+    // stripeEvents table so subscription state never double-applies.
+    const payloadHashBytes = await crypto.subtle.digest('SHA-256', encoder.encode(rawBody));
+    const payloadHash = Array.from(new Uint8Array(payloadHashBytes))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    const claimed = await ctx.runMutation(internal.stripeIdempotency.claim, {
+      eventId: body.id as string,
+      type: eventType,
+      payloadHash,
+    });
+    if (!claimed) {
+      // Already processed — return 200 so Stripe stops retrying.
+      return new Response(null, { status: 200 });
+    }
+
     await ctx.runMutation(internal.audit.log, {
       entityType: 'stripe_webhook',
       entityId: body.id,

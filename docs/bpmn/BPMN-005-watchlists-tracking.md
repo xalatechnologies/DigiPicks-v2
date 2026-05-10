@@ -75,5 +75,6 @@ via the audit query tool.
 
 ## Module mapping
 
-- [M14 — Recommendations](../modules/M14-recommendations.md)
-- [M19 — Notifications & realtime](../modules/M19-notifications-realtime.md)
+- [M11 — Realtime odds intelligence](../modules/M11-realtime-odds-intelligence.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M18 — Saved library & watchlists](../modules/M18-saved-library-watchlists.md)

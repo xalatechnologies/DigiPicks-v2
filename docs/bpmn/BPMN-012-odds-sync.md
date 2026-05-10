@@ -8,13 +8,19 @@ DigiPicks schema, and propagation to the feed and watchlist alerts.
 ## Trigger
 
 - Cron `pollOddsSnapshots` runs every 60 seconds.
-- Manual `oddsApi.refreshNow` from `/admin` for a specific event.
+- Manual admin refresh from `/admin` — the action is
+  `events.seedFromOddsApi` (the prose name `oddsApi.refreshNow` in
+  earlier docs is an alias for the same call).
 
 ## Preconditions
 
 - `ODDS_API_KEY` env var configured (otherwise the action is a quiet
   no-op and emits a single startup warning).
 - Events exist in `scheduled` or `live` state for in-window dates.
+- Sport-key registry is shared across pollers — `oddsApi.pollUpcoming`
+  imports `SPORT_KEY_MAP_FULL` and `liveScores.pollActive` imports
+  `SPORT_KEY_MAP_LIVE` from `convex/shared/sportKeyMap.ts` (single
+  source of truth; live-poll subset is intentionally narrower for quota).
 
 ## Actors / Swimlanes
 
@@ -44,12 +50,14 @@ flowchart TD
   subgraph F[Feed / alerts]
     f1[feed.list re-runs]
     f2[notify.onLineMovement]
+    f3{{discord.delivery.fanoutOutbound<br/>eventType=odds_movement}}
   end
 
   c1 --> k1 --> k2 --> p1
   p1 -->|JSON| k2 --> k3 -.-> k4
   k3 -.-> f1
   k3 -.-> k5 -.-> f2
+  k5 -.-> f3
 ```
 
 ## Alternative flows
@@ -75,6 +83,10 @@ flowchart TD
   on every odds change.
 - Watchlist subscribers (BPMN-005) receive push when implied
   probability shifts ≥ threshold.
+- Creators with an enabled outbound `discordChannelSyncs` row + the
+  `oddsMovement` alert rule on receive a Discord embed for each picked
+  event whose line crosses `LINE_MOVE_THRESHOLD_PCT`. Per-creator (not
+  per-user) — see BPMN-015.
 
 ## AI interactions
 
@@ -83,6 +95,7 @@ for explanatory text, but that's read-side and unrelated to ingest.
 
 ## Module mapping
 
-- [M06 — Odds ingestion & intel](../modules/M06-odds-intel.md)
-- [M14 — Recommendations](../modules/M14-recommendations.md)
-- [M19 — Notifications & realtime](../modules/M19-notifications-realtime.md)
+- [M11 — Realtime odds intelligence](../modules/M11-realtime-odds-intelligence.md)
+- [M22 — External sports data providers](../modules/M22-external-sports-data-providers.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M20 — Discord integration](../modules/M20-discord-integration.md)

@@ -3,8 +3,10 @@
 ## Purpose
 
 A visitor (or signed-in customer) discovers a creator, hits a paywall,
-checks out via Stripe, and gains entitlement to premium content in
-realtime.
+checks out via Stripe, and gains access to premium content in
+realtime. Access is gated by `subscriptions.status` via the
+`isAccessActive(sub)` helper — there is no separate `entitlements`
+table.
 
 ## Trigger
 
@@ -19,10 +21,12 @@ Visitor clicks **Subscribe** on a `PriceCard` for a creator's tier.
 ## Actors / Swimlanes
 
 - **Visitor / Customer**
-- **Convex Backend** — `subscriptions`, `entitlements`, `pricingTiers`.
+- **Convex Backend** — `subscriptions`, `pricingTiers`,
+  `stripeEvents` (webhook idempotency).
 - **Stripe** — Checkout + webhook.
-- **Notify** — push, email, telegram, discord fanout.
-- **Feed** — realtime subscription queries.
+- **Notify** — `internal.notify.onSubscriptionActive` lifecycle dispatch
+  (push / email / telegram / in-app).
+- **Feed** — realtime subscription queries gated by `isAccessActive`.
 
 ## Main flow
 
@@ -36,8 +40,9 @@ flowchart TD
   end
   subgraph K[Convex Backend]
     k1{{stripe.createCheckoutSession}}
-    k2[(subscriptions<br/>upsert status=active)]
-    k3[(entitlements<br/>insert)]
+    k0[(stripeEvents<br/>claim eventId)]
+    k2{{_recordSubscriptionFromStripe<br/>off→on}}
+    k3[(subscriptions<br/>upsert status=active)]
     k4[(auditLogs<br/>action=stripe.subscribed)]
   end
   subgraph S[Stripe]
@@ -45,16 +50,15 @@ flowchart TD
     s2{{webhook checkout.session.completed}}
   end
   subgraph N[Notify]
-    n1{{notify.dispatch<br/>welcome}}
+    n1{{internal.notify.onSubscriptionActive<br/>kind=subscription_active}}
   end
   subgraph F[Feed]
-    f1[creators.gatedContent<br/>recomputes]
+    f1[isAccessActive flips true<br/>premium queries unblock]
   end
 
-  c1 --> c2 --> k1 --> s1 --> c3 --> s2 --> k2
-  k2 -.-> k3
+  c1 --> c2 --> k1 --> s1 --> c3 --> s2 --> k0 --> k2 --> k3
   k3 -.-> k4
-  k3 -.-> n1
+  k2 -.-> n1
   k3 -.-> f1
   s2 --> c4
 ```
@@ -62,24 +66,29 @@ flowchart TD
 ## Alternative flows
 
 - **Card declined** → Stripe stays on Checkout; no subscription row.
-- **Webhook missed** → idempotent webhook handler reconciles on retry
-  (`stripeEvents` dedupe table).
+- **Webhook replay** → `internal.stripeIdempotency.claim` short-circuits
+  on duplicate `stripeEvents.eventId` so the rest of the handler is a
+  no-op.
 - **Trial selected** → `trialDays` from tier copies into subscription;
-  `status='trialing'`; entitlement still granted.
+  `status='trialing'`; `isAccessActive` returns true.
 - **Visitor not signed in** → checkout collects email; webhook creates a
   `users` row + magic-link invite.
 
 ## Postconditions
 
 - `subscriptions` row with `status` ∈ {`active`, `trialing`}.
-- One or more `entitlements` rows.
+- `isAccessActive(sub)` returns true; premium queries unblock for the
+  customer.
+- One `stripeEvents` row keyed by `eventId` (idempotency receipt).
 - Audit row `stripe.subscribed`.
 - Stripe `customer_id` stored on `users`.
+- One in-app `notifications` row (`kind='subscription_active'`,
+  lifecycle — bypasses per-kind toggles).
 
 ## Realtime events
 
-- `creators.gatedContent` query flips premium content visible.
 - `subscriptions.mine` updates instantly for the customer.
+- Premium-gated queries that consult `isAccessActive` re-run.
 - Creator's `subscribers.list` admin view auto-refreshes.
 
 ## AI interactions
@@ -89,6 +98,7 @@ upstream (BPMN-014).
 
 ## Module mapping
 
-- [M03 — Subscriptions & payments](../modules/M03-subscriptions-payments.md)
-- [M15 — Following & access](../modules/M15-following-access.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M06 — Access control & entitlements](../modules/M06-access-control-entitlements.md)
+- [M07 — Subscription, billing & monetization](../modules/M07-subscription-billing-monetization.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

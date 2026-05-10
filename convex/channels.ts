@@ -14,31 +14,46 @@ import { channelType } from './shared/validators';
 // able to read and post.
 // =============================================================================
 
-/** Public list of all active community channels, most-recently-active first. */
+/** Public list of all active community channels, most-recently-active first.
+ *  Includes both `type='public'` and `type='subscriber'` rows so subscribers
+ *  can discover gated channels in the directory; the `requiredAccess` field
+ *  on each row tells the UI when to render a lock + subscribe CTA. */
 export const list = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = Math.min(args.limit ?? 50, 200);
 
-    const rows = await ctx.db
-      .query('channels')
-      .withIndex('by_type', (q) => q.eq('type', 'public'))
-      .order('desc')
-      .take(limit);
+    // Two bounded reads (one per type) merged + sorted in-memory. Each
+    // index read stays bounded; the merge cap is `limit` so the total
+    // scan is at most 2 × limit rows.
+    const [publicRows, subscriberRows] = await Promise.all([
+      ctx.db
+        .query('channels')
+        .withIndex('by_type', (q) => q.eq('type', 'public'))
+        .order('desc')
+        .take(limit),
+      ctx.db
+        .query('channels')
+        .withIndex('by_type', (q) => q.eq('type', 'subscriber'))
+        .order('desc')
+        .take(limit),
+    ]);
+    const merged = [...publicRows, ...subscriberRows]
+      .filter((c) => c.isActive)
+      .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0))
+      .slice(0, limit);
 
     const enriched = await Promise.all(
-      rows
-        .filter((c) => c.isActive)
-        .map(async (c) => {
-          const creator = await ctx.db.get(c.creatorId);
-          return {
-            channel: c,
-            creator,
-            // 'public' is the default for legacy rows that predate the
-            // access field. Subscriber-gating ships from this row up.
-            requiredAccess: c.access ?? 'public',
-          };
-        }),
+      merged.map(async (c) => {
+        const creator = await ctx.db.get(c.creatorId);
+        return {
+          channel: c,
+          creator,
+          // 'public' is the default for legacy rows that predate the
+          // access field. Subscriber-gating ships from this row up.
+          requiredAccess: c.access ?? 'public',
+        };
+      }),
     );
     return enriched;
   },

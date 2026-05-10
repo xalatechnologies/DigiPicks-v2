@@ -326,6 +326,13 @@ export const grade = internalMutation({
           relatedEntityId: args.id,
         },
       });
+      // BPMN-013 — AI grading explanation. One-sentence neutral summary
+      // ("Took -3.5; final 27-21, covered by 2.5") stored on the pick
+      // for the customer-facing timeline. Quietly skips when
+      // ANTHROPIC_API_KEY is unset.
+      await ctx.scheduler.runAfter(0, internal.ai.gradingExplanation, {
+        pickId: args.id,
+      });
     }
 
     return args.id;
@@ -334,6 +341,24 @@ export const grade = internalMutation({
 
 // Internal-only.
 /** Persist AI analysis on a pick. Called by ai.analyzePick. */
+/**
+ * BPMN-013 — persist the grading-explanation sentence produced by
+ * internal.ai.gradingExplanation. Idempotent: a re-run just overwrites.
+ */
+export const _setGradeExplanation = internalMutation({
+  args: {
+    pickId: v.id('picks'),
+    explanation: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.pickId, {
+      gradeExplanation: args.explanation,
+      gradeExplanationAt: Date.now(),
+    });
+    return null;
+  },
+});
+
 export const _setAiAnalysis = internalMutation({
   args: {
     pickId: v.id('picks'),

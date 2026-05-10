@@ -93,11 +93,15 @@ flowchart TD
 
 ## Alternative flows
 
-- **Postponed** → status flips back to `scheduled` with a new
-  `startsAt`; picks remain pending; subscribers get a postponement
-  notification (BPMN-015).
-- **Forfeit / no-contest** → admin patches status to `canceled` and the
-  grader voids open picks (`grade='void'`, `netUnits=0`).
+- **Postponement / forfeit / no-contest (DEFERRED)** — there is no
+  dedicated postponement state machine or forfeit handler today. Manual
+  remediation routes through admin moderation (BPMN-010) +
+  dispute-driven grade override (BPMN-011). Automated postponement and
+  forfeit-aware void grading are reserved for a future iteration.
+- **Late-data dedup (DEFERRED)** — there is no automated dedup of
+  near-identical events that arrive after the federated row was
+  imported. Today, conflicts are caught by the duplicate guard on
+  `events.create` (BPMN-009) and otherwise resolved manually.
 - **Score correction post-grading** → grades are immutable
   (NFR-006); the correction flows through dispute resolution
   (BPMN-011) and writes a `pick.grade.overridden` audit row.
@@ -130,9 +134,11 @@ flowchart TD
 
 ## Module mapping
 
-- [M05 — Federated events catalog](../modules/M05-federated-events.md)
-- [M06 — Odds ingestion & intel](../modules/M06-odds-intel.md)
-- [M08 — Picks publishing](../modules/M08-picks-publishing.md)
-- [M09 — Grading & analytics](../modules/M09-grading-analytics.md)
-- [M11 — Streaming integration](../modules/M11-streaming-integration.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M04 — Provider-agnostic event engine](../modules/M04-provider-agnostic-event-engine.md)
+- [M05 — Picks publishing engine](../modules/M05-picks-publishing-engine.md)
+- [M09 — Pick grading & performance](../modules/M09-pick-grading-performance.md)
+- [M11 — Realtime odds intelligence](../modules/M11-realtime-odds-intelligence.md)
+- [M15 — Livestream integrations](../modules/M15-livestream-integrations.md)
+- [M22 — External sports data providers](../modules/M22-external-sports-data-providers.md)
+- [M23 — Custom event review & federation](../modules/M23-custom-event-review-federation.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

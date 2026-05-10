@@ -21,9 +21,17 @@ Creator clicks **Publish** on `/dashboard/create`.
 ## Actors / Swimlanes
 
 - **Creator**
-- **Convex Backend** — `picks`, `events`, `entitlements`, `auditLogs`.
-- **AI Engine** — optional `ai.cowrite` action for summaries.
-- **Notify** — fanout to push / telegram / discord / email.
+- **Convex Backend** — `picks`, `events`, `auditLogs`.
+- **AI Engine** — optional `ai.cowrite` for pre-publish suggestion;
+  post-publish `ai.analyzePick` runs async to fill `aiSummary` /
+  `aiConfidence` / `aiReasoning`.
+- **Notify** — per-user fanout: push / telegram / email (BPMN-015).
+- **Discord** — per-creator outbound. Two paths:
+  `discord.delivery.deliverPickNotification` (legacy single webhook on
+  `creators.discordWebhookUrl`) and `discord.delivery.fanoutOutbound`
+  (new multi-channel flow keyed off `discordChannelSyncs`). Both fire
+  fire-and-forget; failures land in `discordDeliveryLogs` and never
+  block publish.
 - **Feed** — realtime subscription queries.
 
 ## Main flow
@@ -38,13 +46,21 @@ flowchart TD
   subgraph K[Convex Backend]
     k1{{rateLimit.consume<br/>shard=picksPublish}}
     k2[(picks<br/>insert status=published)]
-    k3{{ai.cowrite<br/>optional}}
-    k4[(picks<br/>patch summary)]
+    k3{{ai.analyzePick<br/>scheduled async}}
+    k4[(picks<br/>patch aiSummary + aiConfidence)]
     k5[(auditLogs<br/>action=pick.published)]
     k6{{notify.onPickPublished}}
   end
+  subgraph A[AI]
+    a1[/Anthropic Haiku 4.5<br/>cache_control: ephemeral/]
+  end
   subgraph N[Notify]
-    n1{{notify.dispatch}}
+    n1{{notify.dispatch<br/>push + telegram + email}}
+  end
+  subgraph D[Discord]
+    d1{{discord.delivery.deliverPickNotification<br/>legacy webhook}}
+    d2{{discord.delivery.fanoutOutbound<br/>eventType=new_pick}}
+    d3{{discord.delivery.fanoutOutbound<br/>eventType=ai_insight}}
   end
   subgraph F[Feed]
     f1[feed.list re-runs]
@@ -52,9 +68,12 @@ flowchart TD
   end
 
   cr1 --> cr2 --> cr3 --> k1 --> k2
-  k2 -.-> k3 -.-> k4
+  k2 -.-> k3 -.-> a1 -.-> k4
+  k4 -.-> d3
   k2 -.-> k5
   k2 -.-> k6 -.-> n1
+  k2 -.-> d1
+  k2 -.-> d2
   k2 -.-> f1
   k2 -.-> f2
 ```
@@ -75,9 +94,18 @@ flowchart TD
 ## Postconditions
 
 - `picks` row with `grade='pending'`.
-- Possibly an AI-generated `summary` field.
+- Async-filled `aiSummary` / `aiConfidence` / `aiReasoning` from
+  `ai.analyzePick` (no-op if `ANTHROPIC_API_KEY` is unset).
 - Audit row `pick.published`.
-- One row in `notifications` per channel × subscriber.
+- One row in `notifications` per channel × subscriber (push / telegram /
+  email path — see BPMN-015).
+- For each enabled outbound `discordChannelSyncs` row on the creator,
+  one `discordDeliveryLogs` row per Discord post (`new_pick` and, once
+  the AI analysis lands, `ai_insight`). Legacy creators on
+  `creators.discordWebhookUrl` get a single `deliverPickNotification`
+  delivery row instead — the two paths are mutually exclusive: the
+  legacy fallback short-circuits when any `discordChannelSyncs` row
+  exists for the creator.
 
 ## Realtime events
 
@@ -86,13 +114,21 @@ flowchart TD
 
 ## AI interactions
 
-- `ai.cowrite` (Anthropic Haiku, prompt-cached system prompt). Returns a
-  ≤140-char neutral summary. Never publishes content the creator hasn't
-  approved — the action returns text the creator chose to accept.
+- `ai.suggestPick` (pre-publish, optional). Anthropic Haiku 4.5 with the
+  shared prompt-cached system block. Returns a draft summary +
+  confidence + reasoning the creator can accept; never publishes
+  unapproved content.
+- `ai.analyzePick` (post-publish, scheduled async). Same Haiku model
+  and system prompt — intentionally so that both paths share the
+  Anthropic prompt cache. On completion, schedules
+  `discord.delivery.fanoutOutbound` with `eventType='ai_insight'` for
+  creators with the `aiInsight` alert rule on. Quietly skips when
+  `ANTHROPIC_API_KEY` is unset.
 
 ## Module mapping
 
-- [M08 — Picks publishing](../modules/M08-picks-publishing.md)
-- [M14 — Recommendations](../modules/M14-recommendations.md)
-- [M19 — Notifications & realtime](../modules/M19-notifications-realtime.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M05 — Picks publishing engine](../modules/M05-picks-publishing-engine.md)
+- [M12 — AI intelligence engine](../modules/M12-ai-intelligence-engine.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M20 — Discord integration](../modules/M20-discord-integration.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

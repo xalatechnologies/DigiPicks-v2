@@ -28,9 +28,18 @@ export const SPORT_KEY_MAP_FULL: Record<string, string[]> = {
   Baseball: ['baseball_mlb'],
   Hockey: ['icehockey_nhl'],
   Cricket: ['cricket_ipl', 'cricket_international_t20'],
-  Tennis: ['tennis_atp_australian_open', 'tennis_wta_australian_open'],
+  Tennis: [
+    'tennis_atp_australian_open',
+    'tennis_atp_french_open',
+    'tennis_atp_us_open',
+    'tennis_atp_wimbledon',
+    'tennis_wta_australian_open',
+    'tennis_wta_french_open',
+    'tennis_wta_us_open',
+    'tennis_wta_wimbledon',
+  ],
   MMA: ['mma_mixed_martial_arts'],
-  Rugby: ['rugbyleague_nrl'],
+  Rugby: ['rugbyleague_nrl', 'rugbyunion_six_nations', 'rugbyunion_world_cup'],
 };
 
 /**

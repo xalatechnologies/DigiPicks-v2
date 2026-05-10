@@ -2,6 +2,30 @@ import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { subscriptionPlan, subscriptionStatus } from './shared/validators';
 import { requireUser } from './shared/permissions';
+import { internal } from './_generated/api';
+
+// Grace-period default (3 days). When a subscription flips to past_due we
+// stamp gracePeriodEndsAt = now + GRACE_PERIOD_MS so access helpers treat
+// the row as still-active until the window closes. Override per
+// environment via GRACE_PERIOD_DAYS env var (BPMN-003 §grace period).
+function getGracePeriodMs(): number {
+  const days = Number(process.env.GRACE_PERIOD_DAYS);
+  const safe = Number.isFinite(days) && days >= 0 && days <= 30 ? days : 3;
+  return safe * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * True when the subscription should grant entitlement right now. Active
+ * always passes; past_due passes within the grace window. Other states
+ * (refunded, cancelled, expired) never grant access.
+ */
+export function isAccessActive(sub: { status: string; gracePeriodEndsAt?: number }): boolean {
+  if (sub.status === 'active') return true;
+  if (sub.status === 'past_due' && sub.gracePeriodEndsAt && sub.gracePeriodEndsAt > Date.now()) {
+    return true;
+  }
+  return false;
+}
 
 // =============================================================================
 // Subscriptions Module — User ↔ Creator subscription lifecycle
@@ -15,9 +39,7 @@ export const mySubscriptions = query({
     const user = await requireUser(ctx);
     const subs = await ctx.db
       .query('subscriptions')
-      .withIndex('by_subscriber_and_creator', (q) =>
-        q.eq('subscriberId', user._id),
-      )
+      .withIndex('by_subscriber_and_creator', (q) => q.eq('subscriberId', user._id))
       .take(50);
 
     const enriched = await Promise.all(
@@ -184,17 +206,30 @@ export const _recordSubscriptionFromStripe = internalMutation({
       .first();
 
     if (existing) {
+      const wasActive = isAccessActive(existing);
       await ctx.db.patch(existing._id, {
         plan: args.plan,
         status: args.status,
         renewsAt: args.renewsAt,
         stripeCustomerId: args.stripeCustomerId,
-        ...(args.status !== 'active' ? {} : { cancelledAt: undefined }),
+        ...(args.status === 'active'
+          ? { cancelledAt: undefined, gracePeriodEndsAt: undefined }
+          : {}),
       });
+      // BPMN-003 — fire welcome / reactivation notify only on the
+      // off→on transition. Pure renewal updates (active→active) stay
+      // silent.
+      if (args.status === 'active' && !wasActive) {
+        await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionActive, {
+          userId: args.subscriberId,
+          creatorId: args.creatorId,
+          subscriptionId: existing._id,
+        });
+      }
       return existing._id;
     }
 
-    return await ctx.db.insert('subscriptions', {
+    const id = await ctx.db.insert('subscriptions', {
       subscriberId: args.subscriberId,
       creatorId: args.creatorId,
       plan: args.plan,
@@ -204,12 +239,24 @@ export const _recordSubscriptionFromStripe = internalMutation({
       stripeSubscriptionId: args.stripeSubscriptionId,
       stripeCustomerId: args.stripeCustomerId,
     });
+    // BPMN-002 — first-time activation is the welcome moment.
+    if (args.status === 'active') {
+      await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionActive, {
+        userId: args.subscriberId,
+        creatorId: args.creatorId,
+        subscriptionId: id,
+      });
+    }
+    return id;
   },
 });
 
 /**
  * Update an existing subscription's status from a Stripe webhook event.
- * Used for status transitions like active → past_due.
+ * Used for status transitions like active → past_due. Stamps
+ * gracePeriodEndsAt on the past_due transition (BPMN-003 §grace period)
+ * and schedules the lifecycle notify so the customer learns about the
+ * payment hiccup or termination via inbox / push / telegram.
  */
 export const _updateSubscriptionStatusFromStripe = internalMutation({
   args: {
@@ -227,16 +274,54 @@ export const _updateSubscriptionStatusFromStripe = internalMutation({
 
     if (!sub) return null; // Stale event for a sub we don't know about.
 
-    await ctx.db.patch(sub._id, {
+    const patch: Record<string, unknown> = {
       status: args.status,
       renewsAt: args.renewsAt ?? sub.renewsAt,
-    });
+    };
+
+    // Past-due transition: open grace window. Active recovery: close it.
+    if (args.status === 'past_due' && sub.status !== 'past_due') {
+      patch.gracePeriodEndsAt = Date.now() + getGracePeriodMs();
+    } else if (args.status === 'active') {
+      patch.gracePeriodEndsAt = undefined;
+    }
+
+    await ctx.db.patch(sub._id, patch);
+
+    // Lifecycle notify on transitions only — silent on no-op repeats.
+    if (args.status === 'past_due' && sub.status !== 'past_due') {
+      await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionPastDue, {
+        userId: sub.subscriberId,
+        creatorId: sub.creatorId,
+        subscriptionId: sub._id,
+        gracePeriodEndsAt: patch.gracePeriodEndsAt as number | undefined,
+      });
+    } else if (
+      (args.status === 'cancelled' || args.status === 'refunded') &&
+      sub.status !== args.status
+    ) {
+      await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionCancelled, {
+        userId: sub.subscriberId,
+        creatorId: sub.creatorId,
+        subscriptionId: sub._id,
+        reason: args.status,
+      });
+    } else if (args.status === 'active' && !isAccessActive(sub)) {
+      // Recovery from past_due / cancelled back to active.
+      await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionActive, {
+        userId: sub.subscriberId,
+        creatorId: sub.creatorId,
+        subscriptionId: sub._id,
+      });
+    }
+
     return sub._id;
   },
 });
 
 /**
  * Mark a subscription cancelled in response to customer.subscription.deleted.
+ * Schedules the lifecycle notify so the customer sees the change.
  */
 export const _cancelSubscriptionFromStripe = internalMutation({
   args: {
@@ -251,10 +336,18 @@ export const _cancelSubscriptionFromStripe = internalMutation({
       .first();
 
     if (!sub) return null;
+    if (sub.status === 'cancelled') return sub._id; // idempotent
 
     await ctx.db.patch(sub._id, {
       status: 'cancelled',
       cancelledAt: Date.now(),
+      gracePeriodEndsAt: undefined,
+    });
+    await ctx.scheduler.runAfter(0, internal.notify.onSubscriptionCancelled, {
+      userId: sub.subscriberId,
+      creatorId: sub.creatorId,
+      subscriptionId: sub._id,
+      reason: 'cancelled',
     });
     return sub._id;
   },

@@ -17,9 +17,8 @@ Customer navigates to `/feed` (or any feed-bearing page).
 ## Actors / Swimlanes
 
 - **Customer**
-- **Convex Backend** — `feed.list`, `picks`, `entitlements`,
-  `recommendations`.
-- **AI Engine** — optional ranking / summary tool calls.
+- **Convex Backend** — `feed.list`, `picks`, `subscriptions`
+  (`isAccessActive` access gate).
 - **Notify** — line-movement + pick-published alerts (BPMN-005, -015).
 
 ## Main flow
@@ -33,26 +32,26 @@ flowchart TD
   end
   subgraph K[Convex Backend]
     k1{{feed.list<br/>cursor pagination}}
-    k2[(entitlements<br/>read)]
+    k2[(subscriptions<br/>isAccessActive gate)]
     k3[(picks<br/>visible set)]
     k4[(savedPicks<br/>insert)]
   end
-  subgraph A[AI Engine]
-    a1{{recommendations.rank<br/>optional}}
-  end
 
   c1 --> k1 --> k2 --> k3 --> c2
-  k3 -.-> a1 -.-> k1
   c2 --> c3 --> k4
 ```
 
 ## Alternative flows
 
-- **No entitlement to a premium pick** → `picks.body` is redacted;
-  `PickCard` renders the upsell variant linking to BPMN-002.
+- **No active subscription for a premium pick** → `isAccessActive(sub)`
+  is false; `picks.body` is redacted and `PickCard` renders the upsell
+  variant linking to BPMN-002.
 - **Cursor exhausted** → empty page; UI shows the friendly EmptyState.
 - **Realtime new pick during session** → Convex subscription pushes the
   new row; UI prepends without a refresh.
+- **AI-ranked feed (DEFERRED)** — semantic ranking / personalization on
+  `feed.list` is reserved for a future iteration. Today the feed is
+  ordered chronologically with cursor pagination.
 
 ## Postconditions
 
@@ -67,11 +66,13 @@ flowchart TD
 
 ## AI interactions
 
-- Optional `recommendations.rank` action — Claude Haiku ranks the
-  candidate set. Used only when the customer's history is sparse.
+None on the feed today. AI ranking is DEFERRED — see §Alternative flows.
+The Copilot (BPMN-014) is a separate surface a customer can open from
+`/account/copilot`.
 
 ## Module mapping
 
-- [M07 — Feed & discovery](../modules/M07-feed-discovery.md)
-- [M14 — Recommendations](../modules/M14-recommendations.md)
-- [M15 — Following & access](../modules/M15-following-access.md)
+- [M06 — Access control & entitlements](../modules/M06-access-control-entitlements.md)
+- [M10 — Customer feed & discovery](../modules/M10-customer-feed-discovery.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M18 — Saved library & watchlists](../modules/M18-saved-library-watchlists.md)

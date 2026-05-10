@@ -25,8 +25,15 @@ grading run feeds analytics, performance, and downstream notifications.
 - **Cron**
 - **Convex Backend** — `events`, `picks`, `auditLogs`,
   `creatorPerformance`.
-- **AI Engine** — optional grading-explanation summary.
-- **Notify** — pick-graded fanout.
+- **AI Engine** — `internal.ai.gradingExplanation`. After notify
+  dispatch, `picks.grade` schedules this internal action; on completion
+  it patches `picks.gradeExplanation` (and `gradeExplanationAt`) with a
+  neutral one-liner produced by Anthropic Haiku (prompt-cached).
+- **Notify** — pick-graded fanout (per-user, BPMN-015).
+- **Discord** — per-creator outbound fanout
+  (`discord.delivery.fanoutOutbound`, `eventType='pick_graded'`).
+  Fires on every grade transition for creators with an enabled outbound
+  `discordChannelSyncs` row + the `pickGraded` alert rule on.
 - **Customer feed** — `results.mine`, creator `Performance`.
 
 ## Main flow
@@ -46,10 +53,14 @@ flowchart TD
     k6{{creatorPerformance.rollUp}}
   end
   subgraph A[AI]
-    a1{{ai.gradingExplanation<br/>optional}}
+    a1{{internal.ai.gradingExplanation<br/>scheduled after notify}}
+    a2[(picks<br/>patch gradeExplanation<br/>+ gradeExplanationAt)]
   end
   subgraph N[Notify]
     n1{{notify.onPickGraded}}
+  end
+  subgraph D[Discord]
+    d1{{discord.delivery.fanoutOutbound<br/>eventType=pick_graded}}
   end
 
   c1 --> k1
@@ -57,7 +68,8 @@ flowchart TD
   k1 --> k2 --> k3 --> k4 -.-> k5
   k4 -.-> k6
   k4 -.-> n1
-  k4 -.-> a1
+  k4 -.-> d1
+  n1 -.-> a1 -.-> a2
 ```
 
 ## Alternative flows
@@ -91,13 +103,17 @@ flowchart TD
 
 ## AI interactions
 
-- Optional: `ai.gradingExplanation` produces a one-sentence summary
-  ("Took -3.5; final 27-21, covered by 2.5"). Stored on
-  `picks.gradeExplanation` for the customer-facing surface.
+- `internal.ai.gradingExplanation` (Anthropic Haiku, prompt-cached) is
+  scheduled after notify dispatch. It produces a neutral one-liner
+  ("Took -3.5; final 27-21, covered by 2.5") and patches
+  `picks.gradeExplanation` + `picks.gradeExplanationAt`. Quietly skips
+  when `ANTHROPIC_API_KEY` is unset (symmetric with `analyzePick` /
+  `suggestPick`).
 
 ## Module mapping
 
-- [M09 — Grading & analytics](../modules/M09-grading-analytics.md)
-- [M14 — Recommendations](../modules/M14-recommendations.md)
-- [M19 — Notifications & realtime](../modules/M19-notifications-realtime.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M09 — Pick grading & performance](../modules/M09-pick-grading-performance.md)
+- [M12 — AI intelligence engine](../modules/M12-ai-intelligence-engine.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M16 — Creator analytics dashboard](../modules/M16-creator-analytics-dashboard.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

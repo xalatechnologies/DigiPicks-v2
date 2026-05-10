@@ -2,27 +2,35 @@
 
 ## Purpose
 
-End-to-end state machine for a paid subscription: renew, fail, recover,
-cancel, refund.
+End-to-end state machine for a paid subscription: renew, fail (with
+grace window), recover, cancel. Refunds via the Stripe API are
+DEFERRED — see §Alternative flows. Access is gated by
+`subscriptions.status` via the `isAccessActive(sub)` helper, which
+honors a `gracePeriodEndsAt` window during `past_due`.
 
 ## Trigger
 
 Stripe webhook events (`invoice.paid`, `invoice.payment_failed`,
-`customer.subscription.updated`, `customer.subscription.deleted`,
-`charge.refunded`).
+`customer.subscription.updated`, `customer.subscription.deleted`).
 
 ## Preconditions
 
 - Active row in `subscriptions` from BPMN-002.
 - `STRIPE_WEBHOOK_SECRET` env var configured; HMAC verification on every
   inbound POST.
+- Webhook idempotency: every inbound event runs through
+  `internal.stripeIdempotency.claim` which inserts into `stripeEvents`
+  (`eventId` unique) and short-circuits replays.
 
 ## Actors / Swimlanes
 
 - **Stripe**
-- **Convex Backend** — `subscriptions`, `entitlements`, `auditLogs`,
-  `stripeEvents` (idempotency).
-- **Notify** — dunning + cancellation comms.
+- **Convex Backend** — `subscriptions` (status + `gracePeriodEndsAt`),
+  `auditLogs`, `stripeEvents` (idempotency receipts).
+- **Notify** — lifecycle dispatches:
+  `internal.notify.onSubscriptionPastDue` and
+  `internal.notify.onSubscriptionCancelled`. Lifecycle kinds bypass
+  per-kind toggles.
 - **Customer** — sees state in `/account/subscriptions`.
 
 ## Main flow
@@ -33,54 +41,66 @@ flowchart TD
     s1{{invoice.paid}}
     s2{{invoice.payment_failed}}
     s3{{subscription.deleted}}
-    s4{{charge.refunded}}
   end
   subgraph K[Convex Backend]
-    k0[(stripeEvents<br/>dedupe)]
-    k1[(subscriptions<br/>status=active)]
-    k2[(subscriptions<br/>status=past_due)]
-    k3[(subscriptions<br/>status=canceled)]
-    k4[(entitlements<br/>revoke)]
+    k0{{internal.stripeIdempotency.claim<br/>insert stripeEvents}}
+    kr[(stripeEvents<br/>replay short-circuit)]
+    k1{{_recordSubscriptionFromStripe}}
+    k2{{_updateSubscriptionStatusFromStripe<br/>stamps gracePeriodEndsAt}}
+    k3{{_cancelSubscriptionFromStripe}}
+    k1a[(subscriptions<br/>status=active)]
+    k2a[(subscriptions<br/>status=past_due)]
+    k3a[(subscriptions<br/>status=canceled)]
     k5[(auditLogs)]
   end
   subgraph N[Notify]
-    n1{{notify.dispatch<br/>renewal}}
-    n2{{notify.dispatch<br/>dunning}}
-    n3{{notify.dispatch<br/>cancellation}}
+    n2{{onSubscriptionPastDue<br/>kind=subscription_past_due}}
+    n3{{onSubscriptionCancelled<br/>kind=subscription_cancelled}}
   end
 
-  s1 --> k0 --> k1 -.-> k5
-  k1 -.-> n1
-  s2 --> k0 --> k2 -.-> n2
-  s3 --> k0 --> k3 -.-> k4 -.-> n3
-  s4 --> k0 --> k4
-  k2 -.-> k5
-  k3 -.-> k5
-  k4 -.-> k5
+  s1 --> k0
+  s2 --> k0
+  s3 --> k0
+  k0 -->|replay| kr
+  k0 -->|new, paid| k1 --> k1a
+  k0 -->|new, failed| k2 --> k2a -.-> n2
+  k0 -->|new, deleted| k3 --> k3a -.-> n3
+  k1a -.-> k5
+  k2a -.-> k5
+  k3a -.-> k5
 ```
 
 ## Alternative flows
 
-- **Grace period** — `past_due` keeps entitlement for `gracePeriodDays`
-  (default 3). After expiry, entitlement revoked but row stays for
-  reactivation.
-- **Reactivation** — customer fixes card → `invoice.paid` → status flips
-  back to `active`; entitlement re-granted.
-- **Refund** — `charge.refunded` reverses entitlement and writes a
-  `payment.refund` audit row.
-- **Webhook replay** — `stripeEvents.eventId` unique constraint short-
-  circuits replays.
+- **Grace period** — on `past_due`, `_updateSubscriptionStatusFromStripe`
+  stamps `subscriptions.gracePeriodEndsAt = now + GRACE_PERIOD_DAYS`
+  (default 3 days, override via `GRACE_PERIOD_DAYS` env). While inside
+  the window, `isAccessActive(sub)` still returns true. After expiry,
+  premium queries gate off but the row stays for reactivation.
+- **Reactivation** — customer fixes card → `invoice.paid` →
+  `_recordSubscriptionFromStripe` flips status back to `active` and
+  schedules `onSubscriptionActive` only on off→on transitions.
+- **Refund (DEFERRED)** — there is no `charge.refunded` handler today;
+  the Stripe refund admin action lives behind a future code path.
+  Manual override flows through dispute resolution (BPMN-011).
+- **Webhook replay** — `internal.stripeIdempotency.claim` inserts the
+  event into `stripeEvents`; the unique `eventId` constraint
+  short-circuits replays before any state transition runs.
 
 ## Postconditions
 
 - `subscriptions.status` reflects current Stripe state.
-- `entitlements` are pruned for terminal states.
+- `subscriptions.gracePeriodEndsAt` stamped on past_due transition.
+- `stripeEvents` row stored per processed `eventId` (idempotency).
 - Audit log captures every transition (append-only).
+- Lifecycle `notifications` rows for `subscription_past_due` /
+  `subscription_cancelled` (bypass per-kind toggles).
 
 ## Realtime events
 
 - `subscriptions.mine` updates the customer dashboard.
-- `creators.gatedContent` re-computes for the affected creator.
+- Premium-gated queries that consult `isAccessActive` re-run for the
+  affected creator's audience.
 
 ## AI interactions
 
@@ -89,5 +109,7 @@ tool — see BPMN-014).
 
 ## Module mapping
 
-- [M03 — Subscriptions & payments](../modules/M03-subscriptions-payments.md)
-- [M22 — Audit log](../modules/M22-audit-log.md)
+- [M06 — Access control & entitlements](../modules/M06-access-control-entitlements.md)
+- [M07 — Subscription, billing & monetization](../modules/M07-subscription-billing-monetization.md)
+- [M13 — Notifications & smart alerts](../modules/M13-notifications-smart-alerts.md)
+- [M25 — Platform settings, compliance & audit](../modules/M25-platform-settings-compliance-audit.md)

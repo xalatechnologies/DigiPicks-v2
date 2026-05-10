@@ -21,7 +21,16 @@ import { escapeMarkdownV2 } from './telegram';
 // helpers below — it is not a per-user channel.
 // =============================================================================
 
-export type NotifyKind = 'pick_published' | 'pick_graded' | 'line_moved';
+export type NotifyKind =
+  | 'pick_published'
+  | 'pick_graded'
+  | 'line_moved'
+  // Lifecycle kinds (always-on; not gated by per-kind toggles since these
+  // are transactional notifications the user expects regardless of prefs):
+  | 'welcome'
+  | 'subscription_active'
+  | 'subscription_past_due'
+  | 'subscription_cancelled';
 
 interface NotifyPayload {
   /** Headline copy — used for in-app + push title. */
@@ -56,10 +65,13 @@ export const _insertInApp = internalMutation({
   },
   handler: async (ctx, args) => {
     if (args.entityKey) {
-      // Best-effort dedup — same user + type + entityKey unread within the
-      // last 5 minutes is treated as a duplicate. Avoids spamming the inbox
-      // when triggers fire twice (e.g. cron retry). Bounded scan via index.
-      const cutoff = Date.now() - 5 * 60 * 1000;
+      // Best-effort dedup — same user + type + entityKey unread within
+      // the dedup window is treated as a duplicate. Avoids spamming the
+      // inbox when triggers fire twice (e.g. cron retry). Bounded scan
+      // via index. Window defaults to 5 min; override with
+      // NOTIFY_DEDUP_WINDOW_MS for ops tuning.
+      const dedupMs = Number(process.env.NOTIFY_DEDUP_WINDOW_MS) || 5 * 60 * 1000;
+      const cutoff = Date.now() - dedupMs;
       const recent = await ctx.db
         .query('notifications')
         .withIndex('by_user', (q) => q.eq('userId', args.userId))
@@ -99,6 +111,10 @@ export const dispatch = internalAction({
       v.literal('pick_published'),
       v.literal('pick_graded'),
       v.literal('line_moved'),
+      v.literal('welcome'),
+      v.literal('subscription_active'),
+      v.literal('subscription_past_due'),
+      v.literal('subscription_cancelled'),
     ),
     payload: v.object({
       title: v.string(),
@@ -117,13 +133,23 @@ export const dispatch = internalAction({
     }
 
     const prefs = user.notifyPrefs ?? {};
-    // Per-kind toggles default to true so a user with no prefs still gets alerts.
+    // Lifecycle kinds (welcome / subscription_*) are transactional and
+    // always fire — users can't opt out of being told their subscription
+    // ended. Per-kind toggles only apply to the discretionary kinds
+    // (picks, line movement). Default true so a user with no prefs still
+    // gets alerts.
+    const isLifecycle =
+      args.kind === 'welcome' ||
+      args.kind === 'subscription_active' ||
+      args.kind === 'subscription_past_due' ||
+      args.kind === 'subscription_cancelled';
     const kindEnabled =
-      args.kind === 'pick_published'
+      isLifecycle ||
+      (args.kind === 'pick_published'
         ? prefs.pickPublished !== false
         : args.kind === 'pick_graded'
           ? prefs.pickGraded !== false
-          : prefs.lineMoved !== false;
+          : prefs.lineMoved !== false);
     if (!kindEnabled) {
       return { inApp: false, push: false, telegram: false };
     }
@@ -256,21 +282,12 @@ export const onPickGraded = internalAction({
     if (!grade || grade === 'pending') return;
 
     const verb =
-      grade === 'win'
-        ? 'won'
-        : grade === 'loss'
-          ? 'lost'
-          : grade === 'push'
-            ? 'pushed'
-            : grade;
+      grade === 'win' ? 'won' : grade === 'loss' ? 'lost' : grade === 'push' ? 'pushed' : grade;
 
     const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
     const url = `${baseUrl}/creators/${ctxData.creator.handle}#pick-${args.pickId}`;
 
-    const recipients = new Set<Id<'users'>>([
-      ...ctxData.saverIds,
-      ...ctxData.subscriberIds,
-    ]);
+    const recipients = new Set<Id<'users'>>([...ctxData.saverIds, ...ctxData.subscriberIds]);
 
     await Promise.all(
       Array.from(recipients).map((userId) =>
@@ -304,9 +321,7 @@ export const _pickContext = internalQuery({
       .query('subscriptions')
       .withIndex('by_creator', (q) => q.eq('creatorId', pick.creatorId))
       .take(2000);
-    const subscriberIds = subs
-      .filter((s) => s.status === 'active')
-      .map((s) => s.subscriberId);
+    const subscriberIds = subs.filter((s) => s.status === 'active').map((s) => s.subscriberId);
     return { pick, creator, subscriberIds };
   },
 });
@@ -329,9 +344,7 @@ export const _gradedContext = internalQuery({
       .query('subscriptions')
       .withIndex('by_creator', (q) => q.eq('creatorId', pick.creatorId))
       .take(2000);
-    const subscriberIds = subs
-      .filter((s) => s.status === 'active')
-      .map((s) => s.subscriberId);
+    const subscriberIds = subs.filter((s) => s.status === 'active').map((s) => s.subscriberId);
 
     return { pick, creator, saverIds, subscriberIds };
   },
@@ -424,6 +437,135 @@ function formatTelegram(kind: NotifyKind, payload: NotifyPayload): string {
       ? '🎯'
       : kind === 'pick_graded'
         ? '✅'
-        : '📈';
+        : kind === 'welcome'
+          ? '👋'
+          : kind === 'subscription_active'
+            ? '✨'
+            : kind === 'subscription_past_due'
+              ? '⚠️'
+              : kind === 'subscription_cancelled'
+                ? '🛑'
+                : '📈';
   return `${head} *${title}*${body ? `\n${body}` : ''}${tail}`;
 }
+
+// ─── Lifecycle dispatch helpers (BPMN-001, BPMN-002, BPMN-003) ──────────────
+
+/** Welcome a brand-new user. Scheduled from auth.ts createOrUpdateUser. */
+export const onUserSignup = internalAction({
+  args: { userId: v.id('users') },
+  handler: async (ctx, args) => {
+    const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
+    await ctx.runAction(internal.notify.dispatch, {
+      userId: args.userId,
+      kind: 'welcome',
+      payload: {
+        title: 'Welcome to DigiPicks',
+        body: 'Discover verified creators, follow the picks you trust, and get realtime alerts.',
+        url: `${baseUrl}/account`,
+        entityKey: `welcome:${args.userId}`,
+      },
+    });
+  },
+});
+
+/** Notify a subscriber when their subscription is first active or
+ *  reactivated. Scheduled from subscriptions._recordSubscriptionFromStripe. */
+export const onSubscriptionActive = internalAction({
+  args: {
+    userId: v.id('users'),
+    creatorId: v.id('creators'),
+    subscriptionId: v.id('subscriptions'),
+  },
+  handler: async (ctx, args) => {
+    const creator = await ctx.runQuery(internal.notify._creatorForLifecycle, {
+      creatorId: args.creatorId,
+    });
+    if (!creator) return;
+    const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
+    await ctx.runAction(internal.notify.dispatch, {
+      userId: args.userId,
+      kind: 'subscription_active',
+      payload: {
+        title: `You're subscribed to ${creator.name}`,
+        body: 'Premium content is unlocked. New picks will appear in your feed.',
+        url: `${baseUrl}/creators/${creator.handle}`,
+        entityKey: `sub-active:${args.subscriptionId}`,
+      },
+    });
+  },
+});
+
+/** Notify on payment failure. Grace period is encoded as text — the
+ *  access decision lives in subscriptions.isAccessActive. */
+export const onSubscriptionPastDue = internalAction({
+  args: {
+    userId: v.id('users'),
+    creatorId: v.id('creators'),
+    subscriptionId: v.id('subscriptions'),
+    gracePeriodEndsAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const creator = await ctx.runQuery(internal.notify._creatorForLifecycle, {
+      creatorId: args.creatorId,
+    });
+    if (!creator) return;
+    const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
+    const days = args.gracePeriodEndsAt
+      ? Math.max(0, Math.ceil((args.gracePeriodEndsAt - Date.now()) / (24 * 60 * 60 * 1000)))
+      : 0;
+    const tail =
+      days > 0
+        ? `Your access continues for ${days} more day${days === 1 ? '' : 's'} while we retry the charge.`
+        : 'Update your payment method to keep access.';
+    await ctx.runAction(internal.notify.dispatch, {
+      userId: args.userId,
+      kind: 'subscription_past_due',
+      payload: {
+        title: `Payment failed · ${creator.name}`,
+        body: tail,
+        url: `${baseUrl}/account/subscriptions`,
+        entityKey: `sub-past-due:${args.subscriptionId}`,
+      },
+    });
+  },
+});
+
+/** Notify when a subscription terminates (cancelled or refunded). */
+export const onSubscriptionCancelled = internalAction({
+  args: {
+    userId: v.id('users'),
+    creatorId: v.id('creators'),
+    subscriptionId: v.id('subscriptions'),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const creator = await ctx.runQuery(internal.notify._creatorForLifecycle, {
+      creatorId: args.creatorId,
+    });
+    if (!creator) return;
+    const baseUrl = process.env.WEB_BASE_URL ?? 'https://app.digipicks.com';
+    await ctx.runAction(internal.notify.dispatch, {
+      userId: args.userId,
+      kind: 'subscription_cancelled',
+      payload: {
+        title: `Subscription ended · ${creator.name}`,
+        body:
+          args.reason === 'refunded'
+            ? 'Your subscription was refunded. Premium access has been removed.'
+            : 'Your subscription has ended. You can resubscribe any time.',
+        url: `${baseUrl}/creators/${creator.handle}`,
+        entityKey: `sub-cancelled:${args.subscriptionId}`,
+      },
+    });
+  },
+});
+
+export const _creatorForLifecycle = internalQuery({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, args): Promise<{ name: string; handle: string } | null> => {
+    const creator = await ctx.db.get(args.creatorId);
+    if (!creator) return null;
+    return { name: creator.name, handle: creator.handle };
+  },
+});

@@ -149,6 +149,28 @@ export const _ensureStreamRoom = internalMutation({
   },
 });
 
+/**
+ * BPMN-008 — archive the stream-linked community room when the creator
+ * goes offline. Flips `isActive` false so the channel falls out of the
+ * public list query; stays in storage so message history is preserved
+ * for the next live session. Idempotent: a re-run when already archived
+ * is a no-op.
+ */
+export const _archiveStreamRoom = internalMutation({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, args): Promise<{ channelId: Id<'channels'> } | null> => {
+    const channel = await ctx.db
+      .query('channels')
+      .withIndex('by_linkedStream', (q) => q.eq('linkedStreamCreatorId', args.creatorId))
+      .first();
+    if (!channel) return null;
+    if (channel.isActive) {
+      await ctx.db.patch(channel._id, { isActive: false });
+    }
+    return { channelId: channel._id };
+  },
+});
+
 // ─── Polling action ─────────────────────────────────────────────────────────
 
 interface LiveResult {
@@ -188,6 +210,7 @@ export const pollStreams = internalAction({
 
       const wasLive = Boolean(c.streamLive);
       const transitionedLive = result.live && !wasLive;
+      const transitionedOffline = !result.live && wasLive;
 
       await ctx.runMutation(internal.streams._setLiveState, {
         creatorId: c._id,
@@ -217,6 +240,14 @@ export const pollStreams = internalAction({
       } else if (result.live) {
         stillLive++;
       } else {
+        if (transitionedOffline) {
+          // BPMN-008 — archive the stream-linked community room on the
+          // live→offline edge so it stops surfacing in `channels.list`.
+          // Idempotent: re-runs are no-ops when already archived.
+          await ctx.runMutation(internal.streams._archiveStreamRoom, {
+            creatorId: c._id,
+          });
+        }
         offline++;
       }
     }

@@ -33,7 +33,10 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   failed: 'red',
 };
 
-const PLATFORM_FEE_RATE = 0.13; // 87% to creator (10% platform + ~3% Stripe)
+// Default fallback while the summary query is loading. The authoritative
+// rate ships in payouts.summary.platformFeeRate (PLATFORM_FEE_RATE_BPS env
+// override on the server, default 0.13).
+const PLATFORM_FEE_RATE_FALLBACK = 0.13;
 
 function formatCurrency(amount: number, currency: string): string {
   try {
@@ -57,10 +60,7 @@ function formatDate(ms: number): string {
 
 export function Earnings() {
   const me = useQuery(api.users.meSafe);
-  const creator = useQuery(
-    api.creators.get,
-    me?.creatorId ? { id: me.creatorId } : 'skip',
-  );
+  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const subs = useQuery(
     api.subscriptions.byCreator,
     me?.creatorId ? { creatorId: me.creatorId, limit: 1000 } : 'skip',
@@ -71,7 +71,8 @@ export function Earnings() {
   const activeSubs = (subs ?? []).filter((s) => s.status === 'active');
   const startingPrice = creator?.startingPrice ?? 0;
   const mrrGross = activeSubs.length * startingPrice;
-  const mrrNet = mrrGross * (1 - PLATFORM_FEE_RATE);
+  const platformFeeRate = summary?.platformFeeRate ?? PLATFORM_FEE_RATE_FALLBACK;
+  const mrrNet = mrrGross * (1 - platformFeeRate);
   const currency = summary?.currency ?? 'USD';
   const paidTotal = summary?.paidTotal ?? 0;
   const pendingTotal = summary?.pendingTotal ?? 0;
@@ -140,39 +141,24 @@ export function Earnings() {
                   sub="Derived from active subscriptions × creator price"
                 />
                 <Stack gap={2}>
+                  <KV k="Active subscribers" v={<Mono>{activeSubs.length}</Mono>} />
+                  <KV k="Gross revenue" v={<Mono>{formatCurrency(mrrGross, currency)}</Mono>} />
                   <KV
-                    k="Active subscribers"
-                    v={<Mono>{activeSubs.length}</Mono>}
+                    k={`Platform + Stripe (~${Math.round(platformFeeRate * 100)}%)`}
+                    v={<Mono>−{formatCurrency(mrrGross * platformFeeRate, currency)}</Mono>}
                   />
-                  <KV
-                    k="Gross revenue"
-                    v={<Mono>{formatCurrency(mrrGross, currency)}</Mono>}
-                  />
-                  <KV
-                    k="Platform + Stripe (~13%)"
-                    v={
-                      <Mono>−{formatCurrency(mrrGross * PLATFORM_FEE_RATE, currency)}</Mono>
-                    }
-                  />
-                  <KV
-                    k="Net to creator"
-                    v={<Mono>{formatCurrency(mrrNet, currency)}</Mono>}
-                  />
+                  <KV k="Net to creator" v={<Mono>{formatCurrency(mrrNet, currency)}</Mono>} />
                 </Stack>
               </Card>
             </Col>
 
             <Col gap={4}>
               <Card>
-                <CardHead
-                  title="Payout method"
-                  sub="Stripe Connect handles direct deposits"
-                />
+                <CardHead title="Payout method" sub="Stripe Connect handles direct deposits" />
                 <Stack gap={3}>
                   <Muted>
-                    Connect a Stripe account to receive monthly payouts. Until
-                    then, earnings accumulate as “pending” and we'll route
-                    payouts manually.
+                    Connect a Stripe account to receive monthly payouts. Until then, earnings
+                    accumulate as “pending” and we'll route payouts manually.
                   </Muted>
                   <Row gap={2}>
                     <Button variant="secondary" size="sm" disabled>

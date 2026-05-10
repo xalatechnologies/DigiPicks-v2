@@ -1,6 +1,7 @@
 import { convexAuth } from '@convex-dev/auth/server';
 import { Password } from '@convex-dev/auth/providers/Password';
 import Discord from '@auth/core/providers/discord';
+import { internal } from './_generated/api';
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
@@ -23,8 +24,8 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         }
         return args.existingUserId;
       }
-      // Creating a new user — set DigiPicks defaults + Discord fields
-      return ctx.db.insert('users', {
+      // Creating a new user — set DigiPicks defaults + Discord fields.
+      const userId = await ctx.db.insert('users', {
         ...args.profile,
         role: 'user',
         isActive: true,
@@ -36,6 +37,26 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
             }
           : {}),
       });
+      // Audit-log the signup inside the same transaction (BPMN-001
+      // §postconditions). Direct insert keeps this self-contained — we
+      // can't ctx.runMutation from the auth callback.
+      await ctx.db.insert('auditLogs', {
+        actorUserId: userId,
+        entityType: 'user',
+        entityId: userId,
+        action: 'user.signup',
+        metadata: {
+          provider: args.profile?.discordId ? 'discord' : 'password',
+          email: args.profile?.email ?? null,
+        },
+        createdAt: Date.now(),
+      });
+      // BPMN-001 — schedule the welcome dispatch. Fire-and-forget; the
+      // signup completes regardless of whether welcome delivery succeeds.
+      await ctx.scheduler.runAfter(0, internal.notify.onUserSignup, {
+        userId,
+      });
+      return userId;
     },
   },
 });
