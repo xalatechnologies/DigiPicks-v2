@@ -39,7 +39,8 @@ import {
 import { api } from '../../../../convex/_generated/api';
 
 function formatWinRate(v: number): string {
-  return `${(v * 100).toFixed(1)}%`;
+  const pct = v <= 1 ? v * 100 : v;
+  return `${pct.toFixed(1)}%`;
 }
 
 function formatSubs(v: number): string {
@@ -62,19 +63,13 @@ export function CreatorDetail() {
   const navigate = useNavigate();
   const { isAuthenticated } = useConvexAuth();
 
-  const creator = useQuery(
-    api.creators.getByHandle,
-    id ? { handle: id } : 'skip',
-  );
+  const creator = useQuery(api.creators.getByHandle, id ? { handle: id } : 'skip');
   const recentPicks = useQuery(
     api.picks.byCreator,
     creator?._id ? { creatorId: creator._id, limit: 4 } : 'skip',
   );
   const allCreators = useQuery(api.creators.list, {});
-  const trust = useQuery(
-    api.trust.get,
-    creator?._id ? { creatorId: creator._id } : 'skip',
-  );
+  const trust = useQuery(api.trust.get, creator?._id ? { creatorId: creator._id } : 'skip');
   const isFollowing = useQuery(
     api.followedCreators.isFollowing,
     creator?._id ? { creatorId: creator._id } : 'skip',
@@ -146,9 +141,7 @@ export function CreatorDetail() {
     );
   }
 
-  const others = (allCreators ?? [])
-    .filter((c) => c._id !== creator._id)
-    .slice(0, 3);
+  const others = (allCreators ?? []).filter((c) => c._id !== creator._id).slice(0, 3);
   const recent = recentPicks ?? [];
   const trend = buildTrend(creator.handle.charCodeAt(0) + creator.handle.length);
   const cssVars = { '--av-color': creator.avatarColor } as React.CSSProperties;
@@ -161,11 +154,7 @@ export function CreatorDetail() {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      features: [
-        'Public picks and grades',
-        'Win-rate transparency',
-        'Notification preferences',
-      ],
+      features: ['Public picks and grades', 'Win-rate transparency', 'Notification preferences'],
       featured: false,
       available: true,
     },
@@ -237,12 +226,7 @@ export function CreatorDetail() {
     <main>
       <Container size="xl">
         <Section noReveal>
-          <Breadcrumb
-            items={[
-              { label: 'Creators', href: '/creators' },
-              { label: creator.name },
-            ]}
-          />
+          <Breadcrumb items={[{ label: 'Creators', href: '/creators' }, { label: creator.name }]} />
         </Section>
 
         <Section noReveal>
@@ -250,31 +234,28 @@ export function CreatorDetail() {
             <Grid cols={2} gap={8} stagger={false}>
               <Stack gap={5}>
                 <Row gap={5}>
-                  <Avatar
-                    mono={creator.avatarMono}
-                    color={creator.avatarColor}
-                    size={88}
-                  />
+                  <Avatar mono={creator.avatarMono} color={creator.avatarColor} size={88} />
                   <Stack gap={2}>
                     <Row gap={2} wrap>
                       {creator.trending && (
-                        <Badge tone="gold" icon="flame">Trending</Badge>
+                        <Badge tone="gold" icon="flame">
+                          Trending
+                        </Badge>
                       )}
                       <Badge tone={streakDown ? 'red' : 'green'} dot>
                         Streak {creator.streak || '—'}
                       </Badge>
                       {creator.verified && (
-                        <Badge tone="blue" icon="verified">Verified</Badge>
+                        <Badge tone="blue" icon="verified">
+                          Verified
+                        </Badge>
                       )}
                       {isSubscribed && (
                         <Badge tone="violet" dot>
                           Subscribed
                         </Badge>
                       )}
-                      <TrustScoreBadge
-                        size="sm"
-                        score={trust?.score ?? null}
-                      />
+                      <TrustScoreBadge size="sm" score={trust?.score ?? null} />
                     </Row>
                     <Heading level={1} size="3xl" balance>
                       {creator.name}
@@ -336,10 +317,7 @@ export function CreatorDetail() {
                     value={creator.units}
                     delta={{ value: unitsDown ? '-' : '+', dir: unitsDown ? 'down' : 'up' }}
                   />
-                  <Metric
-                    label="Subscribers"
-                    value={formatSubs(creator.subscriberCount)}
-                  />
+                  <Metric label="Subscribers" value={formatSubs(creator.subscriberCount)} />
                   <Metric label="W·L·P record" value={creator.record} />
                 </Grid>
                 <Card pad="md">
@@ -348,12 +326,7 @@ export function CreatorDetail() {
                       <Eyebrow>Rolling units</Eyebrow>
                       <Mono>last 30 graded picks</Mono>
                     </Stack>
-                    <Sparkline
-                      values={trend}
-                      color="var(--green)"
-                      width={160}
-                      height={42}
-                    />
+                    <Sparkline values={trend} color="var(--green)" width={160} height={42} />
                   </Row>
                 </Card>
               </Stack>
@@ -366,11 +339,7 @@ export function CreatorDetail() {
           title={`What ${creator.name} is calling now.`}
           sub="Pre-game only · graded by the platform · published in real time."
           action={
-            <Button
-              variant="ghost"
-              iconRight="arrow-right"
-              onClick={() => navigate('/events')}
-            >
+            <Button variant="ghost" iconRight="arrow-right" onClick={() => navigate('/events')}>
               See tonight's slate
             </Button>
           }
@@ -403,7 +372,9 @@ export function CreatorDetail() {
                   aiReasoning={p.aiReasoning}
                   aiModel={p.aiModel}
                   locked={p.access !== 'free' && !isSubscribed}
-                  onOpen={() => p.access !== 'free' && !isSubscribed ? openSubscribe() : undefined}
+                  onOpen={() =>
+                    p.access !== 'free' && !isSubscribed ? openSubscribe() : undefined
+                  }
                 />
               ))}
             </Stack>
@@ -413,11 +384,7 @@ export function CreatorDetail() {
               title="No public picks yet."
               subtitle="This creator hasn't posted a public pick recently. Subscribe to see premium picks the moment they go live."
               action={
-                <Button
-                  variant="primary"
-                  iconRight="arrow-right"
-                  onClick={openSubscribe}
-                >
+                <Button variant="primary" iconRight="arrow-right" onClick={openSubscribe}>
                   Subscribe — ${creator.startingPrice}/mo
                 </Button>
               }
@@ -432,10 +399,7 @@ export function CreatorDetail() {
             sub="Embedded directly so you can follow live commentary without leaving DigiPicks."
           >
             <Card pad="md">
-              <StreamEmbed
-                platform={creator.streamPlatform}
-                handle={creator.streamHandle}
-              />
+              <StreamEmbed platform={creator.streamPlatform} handle={creator.streamHandle} />
             </Card>
           </Section>
         )}
@@ -451,10 +415,7 @@ export function CreatorDetail() {
               <Stack gap={4}>
                 <Row gap={1} wrap>
                   {(creator.last10 || '').split('').map((c, i) => (
-                    <Badge
-                      key={i}
-                      tone={c === 'W' ? 'green' : c === 'L' ? 'red' : 'mute'}
-                    >
+                    <Badge key={i} tone={c === 'W' ? 'green' : c === 'L' ? 'red' : 'mute'}>
                       {c}
                     </Badge>
                   ))}
@@ -547,11 +508,7 @@ export function CreatorDetail() {
           eyebrow="Similar creators"
           title="Other operators worth following."
           action={
-            <Button
-              variant="outline"
-              onClick={() => navigate('/creators')}
-              iconRight="arrow-right"
-            >
+            <Button variant="outline" onClick={() => navigate('/creators')} iconRight="arrow-right">
               Browse all creators
             </Button>
           }

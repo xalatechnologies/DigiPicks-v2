@@ -25,13 +25,12 @@
 .aurora {
   position: absolute;
   inset: -20% -10%;
-  background:
-    radial-gradient(
-      circle at 30% 20%,
-      color-mix(in srgb, var(--primary) 10%, transparent) 0%,
-      transparent 40%
-    );
-  filter: blur(40px);
+  background: radial-gradient(
+    circle at 30% 20%,
+    color-mix(in srgb, var(--primary) 10%, transparent) 0%,
+    transparent 40%
+  );
+  filter: blur(var(--blur-xl));
   opacity: 0.7;
   pointer-events: none;
   z-index: 0;
@@ -82,10 +81,11 @@
   gap: var(--space-2);
   font-family: var(--f-mono);
   font-size: var(--text-2xs);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-wider);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
   color: var(--t-3);
+  margin-bottom: var(--space-2);
 }
 .eyebrow::before {
   content: '';
@@ -97,11 +97,12 @@
 .title {
   margin: 0;
   font-family: var(--f-sans);
-  font-size: var(--text-4xl);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-tightest);
-  line-height: 1.05;
+  font-size: var(--text-5xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--leading-display);
   color: var(--t-1);
+  max-width: 22ch;
 }
 .title em,
 .title :global(em) {
@@ -116,9 +117,10 @@
 .sub {
   margin: 0;
   font-family: var(--f-sans);
-  font-size: var(--text-base);
-  line-height: 1.5;
-  color: var(--t-3);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--t-2);
+  max-width: 60ch;
 }
 
 .actions {
@@ -308,13 +310,13 @@
   margin-top: var(--space-2);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .hero {
     padding: var(--space-7) var(--space-6) var(--space-6);
     gap: var(--space-6);
   }
   .title {
-    font-size: var(--text-3xl);
+    font-size: var(--text-4xl);
   }
   .gaugeValue {
     font-size: var(--text-4xl);

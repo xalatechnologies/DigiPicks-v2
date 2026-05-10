@@ -54,23 +54,23 @@
      Brand & semantic colors
      ───────────────────────────────────────────────────────────────────────── */
   --green: #00ba7c;
-  --green-soft: rgba(0, 186, 124, 0.10);
-  --green-line: rgba(0, 186, 124, 0.30);
+  --green-soft: rgba(0, 186, 124, 0.1);
+  --green-line: rgba(0, 186, 124, 0.3);
   --gold: #b58104;
-  --gold-soft: rgba(181, 129, 4, 0.10);
+  --gold-soft: rgba(181, 129, 4, 0.1);
   --gold-line: rgba(181, 129, 4, 0.28);
   --red: #f4212e;
   --red-soft: rgba(244, 33, 46, 0.08);
   --red-line: rgba(244, 33, 46, 0.26);
   --amber: #c1921a;
-  --amber-soft: rgba(193, 146, 26, 0.10);
+  --amber-soft: rgba(193, 146, 26, 0.1);
   --amber-line: rgba(193, 146, 26, 0.28);
   --blue: #1e9df1;
-  --blue-soft: rgba(30, 157, 241, 0.10);
+  --blue-soft: rgba(30, 157, 241, 0.1);
   --blue-line: rgba(30, 157, 241, 0.34);
   --violet: #7a4dd9;
-  --violet-soft: rgba(122, 77, 217, 0.10);
-  --violet-line: rgba(122, 77, 217, 0.30);
+  --violet-soft: rgba(122, 77, 217, 0.1);
+  --violet-line: rgba(122, 77, 217, 0.3);
 
   /* primary alias — keeps prototype semantics ("accent-c" = brand blue) */
   --accent-c: var(--blue);
@@ -85,6 +85,15 @@
   --sport-soc: #a88ee5;
   --sport-ten: #e0d472;
   --sport-ufc: #e25e5e;
+
+  /* third-party brand accents — used on connected-account avatars,
+     OAuth buttons, integration tiles. Treat as fixed identity colors:
+     do not theme. */
+  --brand-google: #4285f4;
+  --brand-discord: #5865f2;
+  --brand-apple: #0a0a0a;
+  --brand-stripe: #635bff;
+  --brand-x: #0f1419;
 
   /* ─────────────────────────────────────────────────────────────────────────
      Typography
@@ -357,13 +366,13 @@
   --red-line: rgba(244, 33, 46, 0.32);
   --amber: #f7b928;
   --amber-soft: rgba(247, 185, 40, 0.12);
-  --amber-line: rgba(247, 185, 40, 0.30);
+  --amber-line: rgba(247, 185, 40, 0.3);
   --blue: #1c9cf0;
   --blue-soft: rgba(28, 156, 240, 0.14);
   --blue-line: rgba(28, 156, 240, 0.34);
   --violet: #b58cff;
   --violet-soft: rgba(181, 140, 255, 0.12);
-  --violet-line: rgba(181, 140, 255, 0.30);
+  --violet-line: rgba(181, 140, 255, 0.3);
 
   --accent-c: var(--blue);
   --accent-soft: var(--blue-soft);

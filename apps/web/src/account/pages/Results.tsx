@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -108,7 +109,8 @@ export function Results() {
                   color={c.creatorColor}
                   trailing={
                     <Badge tone={c.netUnits >= 0 ? 'green' : 'red'}>
-                      {c.netUnits > 0 ? '+' : ''}{c.netUnits}u
+                      {c.netUnits > 0 ? '+' : ''}
+                      {c.netUnits}u
                     </Badge>
                   }
                 />
@@ -136,7 +138,8 @@ export function Results() {
                   color="var(--primary)"
                   trailing={
                     <Badge tone={sp.netUnits >= 0 ? 'green' : 'red'}>
-                      {sp.netUnits > 0 ? '+' : ''}{sp.netUnits}u
+                      {sp.netUnits > 0 ? '+' : ''}
+                      {sp.netUnits}u
                     </Badge>
                   }
                 />
@@ -154,7 +157,8 @@ export function Results() {
           sub={`${bestCreator.wins}W-${bestCreator.losses}L · ${bestCreator.winRate}% win rate`}
           action={
             <Badge tone="green">
-              {bestCreator.netUnits > 0 ? '+' : ''}{bestCreator.netUnits}u
+              {bestCreator.netUnits > 0 ? '+' : ''}
+              {bestCreator.netUnits}u
             </Badge>
           }
         >
@@ -175,7 +179,12 @@ export function Results() {
         title="Improve your edge"
         sub="Diversify across creators and sports to reduce variance and smooth your equity curve."
       >
-        <Button variant="outline" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
+        <Button
+          variant="outline"
+          size="sm"
+          iconRight="arrow-right"
+          onClick={() => navigate('/account/discover')}
+        >
           Find creators
         </Button>
       </InsightCard>
@@ -183,167 +192,212 @@ export function Results() {
   );
 
   return (
-    <Container size="2xl">
-      <Stack gap={6}>
-        <PortfolioHero
-          eyebrow="My results"
-          title={hasData ? 'Track your edge over time' : 'Your results page'}
-          sub={
-            hasData
-              ? 'Win rate, units, and streak across every graded play you’ve followed.'
-              : 'Once your subscribed creators grade picks you’ve followed, your performance shows up here.'
-          }
-          empty={!hasData}
-          emptyTitle="No picks tracked yet"
-          emptySub="Subscribe to creators and their graded picks will build your portfolio."
-          emptyAction={
-            <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
-              Discover creators
+    <>
+      <PageHeader
+        title="My Results"
+        crumbs={[{ label: 'Account' }, { label: 'Results' }]}
+        actions={
+          <Row gap={2}>
+            <Button
+              variant="outline"
+              size="sm"
+              iconLeft="bookmark"
+              onClick={() => navigate('/account/saved')}
+            >
+              Saved
             </Button>
-          }
-          winRate={hasData ? portfolio!.winRate : undefined}
-          winRateLabel={hasData ? winRateLabel(portfolio!.winRate) : undefined}
-          kpis={
-            hasData
-              ? [
-                  {
-                    label: 'Net units',
-                    value: `${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`,
-                    tone: portfolio!.netUnits > 0 ? 'green' : portfolio!.netUnits < 0 ? 'red' : 'neutral',
-                  },
-                  {
-                    label: 'Record',
-                    value: `${portfolio!.wins}W-${portfolio!.losses}L`,
-                    tone: 'neutral',
-                  },
-                  {
-                    label: 'Streak',
-                    value: portfolio!.streak,
-                    tone: portfolio!.streak.startsWith('W') ? 'gold' : portfolio!.streak.startsWith('L') ? 'red' : 'neutral',
-                  },
-                  {
-                    label: 'Pending',
-                    value: String(portfolio!.pending),
-                    tone: 'neutral',
-                  },
-                ]
-              : []
-          }
-          spark={hasData ? sparkData : undefined}
-          actions={
-            <Row gap={2}>
-              <Button variant="secondary" size="sm" iconLeft="bookmark" onClick={() => navigate('/account/saved')}>
-                Saved
+            <Button
+              variant="primary"
+              size="sm"
+              iconRight="arrow-right"
+              onClick={() => navigate('/account')}
+            >
+              Dashboard
+            </Button>
+          </Row>
+        }
+      />
+
+      <Container size="2xl">
+        <Stack gap={6}>
+          <PortfolioHero
+            eyebrow="My results"
+            title={hasData ? 'Track your edge over time' : 'Your results page'}
+            sub={
+              hasData
+                ? 'Win rate, units, and streak across every graded play you’ve followed.'
+                : 'Once your subscribed creators grade picks you’ve followed, your performance shows up here.'
+            }
+            empty={!hasData}
+            emptyTitle="No picks tracked yet"
+            emptySub="Subscribe to creators and their graded picks will build your portfolio."
+            emptyAction={
+              <Button
+                variant="primary"
+                size="sm"
+                iconRight="arrow-right"
+                onClick={() => navigate('/account/discover')}
+              >
+                Discover creators
               </Button>
-              <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account')}>
-                Dashboard
-              </Button>
-            </Row>
-          }
-        />
+            }
+            winRate={hasData ? portfolio!.winRate : undefined}
+            winRateLabel={hasData ? winRateLabel(portfolio!.winRate) : undefined}
+            kpis={
+              hasData
+                ? [
+                    {
+                      label: 'Net units',
+                      value: `${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`,
+                      tone:
+                        portfolio!.netUnits > 0
+                          ? 'green'
+                          : portfolio!.netUnits < 0
+                            ? 'red'
+                            : 'neutral',
+                    },
+                    {
+                      label: 'Record',
+                      value: `${portfolio!.wins}W-${portfolio!.losses}L`,
+                      tone: 'neutral',
+                    },
+                    {
+                      label: 'Streak',
+                      value: portfolio!.streak,
+                      tone: portfolio!.streak.startsWith('W')
+                        ? 'gold'
+                        : portfolio!.streak.startsWith('L')
+                          ? 'red'
+                          : 'neutral',
+                    },
+                    {
+                      label: 'Pending',
+                      value: String(portfolio!.pending),
+                      tone: 'neutral',
+                    },
+                  ]
+                : []
+            }
+            spark={hasData ? sparkData : undefined}
+          />
 
-        {isLoading && <EmptyState icon="chart" title="Loading results…" />}
+          {isLoading && <EmptyState icon="chart" title="Loading results…" />}
 
-        {hasData && (
-          <>
-            <Row gap={4} wrap>
-              <StatTile
-                label="Win rate"
-                tone={portfolio!.winRate >= 55 ? 'green' : portfolio!.winRate >= 50 ? 'blue' : 'red'}
-                value={`${portfolio!.winRate}%`}
-                sub={winRateLabel(portfolio!.winRate)}
-                trend={
-                  portfolio!.winRate >= 55
-                    ? { value: 'Profitable', dir: 'up' }
-                    : portfolio!.winRate >= 50
-                      ? { value: 'Break-even', dir: 'flat' }
-                      : { value: 'Below .500', dir: 'down' }
-                }
-              />
-              <StatTile
-                label="Net units"
-                tone={portfolio!.netUnits >= 0 ? 'green' : 'red'}
-                value={`${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`}
-                sub={portfolio!.netUnits >= 0 ? 'Profit on followed plays' : 'Loss on followed plays'}
-                trend={portfolio!.netUnits >= 0 ? { value: 'Profit', dir: 'up' } : { value: 'Loss', dir: 'down' }}
-              />
-              <StatTile
-                label="Record"
-                tone="neutral"
-                value={`${portfolio!.wins}W-${portfolio!.losses}L`}
-                sub={`${portfolio!.pending} pending`}
-              />
-              <StatTile
-                label="Streak"
-                tone={portfolio!.streak.startsWith('W') ? 'gold' : portfolio!.streak.startsWith('L') ? 'red' : 'neutral'}
-                value={portfolio!.streak}
-                sub={
-                  portfolio!.streak.startsWith('W')
-                    ? 'Hot stretch — stay disciplined.'
-                    : portfolio!.streak.startsWith('L')
-                      ? 'Cold stretch — review process.'
-                      : 'No active streak.'
-                }
-              />
-            </Row>
-
-            <SectionHead
-              eyebrow="Recent plays"
-              title="Activity"
-              sub={`${recent?.length ?? 0} plays tracked`}
-              action={
-                <Tabs
-                  value={tab}
-                  onChange={(v) => setTab(v as ResultTab)}
-                  tabs={[
-                    { value: 'all', label: `All ${counts.all}` },
-                    { value: 'wins', label: `Wins ${counts.wins}` },
-                    { value: 'losses', label: `Losses ${counts.losses}` },
-                    { value: 'pending', label: `Pending ${counts.pending}` },
-                  ]}
-                  ariaLabel="Filter by result"
+          {hasData && (
+            <>
+              <Row gap={4} wrap>
+                <StatTile
+                  label="Win rate"
+                  tone={
+                    portfolio!.winRate >= 55 ? 'green' : portfolio!.winRate >= 50 ? 'blue' : 'red'
+                  }
+                  value={`${portfolio!.winRate}%`}
+                  sub={winRateLabel(portfolio!.winRate)}
+                  trend={
+                    portfolio!.winRate >= 55
+                      ? { value: 'Profitable', dir: 'up' }
+                      : portfolio!.winRate >= 50
+                        ? { value: 'Break-even', dir: 'flat' }
+                        : { value: 'Below .500', dir: 'down' }
+                  }
                 />
-              }
-            />
+                <StatTile
+                  label="Net units"
+                  tone={portfolio!.netUnits >= 0 ? 'green' : 'red'}
+                  value={`${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`}
+                  sub={
+                    portfolio!.netUnits >= 0 ? 'Profit on followed plays' : 'Loss on followed plays'
+                  }
+                  trend={
+                    portfolio!.netUnits >= 0
+                      ? { value: 'Profit', dir: 'up' }
+                      : { value: 'Loss', dir: 'down' }
+                  }
+                />
+                <StatTile
+                  label="Record"
+                  tone="neutral"
+                  value={`${portfolio!.wins}W-${portfolio!.losses}L`}
+                  sub={`${portfolio!.pending} pending`}
+                />
+                <StatTile
+                  label="Streak"
+                  tone={
+                    portfolio!.streak.startsWith('W')
+                      ? 'gold'
+                      : portfolio!.streak.startsWith('L')
+                        ? 'red'
+                        : 'neutral'
+                  }
+                  value={portfolio!.streak}
+                  sub={
+                    portfolio!.streak.startsWith('W')
+                      ? 'Hot stretch — stay disciplined.'
+                      : portfolio!.streak.startsWith('L')
+                        ? 'Cold stretch — review process.'
+                        : 'No active streak.'
+                  }
+                />
+              </Row>
 
-            <DashGrid aside={aside}>
-              <Card pad="md">
-                {filteredResults.length === 0 ? (
-                  <EmptyState icon="feed" title="No picks match this filter." />
-                ) : (
-                  <Stack gap={0}>
-                    {filteredResults.map((pick, i) => (
-                      <React.Fragment key={pick._id}>
-                        {i > 0 && <Divider />}
-                        <PersonRow
-                          name={pick.title}
-                          sub={`${pick.creatorName} · ${pick.sport} · ${fmtDate(pick.publishedAt ?? pick.createdAt)}`}
-                          mono={pick.creatorMono}
-                          color={pick.creatorColor}
-                          trailing={
-                            <Row gap={2}>
-                              <Badge tone="mute">{pick.odds}</Badge>
-                              <Badge tone={gradeColor(pick.grade)} dot>
-                                {gradeLabel(pick.grade)}
-                              </Badge>
-                            </Row>
-                          }
-                        />
-                      </React.Fragment>
-                    ))}
-                  </Stack>
-                )}
-                {filteredResults.length > 0 && filteredResults.length < counts.all && (
-                  <>
-                    <Divider />
-                    <Muted>{`Showing ${filteredResults.length} of ${counts.all} plays`}</Muted>
-                  </>
-                )}
-              </Card>
-            </DashGrid>
-          </>
-        )}
-      </Stack>
-    </Container>
+              <SectionHead
+                eyebrow="Recent plays"
+                title="Activity"
+                sub={`${recent?.length ?? 0} plays tracked`}
+                action={
+                  <Tabs
+                    value={tab}
+                    onChange={(v) => setTab(v as ResultTab)}
+                    tabs={[
+                      { value: 'all', label: `All ${counts.all}` },
+                      { value: 'wins', label: `Wins ${counts.wins}` },
+                      { value: 'losses', label: `Losses ${counts.losses}` },
+                      { value: 'pending', label: `Pending ${counts.pending}` },
+                    ]}
+                    ariaLabel="Filter by result"
+                  />
+                }
+              />
+
+              <DashGrid aside={aside}>
+                <Card pad="md">
+                  {filteredResults.length === 0 ? (
+                    <EmptyState icon="feed" title="No picks match this filter." />
+                  ) : (
+                    <Stack gap={0}>
+                      {filteredResults.map((pick, i) => (
+                        <React.Fragment key={pick._id}>
+                          {i > 0 && <Divider />}
+                          <PersonRow
+                            name={pick.title}
+                            sub={`${pick.creatorName} · ${pick.sport} · ${fmtDate(pick.publishedAt ?? pick.createdAt)}`}
+                            mono={pick.creatorMono}
+                            color={pick.creatorColor}
+                            trailing={
+                              <Row gap={2}>
+                                <Badge tone="mute">{pick.odds}</Badge>
+                                <Badge tone={gradeColor(pick.grade)} dot>
+                                  {gradeLabel(pick.grade)}
+                                </Badge>
+                              </Row>
+                            }
+                          />
+                        </React.Fragment>
+                      ))}
+                    </Stack>
+                  )}
+                  {filteredResults.length > 0 && filteredResults.length < counts.all && (
+                    <>
+                      <Divider />
+                      <Muted>{`Showing ${filteredResults.length} of ${counts.all} plays`}</Muted>
+                    </>
+                  )}
+                </Card>
+              </DashGrid>
+            </>
+          )}
+        </Stack>
+      </Container>
+    </>
   );
 }

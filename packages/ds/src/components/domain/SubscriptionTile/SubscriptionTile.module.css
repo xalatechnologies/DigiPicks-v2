@@ -154,7 +154,7 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .tile {
     grid-template-columns: 1fr auto;
     gap: var(--space-3);

@@ -9,10 +9,10 @@ import { Saved } from '../pages/Saved';
 import { Community } from '../pages/Community';
 import { Notifications } from '../pages/Notifications';
 import { Events } from '../pages/Events';
-import { Creators } from '../pages/Creators';
 
 // Account-specific pages
 import { Dashboard } from './pages/Dashboard';
+import { Discover } from './pages/Discover';
 import { Subscriptions } from './pages/Subscriptions';
 import { Results } from './pages/Results';
 import { AccountSettings } from './pages/AccountSettings';
@@ -26,7 +26,7 @@ export function AccountRoutes() {
       <Routes>
         <Route element={<SubscriberShell />}>
           <Route index element={<Dashboard />} />
-          <Route path="discover" element={<Creators />} />
+          <Route path="discover" element={<Discover />} />
           <Route path="events" element={<Events />} />
           <Route path="results" element={<Results />} />
           <Route path="saved" element={<Saved />} />

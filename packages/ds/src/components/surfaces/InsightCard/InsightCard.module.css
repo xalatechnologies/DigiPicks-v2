@@ -60,8 +60,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--space-8);
+  height: var(--space-8);
   border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--ic-accent) 12%, var(--bg-1));
   color: var(--ic-accent);

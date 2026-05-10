@@ -95,7 +95,7 @@
   align-items: baseline;
   gap: var(--space-3);
   flex-wrap: wrap;
-  min-height: 36px;
+  min-height: var(--space-9);
 }
 
 .value {

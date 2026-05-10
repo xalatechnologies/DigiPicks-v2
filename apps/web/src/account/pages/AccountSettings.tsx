@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
+  PageHead,
   Container,
   Stack,
   Row,
@@ -36,9 +37,24 @@ const NOTIFICATION_SECTIONS = [
     eyebrow: 'Pick alerts',
     sub: 'Stay in the loop the moment a creator publishes.',
     items: [
-      { id: 'newPick', label: 'New pick alerts', sub: 'When a subscribed creator publishes', defaultOn: true },
-      { id: 'gradeAlert', label: 'Grading updates', sub: 'When followed picks are graded', defaultOn: true },
-      { id: 'urgentPick', label: 'Urgent picks', sub: 'Picks with cutoffs under 1h', defaultOn: true },
+      {
+        id: 'newPick',
+        label: 'New pick alerts',
+        sub: 'When a subscribed creator publishes',
+        defaultOn: true,
+      },
+      {
+        id: 'gradeAlert',
+        label: 'Grading updates',
+        sub: 'When followed picks are graded',
+        defaultOn: true,
+      },
+      {
+        id: 'urgentPick',
+        label: 'Urgent picks',
+        sub: 'Picks with cutoffs under 1h',
+        defaultOn: true,
+      },
     ],
   },
   {
@@ -46,8 +62,18 @@ const NOTIFICATION_SECTIONS = [
     eyebrow: 'Billing',
     sub: 'Renewals, failed payments, price changes.',
     items: [
-      { id: 'billing', label: 'Billing alerts', sub: 'Failed payments and renewals', defaultOn: true },
-      { id: 'priceChange', label: 'Price changes', sub: 'Creator pricing updates', defaultOn: true },
+      {
+        id: 'billing',
+        label: 'Billing alerts',
+        sub: 'Failed payments and renewals',
+        defaultOn: true,
+      },
+      {
+        id: 'priceChange',
+        label: 'Price changes',
+        sub: 'Creator pricing updates',
+        defaultOn: true,
+      },
     ],
   },
   {
@@ -55,7 +81,12 @@ const NOTIFICATION_SECTIONS = [
     eyebrow: 'Community',
     sub: 'Weekly digest and reply notifications.',
     items: [
-      { id: 'digest', label: 'Weekly digest', sub: 'Top picks and win-rate movers', defaultOn: false },
+      {
+        id: 'digest',
+        label: 'Weekly digest',
+        sub: 'Top picks and win-rate movers',
+        defaultOn: false,
+      },
       { id: 'community', label: 'Mentions', sub: 'When someone replies to you', defaultOn: false },
     ],
   },
@@ -126,7 +157,7 @@ export function AccountSettings() {
             name="Google"
             sub={me?.email ?? 'Not connected'}
             mono="G"
-            color="#4285F4"
+            color="var(--brand-google)"
             trailing={<Badge tone="green">Connected</Badge>}
           />
           <Divider />
@@ -134,16 +165,24 @@ export function AccountSettings() {
             name="Discord"
             sub="Not connected"
             mono="D"
-            color="#5865F2"
-            trailing={<Button variant="outline" size="sm">Connect</Button>}
+            color="var(--brand-discord)"
+            trailing={
+              <Button variant="outline" size="sm">
+                Connect
+              </Button>
+            }
           />
           <Divider />
           <PersonRow
             name="Apple"
             sub="Not connected"
             mono="A"
-            color="var(--t-1)"
-            trailing={<Button variant="outline" size="sm">Connect</Button>}
+            color="var(--brand-apple)"
+            trailing={
+              <Button variant="outline" size="sm">
+                Connect
+              </Button>
+            }
           />
         </Stack>
       </InsightCard>
@@ -196,9 +235,15 @@ export function AccountSettings() {
         sub="Pausing hides your activity. Deleting is permanent and cannot be undone."
       >
         <Row gap={2} wrap>
-          <Button variant="outline" size="sm">Export data</Button>
-          <Button variant="outline" size="sm">Pause</Button>
-          <Button variant="danger" size="sm">Delete</Button>
+          <Button variant="outline" size="sm">
+            Export data
+          </Button>
+          <Button variant="outline" size="sm">
+            Pause
+          </Button>
+          <Button variant="danger" size="sm">
+            Delete
+          </Button>
         </Row>
       </InsightCard>
     </>
@@ -211,7 +256,11 @@ export function AccountSettings() {
         crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
         actions={
           <Row gap={2}>
-            {saved && <Badge tone="green" dot>Saved</Badge>}
+            {saved && (
+              <Badge tone="green" dot>
+                Saved
+              </Badge>
+            )}
             <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
               <Icon name="check" size={13} />
               {saving ? 'Saving…' : 'Save changes'}
@@ -222,6 +271,12 @@ export function AccountSettings() {
 
       <Container size="2xl">
         <Stack gap={6}>
+          <PageHead
+            eyebrow="Account"
+            title="Settings"
+            sub="Profile, notifications, privacy, and connected accounts — fine-tune how DigiPicks works for you."
+          />
+
           {error && (
             <InsightCard
               tone="red"
@@ -268,7 +323,9 @@ export function AccountSettings() {
                 <Field label="Language">
                   <Select value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
                     {LOCALE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
                   </Select>
                 </Field>
@@ -308,7 +365,12 @@ export function AccountSettings() {
                 title="Have a track record? Publish picks."
                 sub="Apply once, get verified, and keep 87% of every subscription."
                 action={
-                  <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/apply')}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    iconRight="arrow-right"
+                    onClick={() => navigate('/apply')}
+                  >
                     Apply now
                   </Button>
                 }

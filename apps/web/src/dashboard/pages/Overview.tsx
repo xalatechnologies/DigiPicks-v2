@@ -15,7 +15,7 @@ import {
   Mono,
   Badge,
   Sparkline,
-  Section,
+  PageHead,
   MetricGrid,
   PersonRow,
   TitleSub,
@@ -81,8 +81,8 @@ export function Overview() {
 
       <Container size="2xl">
         <Stack gap={6}>
-          <Section
-            eyebrow="A quick read on your studio, audience, and growth"
+          <PageHead
+            eyebrow="Studio overview"
             title={`Welcome back, ${displayName}.`}
             sub="Tonight's slate, your in-flight picks, and your fastest-growing levers."
           />

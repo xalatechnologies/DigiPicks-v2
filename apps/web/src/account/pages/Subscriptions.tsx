@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   PageHeader,
+  PageHead,
   Container,
   Stack,
   Row,
@@ -23,7 +24,11 @@ import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 function fmtDate(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(ms).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtShort(ms: number): string {
@@ -50,14 +55,19 @@ export function Subscriptions() {
   const earliestSub = [...active, ...cancelled].reduce((earliest, s) => {
     return earliest === 0 || s.startedAt < earliest ? s.startedAt : earliest;
   }, 0);
-  const monthsActive = earliestSub > 0 ? Math.max(1, Math.ceil((Date.now() - earliestSub) / (30 * 86400000))) : 0;
+  const monthsActive =
+    earliestSub > 0 ? Math.max(1, Math.ceil((Date.now() - earliestSub) / (30 * 86400000))) : 0;
   const lifetimeEstimate = totalMonthly * monthsActive;
 
   async function handleCancel(creatorId: Id<'creators'>) {
     setCancelling(creatorId);
-    try { await cancelSub({ creatorId }); }
-    catch { /* useQuery recovers */ }
-    finally { setCancelling(null); }
+    try {
+      await cancelSub({ creatorId });
+    } catch {
+      /* useQuery recovers */
+    } finally {
+      setCancelling(null);
+    }
   }
 
   // ── Right rail ─────────────────────────────────────────────────────────
@@ -70,7 +80,9 @@ export function Subscriptions() {
         sub="Expires 09/28"
         action={<Badge tone="green">Default</Badge>}
       >
-        <Button variant="outline" size="sm" iconLeft="plus">Add method</Button>
+        <Button variant="outline" size="sm" iconLeft="plus">
+          Add method
+        </Button>
       </InsightCard>
 
       <InsightCard
@@ -102,7 +114,11 @@ export function Subscriptions() {
         tone="mute"
         eyebrow="Recent invoices"
         title="Billing history"
-        action={<Button variant="ghost" size="sm" iconRight="arrow-right">All</Button>}
+        action={
+          <Button variant="ghost" size="sm" iconRight="arrow-right">
+            All
+          </Button>
+        }
       >
         {active.length === 0 && cancelled.length === 0 ? (
           <Muted>No billing history yet.</Muted>
@@ -128,7 +144,12 @@ export function Subscriptions() {
         )}
       </InsightCard>
 
-      <InsightCard tone="blue" eyebrow="Quick links" title="Billing tools" sub="External portals & support">
+      <InsightCard
+        tone="blue"
+        eyebrow="Quick links"
+        title="Billing tools"
+        sub="External portals & support"
+      >
         <Stack gap={0}>
           <PersonRow
             name="Stripe portal"
@@ -168,7 +189,12 @@ export function Subscriptions() {
             <Button variant="secondary" size="sm" onClick={() => navigate('/account')}>
               Dashboard
             </Button>
-            <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
+            <Button
+              variant="primary"
+              size="sm"
+              iconRight="arrow-right"
+              onClick={() => navigate('/account/discover')}
+            >
               Discover more
             </Button>
           </Row>
@@ -177,13 +203,27 @@ export function Subscriptions() {
 
       <Container size="2xl">
         <Stack gap={6}>
+          <PageHead
+            eyebrow="Account"
+            title={active.length > 0 ? 'Your active subscriptions' : 'Your subscriptions'}
+            sub={
+              active.length > 0
+                ? `You're supporting ${active.length} creator${active.length === 1 ? '' : 's'} for $${totalMonthly}/mo. Manage plans, payment, and billing history below.`
+                : 'Manage active plans, retry past-due payments, and resubscribe to creators you’ve cancelled.'
+            }
+          />
+
           {/* Top metrics — accent stat tiles */}
           <Row gap={4} wrap>
             <StatTile
               label="Active"
               tone="green"
               value={String(active.length)}
-              sub={active.length > 0 ? `${active.length} creator${active.length === 1 ? '' : 's'} on rotation` : 'No active plans'}
+              sub={
+                active.length > 0
+                  ? `${active.length} creator${active.length === 1 ? '' : 's'} on rotation`
+                  : 'No active plans'
+              }
             />
             <StatTile
               label="Monthly spend"
@@ -195,7 +235,11 @@ export function Subscriptions() {
               label="Lifetime"
               tone="gold"
               value={`$${lifetimeEstimate}`}
-              sub={monthsActive > 0 ? `Across ${monthsActive} month${monthsActive === 1 ? '' : 's'}` : '—'}
+              sub={
+                monthsActive > 0
+                  ? `Across ${monthsActive} month${monthsActive === 1 ? '' : 's'}`
+                  : '—'
+              }
             />
             <StatTile
               label="Past due"
@@ -209,18 +253,26 @@ export function Subscriptions() {
           <DashGrid aside={aside}>
             {isLoading && <EmptyState icon="card" title="Loading subscriptions…" />}
 
-            {!isLoading && active.length === 0 && pastDue.length === 0 && cancelled.length === 0 && (
-              <EmptyState
-                icon="card"
-                title="No subscriptions yet"
-                subtitle="Discover creators and subscribe to start receiving premium picks."
-                action={
-                  <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
-                    Browse creators
-                  </Button>
-                }
-              />
-            )}
+            {!isLoading &&
+              active.length === 0 &&
+              pastDue.length === 0 &&
+              cancelled.length === 0 && (
+                <EmptyState
+                  icon="card"
+                  title="No subscriptions yet"
+                  subtitle="Discover creators and subscribe to start receiving premium picks."
+                  action={
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      iconRight="arrow-right"
+                      onClick={() => navigate('/account/discover')}
+                    >
+                      Browse creators
+                    </Button>
+                  }
+                />
+              )}
 
             {pastDue.length > 0 && (
               <>
@@ -229,7 +281,11 @@ export function Subscriptions() {
                   eyebrow="Action needed"
                   title="Past due"
                   sub="Update your card to keep these subscriptions active."
-                  action={<Badge tone="red" dot>{pastDue.length}</Badge>}
+                  action={
+                    <Badge tone="red" dot>
+                      {pastDue.length}
+                    </Badge>
+                  }
                 />
                 <Stack gap={2}>
                   {pastDue.map((sub) => (
@@ -243,9 +299,17 @@ export function Subscriptions() {
                       price={sub.creatorStartingPrice}
                       status="past_due"
                       meta="Payment failed"
-                      primaryAction={<Button variant="primary" size="sm">Retry payment</Button>}
+                      primaryAction={
+                        <Button variant="primary" size="sm">
+                          Retry payment
+                        </Button>
+                      }
                       secondaryAction={
-                        <Button variant="ghost" size="sm" onClick={() => navigate(`/creators/${sub.creatorHandle}`)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/creators/${sub.creatorHandle}`)}
+                        >
                           View
                         </Button>
                       }
@@ -263,7 +327,12 @@ export function Subscriptions() {
                   title="Active plans"
                   sub={`${active.length} creator${active.length === 1 ? '' : 's'} · $${totalMonthly}/mo total`}
                   action={
-                    <Button variant="outline" size="sm" iconLeft="compass" onClick={() => navigate('/account/discover')}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      iconLeft="compass"
+                      onClick={() => navigate('/account/discover')}
+                    >
                       Add more
                     </Button>
                   }
@@ -326,7 +395,12 @@ export function Subscriptions() {
                       status="cancelled"
                       meta={sub.cancelledAt ? `Cancelled ${fmtDate(sub.cancelledAt)}` : undefined}
                       primaryAction={
-                        <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate(`/creators/${sub.creatorHandle}`)}>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          iconRight="arrow-right"
+                          onClick={() => navigate(`/creators/${sub.creatorHandle}`)}
+                        >
                           Resubscribe
                         </Button>
                       }

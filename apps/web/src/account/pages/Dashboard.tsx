@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
+  PageHeader,
   Container,
   Stack,
   Row,
@@ -65,10 +66,7 @@ export function Dashboard() {
   const feedItems = feed?.items ?? [];
   const hasPortfolio = Boolean(portfolio && portfolio.totalPicks > 0);
 
-  const pickIds = React.useMemo(
-    () => feedItems.map((i) => i.pick._id),
-    [feedItems],
-  );
+  const pickIds = React.useMemo(() => feedItems.map((i) => i.pick._id), [feedItems]);
   const savedMap = useQuery(
     api.savedPicks.savedIdsBatch,
     pickIds.length > 0 ? { pickIds } : 'skip',
@@ -78,7 +76,9 @@ export function Dashboard() {
     try {
       if (currentlySaved) await unsave({ pickId });
       else await save({ pickId });
-    } catch { /* useQuery recovers */ }
+    } catch {
+      /* useQuery recovers */
+    }
   }
 
   const sparkData = React.useMemo(() => {
@@ -98,11 +98,20 @@ export function Dashboard() {
     <>
       <InsightCard
         tone="green"
-        eyebrow={activeSubs.length > 0 ? `${activeSubs.length} active · $${totalMonthly}/mo` : 'No subscriptions'}
+        eyebrow={
+          activeSubs.length > 0
+            ? `${activeSubs.length} active · $${totalMonthly}/mo`
+            : 'No subscriptions'
+        }
         title="Subscriptions"
         sub="Manage your creator plans"
         action={
-          <Button variant="ghost" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/subscriptions')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            iconRight="arrow-right"
+            onClick={() => navigate('/account/subscriptions')}
+          >
             Manage
           </Button>
         }
@@ -113,7 +122,12 @@ export function Dashboard() {
             title="No subscriptions yet"
             subtitle="Subscribe to unlock premium picks and personalize your feed."
             action={
-              <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
+              <Button
+                variant="primary"
+                size="sm"
+                iconRight="arrow-right"
+                onClick={() => navigate('/account/discover')}
+              >
                 Browse creators
               </Button>
             }
@@ -142,7 +156,12 @@ export function Dashboard() {
           eyebrow="Latest grades"
           title="Recent results"
           action={
-            <Button variant="ghost" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/results')}>
+            <Button
+              variant="ghost"
+              size="sm"
+              iconRight="arrow-right"
+              onClick={() => navigate('/account/results')}
+            >
               All
             </Button>
           }
@@ -158,7 +177,15 @@ export function Dashboard() {
                   color={pick.creatorColor}
                   trailing={
                     <Badge
-                      tone={pick.grade === 'win' ? 'green' : pick.grade === 'loss' ? 'red' : pick.grade === 'push' ? 'gold' : 'mute'}
+                      tone={
+                        pick.grade === 'win'
+                          ? 'green'
+                          : pick.grade === 'loss'
+                            ? 'red'
+                            : pick.grade === 'push'
+                              ? 'gold'
+                              : 'mute'
+                      }
                       dot
                     >
                       {pick.grade ?? 'pending'}
@@ -205,148 +232,192 @@ export function Dashboard() {
   );
 
   return (
-    <Container size="2xl">
-      <Stack gap={6}>
-        <PortfolioHero
-          eyebrow={hasPortfolio ? 'Portfolio · live' : 'Welcome'}
-          title={`Welcome back, ${displayName}`}
-          sub={
-            hasPortfolio
-              ? 'Your followed plays at a glance — units, record, and streak.'
-              : 'Subscribe to creators and your tracked plays will build your portfolio here.'
-          }
-          empty={!hasPortfolio}
-          emptyTitle="No tracked plays yet"
-          emptySub="Subscribe to a creator and any followed picks they grade will start populating your portfolio."
-          emptyAction={
-            <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
-              Discover creators
+    <>
+      <PageHeader
+        title="Dashboard"
+        crumbs={[{ label: 'Account' }, { label: 'Dashboard' }]}
+        actions={
+          <Row gap={2}>
+            <Button
+              variant="secondary"
+              size="sm"
+              iconLeft="card"
+              onClick={() => navigate('/account/subscriptions')}
+            >
+              Manage subs
             </Button>
-          }
-          winRate={hasPortfolio ? portfolio!.winRate : undefined}
-          winRateLabel={hasPortfolio ? winRateLabel(portfolio!.winRate) : undefined}
-          kpis={
-            hasPortfolio
-              ? [
-                  {
-                    label: 'Net units',
-                    value: `${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`,
-                    tone: portfolio!.netUnits > 0 ? 'green' : portfolio!.netUnits < 0 ? 'red' : 'neutral',
-                  },
-                  {
-                    label: 'Record',
-                    value: `${portfolio!.wins}W-${portfolio!.losses}L`,
-                    tone: 'neutral',
-                  },
-                  {
-                    label: 'Active subs',
-                    value: String(activeSubs.length),
-                    tone: 'neutral',
-                  },
-                  {
-                    label: 'Streak',
-                    value: portfolio!.streak,
-                    tone: portfolio!.streak.startsWith('W') ? 'gold' : portfolio!.streak.startsWith('L') ? 'red' : 'neutral',
-                  },
-                ]
-              : []
-          }
-          spark={hasPortfolio ? sparkData : undefined}
-          actions={
-            <Row gap={2}>
-              <Button variant="secondary" size="sm" iconLeft="card" onClick={() => navigate('/account/subscriptions')}>
-                Manage subs
-              </Button>
-              <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
+            <Button
+              variant="primary"
+              size="sm"
+              iconRight="arrow-right"
+              onClick={() => navigate('/account/discover')}
+            >
+              Discover
+            </Button>
+          </Row>
+        }
+      />
+
+      <Container size="2xl">
+        <Stack gap={6}>
+          <PortfolioHero
+            eyebrow={hasPortfolio ? 'Portfolio · live' : 'Welcome'}
+            title={`Welcome back, ${displayName}`}
+            sub={
+              hasPortfolio
+                ? 'Your followed plays at a glance — units, record, and streak.'
+                : 'Subscribe to creators and your tracked plays will build your portfolio here.'
+            }
+            empty={!hasPortfolio}
+            emptyTitle="No tracked plays yet"
+            emptySub="Subscribe to a creator and any followed picks they grade will start populating your portfolio."
+            emptyAction={
+              <Button
+                variant="primary"
+                size="sm"
+                iconRight="arrow-right"
+                onClick={() => navigate('/account/discover')}
+              >
                 Discover creators
               </Button>
-            </Row>
-          }
-        />
+            }
+            winRate={hasPortfolio ? portfolio!.winRate : undefined}
+            winRateLabel={hasPortfolio ? winRateLabel(portfolio!.winRate) : undefined}
+            kpis={
+              hasPortfolio
+                ? [
+                    {
+                      label: 'Net units',
+                      value: `${portfolio!.netUnits > 0 ? '+' : ''}${portfolio!.netUnits}u`,
+                      tone:
+                        portfolio!.netUnits > 0
+                          ? 'green'
+                          : portfolio!.netUnits < 0
+                            ? 'red'
+                            : 'neutral',
+                    },
+                    {
+                      label: 'Record',
+                      value: `${portfolio!.wins}W-${portfolio!.losses}L`,
+                      tone: 'neutral',
+                    },
+                    {
+                      label: 'Active subs',
+                      value: String(activeSubs.length),
+                      tone: 'neutral',
+                    },
+                    {
+                      label: 'Streak',
+                      value: portfolio!.streak,
+                      tone: portfolio!.streak.startsWith('W')
+                        ? 'gold'
+                        : portfolio!.streak.startsWith('L')
+                          ? 'red'
+                          : 'neutral',
+                    },
+                  ]
+                : []
+            }
+            spark={hasPortfolio ? sparkData : undefined}
+          />
 
-        <SectionHead
-          eyebrow="Your feed"
-          title={feed?.personalized ? 'Latest from creators you follow' : 'Trending picks'}
-          sub={
-            feed?.personalized
-              ? `${feedItems.length} pick${feedItems.length === 1 ? '' : 's'} from your subscriptions`
-              : 'Discover mode — subscribe to personalize your feed.'
-          }
-          action={
-            <FilterChips
-              options={SPORT_FILTERS}
-              value={sport}
-              onChange={setSport}
-              allLabel="All sports"
-            />
-          }
-        />
-
-        <DashGrid aside={aside}>
-          {feed && !feed.personalized && (
-            <Card>
-              <Row gap={3} between>
-                <Row gap={2}>
-                  <Badge tone="blue" dot>Discover mode</Badge>
-                  <Muted>Subscribe to personalize your feed.</Muted>
-                </Row>
-                <Button variant="outline" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
-                  Browse creators
-                </Button>
-              </Row>
-            </Card>
-          )}
-
-          {isLoading && <EmptyState icon="feed" title="Loading your feed…" />}
-
-          {isEmpty && (
-            <EmptyState
-              icon="feed"
-              title="No picks yet"
-              subtitle="Check back later — your subscribed creators publish daily."
-              action={
-                <Button variant="primary" size="sm" iconRight="arrow-right" onClick={() => navigate('/account/discover')}>
-                  Discover creators
-                </Button>
-              }
-            />
-          )}
-
-          {!isEmpty && feedItems.map(({ pick, creator }) => {
-            const isSaved = savedMap?.[pick._id] ?? false;
-            return (
-              <PickCard
-                key={pick._id}
-                creatorName={creator?.name ?? 'Unknown'}
-                creatorHandle={creator?.handle ?? ''}
-                creatorMono={creator?.avatarMono ?? ''}
-                creatorColor={creator?.avatarColor ?? ''}
-                creatorVerified={creator?.verified ?? false}
-                access={pick.access}
-                sport={pick.sport}
-                event={pick.eventName}
-                eventTime={pick.eventTime}
-                posted={pick.publishedAt ? timeAgo(pick.publishedAt) : timeAgo(pick.createdAt)}
-                title={pick.title}
-                market={pick.market}
-                selection={pick.selection}
-                odds={pick.odds}
-                units={pick.units}
-                body={pick.body}
-                teaser={pick.teaser}
-                status={pick.grade ?? 'pending'}
-                aiSummary={pick.aiSummary}
-                aiConfidence={pick.aiConfidence}
-                aiReasoning={pick.aiReasoning}
-                aiModel={pick.aiModel}
-                saved={isSaved}
-                onSave={() => toggleSave(pick._id, isSaved)}
-                onOpen={() => creator && navigate(`/creators/${creator.handle}`)}
+          <SectionHead
+            eyebrow="Your feed"
+            title={feed?.personalized ? 'Latest from creators you follow' : 'Trending picks'}
+            sub={
+              feed?.personalized
+                ? `${feedItems.length} pick${feedItems.length === 1 ? '' : 's'} from your subscriptions`
+                : 'Discover mode — subscribe to personalize your feed.'
+            }
+            action={
+              <FilterChips
+                options={SPORT_FILTERS}
+                value={sport}
+                onChange={setSport}
+                allLabel="All sports"
               />
-            );
-          })}
-        </DashGrid>
-      </Stack>
-    </Container>
+            }
+          />
+
+          <DashGrid aside={aside}>
+            {feed && !feed.personalized && (
+              <Card>
+                <Row gap={3} between>
+                  <Row gap={2}>
+                    <Badge tone="blue" dot>
+                      Discover mode
+                    </Badge>
+                    <Muted>Subscribe to personalize your feed.</Muted>
+                  </Row>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    iconRight="arrow-right"
+                    onClick={() => navigate('/account/discover')}
+                  >
+                    Browse creators
+                  </Button>
+                </Row>
+              </Card>
+            )}
+
+            {isLoading && <EmptyState icon="feed" title="Loading your feed…" />}
+
+            {isEmpty && (
+              <EmptyState
+                icon="feed"
+                title="No picks yet"
+                subtitle="Check back later — your subscribed creators publish daily."
+                action={
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    iconRight="arrow-right"
+                    onClick={() => navigate('/account/discover')}
+                  >
+                    Discover creators
+                  </Button>
+                }
+              />
+            )}
+
+            {!isEmpty &&
+              feedItems.map(({ pick, creator }) => {
+                const isSaved = savedMap?.[pick._id] ?? false;
+                return (
+                  <PickCard
+                    key={pick._id}
+                    creatorName={creator?.name ?? 'Unknown'}
+                    creatorHandle={creator?.handle ?? ''}
+                    creatorMono={creator?.avatarMono ?? ''}
+                    creatorColor={creator?.avatarColor ?? ''}
+                    creatorVerified={creator?.verified ?? false}
+                    access={pick.access}
+                    sport={pick.sport}
+                    event={pick.eventName}
+                    eventTime={pick.eventTime}
+                    posted={pick.publishedAt ? timeAgo(pick.publishedAt) : timeAgo(pick.createdAt)}
+                    title={pick.title}
+                    market={pick.market}
+                    selection={pick.selection}
+                    odds={pick.odds}
+                    units={pick.units}
+                    body={pick.body}
+                    teaser={pick.teaser}
+                    status={pick.grade ?? 'pending'}
+                    aiSummary={pick.aiSummary}
+                    aiConfidence={pick.aiConfidence}
+                    aiReasoning={pick.aiReasoning}
+                    aiModel={pick.aiModel}
+                    saved={isSaved}
+                    onSave={() => toggleSave(pick._id, isSaved)}
+                    onOpen={() => creator && navigate(`/creators/${creator.handle}`)}
+                  />
+                );
+              })}
+          </DashGrid>
+        </Stack>
+      </Container>
+    </>
   );
 }
