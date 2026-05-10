@@ -86,7 +86,9 @@ export const pollUpcoming = internalAction({
             await openCircuit(ctx, CIRCUIT_KEY, `pollUpcoming HTTP ${res.status}`);
             break;
           }
-          console.warn(`Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`);
+          if (res.status !== 404) {
+            console.warn(`Odds API /events error for ${sportKey}: ${res.status} ${res.statusText}`);
+          }
           continue;
         }
         sawSuccess = true;
@@ -214,7 +216,9 @@ export const pollOddsSnapshots = internalAction({
             await openCircuit(ctx, CIRCUIT_KEY, `pollOddsSnapshots HTTP ${res.status}`);
             break;
           }
-          console.warn(`Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`);
+          if (res.status !== 404) {
+            console.warn(`Odds API /odds error for ${sportKey}: ${res.status} ${res.statusText}`);
+          }
           continue;
         }
         sawSuccess = true;

@@ -63,7 +63,11 @@ export const pollActive = internalAction({
             await openCircuit(ctx, CIRCUIT_KEY, `liveScores HTTP ${res.status}`);
             break;
           }
-          console.warn(`Odds API error for ${sportKey}: ${res.status}`);
+          // 404 = tournament not currently active (seasonal sports). Silent
+          // skip — only warn on genuinely unexpected statuses.
+          if (res.status !== 404) {
+            console.warn(`Odds API error for ${sportKey}: ${res.status}`);
+          }
           continue;
         }
         sawSuccess = true;
