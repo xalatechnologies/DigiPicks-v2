@@ -80,8 +80,72 @@ const WIKI_SUMMARY = 'https://en.wikipedia.org/api/rest_v1/page/summary';
 interface WikipediaSummary {
   type?: string;
   title?: string;
+  description?: string;
+  extract?: string;
   thumbnail?: { source?: string; width?: number; height?: number };
-  originalimage?: { source?: string };
+  originalimage?: { source?: string; width?: number; height?: number };
+}
+
+/**
+ * Decide whether a Wikipedia page summary actually describes a sports
+ * team (or franchise) so we don't grab a stadium photo / coach portrait
+ * / mascot illustration as the team's "logo." Combines:
+ *   - the page `description` field (one-line gloss)
+ *   - the `extract` first sentence
+ *   - aspect ratio of the candidate image (crests ≈ square)
+ */
+function isLikelyTeamPage(summary: WikipediaSummary, sport: string): boolean {
+  const blob = `${summary.description ?? ''} ${summary.extract ?? ''}`.toLowerCase();
+  if (!blob) return false;
+
+  // Reject obvious non-team page kinds.
+  const negative = [
+    'stadium',
+    'arena',
+    'racecourse',
+    'racetrack',
+    'manager',
+    'coach',
+    'born ',
+    'is a former',
+    'is an american basketball player',
+    'is a footballer',
+    'mascot',
+    'song',
+    'film',
+    'tv series',
+    'video game',
+    'novel',
+    'album',
+    'rock band',
+  ];
+  if (negative.some((needle) => blob.includes(needle))) return false;
+
+  // Sport-specific positive signals. The page must look like a club /
+  // franchise / national team to pass. Be strict — false positives here
+  // are exactly what gave us stadium photos.
+  const positives: string[] = ['club', 'franchise', 'team', 'football side'];
+  const sportLower = sport.toLowerCase();
+  if (sportLower === 'soccer') positives.push('association football', 'football club');
+  if (sportLower === 'cricket') positives.push('cricket team', 'cricket franchise', 'ipl');
+  if (sportLower === 'football')
+    positives.push('national football league', 'nfl franchise', 'american football');
+  if (sportLower === 'basketball') positives.push('basketball team', 'nba');
+  if (sportLower === 'baseball') positives.push('baseball team', 'mlb');
+  if (sportLower === 'hockey' || sportLower === 'ice hockey') positives.push('hockey team', 'nhl');
+
+  if (!positives.some((p) => blob.includes(p))) return false;
+
+  // Aspect-ratio sanity check on the image — crests are roughly square,
+  // photos are wide. originalimage is preferred when present; thumbnail
+  // is normalized to a square box so it's always close-to-1.
+  const w = summary.originalimage?.width ?? summary.thumbnail?.width ?? 0;
+  const h = summary.originalimage?.height ?? summary.thumbnail?.height ?? 0;
+  if (w > 0 && h > 0) {
+    const ratio = w / h;
+    if (ratio > 1.4 || ratio < 0.6) return false;
+  }
+  return true;
 }
 
 /** Generate candidate Wikipedia page titles for (sport, name). Order
@@ -113,7 +177,7 @@ async function fetchFromWikipedia(sport: string, name: string): Promise<string |
   // 1. Try direct title candidates. The REST summary endpoint follows
   //    redirects automatically, so "Manchester United F.C." resolves
   //    even when Wikipedia stores the page at a slightly different
-  //    title. Returns the page thumbnail when present.
+  //    title. We accept the image only when isLikelyTeamPage agrees.
   for (const candidate of wikipediaCandidates(sport, name)) {
     try {
       const res = await fetch(
@@ -122,6 +186,7 @@ async function fetchFromWikipedia(sport: string, name: string): Promise<string |
       );
       if (!res.ok) continue;
       const data = (await res.json()) as WikipediaSummary;
+      if (!isLikelyTeamPage(data, sport)) continue;
       const url = data.originalimage?.source ?? data.thumbnail?.source;
       if (url) return url;
     } catch {
@@ -129,7 +194,8 @@ async function fetchFromWikipedia(sport: string, name: string): Promise<string |
     }
   }
   // 2. Fallback to opensearch with sport context. Less reliable but
-  //    catches edge cases (mascots-only names, regional clubs).
+  //    catches edge cases (mascots-only names, regional clubs). Same
+  //    isLikelyTeamPage gate so we don't grab a stadium photo.
   try {
     const sportContext = sport.toLowerCase() === 'football' ? 'NFL' : sport;
     const search = `${name} ${sportContext}`;
@@ -146,6 +212,7 @@ async function fetchFromWikipedia(sport: string, name: string): Promise<string |
     });
     if (!sumRes.ok) return undefined;
     const sumData = (await sumRes.json()) as WikipediaSummary;
+    if (!isLikelyTeamPage(sumData, sport)) return undefined;
     return sumData.originalimage?.source ?? sumData.thumbnail?.source;
   } catch {
     return undefined;

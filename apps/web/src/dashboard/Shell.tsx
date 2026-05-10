@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, ThemeToggle } from '@digipicks/ds';
+import { AccountUserMenu } from '../auth/AccountUserMenu';
 import { api } from '../../../../convex/_generated/api';
 
 // =============================================================================
@@ -102,6 +103,23 @@ function buildNavSections(subscriberCount: string): StudioNavSection[] {
         },
       ],
     },
+    {
+      title: 'Tools',
+      items: [
+        {
+          to: '/dashboard/copilot',
+          label: 'Copilot',
+          sub: 'Studio AI assistant',
+          icon: 'sparkles',
+        },
+        {
+          to: '/dashboard/settings',
+          label: 'Settings',
+          sub: 'Profile · Discord · Telegram',
+          icon: 'gear',
+        },
+      ],
+    },
   ];
 }
 
@@ -128,7 +146,14 @@ export function DashboardShell() {
 
   const sections = buildNavSections(subscriberCountLabel);
 
-  const header = <AppHeader userName={userName} userMail={userMail} userMonogram={userMonogram} />;
+  const header = (
+    <AppHeader
+      userName={userName}
+      userMail={userMail}
+      userMonogram={userMonogram}
+      userMenu={<AccountUserMenu align="right" />}
+    />
+  );
 
   const sidebar = (
     <Sidebar footer={<ThemeToggle />}>

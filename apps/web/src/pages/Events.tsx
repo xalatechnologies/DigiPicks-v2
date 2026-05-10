@@ -71,7 +71,9 @@ export function Events() {
 
   const totalEvents = (allEvents ?? []).length;
   const heroFeatured = featured[0];
-  const otherFeatured = featured.slice(1);
+  // Cap "Marquee matchups" at 5 total cards: 1 hero + 4 in the grid
+  // below it. Anything beyond surfaces in the per-league sections.
+  const otherFeatured = featured.slice(1, 5);
 
   // Prefer the backend-resolved logo URLs (downloaded into Convex storage
   // by `internal.teamLogos.resolveOne`) and fall back to the synchronous

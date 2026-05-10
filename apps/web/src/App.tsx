@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useConvexAuth, useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import {
   PublicLayout,
@@ -16,9 +16,8 @@ import {
   Badge,
   Spacer,
   EmptyState,
-  UserMenu,
-  type UserMenuItem,
 } from '@digipicks/ds';
+import { AccountUserMenu } from './auth/AccountUserMenu';
 import { api } from '../../../convex/_generated/api';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
@@ -81,108 +80,9 @@ const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/odds', label: 'Odds' },
 ];
 
-function AuthHeaderButton() {
-  const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useConvexAuth();
-  const { signOut } = useAuthActions();
-  // Pull the current user's profile so the UserMenu header shows the
-  // right name + email + avatar mono. `'skip'` while unauth.
-  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
-  // Unread notification count flows into the menu's Notifications row
-  // as a trailing badge — surfaces the count without a separate bell.
-  const unread = useQuery(api.notifications.unreadCount, isAuthenticated ? {} : 'skip');
-
-  if (isLoading) return null;
-  if (!isAuthenticated) {
-    return (
-      <Button variant="primary" onClick={() => navigate('/auth')}>
-        Sign in
-      </Button>
-    );
-  }
-
-  const items: UserMenuItem[] = [
-    {
-      label: 'My account',
-      icon: 'user',
-      onClick: () => navigate('/account'),
-    },
-    {
-      label: 'Discover',
-      icon: 'compass',
-      hint: 'Personalized feed',
-      onClick: () => navigate('/account/discover'),
-    },
-    {
-      label: 'My subscriptions',
-      icon: 'card',
-      onClick: () => navigate('/account/subscriptions'),
-    },
-    {
-      label: 'Saved picks',
-      icon: 'bookmark',
-      onClick: () => navigate('/account/saved'),
-    },
-    {
-      label: 'Watchlists',
-      icon: 'eye',
-      onClick: () => navigate('/account/watchlists'),
-    },
-    {
-      label: 'Results',
-      icon: 'trophy',
-      onClick: () => navigate('/account/results'),
-    },
-    {
-      label: 'Notifications',
-      icon: 'bell',
-      onClick: () => navigate('/account/notifications'),
-      trailing:
-        unread && unread > 0 ? (
-          <Badge tone="red" dot>
-            {unread > 9 ? '9+' : String(unread)}
-          </Badge>
-        ) : undefined,
-    },
-    {
-      label: 'Messages',
-      icon: 'inbox',
-      onClick: () => navigate('/account/messages'),
-    },
-    {
-      label: 'Copilot',
-      icon: 'sparkles',
-      hint: 'Ask anything',
-      onClick: () => navigate('/account/copilot'),
-    },
-    { divider: true },
-    {
-      label: 'Settings',
-      icon: 'gear',
-      onClick: () => navigate('/account/settings'),
-    },
-    {
-      label: 'Sign out',
-      icon: 'key',
-      destructive: true,
-      onClick: () => {
-        void signOut();
-      },
-    },
-  ];
-
-  return (
-    <UserMenu
-      user={{
-        name: me?.name ?? 'Account',
-        email: me?.email ?? undefined,
-        mono: me?.name?.charAt(0).toUpperCase(),
-      }}
-      items={items}
-      align="right"
-    />
-  );
-}
+// AccountUserMenu lives in apps/web/src/auth/AccountUserMenu.tsx so the
+// public header / account shell / dashboard shell all share the same
+// dropdown. Re-import below.
 
 function NotificationsBell() {
   const navigate = useNavigate();
@@ -243,7 +143,7 @@ function PublicHeader() {
           <Button variant="outline" iconRight="sparkles" onClick={() => navigate('/apply')}>
             Become a creator
           </Button>
-          <AuthHeaderButton />
+          <AccountUserMenu />
         </Row>
       </Row>
     </Container>

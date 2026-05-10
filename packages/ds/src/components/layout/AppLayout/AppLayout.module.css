@@ -27,4 +27,17 @@
   overflow-y: auto;
   position: relative;
   background: var(--bg-0);
+  /* Page-content breathing room. Every shell-mounted page (account,
+     dashboard) sat flush against the AppHeader by default; this gives
+     ~32px of vertical space above the first page title so the rhythm
+     matches the public pages' Container pad="page". */
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
 }

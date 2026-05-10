@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, ThemeToggle } from '@digipicks/ds';
+import { AccountUserMenu } from '../auth/AccountUserMenu';
 import { api } from '../../../../convex/_generated/api';
 
 // =============================================================================
@@ -71,6 +72,19 @@ function buildNavSections(unreadLabel: string): AccountNavSection[] {
           icon: 'bell',
           badge: unreadLabel,
         },
+        { to: '/account/messages', label: 'Messages', sub: 'DMs & threads', icon: 'inbox' },
+        {
+          to: '/account/watchlists',
+          label: 'Watchlists',
+          sub: 'Alert rules on the slate',
+          icon: 'eye',
+        },
+        {
+          to: '/account/copilot',
+          label: 'Copilot',
+          sub: 'Ask anything · cited',
+          icon: 'sparkles',
+        },
         { to: '/account/community', label: 'Community', sub: 'Live discussions', icon: 'message' },
         { to: '/account/settings', label: 'Settings', sub: 'Profile & preferences', icon: 'gear' },
       ],
@@ -97,7 +111,16 @@ export function SubscriberShell() {
 
   const sections = buildNavSections(unreadLabel);
 
-  const header = <AppHeader userName={userName} userMail={userMail} userMonogram={userMonogram} />;
+  // Single shared dropdown (auth + identity + items + sign-out). One
+  // component, one source of truth — see auth/AccountUserMenu.tsx.
+  const header = (
+    <AppHeader
+      userName={userName}
+      userMail={userMail}
+      userMonogram={userMonogram}
+      userMenu={<AccountUserMenu align="right" />}
+    />
+  );
 
   const sidebar = (
     <Sidebar footer={<ThemeToggle />}>

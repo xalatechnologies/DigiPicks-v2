@@ -13,6 +13,10 @@ export interface AppHeaderProps {
   onSearch?: (q: string) => void;
   onUserClick?: () => void;
   actions?: React.ReactNode;
+  /** When provided, replaces the built-in name/mono user button. Lets the
+   *  host unify the auth surface (e.g. drop in `<UserMenu />` so /account
+   *  shares the public-header dropdown). */
+  userMenu?: React.ReactNode;
   className?: string;
 }
 
@@ -23,6 +27,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onSearch,
   onUserClick,
   actions,
+  userMenu,
   className,
 }) => {
   const [query, setQuery] = React.useState('');
@@ -66,21 +71,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Icon name="help" size={18} />
         </button>
         <ThemeIconButton />
-        <button
-          type="button"
-          className={s.user}
-          onClick={onUserClick}
-          aria-label="User menu"
-        >
-          <span className={s.avatar}>{userMonogram}</span>
-          {(userName || userMail) && (
-            <span className={s.userText}>
-              {userName && <span className={s.userName}>{userName}</span>}
-              {userMail && <span className={s.userMail}>{userMail}</span>}
-            </span>
-          )}
-          <Icon name="chevron-down" size={14} className={s.userChev} />
-        </button>
+        {userMenu ?? (
+          <button type="button" className={s.user} onClick={onUserClick} aria-label="User menu">
+            <span className={s.avatar}>{userMonogram}</span>
+            {(userName || userMail) && (
+              <span className={s.userText}>
+                {userName && <span className={s.userName}>{userName}</span>}
+                {userMail && <span className={s.userMail}>{userMail}</span>}
+              </span>
+            )}
+            <Icon name="chevron-down" size={14} className={s.userChev} />
+          </button>
+        )}
       </div>
     </header>
   );
