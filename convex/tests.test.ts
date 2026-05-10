@@ -3,6 +3,7 @@ import { convexTest } from './__tests__/setup.test';
 import { expect, test, describe } from 'vitest';
 import { api, internal } from './_generated/api';
 import schema from './schema';
+import { _testHooks } from './autoGrader';
 
 const modules = import.meta.glob('./**/*.ts');
 
@@ -454,6 +455,111 @@ describe('applications', () => {
 });
 
 // =============================================================================
+// Auto-grader pure-function tests (Phase 16a)
+// =============================================================================
+
+describe('autoGrader.parsers', () => {
+  const { americanToDecimal, parseUnits, parseLine, detectSide, detectOverUnder, classifyMarket } =
+    _testHooks;
+
+  test('americanToDecimal handles +/− conventions', () => {
+    expect(americanToDecimal('-110')).toBeCloseTo(1.909, 2);
+    expect(americanToDecimal('+150')).toBeCloseTo(2.5, 2);
+    expect(americanToDecimal('200')).toBeCloseTo(3.0, 2);
+    expect(americanToDecimal('weird')).toBeNull();
+  });
+
+  test('parseUnits extracts numeric stake', () => {
+    expect(parseUnits('2u')).toBe(2);
+    expect(parseUnits('1.5u')).toBe(1.5);
+    expect(parseUnits(undefined)).toBe(1);
+  });
+
+  test('parseLine extracts trailing line value', () => {
+    expect(parseLine('Chiefs -3.5')).toBe(-3.5);
+    expect(parseLine('Over 224.5')).toBe(224.5);
+    expect(parseLine('Lakers')).toBeNull();
+  });
+
+  test('detectSide matches by team name', () => {
+    expect(detectSide('Chiefs -3', 'Kansas City Chiefs', 'Buffalo Bills')).toBe('home');
+    expect(detectSide('Bills +3', 'Kansas City Chiefs', 'Buffalo Bills')).toBe('away');
+    expect(detectSide('Mystery', 'Kansas City Chiefs', 'Buffalo Bills')).toBeNull();
+  });
+
+  test('detectOverUnder reads direction', () => {
+    expect(detectOverUnder('Over 224.5')).toBe('over');
+    expect(detectOverUnder('Under 50')).toBe('under');
+    expect(detectOverUnder('Chiefs -3')).toBeNull();
+  });
+
+  test('classifyMarket maps friendly names', () => {
+    expect(classifyMarket('Spread')).toBe('spread');
+    expect(classifyMarket('Moneyline')).toBe('h2h');
+    expect(classifyMarket('Total / Over Under')).toBe('total');
+    expect(classifyMarket('first to 5')).toBe('unknown');
+  });
+});
+
+describe('autoGrader.gradePick', () => {
+  const { gradePick } = _testHooks;
+  const basePick = {
+    creatorId: 'creator' as never,
+    access: 'free' as const,
+    sport: 'Football',
+    league: 'NFL',
+    eventName: 'KC @ BUF',
+    eventTime: '8 PM',
+    title: 'Chiefs -3',
+    market: 'Spread',
+    selection: 'Chiefs -3',
+    odds: '-110',
+    units: '1u',
+    confidence: 'High' as const,
+    status: 'published' as const,
+    grade: 'pending' as const,
+    createdAt: 0,
+    _id: 'pick' as never,
+    _creationTime: 0,
+  };
+
+  test('spread win', () => {
+    const r = gradePick({ ...basePick }, 31, 24, 'Kansas City Chiefs', 'Buffalo Bills');
+    expect(r?.grade).toBe('win');
+    expect(r?.netUnits).toMatch(/^\+/);
+  });
+
+  test('spread push', () => {
+    const r = gradePick({ ...basePick, selection: 'Chiefs -3' }, 27, 24, 'Kansas City Chiefs', 'Buffalo Bills');
+    expect(r?.grade).toBe('push');
+  });
+
+  test('h2h loss', () => {
+    const r = gradePick(
+      { ...basePick, market: 'Moneyline', selection: 'Bills' },
+      31, 24, 'Kansas City Chiefs', 'Buffalo Bills',
+    );
+    expect(r?.grade).toBe('loss');
+  });
+
+  test('total over win', () => {
+    const r = gradePick(
+      { ...basePick, market: 'Total', selection: 'Over 50.5' },
+      31, 24, 'Kansas City Chiefs', 'Buffalo Bills',
+    );
+    expect(r?.grade).toBe('win');
+  });
+
+  test('unrecognized market returns null', () => {
+    const r = gradePick(
+      { ...basePick, market: 'First to 5' },
+      31, 24, 'Kansas City Chiefs', 'Buffalo Bills',
+    );
+    expect(r).toBeNull();
+  });
+});
+
+// =============================================================================
 // Disputes Tests (Phase 11)
 // =============================================================================
 
@@ -561,6 +667,44 @@ describe('disputes', () => {
         reason: 'I have opinions',
       }),
     ).rejects.toThrow(/active subscribers/i);
+  });
+
+  test('full lifecycle audit-logs each transition', async () => {
+    const t = convexTest(schema, modules);
+    const { pickId, subscriberId } = await setupGradedPick(t);
+
+    const adminId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { role: 'admin', isActive: true }),
+    );
+
+    const disputeId = await t
+      .withIdentity({ subject: subscriberId })
+      .mutation(api.disputes.open, {
+        pickId,
+        reason: 'Lifecycle audit',
+      });
+    await t.withIdentity({ subject: adminId }).mutation(api.disputes.transition, {
+      disputeId,
+      status: 'under_review',
+    });
+    await t.withIdentity({ subject: adminId }).mutation(api.disputes.transition, {
+      disputeId,
+      status: 'resolved',
+      resolution: 'Final.',
+    });
+
+    const logs = await t.run(async (ctx) =>
+      ctx.db
+        .query('auditLogs')
+        .withIndex('by_entity', (q) =>
+          q.eq('entityType', 'dispute').eq('entityId', disputeId),
+        )
+        .collect(),
+    );
+    const actions = logs.map((l) => l.action);
+    expect(actions).toContain('dispute.opened');
+    expect(actions).toContain('dispute.under_review');
+    expect(actions).toContain('dispute.resolved');
   });
 
   test('dispute open writes an audit log entry', async () => {

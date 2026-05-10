@@ -142,6 +142,20 @@ export const create = mutation({
       }
     }
 
+    // Phase 16b — premium / VIP picks must attach to an admin-verified
+    // event. Closes M23: a creator can't monetize a self-submitted event
+    // without admin sign-off. Free picks are unaffected so creators can
+    // still seed their event before getting it verified.
+    if ((args.access === 'premium' || args.access === 'vip') && args.eventId) {
+      const event = await ctx.db.get(args.eventId);
+      if (event && event.verificationStatus !== 'admin_verified') {
+        throw new Error(
+          'Premium / VIP picks require an admin-verified event. ' +
+            'Submit the event for review or publish a free pick.',
+        );
+      }
+    }
+
     const pickId = await ctx.db.insert('picks', {
       creatorId: args.creatorId,
       access: args.access,

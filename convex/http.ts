@@ -270,6 +270,16 @@ async function dispatchPayout(
       payoutCents,
     });
   }
+
+  // Phase 16d — bump the coupon redemption counter so admin-issued
+  // promo caps fire. Stripe is the source of truth for the actual
+  // discount; this mirror tracks platform-side issuance against caps.
+  const couponCode = subscriptionMetadata.couponCode;
+  if (couponCode) {
+    await ctx.runMutation(internal.coupons._incrementRedemption, {
+      code: couponCode,
+    });
+  }
 }
 
 export default http;

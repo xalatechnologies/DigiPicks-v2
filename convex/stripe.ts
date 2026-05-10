@@ -96,6 +96,30 @@ export const _creatorForCheckout = internalQuery({
   },
 });
 
+export const _lookupCoupon = internalQuery({
+  args: { code: v.string() },
+  handler: async (ctx, args) => {
+    const code = args.code.trim().toUpperCase();
+    const row = await ctx.db
+      .query('couponCodes')
+      .withIndex('by_code', (q) => q.eq('code', code))
+      .first();
+    if (!row || row.archived) return null;
+    if (row.expiresAt > 0 && row.expiresAt < Date.now()) return null;
+    if (row.maxRedemptions > 0 && row.redemptionCount >= row.maxRedemptions) {
+      return null;
+    }
+    return row;
+  },
+});
+
+export const _lookupTier = internalQuery({
+  args: { tierId: v.id('pricingTiers') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.tierId);
+  },
+});
+
 /**
  * Create a Stripe Checkout Session for a subscriber to subscribe to a
  * creator on the chosen plan tier. Returns the redirect URL — the
@@ -110,6 +134,12 @@ export const createCheckoutSession = action({
     plan: subscriptionPlan,
     /** Referral code applied at checkout — surfaces back via webhook. */
     referralCode: v.optional(v.string()),
+    /** Admin-issued coupon code (Phase 16d). Resolved server-side to a
+     *  Stripe coupon ID before being passed to checkout. */
+    couponCode: v.optional(v.string()),
+    /** Pricing tier for trial-day support (Phase 16d). When set, overrides
+     *  the legacy plan-based price lookup with the tier's stripePriceId. */
+    tierId: v.optional(v.id('pricingTiers')),
   },
   handler: async (ctx, args): Promise<{ url: string }> => {
     if (args.plan === 'free') {
@@ -182,6 +212,28 @@ export const createCheckoutSession = action({
       const code = args.referralCode.trim().toLowerCase();
       params.set('metadata[referralCode]', code);
       params.set('subscription_data[metadata][referralCode]', code);
+    }
+
+    // Phase 16d — coupon resolution + trial period.
+    if (args.couponCode) {
+      const coupon = await ctx.runQuery(internal.stripe._lookupCoupon, {
+        code: args.couponCode,
+      });
+      if (!coupon) {
+        throw new Error('Coupon code is invalid, expired, or fully redeemed.');
+      }
+      params.set('discounts[0][coupon]', coupon.stripeCouponId);
+      params.set('metadata[couponCode]', coupon.code);
+      params.set('subscription_data[metadata][couponCode]', coupon.code);
+    }
+
+    if (args.tierId) {
+      const tier = await ctx.runQuery(internal.stripe._lookupTier, {
+        tierId: args.tierId,
+      });
+      if (tier?.trialDays && tier.trialDays > 0) {
+        params.set('subscription_data[trial_period_days]', String(tier.trialDays));
+      }
     }
 
     // Idempotency-Key bucketed to a 5-minute window so duplicate clicks /

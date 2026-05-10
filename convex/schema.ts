@@ -439,7 +439,8 @@ export default defineSchema({
     .index('by_status', ['status', 'createdAt'])
     .index('by_status_and_publishAt', ['status', 'publishAt'])
     .index('by_status_and_trending', ['status', 'trendingScore'])
-    .index('by_access', ['access', 'createdAt']),
+    .index('by_access', ['access', 'createdAt'])
+    .index('by_event_and_status', ['eventId', 'status']),
 
   events: defineTable({
     sport: v.string(),
@@ -635,10 +636,177 @@ export default defineSchema({
     sortOrder: v.number(),
     /** 'free' | 'premium' | 'vip' — kept so legacy subs still join cleanly. */
     legacyPlan: v.optional(v.string()),
+    /**
+     * Phase 16d — Stripe trial period in days. When set, checkout
+     * passes `subscription_data[trial_period_days]` to Stripe so the
+     * customer's first invoice is delayed.
+     */
+    trialDays: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_creator', ['creatorId', 'sortOrder'])
     .index('by_stripePriceId', ['stripePriceId']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AI COPILOT (Phase 16f, M24) — multi-turn conversation with tool use.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  aiConversations: defineTable({
+    userId: v.id('users'),
+    title: v.string(),
+    /** 'customer' or 'creator' — drives the system prompt template. */
+    persona: v.union(v.literal('customer'), v.literal('creator')),
+    archivedAt: v.optional(v.number()),
+    lastMessageAt: v.optional(v.number()),
+    messageCount: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_user', ['userId', 'lastMessageAt'])
+    .index('by_user_active', ['userId', 'archivedAt']),
+
+  aiMessages: defineTable({
+    conversationId: v.id('aiConversations'),
+    role: v.union(
+      v.literal('user'),
+      v.literal('assistant'),
+      v.literal('tool'),
+    ),
+    body: v.string(),
+    /** When role='tool' — the tool name + arg payload echoed back. */
+    toolName: v.optional(v.string()),
+    toolArgs: v.optional(v.any()),
+    /** Model + token usage metadata for assistant turns. */
+    model: v.optional(v.string()),
+    inputTokens: v.optional(v.number()),
+    outputTokens: v.optional(v.number()),
+    /** Citation list — entity refs the assistant grounded its answer on. */
+    citations: v.optional(
+      v.array(
+        v.object({
+          kind: v.string(),
+          id: v.string(),
+          label: v.string(),
+        }),
+      ),
+    ),
+    createdAt: v.number(),
+  })
+    .index('by_conversation', ['conversationId', 'createdAt']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DISCORD INBOUND (Phase 16e, M20) — guild integrations + channel sync
+  // configuration + imported message metadata. The schema lives now;
+  // actual Bot API ingestion is gated behind DISCORD_BOT_TOKEN.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  discordIntegrations: defineTable({
+    creatorId: v.id('creators'),
+    guildId: v.string(),
+    guildName: v.string(),
+    status: v.union(
+      v.literal('connected'),
+      v.literal('paused'),
+      v.literal('revoked'),
+    ),
+    connectedByUserId: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_creator', ['creatorId'])
+    .index('by_guild', ['guildId'])
+    .index('by_status', ['status']),
+
+  discordChannelSyncs: defineTable({
+    integrationId: v.id('discordIntegrations'),
+    channelId: v.string(),
+    channelName: v.string(),
+    syncDirection: v.union(
+      v.literal('outbound'),
+      v.literal('inbound'),
+      v.literal('two_way'),
+    ),
+    /** Optional link to a DigiPicks entity (event / pick / livestream / creator). */
+    linkedEntityType: v.optional(v.string()),
+    linkedEntityId: v.optional(v.string()),
+    isEnabled: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_integration', ['integrationId'])
+    .index('by_channel', ['channelId'])
+    .index('by_linked_entity', ['linkedEntityType', 'linkedEntityId']),
+
+  discordMessageImports: defineTable({
+    integrationId: v.id('discordIntegrations'),
+    channelId: v.string(),
+    threadId: v.optional(v.string()),
+    discordMessageId: v.string(),
+    /** Hashed author identifier — never raw Discord user ID. */
+    authorHash: v.string(),
+    /** Summarized content; raw never stored by default. */
+    contentSummary: v.optional(v.string()),
+    rawContentStored: v.boolean(),
+    linkedEntityType: v.optional(v.string()),
+    linkedEntityId: v.optional(v.string()),
+    sentimentScore: v.optional(v.number()),
+    importedAt: v.number(),
+  })
+    .index('by_integration', ['integrationId'])
+    .index('by_channel_and_imported', ['channelId', 'importedAt'])
+    .index('by_linked_entity', ['linkedEntityType', 'linkedEntityId']),
+
+  discordSentimentSummaries: defineTable({
+    integrationId: v.id('discordIntegrations'),
+    channelId: v.string(),
+    windowStart: v.number(),
+    windowEnd: v.number(),
+    messageCount: v.number(),
+    /** Aggregate score in [-1, 1]; positive is bullish on the linked entity. */
+    avgSentiment: v.number(),
+    summary: v.string(),
+    createdAt: v.number(),
+  }).index('by_channel_and_window', ['channelId', 'windowStart']),
+
+  discordDeliveryLogs: defineTable({
+    integrationId: v.id('discordIntegrations'),
+    channelId: v.string(),
+    eventType: v.string(),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('sent'),
+      v.literal('failed'),
+      v.literal('retrying'),
+    ),
+    errorMessage: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_integration_and_created', ['integrationId', 'createdAt'])
+    .index('by_status', ['status']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // COUPON CODES (Phase 16d, M19) — admin-issued promotional codes.
+  // Distinct from referral codes (which are per-user). Maps to a Stripe
+  // coupon ID; checkout attaches it as a subscription discount.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  couponCodes: defineTable({
+    code: v.string(),
+    /** Stripe coupon ID (created in Stripe dashboard or via API). */
+    stripeCouponId: v.string(),
+    /** Display-only — actual discount enforced by Stripe. */
+    percentOff: v.optional(v.number()),
+    amountOffCents: v.optional(v.number()),
+    /** Cap on total redemptions across all users. 0 = unlimited. */
+    maxRedemptions: v.number(),
+    redemptionCount: v.number(),
+    /** Hard expiry (ms epoch); 0 = no expiry. */
+    expiresAt: v.number(),
+    createdByUserId: v.id('users'),
+    archived: v.boolean(),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_code', ['code'])
+    .index('by_archived', ['archived', 'createdAt']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FOLLOWED CREATORS (PRD M15) — the second half of the saved library.
