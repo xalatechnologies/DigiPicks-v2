@@ -21,13 +21,12 @@ import {
   Muted,
 } from '@digipicks/ds';
 import { listSavedEmails, rememberEmail, forgetEmail, type SavedEmail } from '../lib/savedEmails';
+import { DEV_DEMO_EMAIL, DEV_DEMO_PASSWORD, DEV_DEMO_UNLOCK } from '../lib/devDemoLogin';
 
 type AuthStep = 'methods' | 'email-password';
 
-/** Resolve the post-auth landing target. Honors a ?redirectTo= param
- *  (so AuthGate can bounce-back to the originally-requested page) and
- *  defaults to /account. Refuses external URLs to avoid open-redirect
- *  shenanigans — only same-origin paths are allowed. */
+/** Resolve the post-auth landing target. Honors ?next= (AuthGate) and
+ *  ?redirectTo= (legacy) then defaults to /account. Same-origin paths only. */
 function safeRedirectTarget(raw: string | null): string {
   if (!raw) return '/account';
   // Only accept relative same-origin paths.
@@ -47,7 +46,7 @@ export function Auth() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const target = safeRedirectTarget(params.get('redirectTo'));
+  const target = safeRedirectTarget(params.get('next') ?? params.get('redirectTo'));
 
   // Already signed in → don't strand the user on the auth page. Covers
   // both "land on /auth while authed" and "Discord OAuth round-tripped
@@ -62,7 +61,16 @@ export function Auth() {
   // password step so returning users skip retyping the address.
   const [saved, setSaved] = useState<SavedEmail[]>([]);
   const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+
+  function fillDemoCredentials(forSignUp: boolean) {
+    setEmailInput(DEV_DEMO_EMAIL);
+    setPasswordInput(DEV_DEMO_PASSWORD);
+    setMode(forSignUp ? 'signUp' : 'signIn');
+    setStep('email-password');
+    setError('');
+  }
 
   useEffect(() => {
     setSaved(listSavedEmails());
@@ -77,6 +85,7 @@ export function Auth() {
   // feature with its own button).
   function pickSavedEmail(email: string) {
     setEmailInput(email);
+    setPasswordInput('');
     setMode('signIn');
     setStep('email-password');
     setError('');
@@ -196,6 +205,23 @@ export function Auth() {
           }
         >
           <Stack gap={4}>
+            {DEV_DEMO_UNLOCK ? (
+              <Stack gap={2}>
+                <Muted>
+                  Dev: visiting <strong>/dashboard</strong> while signed out sends you here with{' '}
+                  <strong>?next=/dashboard</strong>. Use demo credentials below on the email step.
+                </Muted>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => fillDemoCredentials(true)}
+                >
+                  Continue with demo account
+                </Button>
+              </Stack>
+            ) : null}
+
             {saved.length > 0 && (
               <AuthSavedGroup label="Continue as">
                 <Stack gap={2}>
@@ -280,6 +306,7 @@ export function Auth() {
               linkText={isSignUp ? 'Sign in' : 'Sign up free'}
               onClick={() => {
                 setMode(isSignUp ? 'signIn' : 'signUp');
+                setPasswordInput('');
                 setError('');
               }}
             />
@@ -287,6 +314,33 @@ export function Auth() {
         >
           <form onSubmit={handlePasswordSubmit}>
             <Stack gap={4}>
+              {DEV_DEMO_UNLOCK ? (
+                <Stack gap={2}>
+                  <Muted>
+                    Dev shortcut — email <strong>{DEV_DEMO_EMAIL}</strong>, password{' '}
+                    <strong>{DEV_DEMO_PASSWORD}</strong>. Sign up once, then sign in later.
+                  </Muted>
+                  <Row gap={2}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => fillDemoCredentials(true)}
+                    >
+                      Fill demo · Sign up
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fillDemoCredentials(false)}
+                    >
+                      Fill demo · Sign in
+                    </Button>
+                  </Row>
+                </Stack>
+              ) : null}
+
               <Field label="Email" htmlFor="auth-email" required>
                 <Input
                   id="auth-email"
@@ -310,6 +364,8 @@ export function Auth() {
                   autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   minLength={8}
                   required
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
                 />
               </Field>
 

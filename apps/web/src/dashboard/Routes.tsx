@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { AuthGate } from '../auth/AuthGate';
+import { DEV_DEMO_UNLOCK } from '../lib/devDemoLogin';
 import { DashboardShell } from './Shell';
 import { Overview } from './pages/Overview';
 import { Picks } from './pages/Picks';
@@ -23,8 +24,12 @@ import { CreatorCopilot } from './pages/Copilot';
 export function DashboardRoutes() {
   return (
     <AuthGate
-      requireCreator
-      allowedRoles={['super_admin', 'tenant_admin', 'admin']}
+      {...(DEV_DEMO_UNLOCK
+        ? {}
+        : {
+            requireCreator: true,
+            allowedRoles: ['super_admin', 'tenant_admin', 'admin'] as const,
+          })}
       forbiddenTitle="The creator studio is creator-only."
       forbiddenSubtitle="Apply to publish on DigiPicks to unlock this dashboard. Subscribers can browse picks on the public site."
     >
