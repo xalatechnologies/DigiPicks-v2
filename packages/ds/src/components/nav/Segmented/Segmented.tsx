@@ -13,6 +13,10 @@ export interface SegmentedProps {
   onChange: (v: string) => void;
   className?: string;
   ariaLabel?: string;
+  /** Larger touch targets and label size — good for auth and primary choices. */
+  size?: 'sm' | 'md';
+  /** Stretch to container width with equal segments (e.g. forms). */
+  fullWidth?: boolean;
 }
 
 export const Segmented: React.FC<SegmentedProps> = ({
@@ -21,9 +25,15 @@ export const Segmented: React.FC<SegmentedProps> = ({
   onChange,
   className,
   ariaLabel,
+  size = 'sm',
+  fullWidth = false,
 }) => {
   return (
-    <div className={cx(s.toggle, className)} role="group" aria-label={ariaLabel}>
+    <div
+      className={cx(s.toggle, fullWidth && s.fullWidth, size === 'md' && s.md, className)}
+      role="group"
+      aria-label={ariaLabel}
+    >
       {options.map((opt) => (
         <button
           key={opt.value}

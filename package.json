@@ -11,6 +11,7 @@
     "dev:convex": "npx convex dev",
     "dev:all": "concurrently \"pnpm dev:convex\" \"pnpm dev:web\" \"pnpm dev:api\"",
     "build": "pnpm -r build",
+    "build:web": "pnpm --filter @digipicks/web build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run --config convex/vitest.config.ts convex",

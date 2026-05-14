@@ -404,6 +404,7 @@ pnpm typecheck        # repo-wide tsc --noEmit (8 packages)
 pnpm test             # vitest run (Convex backend tests)
 pnpm lint             # eslint where configured
 pnpm build            # production build (web + DS package)
+pnpm build:web        # same command Vercel uses — web app only (monorepo filter)
 ```
 
 ---
@@ -411,7 +412,29 @@ pnpm build            # production build (web + DS package)
 ## Environment variables
 
 Set Convex env vars with `npx convex env set <KEY> <value>`. Vite vars
-go in `.env.local` at the repo root.
+go in `.env.local` at the repo root (see `.env.example`) or in the Vercel
+dashboard for hosted previews/production.
+
+### Vercel
+
+The repo includes [`vercel.json`](./vercel.json) for the **pnpm monorepo**:
+root install, `pnpm --filter @digipicks/web build`, output `apps/web/dist`, and
+SPA fallbacks for React Router.
+
+1. Import the GitHub project in Vercel (project root = repository root).
+2. Under **Settings → Environment Variables**, set **`VITE_CONVEX_URL`**
+   to your **production** Convex URL (`https://….convex.cloud`).
+3. Deploy the Convex backend separately (`npx convex deploy`) and align
+   `CONVEX_SITE_URL` / `WEB_BASE_URL` (Convex) with your real app origin.
+
+Optional: `VITE_SENTRY_DSN`, `VITE_RELEASE`.
+
+**QA-only `/dashboard` bypass (omit on customer-facing production):** set
+**`VITE_DEV_UNLOCK_DASHBOARD=true`** together with **`VITE_SHOW_DEMO_AUTH=true`**
+on a Preview/staging deployment so engineers can open `/dashboard` without a
+creator profile. This does **not** add demo buttons on `/auth`.
+
+Do **not** enable those two on a production deploy intended for real users.
 
 ### Required for full feature parity
 
