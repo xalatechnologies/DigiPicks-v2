@@ -26,6 +26,9 @@ dist/
 
 # Testing
 coverage/
+apps/web/test-results/
+apps/web/playwright-report/
+playwright/.cache/
 
 # Logs
 *.log

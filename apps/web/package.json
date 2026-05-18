@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install --with-deps"
   },
   "dependencies": {
     "@digipicks/app-shell": "workspace:*",
@@ -30,6 +32,7 @@
     "eslint": "^9.15.0",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.7.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "@playwright/test": "^1.57.0"
   }
 }

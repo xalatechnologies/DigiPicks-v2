@@ -45,7 +45,7 @@ Governance / Rules) so a contributor can pick any module up cold.
 
 ## AI + Compliance
 
-- [M24 — AI Copilot & Conversational Intelligence](./M24-ai-copilot-conversational.md) — *planned*
+- [M24 — AI Copilot & Conversational Intelligence](./M24-ai-copilot-conversational.md)
 - [M25 — Platform Settings, Compliance & Audit](./M25-platform-settings-compliance-audit.md)
 
 ---
@@ -55,9 +55,8 @@ Governance / Rules) so a contributor can pick any module up cold.
 Each module page documents what's **shipped**, what's **partial**, and
 what's **planned**. As of the latest commit:
 
-- **Fully shipped (backend + UI):** M01, M02, M03, M04, M05, M06, M07, M08, M09, M10, M11, M12, M13, M14, M15, M16, M17, M18, M19, M21, M22, M23, M25
-- **Outbound shipped, inbound planned:** M20 (Discord)
-- **Foundation present, copilot UI planned:** M24
+- **Fully shipped (backend + UI):** M01, M02, M03, M04, M05, M06, M07, M08, M09, M10, M11, M12, M13, M14, M15, M16, M17, M18, M19, M21, M22, M23, M24, M25
+- **Outbound shipped; inbound / full vision partial:** M20 (Discord — see `convex/discord/inbound.ts` and [discord-integration.md](../discord-integration.md))
 
 ## Companion Documents
 
@@ -67,6 +66,7 @@ what's **planned**. As of the latest commit:
 - [`docs/discord-integration.md`](../discord-integration.md) — Full Discord vision (informs M20)
 - [`docs/functionality-index.md`](../functionality-index.md) — Original functionality backlog
 - [`docs/convex-components.md`](../convex-components.md) — Component-level architecture notes
+- [`docs/requirements-traceability-matrix.md`](../requirements-traceability-matrix.md) — Shipped / partial / deferred matrix for release gating
 
 ## Cross-Cutting Standards
 
@@ -90,7 +90,7 @@ Test strategy across the platform:
 
 - Unit tests for validation + domain logic (`convex/*.test.ts` via `convex-test`)
 - Integration tests for Convex flows (round-trip via the test harness)
-- E2E for golden journeys (Playwright deferred — see M25 carry-forward)
+- E2E for golden journeys (`apps/web/e2e`, Playwright — expand from smoke to full 10 journeys)
 - A11y on major screens (focus traps, skip links, ARIA on charts shipped)
 - Permission tests on role-based access
 - Realtime tests for live updates (implicit via `useQuery` reactivity)

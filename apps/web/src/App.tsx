@@ -57,6 +57,45 @@ const AdminDisputeQueue = React.lazy(() =>
 const AdminCoupons = React.lazy(() =>
   import('./pages/admin/Coupons').then((m) => ({ default: m.Coupons })),
 );
+const PricingPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.PricingPage })),
+);
+const TrustVerificationPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.TrustVerificationPage })),
+);
+const ResultsMethodologyPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.ResultsMethodologyPage })),
+);
+const TrustDisputesPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.TrustDisputesPage })),
+);
+const ResponsibleBettingPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.ResponsibleBettingPage })),
+);
+const AboutPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.AboutPage })),
+);
+const PressPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.PressPage })),
+);
+const BrandPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.BrandPage })),
+);
+const ContactPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.ContactPage })),
+);
+const TermsPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.TermsPage })),
+);
+const PrivacyPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.PrivacyPage })),
+);
+const RefundsPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.RefundsPage })),
+);
+const AgeRestrictionPage = React.lazy(() =>
+  import('./pages/trustLegalPages').then((m) => ({ default: m.AgeRestrictionPage })),
+);
 const DashboardRoutes = React.lazy(() => import('./dashboard/Routes'));
 const AccountRoutes = React.lazy(() => import('./account/Routes'));
 
@@ -157,35 +196,35 @@ function PublicFooter() {
       items: [
         { label: 'Creators', href: '/creators' },
         { label: "Today's Events", href: '/events' },
-        { label: 'Pricing', href: '#' },
+        { label: 'Pricing', href: '/pricing' },
         { label: 'Apply', href: '/apply' },
       ],
     },
     {
       title: 'Trust',
       items: [
-        { label: 'Verification', href: '#' },
-        { label: 'Results methodology', href: '#' },
-        { label: 'Disputes', href: '#' },
-        { label: 'Responsible betting', href: '#' },
+        { label: 'Verification', href: '/trust/verification' },
+        { label: 'Results methodology', href: '/trust/results-methodology' },
+        { label: 'Disputes', href: '/trust/disputes' },
+        { label: 'Responsible betting', href: '/responsible-betting' },
       ],
     },
     {
       title: 'Company',
       items: [
-        { label: 'About', href: '#' },
-        { label: 'Press', href: '#' },
-        { label: 'Brand', href: '#' },
-        { label: 'Contact', href: '#' },
+        { label: 'About', href: '/about' },
+        { label: 'Press', href: '/press' },
+        { label: 'Brand', href: '/brand' },
+        { label: 'Contact', href: '/contact' },
       ],
     },
     {
       title: 'Legal',
       items: [
-        { label: 'Terms', href: '#' },
-        { label: 'Privacy', href: '#' },
-        { label: 'Refunds', href: '#' },
-        { label: '21+ only', href: '#' },
+        { label: 'Terms', href: '/legal/terms' },
+        { label: 'Privacy', href: '/legal/privacy' },
+        { label: 'Refunds', href: '/legal/refunds' },
+        { label: '21+ only', href: '/legal/age' },
       ],
     },
   ];
@@ -195,10 +234,22 @@ function PublicFooter() {
       brand={<Logo size={32} showWord />}
       tagline="A premium network for verified sports creators and the subscribers who back their edge. Bet responsibly."
       social={[
-        { href: '#', label: 'X (Twitter)', icon: <Icon name="message" size={16} /> },
-        { href: '#', label: 'Discord', icon: <Icon name="users" size={16} /> },
-        { href: '#', label: 'YouTube', icon: <Icon name="play" size={16} /> },
-        { href: '#', label: 'Email', icon: <Icon name="inbox" size={16} /> },
+        {
+          href: 'https://x.com',
+          label: 'X (Twitter)',
+          icon: <Icon name="message" size={16} />,
+        },
+        {
+          href: 'https://discord.com',
+          label: 'Discord',
+          icon: <Icon name="users" size={16} />,
+        },
+        {
+          href: 'https://www.youtube.com',
+          label: 'YouTube',
+          icon: <Icon name="play" size={16} />,
+        },
+        { href: '/contact', label: 'Contact', icon: <Icon name="inbox" size={16} /> },
       ]}
       newsletter={{
         title: "Get tonight's slate in your inbox.",
@@ -252,6 +303,19 @@ export function App() {
         <Route path="/creators" element={<Creators />} />
         <Route path="/creators/:id" element={<CreatorDetail />} />
         <Route path="/odds" element={<OddsIntel />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/trust/verification" element={<TrustVerificationPage />} />
+        <Route path="/trust/results-methodology" element={<ResultsMethodologyPage />} />
+        <Route path="/trust/disputes" element={<TrustDisputesPage />} />
+        <Route path="/responsible-betting" element={<ResponsibleBettingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/press" element={<PressPage />} />
+        <Route path="/brand" element={<BrandPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/legal/terms" element={<TermsPage />} />
+        <Route path="/legal/privacy" element={<PrivacyPage />} />
+        <Route path="/legal/refunds" element={<RefundsPage />} />
+        <Route path="/legal/age" element={<AgeRestrictionPage />} />
         <Route
           path="/apply"
           element={
