@@ -1,0 +1,33 @@
+---
+description: Stitch zip exports are layout/functionality references only — never change design tokens
+alwaysApply: true
+---
+
+# Stitch design exports (reference-only)
+
+The product owner supplies **Stitch / EdgePicks** feature zips (e.g. `stitch_edgepicks_*_design.zip`) containing:
+
+| File | Use for |
+| --- | --- |
+| `screen.png` | Visual target — spacing rhythm, hierarchy, density |
+| `code.html` | DOM structure, sections, copy, interaction affordances |
+| `DESIGN.md` | IA and editorial rules (asymmetric layout, no 1px dividers, etc.) |
+
+## Hard constraints
+
+1. **Do not change design tokens.** Never edit `packages/tokens/src/tokens.css`, `packages/tokens/src/theme.css`, or `packages/tokens/src/globals.css` to match Stitch hex values (e.g. `#6B38D4`, `#3fe769`). Existing CSS variables are authoritative.
+2. **Do not paste Stitch styles into apps.** No Tailwind classes, inline colors, or raw `className` from `code.html` in `apps/**` (see Reusable-Component Doctrine in `AGENTS.md`).
+3. **Map visuals to the design system.** Compose `@digipicks/ds` primitives (`Row`, `Stack`, `Section`, `Button`, `Card`, …). New repeated patterns → new DS components under `packages/ds/`, using **only existing** `var(--token)` values in CSS Modules.
+4. **Implement from Stitch:** page/section **layout**, **copy** (unless product says otherwise), **user flows** (navigation, forms, empty states), and **functionality** (Convex, auth, routes).
+5. **Stitch `DESIGN.md` colors are illustrative.** When Stitch and tokens disagree, tokens win. Approximate hierarchy with closest semantic tokens (`--primary`, `--surface`, `--on-surface`, spacing scale, radii).
+
+## Workflow when a zip is provided
+
+1. Unzip or read `DESIGN.md` + skim `code.html` + compare `screen.png`.
+2. Optionally archive under `docs/design-references/<feature-name>/` (same three files) for the team.
+3. Identify target route(s) and wire behavior (e.g. **Become a creator** → `/apply` (guests create login on the form); **Sign in** → `/auth` for existing creators/subscribers; `/dashboard` when `creatorId` exists).
+4. Implement with DS + existing tokens; run typecheck/lint and doctrine greps from `AGENTS.md`.
+
+## Example
+
+Stitch shows **“Apply as creator”** outline button in the header → app uses `<Button variant="outline">` with `becomeCreatorCtaLabel()` and `navigateBecomeCreator()` → **`/apply`** (not auth-first). Returning users use **`/auth?next=/apply`**.

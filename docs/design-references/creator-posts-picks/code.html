@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Elite Editorial - Posts &amp; Picks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#2c1700",
+                    "surface-container-low": "#f2f4f6",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "on-secondary-container": "#5c647a",
+                    "surface-container-high": "#e6e8ea",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#fffbff",
+                    "inverse-primary": "#d0bcff",
+                    "surface-container-highest": "#e0e3e5",
+                    "surface": "#f7f9fb",
+                    "primary-container": "#8455ef",
+                    "inverse-surface": "#2d3133",
+                    "inverse-on-surface": "#eff1f3",
+                    "secondary-fixed": "#dae2fd",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "outline": "#7b7486",
+                    "tertiary-container": "#a76500",
+                    "on-tertiary-container": "#fffbff",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "tertiary-fixed": "#ffdcbb",
+                    "on-primary-fixed": "#23005c",
+                    "surface-tint": "#6d3bd7",
+                    "surface-bright": "#f7f9fb",
+                    "secondary": "#565e74",
+                    "outline-variant": "#cbc3d7",
+                    "primary": "#6b38d4",
+                    "primary-fixed-dim": "#d0bcff",
+                    "on-primary-fixed-variant": "#5516be",
+                    "secondary-container": "#dae2fd",
+                    "tertiary-fixed-dim": "#ffb869",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-error-container": "#93000a",
+                    "background": "#f7f9fb",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#494454",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-surface": "#191c1e",
+                    "tertiary": "#855000",
+                    "surface-dim": "#d8dadc",
+                    "surface-container": "#eceef0",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#e9ddff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "display": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- SideNavBar (Authority Source: JSON) -->
+<aside class="fixed left-0 top-0 h-screen w-64 z-50 bg-zinc-50 dark:bg-zinc-900 shadow-[20px_0_40px_rgba(15,23,42,0.02)] flex flex-col h-full p-6 space-y-2 font-['Manrope'] text-sm font-medium">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-black tracking-tighter text-zinc-900 dark:text-zinc-50">The Curator</h1>
+<p class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Elite Editorial</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">grid_view</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 shadow-sm rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grade</span> Posts &amp; Picks
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">group</span> Subscribers
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">shopping_bag</span> Products
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">leaderboard</span> Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">payments</span> Payouts
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-zinc-200 dark:border-zinc-800">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">person</span> Profile
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+<div class="mt-6 flex items-center gap-3 p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl">
+<img alt="Creator Portrait" class="w-10 h-10 rounded-full object-cover" data-alt="A professional studio portrait of a sophisticated male sports analyst in his late 30s. He is wearing a minimalist charcoal turtleneck and has a focused, intelligent expression. The lighting is dramatic yet soft, creating a high-end editorial feel against a clean, light-grey textured background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaRgoJEr9ZopRo_Ly3HlP3AEehSx-Vj4Xqy6oKkuvce632MA_dxhyKrgXinB4O1Us_xQJAw6xMvI_OiiuZO3Br4xgIGgHGv8uK9kgnoBirtmzpPlRn8Po7A8RTwGLVXDbTqIdhYy1pKH1an9glj4-hBlphyC4r5fNCYFTqFSqmfld7uaagevc5h3bIrI0_p4OQ-v69jvYaIWQ2KxxLT21HFKbnpI1J8JRwIelmxSs6SA7bjpu7nqpbC1YlLAWdipMXgFx5QQi7k-Y"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Alex Sterling</p>
+<p class="text-[10px] text-zinc-400 truncate">Elite Creator</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar (Authority Source: JSON) -->
+<header class="fixed top-0 right-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-4 h-20 ml-64 max-w-[calc(100%-16rem)] shadow-sm dark:shadow-none font-['Manrope'] tracking-tight">
+<div class="flex items-center gap-6">
+<h2 class="text-xl font-black text-zinc-900 dark:text-white">Posts &amp; Picks</h2>
+<div class="h-8 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+<div class="flex items-center gap-4 text-sm">
+<span class="text-violet-600 dark:text-violet-400 font-bold border-b-2 border-violet-600 pb-1">All Activity</span>
+<span class="text-zinc-500 dark:text-zinc-400 font-medium hover:text-violet-500 dark:hover:text-violet-300 transition-all cursor-pointer">Archive</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-zinc-100 dark:bg-zinc-900 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Search picks..." type="text"/>
+</div>
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-all relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wide flex items-center gap-2 active:scale-95 duration-200 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Pick
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pl-64 min-h-screen">
+<div class="max-w-7xl mx-auto px-8 py-8">
+<!-- Filter Bar -->
+<section class="mb-10 flex flex-wrap items-center justify-between gap-4">
+<div class="flex bg-surface-container-low p-1.5 rounded-2xl">
+<button class="px-6 py-2 rounded-xl text-sm font-semibold bg-white text-primary shadow-sm">All Picks</button>
+<button class="px-6 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Free</button>
+<button class="px-6 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Premium</button>
+<button class="px-6 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Drafts</button>
+<button class="px-6 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Scheduled</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-zinc-400 uppercase tracking-widest mr-2">Sort By</span>
+<select class="bg-transparent border-none text-sm font-bold text-on-surface focus:ring-0 cursor-pointer">
+<option>Latest Event Date</option>
+<option>Performance (Win %)</option>
+<option>Access Level</option>
+</select>
+</div>
+</section>
+<!-- Table Card -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0px_20px_40px_rgba(15,23,42,0.04)]">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Event &amp; Category</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Pick Details</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-center">Access</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Status</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Result</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-black">NBA</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Lakers vs Celtics</p>
+<p class="text-[11px] text-zinc-400">Nov 24, 2023 • 7:30 PM EST</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div>
+<p class="font-bold text-sm text-on-surface">Over 215.5 Points</p>
+<p class="text-[11px] text-primary font-medium">Odds: -110</p>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-full tracking-wider">Premium</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-600">Published</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-black text-zinc-400">Pending</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">NFL</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Chiefs vs Eagles</p>
+<p class="text-[11px] text-zinc-400">Nov 23, 2023 • 8:15 PM EST</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div>
+<p class="font-bold text-sm text-on-surface">Chiefs ML</p>
+<p class="text-[11px] text-primary font-medium">Odds: +105</p>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black uppercase rounded-full tracking-wider">Free</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-zinc-400">
+<span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span>
+<span class="text-xs font-bold">Draft</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-black text-zinc-400">--</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">EPL</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Man City vs Liverpool</p>
+<p class="text-[11px] text-zinc-400">Nov 22, 2023 • 12:30 PM EST</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div>
+<p class="font-bold text-sm text-on-surface">Both Teams to Score</p>
+<p class="text-[11px] text-primary font-medium">Odds: -140</p>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase rounded-full tracking-wider">VIP</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-600">Published</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-emerald-500 text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-xs font-black text-emerald-600 uppercase">Win</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+<button class="p-2 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination / Footer -->
+<div class="px-6 py-4 bg-surface-container-low/30 flex items-center justify-between border-t border-surface-container">
+<p class="text-xs text-zinc-400 font-medium">Showing <span class="font-bold text-on-surface">1-10</span> of <span class="font-bold text-on-surface">42</span> picks</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-200 text-zinc-400 hover:bg-white transition-colors cursor-not-allowed">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-white shadow-sm font-bold text-xs">1</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-200 text-on-surface hover:bg-white transition-colors font-bold text-xs">2</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-200 text-on-surface hover:bg-white transition-colors font-bold text-xs">3</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-200 text-on-surface hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Creation Modal (In-UI Preview) -->
+<section class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2">
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-[0px_32px_64px_rgba(107,56,212,0.08)]">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-2xl font-black text-on-surface">New Pick Creation</h3>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-[10px] font-black uppercase text-primary tracking-tighter">Drafting Auto-Saved</span>
+</div>
+</div>
+<form class="space-y-6">
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sport / Category</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20">
+<option>NBA Basketball</option>
+<option>NFL Football</option>
+<option>MLB Baseball</option>
+<option>NHL Hockey</option>
+<option>EPL Soccer</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Event</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20" placeholder="e.g. Suns vs Nuggets" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Pick Type</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20" placeholder="e.g. Point Spread" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">The Pick</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20" placeholder="e.g. Suns -4.5" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Odds</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20" placeholder="e.g. -110" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Insight &amp; Reasoning</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-primary/20" placeholder="Explain your logic for the subscribers..." rows="4"></textarea>
+</div>
+<div class="grid grid-cols-2 gap-6 items-center">
+<div class="space-y-2">
+<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Access Tier</label>
+<div class="flex bg-surface-container-low p-1 rounded-xl">
+<button class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg bg-white text-primary shadow-sm" type="button">Free</button>
+<button class="flex-1 py-2 text-[10px] font-black uppercase text-zinc-400 hover:text-primary transition-colors" type="button">Premium</button>
+<button class="flex-1 py-2 text-[10px] font-black uppercase text-zinc-400 hover:text-primary transition-colors" type="button">VIP</button>
+</div>
+</div>
+<div class="flex items-center justify-end gap-6 pt-6">
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-on-surface">Schedule Pick?</span>
+<button class="w-10 h-5 bg-zinc-200 rounded-full relative transition-colors" type="button">
+<span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform"></span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-6 flex gap-4">
+<button class="flex-1 bg-gradient-to-br from-primary to-primary-container text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all active:scale-[0.98]" type="button">Publish Pick Now</button>
+<button class="px-8 bg-surface-container-high text-on-surface py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-surface-container-highest transition-all" type="button">Save Draft</button>
+</div>
+</form>
+</div>
+</div>
+<div class="space-y-8">
+<!-- Helper Insight Card -->
+<div class="bg-primary/5 rounded-2xl p-6 relative overflow-hidden border border-primary/10">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-primary mb-2">lightbulb</span>
+<h4 class="font-black text-on-surface text-lg mb-2">Editorial Tip</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Picks with at least 150 words of reasoning have a 42% higher subscriber retention rate. Be sure to highlight injury reports or recent situational trends.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">draw</span>
+</div>
+</div>
+<!-- Performance Widget -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
+<h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4">Last 30 Days Stats</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-on-surface">Win Rate</span>
+<span class="text-sm font-black text-emerald-600">68.4%</span>
+</div>
+<div class="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[68%]"></div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="text-xs font-bold text-on-surface">Units (P/L)</span>
+<span class="text-sm font-black text-primary">+12.4U</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Empty State Illustration (Hidden by default, shown if no data) -->
+<section class="hidden flex flex-col items-center justify-center py-20 text-center">
+<div class="w-64 h-64 bg-surface-container-low rounded-full mb-8 flex items-center justify-center overflow-hidden">
+<img alt="Empty Stadium" class="w-full h-full object-cover opacity-40 mix-blend-multiply" data-alt="A cinematic, wide-angle shot of an empty premium sports stadium during the golden hour. The sunlight is streaming through the architectural ribbing, creating dramatic shadows across the pristine green turf and sleek spectator seating. The atmosphere is quiet and expectant, rendered in a high-key, modern aesthetic with a soft violet color grade." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHbBPyWiiT8zT7rI85w6pOLDUli1A6Bwf97YmoiDfgmP5LekDmG1pSyfmQZnWcYVlWy2L2g2KQ-f7Z_h-V9zSmTYlx8SwJCdKIxzEqbppF97OZN_DqGeM5gUlnY3bLj00ysMucdI5x7IMiQCeLBCtZSvEnhGeVSzvPljfp0amdAbbNlZcJuYvISUq3D41YZhMBTSL6gmYI6hdVVnVd-KFKXZbpoYPe7WKMxCWv6bY24iHGdaC6Wyazz2zE0cYLyvivk6A152UcNmA"/>
+</div>
+<h3 class="text-2xl font-black text-on-surface mb-2">Create your first pick</h3>
+<p class="text-on-surface-variant max-w-sm mx-auto mb-8">Your dashboard is looking a bit empty. Start sharing your expertise and grow your subscriber base today.</p>
+<button class="bg-primary text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20">Get Started</button>
+</section>
+</div>
+</main>
+</body></html>

@@ -3,18 +3,14 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Container, Section, EmptyState, Button } from '@digipicks/ds';
+import { DEV_DEMO_UNLOCK, hasDevStudioPreview } from '../lib/devDemoLogin';
 
 /**
  * Roles defined in `convex/shared/validators.ts`. Mirrored here as a string
  * union to keep the gate package-agnostic; values are validated against the
  * live `user.role` returned by `api.users.meSafe`.
  */
-export type UserRole =
-  | 'super_admin'
-  | 'tenant_admin'
-  | 'admin'
-  | 'moderator'
-  | 'user';
+export type UserRole = 'super_admin' | 'tenant_admin' | 'admin' | 'moderator' | 'user';
 
 export interface AuthGateProps {
   children: React.ReactNode;
@@ -60,10 +56,12 @@ export function AuthGate({
   const { pathname, search } = useLocation();
 
   // Only fetch the profile after Convex auth resolves.
-  const user = useQuery(
-    api.users.meSafe,
-    isAuthenticated ? {} : 'skip',
-  );
+  const user = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+
+  // QA: creator apply "Open studio (dev)" — shell without `/auth` redirect.
+  if (DEV_DEMO_UNLOCK && hasDevStudioPreview()) {
+    return <>{children}</>;
+  }
 
   // ── Auth resolving (or profile loading) ──────────────────────────────
   if (isLoading || (isAuthenticated && user === undefined)) {
@@ -109,11 +107,7 @@ export function AuthGate({
               title={forbiddenTitle}
               subtitle={forbiddenSubtitle}
               action={
-                <Button
-                  variant="primary"
-                  iconLeft="arrow-left"
-                  onClick={() => navigate('/')}
-                >
+                <Button variant="primary" iconLeft="arrow-left" onClick={() => navigate('/')}>
                   Back to home
                 </Button>
               }

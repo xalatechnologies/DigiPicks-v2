@@ -1,6 +1,7 @@
 import React, { useEffect, useState, FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react';
+import { useQuery } from 'convex/react';
 import {
   AuthLayout,
   AuthAside,
@@ -15,31 +16,26 @@ import {
   Logo,
   Icon,
   Stack,
-  Segmented,
   Muted,
 } from '@digipicks/ds';
+import { api } from '../../../../convex/_generated/api';
+import { becomeCreatorCtaLabel, navigateBecomeCreator } from '../lib/becomeCreator';
+import {
+  clearAuthRedirectState,
+  effectivePostAuthTarget,
+  hasCreatorApplyIntent,
+  isApplyIntentPath,
+  persistAuthPostLoginTargetFromParams,
+  resolvePostAuthDestination,
+  safeRedirectTarget,
+  type SignupPersona,
+} from '../lib/authPostLoginTarget';
+import { formatAuthError } from '../lib/formatAuthError';
 
 type AuthStep = 'methods' | 'email-password';
-type SignupPersona = 'subscriber' | 'creator';
 
-/** Resolve the post-auth landing target. Honors ?next= (AuthGate) and
- *  ?redirectTo= (legacy) then defaults to /account. Same-origin paths only. */
-function safeRedirectTarget(raw: string | null): string {
-  if (!raw) return '/account';
-  // Only accept relative same-origin paths.
-  if (!raw.startsWith('/') || raw.startsWith('//')) return '/account';
-  // Don't bounce back to the auth page itself.
-  if (raw.startsWith('/auth')) return '/account';
-  return raw;
-}
-
-/** Subscriber email sign-ups must land in the member hub (`/account`), never in the creator studio or apply flow,
- * even when `?next=` pointed at `/dashboard` (shared links, QA unlock, bookmarks). */
-function subscriberSignupLanding(resolvedSafeTarget: string): string {
-  if (resolvedSafeTarget.startsWith('/dashboard') || resolvedSafeTarget.startsWith('/apply')) {
-    return '/account';
-  }
-  return resolvedSafeTarget;
+function defaultSignupPersonaFromLocation(): SignupPersona {
+  return 'subscriber';
 }
 
 export function Auth() {
@@ -47,20 +43,44 @@ export function Auth() {
   const [params] = useSearchParams();
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
   const [step, setStep] = useState<AuthStep>('methods');
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
-  const [signupPersona, setSignupPersona] = useState<SignupPersona>('subscriber');
+  const [signupPersona, setSignupPersona] = useState<SignupPersona>(
+    defaultSignupPersonaFromLocation,
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const target = safeRedirectTarget(params.get('next') ?? params.get('redirectTo'));
+  const nextParam = params.get('next');
+  const redirectToParam = params.get('redirectTo');
 
-  // OAuth (e.g. Discord) completes while usually still on the methods step —
-  // bounce to `target`. Email/password flows navigate explicitly after signIn.
+  // Tab session: OAuth often returns without `?next=`; keep Become a creator intent.
   useEffect(() => {
-    if (!isAuthenticated || step !== 'methods') return;
-    navigate(target, { replace: true });
-  }, [isAuthenticated, navigate, target, step]);
+    persistAuthPostLoginTargetFromParams(nextParam, redirectToParam);
+  }, [nextParam, redirectToParam]);
+
+  const target = effectivePostAuthTarget(nextParam, redirectToParam);
+  const applyIntent = hasCreatorApplyIntent() || isApplyIntentPath(target);
+
+  // Returning applicants should sign in, not re-register on this page.
+  useEffect(() => {
+    if (applyIntent) setMode('signIn');
+  }, [applyIntent]);
+
+  // Already signed in (or OAuth just finished): leave `/auth` immediately.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const dest = resolvePostAuthDestination({
+      target,
+      flow: 'signIn',
+      creatorId: me?.creatorId ?? null,
+      applyIntent,
+    });
+    clearAuthRedirectState();
+    navigate(dest, { replace: true });
+  }, [isAuthenticated, me?.creatorId, navigate, target, applyIntent]);
 
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -75,26 +95,17 @@ export function Auth() {
     try {
       await signIn('password', formData);
 
-      if (flow === 'signUp') {
-        if (signupPersonaForRedirect === 'creator') {
-          navigate('/apply', { replace: true });
-          return;
-        }
-        navigate(subscriberSignupLanding(target), { replace: true });
-        return;
-      }
-      navigate(target, { replace: true });
+      const dest = resolvePostAuthDestination({
+        target,
+        flow,
+        signupPersona: signupPersonaForRedirect,
+        creatorId: me?.creatorId ?? null,
+        applyIntent,
+      });
+      clearAuthRedirectState();
+      navigate(dest, { replace: true });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        const msg = err.message;
-        if (msg.includes('InvalidAccountId') || msg.includes('InvalidSecret')) {
-          setError(flow === 'signIn' ? 'Invalid email or password.' : 'Account already exists.');
-        } else {
-          setError('Something went wrong. Please try again.');
-        }
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      setError(formatAuthError(err, flow));
     } finally {
       setLoading(false);
     }
@@ -105,13 +116,21 @@ export function Auth() {
     setError('');
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    await runPasswordAuth(formData, mode, mode === 'signUp' ? signupPersona : undefined);
+    const email = emailInput.trim();
+    const fd = new FormData();
+    fd.set('email', email);
+    fd.set('password', passwordInput);
+    fd.set('flow', mode === 'signUp' ? 'signUp' : 'signIn');
+    await runPasswordAuth(fd, mode, mode === 'signUp' ? signupPersona : undefined);
   }
 
   const isSignUp = mode === 'signUp';
 
   function openEmailFlow(nextMode: 'signIn' | 'signUp') {
+    if (applyIntent && nextMode === 'signUp') {
+      navigate('/apply');
+      return;
+    }
     setMode(nextMode);
     setStep('email-password');
     setError('');
@@ -137,9 +156,14 @@ export function Auth() {
           variant="ghost"
           size="sm"
           iconRight="arrow-right"
-          onClick={() => navigate('/apply')}
+          onClick={() =>
+            navigateBecomeCreator(navigate, {
+              isAuthenticated,
+              creatorId: me?.creatorId ?? null,
+            })
+          }
         >
-          Become a creator
+          {becomeCreatorCtaLabel(me?.creatorId ?? null)}
         </Button>
       }
       aside={
@@ -171,22 +195,33 @@ export function Auth() {
     >
       {step === 'methods' ? (
         <AuthCard
-          title="Welcome"
-          subtitle="Sign in or create an account — we figure out the rest."
+          title={applyIntent ? 'Sign in' : 'Welcome'}
+          subtitle={
+            applyIntent
+              ? 'Sign in to continue your application, open your creator studio, or access your subscriber hub.'
+              : 'Sign in if you already have an account — creators, subscribers, and admins.'
+          }
           error={error || undefined}
           footer={
             <Stack gap={4} align="stretch">
-              <Muted>New subscriber or creator — finish creator onboarding after signup</Muted>
-              <AuthMethodButton
-                icon={<Icon name="user" size={18} />}
-                label="Sign up with email"
-                onClick={() => openEmailFlow('signUp')}
-              />
+              {applyIntent ? (
+                <AuthFooterLink
+                  text="New creator?"
+                  linkText="Start your application"
+                  onClick={() => navigate('/apply')}
+                />
+              ) : (
+                <AuthMethodButton
+                  icon={<Icon name="user" size={18} />}
+                  label="Sign up as a subscriber"
+                  onClick={() => openEmailFlow('signUp')}
+                />
+              )}
               <Stack align="center">
                 <AuthFooterLink
                   text="Privacy"
                   linkText="Terms of Use"
-                  onClick={() => navigate('/terms')}
+                  onClick={() => navigate('/legal/terms')}
                 />
               </Stack>
             </Stack>
@@ -197,11 +232,14 @@ export function Auth() {
               icon={<Icon name="discord" size={18} />}
               label="Continue with Discord"
               description="Sign in with your Discord account"
-              onClick={() => void signIn('discord')}
+              onClick={() => {
+                persistAuthPostLoginTargetFromParams(nextParam, redirectToParam);
+                void signIn('discord');
+              }}
             />
 
             <AuthMethodButton
-              icon={<Icon name="email" size={18} />}
+              icon={<Icon name="inbox" size={18} />}
               label="Sign in with email"
               description="Sign in here with your email and password."
               onClick={() => openEmailFlow('signIn')}
@@ -255,7 +293,9 @@ export function Auth() {
                 setMode(isSignUp ? 'signIn' : 'signUp');
                 setPasswordInput('');
                 setError('');
-                if (!isSignUp) setSignupPersona('subscriber');
+                if (!isSignUp) {
+                  setSignupPersona('subscriber');
+                }
               }}
             />
           }
@@ -264,21 +304,14 @@ export function Auth() {
             <Stack gap={4}>
               {isSignUp ? (
                 <Stack gap={2}>
-                  <Muted>Signing up as</Muted>
-                  <Segmented
-                    ariaLabel="Choose subscriber or creator signup path"
-                    size="md"
-                    fullWidth
-                    options={[
-                      { label: 'Subscriber', value: 'subscriber' },
-                      { label: 'Creator', value: 'creator' },
-                    ]}
-                    value={signupPersona}
-                    onChange={(v) => setSignupPersona(v as SignupPersona)}
-                  />
                   <Muted>
-                    Same login system — subscribers land in their member hub; creators open the
-                    application flow for the studio (dashboard unlocks after approval).
+                    Subscriber accounts follow creators and track picks in the member hub.
+                  </Muted>
+                  <Muted>
+                    Want to publish on DigiPicks?{' '}
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/apply')}>
+                      Apply as a creator
+                    </Button>
                   </Muted>
                 </Stack>
               ) : null}

@@ -1,0 +1,27 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-1);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-xs);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--t-2);
+}
+
+.clickable {
+  border: 0;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.clickable:hover {
+  background: var(--bg-2);
+}
+
+.clickable:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}

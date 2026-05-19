@@ -9,6 +9,8 @@ export interface NavItemProps {
   icon: IconName | (string & {});
   active?: boolean;
   badge?: React.ReactNode;
+  /** Hide trailing chevron (studio sidebar). */
+  hideChevron?: boolean;
   as?: React.ElementType;
   className?: string;
   children?: React.ReactNode;
@@ -21,6 +23,7 @@ export const NavItem: React.FC<NavItemProps> = ({
   icon,
   active,
   badge,
+  hideChevron,
   as,
   className,
   ...rest
@@ -36,7 +39,7 @@ export const NavItem: React.FC<NavItemProps> = ({
         {sub && <span className={s.sub}>{sub}</span>}
       </span>
       {badge !== undefined && badge !== null && <span className={s.badge}>{badge}</span>}
-      <Icon name="chevron-right" size={14} className={s.chev} />
+      {!hideChevron ? <Icon name="chevron-right" size={14} className={s.chev} /> : null}
     </Comp>
   );
 };

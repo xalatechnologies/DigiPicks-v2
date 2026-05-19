@@ -1,19 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
-  Col,
+  Heading,
+  Eyebrow,
+  Muted,
+  Button,
   Card,
   CardHead,
-  Button,
-  Icon,
-  PageHead,
-  KV,
   Mono,
-  Muted,
   Badge,
   Table,
   THead,
@@ -21,11 +19,17 @@ import {
   Tr,
   Th,
   Td,
-  StatGrid,
   EmptyState,
+  StudioSummaryGrid,
+  KV,
+  QuickActionGrid,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
+import { STUDIO } from '../../lib/studioRoutes';
+import { INVOICES } from '../data/studio';
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   paid: 'green',
@@ -33,9 +37,6 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   failed: 'red',
 };
 
-// Default fallback while the summary query is loading. The authoritative
-// rate ships in payouts.summary.platformFeeRate (PLATFORM_FEE_RATE_BPS env
-// override on the server, default 0.13).
 const PLATFORM_FEE_RATE_FALLBACK = 0.13;
 
 function formatCurrency(amount: number, currency: string): string {
@@ -59,6 +60,9 @@ function formatDate(ms: number): string {
 }
 
 export function Earnings() {
+  const navigate = useNavigate();
+  const devPreview = hasDevStudioPreview();
+
   const me = useQuery(api.users.meSafe);
   const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const subs = useQuery(
@@ -77,150 +81,214 @@ export function Earnings() {
   const paidTotal = summary?.paidTotal ?? 0;
   const pendingTotal = summary?.pendingTotal ?? 0;
 
+  const displayMrr = useMemo(() => {
+    if (devPreview && mrrNet === 0) return '$14,240.50';
+    if (mrrNet === 0) return '—';
+    return formatCurrency(mrrNet, currency);
+  }, [devPreview, mrrNet, currency]);
+
+  const activeCount = devPreview && activeSubs.length === 0 ? 338 : activeSubs.length;
+
+  const showDemoPayouts = devPreview && (payouts === undefined || payouts.length === 0);
+
   return (
-    <>
-      <PageHeader
-        title="Earnings"
-        crumbs={[{ label: 'Growth' }, { label: 'Earnings' }]}
-        actions={
-          <Row gap={2}>
-            <Button variant="secondary" size="sm">
-              <Icon name="filter" size={13} />
-              Export
+    <Container size="2xl">
+      <Stack gap={8}>
+        <Row between wrap>
+          <Stack gap={2}>
+            <Eyebrow>Studio · Payouts</Eyebrow>
+            <Heading level={1} size="2xl">
+              Payouts
+            </Heading>
+            <Muted>MRR from active subscriptions; monthly payouts via Stripe Connect.</Muted>
+          </Stack>
+          <Row gap={2} wrap>
+            <Button variant="outline" size="sm" onClick={() => navigate(STUDIO.products)}>
+              View plans
             </Button>
             <Button variant="primary" size="sm" disabled>
-              <Icon name="dollar" size={13} />
               Withdraw
             </Button>
           </Row>
-        }
-      />
+        </Row>
 
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Growth"
-            title="Earnings"
-            sub="MRR derived from active subscriptions; payouts arrive monthly via Stripe. Withdraw flow lights up once Stripe Connect is configured (Phase 7)."
-          />
+        <StudioSummaryGrid
+          items={[
+            {
+              id: 'mrr',
+              icon: 'dollar',
+              iconTone: 'primary',
+              label: 'MRR (net)',
+              value: displayMrr,
+              delta: devPreview ? { value: '+12.5%', dir: 'up' } : undefined,
+            },
+            {
+              id: 'pending',
+              icon: 'clock',
+              iconTone: 'amber',
+              label: 'Pending payout',
+              value:
+                devPreview && pendingTotal === 0
+                  ? '$2,180.00'
+                  : formatCurrency(pendingTotal, currency),
+            },
+            {
+              id: 'lifetime',
+              icon: 'card',
+              iconTone: 'violet',
+              label: 'Lifetime paid',
+              value:
+                devPreview && paidTotal === 0 ? '$48,920.00' : formatCurrency(paidTotal, currency),
+            },
+            {
+              id: 'subs',
+              icon: 'users',
+              iconTone: 'danger',
+              label: 'Active subscribers',
+              value: activeCount.toLocaleString(),
+            },
+          ]}
+        />
 
-          <StatGrid
-            items={[
-              {
-                id: 'mrr',
-                label: 'MRR (net)',
-                value: <Mono>{formatCurrency(mrrNet, currency)}</Mono>,
-                sub: <Muted>{activeSubs.length} active subscribers</Muted>,
-              },
-              {
-                id: 'pending',
-                label: 'Pending payout',
-                value: <Mono>{formatCurrency(pendingTotal, currency)}</Mono>,
-                sub: <Muted>queued from Stripe</Muted>,
-              },
-              {
-                id: 'lifetime',
-                label: 'Lifetime paid',
-                value: <Mono>{formatCurrency(paidTotal, currency)}</Mono>,
-                sub: <Muted>{summary?.count ?? 0} payouts</Muted>,
-              },
-              {
-                id: 'take',
-                label: 'Take rate',
-                value: <Mono>87%</Mono>,
-                sub: <Muted>creator share after fees</Muted>,
-              },
-            ]}
-          />
-
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead
-                  title="This month (estimated)"
-                  sub="Derived from active subscriptions × creator price"
-                />
-                <Stack gap={2}>
-                  <KV k="Active subscribers" v={<Mono>{activeSubs.length}</Mono>} />
-                  <KV k="Gross revenue" v={<Mono>{formatCurrency(mrrGross, currency)}</Mono>} />
-                  <KV
-                    k={`Platform + Stripe (~${Math.round(platformFeeRate * 100)}%)`}
-                    v={<Mono>−{formatCurrency(mrrGross * platformFeeRate, currency)}</Mono>}
-                  />
-                  <KV k="Net to creator" v={<Mono>{formatCurrency(mrrNet, currency)}</Mono>} />
-                </Stack>
-              </Card>
-            </Col>
-
-            <Col gap={4}>
-              <Card>
-                <CardHead title="Payout method" sub="Stripe Connect handles direct deposits" />
-                <Stack gap={3}>
-                  <Muted>
-                    Connect a Stripe account to receive monthly payouts. Until then, earnings
-                    accumulate as “pending” and we'll route payouts manually.
-                  </Muted>
-                  <Row gap={2}>
-                    <Button variant="secondary" size="sm" disabled>
-                      Connect with Stripe
-                    </Button>
-                  </Row>
-                </Stack>
-              </Card>
-            </Col>
-          </Row>
-
-          <Card pad="sm">
-            <CardHead title="Payouts" sub="Monthly payouts and statements" />
-            {payouts === undefined ? (
-              <EmptyState icon="dollar" title="Loading payouts…" />
-            ) : payouts.length === 0 ? (
-              <EmptyState
-                icon="dollar"
-                title="No payouts yet."
-                subtitle="Once subscribers pay through Stripe, paid invoices will land here automatically."
+        <Row gap={5} wrap>
+          <Card>
+            <CardHead
+              title="This month (estimated)"
+              sub="Active subscribers × plan price — see Products for tiers"
+            />
+            <Stack gap={2}>
+              <KV k="Active subscribers" v={<Mono>{activeCount}</Mono>} />
+              <KV
+                k="Gross revenue"
+                v={
+                  <Mono>
+                    {devPreview && mrrGross === 0
+                      ? '$16,370.00'
+                      : formatCurrency(mrrGross, currency)}
+                  </Mono>
+                }
               />
-            ) : (
-              <Table>
-                <THead>
-                  <Tr>
-                    <Th>Stripe ID</Th>
-                    <Th>Period</Th>
-                    <Th>Paid</Th>
-                    <Th numeric>Amount</Th>
-                    <Th>Status</Th>
-                  </Tr>
-                </THead>
-                <TBody>
-                  {payouts.map((p) => (
-                    <Tr key={p._id}>
-                      <Td>
-                        <Mono>{p.stripePayoutId ?? '—'}</Mono>
-                      </Td>
-                      <Td>
-                        <Muted>
-                          {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
-                        </Muted>
-                      </Td>
-                      <Td>
-                        <Muted>{p.paidAt ? formatDate(p.paidAt) : '—'}</Muted>
-                      </Td>
-                      <Td numeric>
-                        <Mono>{formatCurrency(p.amount, p.currency)}</Mono>
-                      </Td>
-                      <Td>
-                        <Badge tone={STATUS_TONE[p.status] ?? 'mute'} dot>
-                          {p.status}
-                        </Badge>
-                      </Td>
-                    </Tr>
-                  ))}
-                </TBody>
-              </Table>
-            )}
+              <KV
+                k={`Platform + Stripe (~${Math.round(platformFeeRate * 100)}%)`}
+                v={
+                  <Mono>
+                    −
+                    {formatCurrency(
+                      (devPreview && mrrGross === 0 ? 16370 : mrrGross) * platformFeeRate,
+                      currency,
+                    )}
+                  </Mono>
+                }
+              />
+              <KV k="Net to creator" v={<Mono>{displayMrr}</Mono>} />
+              <Row gap={2}>
+                <Button variant="secondary" size="sm" onClick={() => navigate(STUDIO.subscribers)}>
+                  View subscribers
+                </Button>
+              </Row>
+            </Stack>
           </Card>
-        </Stack>
-      </Container>
-    </>
+
+          <Card>
+            <CardHead title="Payout method" sub="Stripe Connect handles direct deposits" />
+            <Stack gap={3}>
+              <Muted>
+                Connect Stripe to receive monthly payouts. Until then, earnings accumulate as
+                pending.
+              </Muted>
+              <Button variant="secondary" size="sm" disabled>
+                Connect with Stripe
+              </Button>
+            </Stack>
+          </Card>
+        </Row>
+
+        <Card pad="sm" elev>
+          <CardHead title="Payout history" sub="Monthly statements" />
+          {payouts === undefined && !devPreview ? (
+            <EmptyState icon="dollar" title="Loading payouts…" />
+          ) : showDemoPayouts ? (
+            <Table>
+              <THead>
+                <Tr>
+                  <Th>Description</Th>
+                  <Th>Date</Th>
+                  <Th numeric>Amount</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </THead>
+              <TBody>
+                {INVOICES.map((inv) => (
+                  <Tr key={inv.id}>
+                    <Td>{inv.description}</Td>
+                    <Td>
+                      <Muted>{inv.date}</Muted>
+                    </Td>
+                    <Td numeric>
+                      <Mono>{inv.amount}</Mono>
+                    </Td>
+                    <Td>
+                      <Badge tone={STATUS_TONE[inv.status] ?? 'mute'} dot>
+                        {inv.status}
+                      </Badge>
+                    </Td>
+                  </Tr>
+                ))}
+              </TBody>
+            </Table>
+          ) : payouts && payouts.length > 0 ? (
+            <Table>
+              <THead>
+                <Tr>
+                  <Th>Stripe ID</Th>
+                  <Th>Period</Th>
+                  <Th>Paid</Th>
+                  <Th numeric>Amount</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </THead>
+              <TBody>
+                {payouts.map((p) => (
+                  <Tr key={p._id}>
+                    <Td>
+                      <Mono>{p.stripePayoutId ?? '—'}</Mono>
+                    </Td>
+                    <Td>
+                      <Muted>
+                        {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
+                      </Muted>
+                    </Td>
+                    <Td>
+                      <Muted>{p.paidAt ? formatDate(p.paidAt) : '—'}</Muted>
+                    </Td>
+                    <Td numeric>
+                      <Mono>{formatCurrency(p.amount, p.currency)}</Mono>
+                    </Td>
+                    <Td>
+                      <Badge tone={STATUS_TONE[p.status] ?? 'mute'} dot>
+                        {p.status}
+                      </Badge>
+                    </Td>
+                  </Tr>
+                ))}
+              </TBody>
+            </Table>
+          ) : (
+            <EmptyState
+              icon="dollar"
+              title="No payouts yet"
+              subtitle="Once subscribers pay through Stripe, paid invoices will appear here."
+              action={
+                <Button variant="primary" size="sm" onClick={() => navigate(STUDIO.products)}>
+                  Set up pricing
+                </Button>
+              }
+            />
+          )}
+        </Card>
+
+        <QuickActionGrid title="Related" items={studioCrossLinks('payouts', navigate)} />
+      </Stack>
+    </Container>
   );
 }

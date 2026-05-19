@@ -92,6 +92,8 @@ export type {
 } from './components/forms/DiscordAlertRuleEditor/DiscordAlertRuleEditor';
 export { PasswordInput } from './components/forms/PasswordInput/PasswordInput';
 export type { PasswordInputProps } from './components/forms/PasswordInput/PasswordInput';
+export { FileUploadZone } from './components/forms/FileUploadZone/FileUploadZone';
+export type { FileUploadZoneProps } from './components/forms/FileUploadZone/FileUploadZone';
 export {
   AuthMethodButton,
   AuthSavedGroup,
@@ -110,6 +112,51 @@ export type { DisputeFormProps } from './components/forms/DisputeForm/DisputeFor
 export { Card } from './components/surfaces/Card/Card';
 export { CardHead } from './components/surfaces/CardHead/CardHead';
 export { Metric } from './components/surfaces/Metric/Metric';
+export type { MetricProps, MetricDir } from './components/surfaces/Metric/Metric';
+export { StudioMetricTile } from './components/surfaces/StudioMetricTile/StudioMetricTile';
+export type { StudioMetricTileProps } from './components/surfaces/StudioMetricTile/StudioMetricTile';
+export { StudioMetricRow } from './components/surfaces/StudioMetricRow/StudioMetricRow';
+export type {
+  StudioMetricRowProps,
+  StudioMetricRowItem,
+} from './components/surfaces/StudioMetricRow/StudioMetricRow';
+export { StudioChartCard } from './components/surfaces/StudioChartCard/StudioChartCard';
+export type { StudioChartCardProps } from './components/surfaces/StudioChartCard/StudioChartCard';
+export { StudioAreaChart } from './components/surfaces/StudioAreaChart/StudioAreaChart';
+export type { StudioAreaChartProps } from './components/surfaces/StudioAreaChart/StudioAreaChart';
+export { ActivityFeed } from './components/surfaces/ActivityFeed/ActivityFeed';
+export type {
+  ActivityFeedProps,
+  ActivityFeedItemData,
+  ActivityFeedTone,
+} from './components/surfaces/ActivityFeed/ActivityFeed';
+export { NextStepsPanel } from './components/surfaces/NextStepsPanel/NextStepsPanel';
+export type {
+  NextStepsPanelProps,
+  NextStepsItem,
+} from './components/surfaces/NextStepsPanel/NextStepsPanel';
+export { QuickActionGrid } from './components/surfaces/QuickActionGrid/QuickActionGrid';
+export type {
+  QuickActionGridProps,
+  QuickActionGridItem,
+} from './components/surfaces/QuickActionGrid/QuickActionGrid';
+export { StudioSummaryCard } from './components/surfaces/StudioSummaryCard/StudioSummaryCard';
+export type {
+  StudioSummaryCardProps,
+  StudioSummaryIconTone,
+} from './components/surfaces/StudioSummaryCard/StudioSummaryCard';
+export { StudioSummaryGrid } from './components/surfaces/StudioSummaryGrid/StudioSummaryGrid';
+export type {
+  StudioSummaryGridProps,
+  StudioSummaryGridItem,
+} from './components/surfaces/StudioSummaryGrid/StudioSummaryGrid';
+export { StudioMetaChip } from './components/surfaces/StudioMetaChip/StudioMetaChip';
+export type { StudioMetaChipProps } from './components/surfaces/StudioMetaChip/StudioMetaChip';
+export { StudioFilterPills } from './components/surfaces/StudioFilterPills/StudioFilterPills';
+export type {
+  StudioFilterPillsProps,
+  StudioFilterPillOption,
+} from './components/surfaces/StudioFilterPills/StudioFilterPills';
 export { EmptyState } from './components/surfaces/EmptyState/EmptyState';
 export { Placeholder } from './components/surfaces/Placeholder/Placeholder';
 export { LockedAnalysis } from './components/surfaces/LockedAnalysis/LockedAnalysis';
@@ -120,6 +167,11 @@ export { TrustMarquee } from './components/surfaces/TrustMarquee/TrustMarquee';
 export { CTABanner } from './components/surfaces/CTABanner/CTABanner';
 export { StepCard } from './components/surfaces/StepCard/StepCard';
 export type { StepCardProps } from './components/surfaces/StepCard/StepCard';
+export { ProcessSteps } from './components/surfaces/ProcessSteps/ProcessSteps';
+export type {
+  ProcessStepsProps,
+  ProcessStepItem,
+} from './components/surfaces/ProcessSteps/ProcessSteps';
 export { Testimonial } from './components/surfaces/Testimonial/Testimonial';
 export type { TestimonialProps } from './components/surfaces/Testimonial/Testimonial';
 export { SplitCTA } from './components/surfaces/SplitCTA/SplitCTA';
@@ -182,6 +234,17 @@ export type {
 
 // ── nav ──────────────────────────────────────────────────────────────────
 export { AppHeader } from './components/nav/AppHeader/AppHeader';
+export { StudioTopBar } from './components/nav/StudioTopBar/StudioTopBar';
+export type { StudioTopBarProps } from './components/nav/StudioTopBar/StudioTopBar';
+export { StudioSidebarBrand } from './components/nav/StudioSidebarBrand/StudioSidebarBrand';
+export type { StudioSidebarBrandProps } from './components/nav/StudioSidebarBrand/StudioSidebarBrand';
+export { CreatorStudioProfile } from './components/nav/CreatorStudioProfile/CreatorStudioProfile';
+export type { CreatorStudioProfileProps } from './components/nav/CreatorStudioProfile/CreatorStudioProfile';
+export { StudioSubNav } from './components/nav/StudioSubNav/StudioSubNav';
+export type {
+  StudioSubNavProps,
+  StudioSubNavItem,
+} from './components/nav/StudioSubNav/StudioSubNav';
 export { Topbar } from './components/nav/Topbar/Topbar';
 export { Sidebar } from './components/nav/Sidebar/Sidebar';
 export { NavSection } from './components/nav/NavSection/NavSection';
@@ -203,6 +266,8 @@ export { DashboardLayout } from './components/layout/DashboardLayout/DashboardLa
 export { Container } from './components/layout/Container/Container';
 export { Grid } from './components/layout/Grid/Grid';
 export type { GridProps, GridGap } from './components/layout/Grid/Grid';
+export { SplitPageLayout } from './components/layout/SplitPageLayout/SplitPageLayout';
+export type { SplitPageLayoutProps } from './components/layout/SplitPageLayout/SplitPageLayout';
 export { Heading } from './components/layout/Heading/Heading';
 export type {
   HeadingProps,
@@ -221,6 +286,14 @@ export { SectionHead } from './components/layout/SectionHead/SectionHead';
 export type { SectionHeadProps } from './components/layout/SectionHead/SectionHead';
 export { MetricGrid } from './components/layout/MetricGrid/MetricGrid';
 export type { MetricGridProps, MetricGridItem } from './components/layout/MetricGrid/MetricGrid';
+export {
+  StudioDashLayout,
+  StudioDashCol,
+} from './components/layout/StudioDashLayout/StudioDashLayout';
+export type {
+  StudioDashLayoutProps,
+  StudioDashColProps,
+} from './components/layout/StudioDashLayout/StudioDashLayout';
 export { StatGrid } from './components/layout/StatGrid/StatGrid';
 export type { StatGridProps, StatGridItem } from './components/layout/StatGrid/StatGrid';
 export { Footer } from './components/layout/Footer/Footer';
@@ -301,6 +374,37 @@ export type {
   EventCardCreatorAvatar,
 } from './components/domain/EventCard/EventCard';
 export { PickCard } from './components/domain/PickCard/PickCard';
+export { StudioPicksTable } from './components/domain/StudioPicksTable/StudioPicksTable';
+export { StudioSubscribersTable } from './components/domain/StudioSubscribersTable/StudioSubscribersTable';
+export { StudioTierCard } from './components/domain/StudioTierCard/StudioTierCard';
+export type {
+  StudioTierCardProps,
+  StudioTierFeature,
+  StudioTierVariant,
+} from './components/domain/StudioTierCard/StudioTierCard';
+export { StudioFeatureCompare } from './components/domain/StudioFeatureCompare/StudioFeatureCompare';
+export type {
+  StudioFeatureCompareProps,
+  StudioFeatureCompareRow,
+} from './components/domain/StudioFeatureCompare/StudioFeatureCompare';
+export { StudioPlanConfigurator } from './components/domain/StudioPlanConfigurator/StudioPlanConfigurator';
+export type {
+  StudioPlanConfiguratorProps,
+  StudioAccessRule,
+} from './components/domain/StudioPlanConfigurator/StudioPlanConfigurator';
+export type {
+  StudioSubscribersTableProps,
+  StudioSubscriberRowData,
+  StudioSubscriberPlan,
+  StudioSubscriberStatus,
+} from './components/domain/StudioSubscribersTable/StudioSubscribersTable';
+export type {
+  StudioPicksTableProps,
+  StudioPickRowData,
+  StudioPickAccess,
+  StudioPickStatus,
+  StudioPickResult,
+} from './components/domain/StudioPicksTable/StudioPicksTable';
 export { ChatPanel } from './components/domain/ChatPanel/ChatPanel';
 export type {
   ChatPanelProps,

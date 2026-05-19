@@ -30,10 +30,12 @@ export const submit = mutation({
       key: user._id,
       throws: true,
     });
+    const email = args.email.trim().toLowerCase();
+
     // Check for duplicate email
     const existing = await ctx.db
       .query('applications')
-      .withIndex('by_email', (q) => q.eq('email', args.email))
+      .withIndex('by_email', (q) => q.eq('email', email))
       .first();
 
     if (existing && existing.status !== 'rejected') {
@@ -43,7 +45,7 @@ export const submit = mutation({
     const applicationId = await ctx.db.insert('applications', {
       name: args.name,
       handle: args.handle,
-      email: args.email,
+      email,
       sport: args.sport,
       niche: args.niche,
       existingFollowing: args.existingFollowing,

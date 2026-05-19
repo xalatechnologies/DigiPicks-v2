@@ -90,7 +90,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       await ctx.db.insert('auditLogs', {
         actorUserId: userId,
         entityType: 'user',
-        entityId: userId,
+        entityId: String(userId),
         action: 'user.signup',
         metadata: {
           provider: args.profile?.discordId ? 'discord' : 'password',

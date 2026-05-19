@@ -1,0 +1,91 @@
+.bar {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr auto;
+  align-items: center;
+  gap: var(--space-6);
+  height: var(--header-h);
+  padding: 0 var(--space-6) 0 0;
+  background: color-mix(in srgb, var(--bg-1) 80%, transparent);
+  backdrop-filter: var(--backdrop-glass);
+  -webkit-backdrop-filter: var(--backdrop-glass);
+  box-shadow: var(--shadow-sm);
+}
+
+.brandSlot {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  height: 100%;
+}
+
+.wordmark {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-tighter);
+}
+
+.searchWrap {
+  position: relative;
+  max-width: var(--search-max-w);
+  width: 100%;
+  justify-self: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t-3);
+  pointer-events: none;
+}
+
+.search {
+  width: 100%;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-10);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  font-size: var(--text-sm);
+  color: var(--t-1);
+}
+
+.search:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.iconBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-8xl);
+  height: var(--size-8xl);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--t-3);
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  color: var(--t-1);
+}
+
+.dot {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: var(--size-xs);
+  height: var(--size-xs);
+  border-radius: var(--r-pill);
+  background: var(--primary);
+}

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subscribers | EdgePicks Creator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f2f4f6",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#dae2fd",
+                      "on-error": "#ffffff",
+                      "surface-variant": "#e0e3e5",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "primary": "#6b38d4",
+                      "on-primary-fixed": "#23005c",
+                      "on-background": "#191c1e",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#d8dadc",
+                      "secondary-container": "#dae2fd",
+                      "primary-fixed-dim": "#d0bcff",
+                      "outline-variant": "#cbc3d7",
+                      "outline": "#7b7486",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "secondary": "#565e74",
+                      "inverse-primary": "#d0bcff",
+                      "tertiary-fixed-dim": "#ffb869",
+                      "on-primary-container": "#fffbff",
+                      "tertiary-container": "#a76500",
+                      "primary-container": "#8455ef",
+                      "on-secondary-container": "#5c647a",
+                      "surface-bright": "#f7f9fb",
+                      "on-secondary-fixed": "#131b2e",
+                      "tertiary-fixed": "#ffdcbb",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#673d00",
+                      "on-tertiary-container": "#fffbff",
+                      "tertiary": "#855000",
+                      "surface": "#f7f9fb",
+                      "on-surface": "#191c1e",
+                      "background": "#f7f9fb",
+                      "on-tertiary-fixed": "#2c1700",
+                      "on-primary-fixed-variant": "#5516be",
+                      "surface-tint": "#6d3bd7",
+                      "surface-container": "#eceef0",
+                      "on-surface-variant": "#494454",
+                      "primary-fixed": "#e9ddff",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-surface": "#2d3133",
+                      "inverse-on-surface": "#eff1f3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "display": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-shift-no-borders {
+            border: none !important;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-zinc-50 dark:bg-zinc-950 flex flex-col gap-2 p-4 border-r border-zinc-100 dark:border-zinc-800 z-50">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="edit_square">edit_square</span>
+</div>
+<div>
+<h1 class="font-headline font-black text-xl tracking-tighter text-zinc-900 dark:text-zinc-50">EdgePicks</h1>
+<p class="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Elite Editorial</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="edit_square">edit_square</span>
+                Posts/Picks
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-zinc-900 text-violet-600 dark:text-violet-400 shadow-sm rounded-xl font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+                Subscribers
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                Products/Pricing
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+                Payouts
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                Profile
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:translate-x-1 transition-transform duration-200 font-['Inter'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800">
+<div class="flex items-center gap-3 px-2">
+<img alt="Profile" class="w-10 h-10 rounded-full" data-alt="Close-up headshot of a professional male editor in his late 30s with groomed beard and glasses. He is set against a blurred modern office background with warm accent lighting. The photography is clean, sharp, and uses a high-end editorial lighting style typical of premium sports journalism platforms." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzEErcJgavvv0eb9VwXMU1hsNrg4dfF4rVEaGeBF4MqiAQO_vXV0pqBKNABe0741exJhwSV4cOsoKtFmX2wli8POR5c6kz-ajxIm101mWaCta4FBI80ZJiBzEW6Gf6Aq8XmodxLPR5AOo--gXwdUEPzKGdL3w95sTg2s5AhEL5lUGM4Gautg-UI59UzNUBBrnEclcj32URo5xAzQBRxtKI6TqvAVpBLHdDnll2VevL8KnPtUx7BPTHN8LHN4l5zST53JG57PPKh5U"/>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold truncate">Marcus Thorne</p>
+<p class="text-xs text-zinc-500 truncate">Elite Creator</p>
+</div>
+<span class="material-symbols-outlined text-zinc-400" data-icon="more_vert">more_vert</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen relative">
+<!-- TopNavBar Component -->
+<header class="w-full sticky top-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<div class="flex justify-between items-center h-16 px-6 w-full">
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-zinc-400 text-lg" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-zinc-100/50 dark:bg-zinc-800/50 border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Search subscribers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-full transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="bg-primary text-white px-5 py-2 rounded-full font-headline font-bold text-sm hover:translate-y-[-2px] active:scale-95 transition-all duration-200 shadow-lg shadow-primary/20">
+                        New Pick
+                    </button>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Header Section -->
+<div class="space-y-1">
+<h2 class="font-headline font-extrabold text-4xl tracking-tight text-on-background">Subscribers</h2>
+<p class="text-zinc-500 font-medium">Manage your audience and track subscriber growth.</p>
+</div>
+<!-- Summary Cards: Bento Grid Style -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.04)] hover:shadow-[0px_20px_40px_rgba(15,23,42,0.08)] transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+<span class="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            +12% <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="trending_up">trending_up</span>
+</span>
+</div>
+<p class="text-sm font-semibold text-zinc-500 mb-1 uppercase tracking-wider">Total Subscribers</p>
+<h3 class="text-3xl font-black font-headline">420</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.04)] hover:shadow-[0px_20px_40px_rgba(15,23,42,0.08)] transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+</div>
+<span class="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            +4% <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="trending_up">trending_up</span>
+</span>
+</div>
+<p class="text-sm font-semibold text-zinc-500 mb-1 uppercase tracking-wider">New This Week</p>
+<h3 class="text-3xl font-black font-headline">+18</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.04)] hover:shadow-[0px_20px_40px_rgba(15,23,42,0.08)] transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+<span class="material-symbols-outlined" data-icon="person_remove">person_remove</span>
+</div>
+<span class="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            -0.5% <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="trending_down">trending_down</span>
+</span>
+</div>
+<p class="text-sm font-semibold text-zinc-500 mb-1 uppercase tracking-wider">Churn Rate</p>
+<h3 class="text-3xl font-black font-headline">2.4%</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.04)] hover:shadow-[0px_20px_40px_rgba(15,23,42,0.08)] transition-all duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined" data-icon="monetization_on">monetization_on</span>
+</div>
+<span class="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            +2% <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="trending_up">trending_up</span>
+</span>
+</div>
+<p class="text-sm font-semibold text-zinc-500 mb-1 uppercase tracking-wider">Revenue / Sub</p>
+<h3 class="text-3xl font-black font-headline">$29.60</h3>
+</div>
+</div>
+<!-- Filters Section -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-4">
+<div class="flex flex-wrap items-center gap-3">
+<div class="bg-surface-container-lowest p-1 rounded-2xl flex gap-1 shadow-sm border border-zinc-100">
+<button class="px-4 py-1.5 rounded-xl text-xs font-bold bg-primary text-white">All Plans</button>
+<button class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:bg-zinc-50">Free</button>
+<button class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:bg-zinc-50">Premium</button>
+<button class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:bg-zinc-50">VIP</button>
+</div>
+<div class="bg-surface-container-lowest px-4 py-2 rounded-2xl border border-zinc-100 flex items-center gap-2 cursor-pointer hover:bg-zinc-50 transition-colors">
+<span class="material-symbols-outlined text-zinc-400 text-lg" data-icon="filter_list">filter_list</span>
+<span class="text-xs font-bold text-zinc-600">Status: Active</span>
+<span class="material-symbols-outlined text-zinc-400 text-lg" data-icon="expand_more">expand_more</span>
+</div>
+<div class="bg-surface-container-lowest px-4 py-2 rounded-2xl border border-zinc-100 flex items-center gap-2 cursor-pointer hover:bg-zinc-50 transition-colors">
+<span class="material-symbols-outlined text-zinc-400 text-lg" data-icon="calendar_today">calendar_today</span>
+<span class="text-xs font-bold text-zinc-600">Last 30 Days</span>
+<span class="material-symbols-outlined text-zinc-400 text-lg" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-2xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                        Export List
+                    </button>
+</div>
+</div>
+<!-- Subscriber Table -->
+<div class="bg-surface-container-lowest rounded-[32px] shadow-[0px_40px_80px_rgba(15,23,42,0.05)] overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-zinc-50/50">
+<th class="px-8 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">Subscriber</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">Plan</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">Status</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">Join Date</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">Renewal</th>
+<th class="px-8 py-5 text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-zinc-100">
+<!-- Row 1 -->
+<tr class="hover:bg-zinc-50/50 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Alex Rivera" data-alt="Close-up portrait of a young man with a friendly smile, wearing a modern jersey. The background is a crisp, bright minimalist studio setting with soft side-lighting that highlights the texture of his apparel. The image follows a premium editorial aesthetic with high contrast and natural skin tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPL3Bd4HxykHyH1iimfJ0a0Gq_Wml8i669XAaG5cDBQnYhH2JRW9X8D3SZdOqXCIwLXYQvzmnDyt4aEpNXhZWzkR8hfP09tLBOusnU6461iS5lq9VST6vg7tXtgOixCQr1utb8MpU6yH-Nz-0jXbt4JAEa3bMSCdqi8FtYC2QNDRR-G08Dkok_2jZHY4nadmCnfT4wbeikGvWKmH-8FoxEw8AL9tqfehoXeyAbUK4fVArlMrbiN6keDUVkXrimdY_57RkkyOAgL7s"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-background">Alex Rivera</p>
+<p class="text-xs text-zinc-400">@arivera_sports</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-violet-100 text-violet-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Premium</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<span class="text-xs font-bold text-emerald-600">Active</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Oct 12, 2023</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Nov 12, 2024</span>
+</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-1.5 rounded-xl bg-white border border-zinc-200 text-[11px] font-bold text-zinc-700 hover:bg-zinc-50 transition-all">View</button>
+<button class="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-zinc-50/50 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Sarah Jenkins" data-alt="A portrait of a confident woman in a business-casual navy blazer against a minimalist off-white architectural background. Soft daylight creates a bright and airy professional atmosphere. The composition is clean, centered, and reflects a high-end editorial profile style with vibrant but natural colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAN2X-NEMAY4pmzQYuOlYvR6CocF4LKzPZI4PgpBbK9xg2HGboF3cO_J3rylakpAz2Fhqb8saJap7w6qF8KXzx1yuNyNI_0APQ5W9MyH7JOqWsjw6JL3wBTrJktyn3JgViagmKQ8fitND-tY7PiPCZNUl-i48hLzEPS69YMUL0B5TidTt9UlciCjWKM1R70AXFqXnlZw6q3gLRbZ61BwF1STjqLLY-08UOniXf2RBn9EFcA9Al3fmmPIefDXs9gXWmIFnlANryBUxE"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-background">Sarah Jenkins</p>
+<p class="text-xs text-zinc-400">@sarah_betz</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">VIP</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<span class="text-xs font-bold text-emerald-600">Active</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Dec 04, 2023</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Jan 04, 2025</span>
+</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-1.5 rounded-xl bg-white border border-zinc-200 text-[11px] font-bold text-zinc-700 hover:bg-zinc-50 transition-all">View</button>
+<button class="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-zinc-50/50 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="David Chen" data-alt="A sharp, studio-lit portrait of a professional man with a minimalist aesthetic. He is wearing a dark grey athletic shirt, looking directly into the lens with a calm expression. The background is a uniform light grey that allows the subject to pop, maintaining a high-end sports editorial look and feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1E-ni9LAwS2sz3wi0rfj6vJuKAeUr1SqSEJZ5O-ye4ZaposMdTkG_2KP9xp7C3hTEh8Nn9WwDN6-WGg7te6c-wn2LKrCHW7f5sS7EYfoLYn-eB0sp0BOgTpxAxMSYFzbLpf_Dk0zty0xYs58Lfw1xezI0oGrV6PyPzMe3wFZd3bECu4MlqpgSzjlt3vdhIfpjmb1Ls2rhh3cIHddRxqqAPpwbKyS0T3NBF-7zc63VsXmNJ2fb1NdtfJ0I0g4en9vE8gW97fhJ7zY"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-background">David Chen</p>
+<p class="text-xs text-zinc-400">@chen.picks</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-zinc-100 text-zinc-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Free</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+<span class="text-xs font-bold text-red-600">Canceled</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Jan 20, 2024</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-400 italic">Expired</span>
+</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-1.5 rounded-xl bg-white border border-zinc-200 text-[11px] font-bold text-zinc-700 hover:bg-zinc-50 transition-all">View</button>
+<button class="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-zinc-50/50 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Elena Sokolov" data-alt="Close-up headshot of a woman with a serious, focused expression, set against a blurred background of a modern sports stadium seating area. The lighting is bright and crisp, capturing detail with a professional magazine-style clarity. The colors are slightly muted with high-energy violet tones in the shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzml-AHF3rOlR6b8xt2imcG0FP8vFlvdRah5abnBvtuxEhHnF8jG7AjkguTRmyMVuetjc_bjv6VpTpUGpCJgEs6uey4xceLI0-r4519tZH5lAtG_BqK_FA5JglPtnPdBZ3qyTBZA8LAIK-nYQnUGv1O-SMCpo4-6JZ5vgXPvvRbfONTzUpNq5GJ4LMNqRpIFAXt095_yvDnPXOv475eHSF1voB9JhEbZwY6lBTMwU1S3iHWQBbOdi6AlHhGdBkRVSKqjSyfudvkk0"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-background">Elena Sokolov</p>
+<p class="text-xs text-zinc-400">@lena_stats</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-violet-100 text-violet-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Premium</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+<span class="text-xs font-bold text-amber-600">Past Due</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">Feb 11, 2024</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-red-500 font-bold">Feb 11, 2024</span>
+</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-1.5 rounded-xl bg-white border border-zinc-200 text-[11px] font-bold text-zinc-700 hover:bg-zinc-50 transition-all">View</button>
+<button class="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-zinc-50/50 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Marcus Gray" data-alt="A portrait of a mature man with a distinguished appearance, wearing a white polo shirt. He stands against a soft-focus background of a contemporary urban park in daylight. The image has a bright, airy, and professional feel, utilizing high-end camera lens compression for a shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJmigm7wi26d6tAzb0To-ScGvwMPd5CYEKoH-Oow5FYqjAQJcn3S3UUu0RCkLa9-DfaN2ffLIa2r8iWURJDTwfowpqPJMURhQyA15IA5w-TdIAyeyqLEMeQIlncUdEWRCrz2wevqFVXt3YUYxJK4oYmuOJIh1WqeGEgtS1uGNEwe8xuIsccKzKpj1hqWdXa6WCnU3BOGWZK3sSxNTV0Kv5jhkAH_J-ovg6rk9iqgJOupvrQL3SlVzNjyl4oVivEj4TZlfh1q4yArA"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-background">Marcus Gray</p>
+<p class="text-xs text-zinc-400">@mgray_analyst</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">VIP</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<span class="text-xs font-bold text-emerald-600">Active</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">May 15, 2023</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-zinc-500">May 15, 2025</span>
+</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-1.5 rounded-xl bg-white border border-zinc-200 text-[11px] font-bold text-zinc-700 hover:bg-zinc-50 transition-all">View</button>
+<button class="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-6 border-t border-zinc-100 flex items-center justify-between">
+<p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Showing 5 of 420 subscribers</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-100 text-zinc-400 hover:bg-zinc-50 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-100 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">2</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-100 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">3</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center border border-zinc-100 text-zinc-400 hover:bg-zinc-50 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Suppressed based on logic, but added for a specific primary task if needed) -->
+<!-- Suppression logic: FAB only on Home/Dashboard screens. Since this is a management page, we use a standard header button. -->
+</body></html>

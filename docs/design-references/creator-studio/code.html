@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks | Creator Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-header {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        h1, h2, h3, h4, .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#dae2fd",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb869",
+                      "background": "#f7f9fb",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "on-surface": "#191c1e",
+                      "tertiary": "#855000",
+                      "surface-dim": "#d8dadc",
+                      "error": "#ba1a1a",
+                      "on-surface-variant": "#494454",
+                      "surface-container": "#eceef0",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed": "#e9ddff",
+                      "on-tertiary-fixed": "#2c1700",
+                      "surface-container-low": "#f2f4f6",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#e6e8ea",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fffbff",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-secondary-container": "#5c647a",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface": "#f7f9fb",
+                      "primary-container": "#8455ef",
+                      "inverse-surface": "#2d3133",
+                      "inverse-on-surface": "#eff1f3",
+                      "inverse-primary": "#d0bcff",
+                      "outline": "#7b7486",
+                      "secondary-fixed": "#dae2fd",
+                      "on-tertiary-fixed-variant": "#673d00",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#a76500",
+                      "on-tertiary-container": "#fffbff",
+                      "on-primary": "#ffffff",
+                      "on-background": "#191c1e",
+                      "tertiary-fixed": "#ffdcbb",
+                      "on-primary-fixed": "#23005c",
+                      "surface-tint": "#6d3bd7",
+                      "primary": "#6b38d4",
+                      "primary-fixed-dim": "#d0bcff",
+                      "on-primary-fixed-variant": "#5516be",
+                      "surface-bright": "#f7f9fb",
+                      "secondary": "#565e74",
+                      "outline-variant": "#cbc3d7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              }
+            },
+          }
+        }
+    </script>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col py-6 px-4 bg-slate-50 dark:bg-slate-900 h-screen w-64 border-r-0 font-manrope text-sm font-medium tracking-tight">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl">E</div>
+<div>
+<h1 class="font-manrope font-extrabold text-xl text-slate-900 dark:text-white tracking-tighter">The Elite Editorial</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Premium Curator</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Tab: Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-violet-600 dark:text-violet-400 font-bold border-r-4 border-violet-600 bg-slate-200/50 dark:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Posts / Picks
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">groups</span>
+                Subscribers
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+                Products / Pricing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+                Payouts
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+                Profile
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto pt-6 px-2">
+<div class="bg-surface-container-high p-4 rounded-xl flex items-center gap-3">
+<img alt="Creator Profile Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white" data-alt="Close-up studio portrait of a confident male creative professional with a modern aesthetic, soft rim lighting, and a neutral grey background that complements the editorial style of the dashboard. The man is wearing a premium knit sweater and looking slightly off-camera with a composed expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiFj2npnCaLu3-Zf_YmmA_nnqkJltReivocoX_vsXMEECIYaoyK8Ero4l0m2qLCg8JUyG_V2LKkpELTqzjMw_OZNlLbpxn41ni_ygPzmdR8YVchkHhd8EAPvQHAeE4p1FMtkNzOZViyfALFDx0PyaqiiTrg_oErWGR2lkbutHxFndlIqyDC49dtpZE9eG83ktC0XOcfFsfflem1ywzS0JybEkLhnWIclAw08Rc7c_Hs0Uj6X4FHfelrlexlIeH25tB1dPtp5grr1I"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold text-slate-900 truncate">Elite Editor</p>
+<p class="text-[10px] text-slate-500 truncate">Pro Account</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar (Shared Component) -->
+<header class="sticky top-0 right-0 z-30 flex items-center justify-between px-8 ml-64 w-full h-20 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl no-border tonal-transition shadow-[0_20px_40px_rgba(25,28,30,0.04)]">
+<div class="flex items-center gap-8 flex-1">
+<div class="hidden md:block font-manrope font-black text-2xl text-slate-900 dark:text-white">EdgePicks</div>
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search analytics or subscribers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-400">
+<button class="hover:opacity-80 transition-opacity relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-full font-manrope font-bold text-xs uppercase tracking-widest hover:shadow-lg transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Pick
+            </button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 p-8 space-y-8">
+<!-- Key Metrics Row -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Monthly Revenue</p>
+<h3 class="text-2xl font-bold text-on-surface">$12,450</h3>
+<div class="flex items-center gap-1 mt-2 text-emerald-500 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Subs</p>
+<h3 class="text-2xl font-bold text-on-surface">420</h3>
+<div class="flex items-center gap-1 mt-2 text-emerald-500 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>8.4%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">New Last 7d</p>
+<h3 class="text-2xl font-bold text-on-surface">+18</h3>
+<div class="flex items-center gap-1 mt-2 text-emerald-500 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>4%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Churn Rate</p>
+<h3 class="text-2xl font-bold text-on-surface">2.4%</h3>
+<div class="flex items-center gap-1 mt-2 text-rose-500 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span>0.5%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Picks</p>
+<h3 class="text-2xl font-bold text-on-surface">156</h3>
+<div class="flex items-center gap-1 mt-2 text-slate-400 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">remove</span>
+<span>Stable</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-[24px] shadow-sm hover:shadow-md transition-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">30d Performance</p>
+<h3 class="text-2xl font-bold text-on-surface">+14.2u</h3>
+<div class="flex items-center gap-1 mt-2 text-emerald-500 font-medium text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>3.1u</span>
+</div>
+</div>
+</section>
+<!-- Analytics Grid -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Revenue Line Chart -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-8 rounded-[24px]">
+<div class="flex items-center justify-between mb-10">
+<div>
+<h2 class="text-xl font-bold text-on-surface">Revenue Analytics</h2>
+<p class="text-sm text-slate-500">Net earnings before platform fees</p>
+</div>
+<div class="flex bg-surface-container p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-primary">7D</button>
+<button class="px-4 py-1.5 text-xs font-medium text-slate-500 hover:text-primary">30D</button>
+<button class="px-4 py-1.5 text-xs font-medium text-slate-500 hover:text-primary">90D</button>
+</div>
+</div>
+<!-- Mock Chart Canvas -->
+<div class="h-[300px] w-full relative">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#6B38D4" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#6B38D4" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Baseline -->
+<line stroke="#ECEEF0" stroke-width="2" x1="0" x2="1000" y1="280" y2="280"></line>
+<!-- Grid Lines -->
+<line stroke="#ECEEF0" stroke-dasharray="8,8" stroke-width="1" x1="0" x2="1000" y1="180" y2="180"></line>
+<line stroke="#ECEEF0" stroke-dasharray="8,8" stroke-width="1" x1="0" x2="1000" y1="80" y2="80"></line>
+<!-- Area -->
+<path d="M0,280 L0,220 C100,200 150,240 250,210 C350,180 450,120 550,140 C650,160 750,60 850,80 L1000,40 L1000,280 Z" fill="url(#chartGradient)"></path>
+<!-- Line -->
+<path d="M0,220 C100,200 150,240 250,210 C350,180 450,120 550,140 C650,160 750,60 850,80 L1000,40" fill="none" stroke="#6B38D4" stroke-linecap="round" stroke-width="4"></path>
+<!-- Active Point -->
+<circle cx="850" cy="80" fill="#6B38D4" r="6"></circle>
+<circle cx="850" cy="80" fill="white" r="12" stroke="#6B38D4" stroke-opacity="0.3" stroke-width="2"></circle>
+</svg>
+<!-- Floating Data Tooltip -->
+<div class="absolute top-10 right-[15%] bg-on-surface text-white p-3 rounded-xl text-xs shadow-xl">
+<p class="font-bold opacity-60">Sept 12</p>
+<p class="text-lg">$1,142.00</p>
+</div>
+</div>
+<div class="flex justify-between mt-6 px-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Mon</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Tue</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Wed</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Thu</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Fri</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Sat</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Sun</span>
+</div>
+</div>
+<!-- Supporting Growth Chart -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-8 rounded-[24px] flex flex-col justify-between">
+<div>
+<h2 class="text-xl font-bold text-on-surface">Subscriber Growth</h2>
+<p class="text-sm text-slate-500">Net audience acceleration</p>
+</div>
+<div class="h-48 w-full mt-8">
+<svg class="w-full h-full" viewbox="0 0 400 200">
+<path d="M0,180 Q100,170 200,100 T400,40" fill="none" stroke="#6B38D4" stroke-width="3"></path>
+<path d="M0,180 Q100,170 200,100 T400,40 L400,200 L0,200 Z" fill="#6B38D4" fill-opacity="0.05"></path>
+</svg>
+</div>
+<div class="mt-4 p-4 bg-surface-container rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">High Growth Week</p>
+<p class="text-xs text-slate-500">Trending 12% above average</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Lower Grid: Activity & Actions -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Recent Activity Feed -->
+<div class="col-span-12 lg:col-span-7 space-y-6">
+<div class="bg-surface-container-lowest p-8 rounded-[24px]">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-xl font-bold text-on-surface">Recent Activity</h2>
+<button class="text-xs font-bold text-primary hover:underline">View All</button>
+</div>
+<div class="space-y-6">
+<!-- Activity Item -->
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">New subscriber joined: <span class="font-bold">@jordan_picks</span></p>
+<p class="text-xs text-slate-400 mt-0.5">2 minutes ago</p>
+</div>
+<div class="text-sm font-bold text-emerald-500">+$49.00</div>
+</div>
+<!-- Activity Item -->
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined">sync</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">Subscription renewed: <span class="font-bold">Alex M.</span></p>
+<p class="text-xs text-slate-400 mt-0.5">45 minutes ago</p>
+</div>
+<div class="text-sm font-bold text-on-surface">+$29.00</div>
+</div>
+<!-- Activity Item -->
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+<span class="material-symbols-outlined">article</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">New post published: <span class="font-bold">NBA Lakers vs Celtics Analysis</span></p>
+<p class="text-xs text-slate-400 mt-0.5">3 hours ago</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+<!-- Activity Item -->
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">person_remove</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-slate-500">Subscriber canceled: <span class="font-bold">@user_123</span></p>
+<p class="text-xs text-slate-400 mt-0.5">5 hours ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Actions & Guidance -->
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<!-- Guidance Block -->
+<div class="bg-gradient-to-br from-on-surface to-slate-800 text-white p-8 rounded-[24px] relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="text-xl font-bold mb-2">Next Steps</h2>
+<p class="text-sm text-slate-400 mb-6">Complete these tasks to optimize your revenue.</p>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 group cursor-pointer">
+<div class="w-6 h-6 rounded-full border-2 border-primary/50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xs">check</span>
+</div>
+<span class="text-sm font-medium group-hover:text-primary transition-colors">Publish your first premium pick</span>
+</li>
+<li class="flex items-center gap-3 group cursor-pointer">
+<div class="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center"></div>
+<span class="text-sm font-medium group-hover:text-white transition-colors">Set up your first subscription plan</span>
+</li>
+<li class="flex items-center gap-3 group cursor-pointer">
+<div class="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center"></div>
+<span class="text-sm font-medium group-hover:text-white transition-colors">Connect your social media handles</span>
+</li>
+</ul>
+</div>
+<!-- Aesthetic Background Overlap -->
+<span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[180px] text-white/5 rotate-12 select-none">flag</span>
+</div>
+<!-- Quick Actions -->
+<div class="bg-surface-container-lowest p-8 rounded-[24px]">
+<h2 class="text-xl font-bold text-on-surface mb-6">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl bg-surface-container hover:bg-primary/10 hover:text-primary transition-all group">
+<span class="material-symbols-outlined mb-2 group-hover:scale-110 transition-transform">add_circle</span>
+<span class="text-xs font-bold uppercase tracking-tight">Create Pick</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl bg-surface-container hover:bg-primary/10 hover:text-primary transition-all group">
+<span class="material-symbols-outlined mb-2 group-hover:scale-110 transition-transform">sell</span>
+<span class="text-xs font-bold uppercase tracking-tight">New Plan</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl bg-surface-container hover:bg-primary/10 hover:text-primary transition-all group">
+<span class="material-symbols-outlined mb-2 group-hover:scale-110 transition-transform">visibility</span>
+<span class="text-xs font-bold uppercase tracking-tight">Audience</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl bg-surface-container hover:bg-primary/10 hover:text-primary transition-all group">
+<span class="material-symbols-outlined mb-2 group-hover:scale-110 transition-transform">edit_square</span>
+<span class="text-xs font-bold uppercase tracking-tight">Edit Profile</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation (Suppressed per "Shell Visibility" rules for Web Desktop view, handled by SideNav) -->
+<!-- Floating Action Button (Handled in TopAppBar per JSON request "trailing_primary_action") -->
+</body></html>

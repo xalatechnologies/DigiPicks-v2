@@ -1,0 +1,39 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.col {
+  min-width: 0;
+}
+
+.span12 {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .span4 {
+    grid-column: span 4;
+  }
+
+  .span5 {
+    grid-column: span 5;
+  }
+
+  .span6 {
+    grid-column: span 6;
+  }
+
+  .span7 {
+    grid-column: span 7;
+  }
+
+  .span8 {
+    grid-column: span 8;
+  }
+}

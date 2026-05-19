@@ -1,0 +1,28 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-2);
+  border-radius: var(--r-xl);
+}
+
+.text {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+}

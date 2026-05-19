@@ -25,19 +25,19 @@ system or add a token**, not to bend the rule.
 
 ## 1. The single source of truth
 
-| Layer | Lives in | Authoritative for |
-| --- | --- | --- |
-| Design tokens (CSS variables) | `packages/tokens/src/tokens.css` | Every color, size, radius, shadow, motion, z-index, container width, font, weight, tracking, leading. |
-| Global resets / body / scrollbars / focus rings | `packages/tokens/src/globals.css` | Browser-level baseline. |
-| Reusable React components + their CSS Modules | `packages/ds/src/components/**` | Every visual element rendered in any app. |
-| Public DS API | `packages/ds/src/index.ts` | The only surface apps may import from. |
+| Layer                                           | Lives in                          | Authoritative for                                                                                     |
+| ----------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Design tokens (CSS variables)                   | `packages/tokens/src/tokens.css`  | Every color, size, radius, shadow, motion, z-index, container width, font, weight, tracking, leading. |
+| Global resets / body / scrollbars / focus rings | `packages/tokens/src/globals.css` | Browser-level baseline.                                                                               |
+| Reusable React components + their CSS Modules   | `packages/ds/src/components/**`   | Every visual element rendered in any app.                                                             |
+| Public DS API                                   | `packages/ds/src/index.ts`        | The only surface apps may import from.                                                                |
 
 `packages/tokens` and `packages/ds` are the **only** packages that may author
 styles. Everywhere else consumes.
 
 ---
 
-## 2. Hard rules (apps/**)
+## 2. Hard rules (apps/\*\*)
 
 These are violations. They will be reverted on sight:
 
@@ -48,10 +48,10 @@ These are violations. They will be reverted on sight:
    `<span className="…">`, etc. The only acceptable raw HTML in app pages is
    `<main>`, `<form>`, `<em>`, `<br />` — all without `className`.
 3. **No Tailwind utility classes anywhere in apps.** No `flex gap-3 p-4
-   text-xl bg-card rounded-lg`. The `@theme inline` bridge in
+text-xl bg-card rounded-lg`. The `@theme inline` bridge in
    `packages/tokens/src/theme.css` exists for the build, not for ergonomics.
-4. **No `.css` or `.module.css` files inside any `apps/**` source tree.** The
-   only stylesheet apps import is `@digipicks/ds/styles` (in `main.tsx`,
+4. **No `.css` or `.module.css` files inside any `apps/**`source tree.** The
+only stylesheet apps import is`@digipicks/ds/styles`(in`main.tsx`,
    exactly once).
 5. **No deep imports from `@digipicks/ds`.** Apps import from the package
    root only. If something isn't exported from `packages/ds/src/index.ts`,
@@ -66,7 +66,7 @@ to extend the DS**, not to add CSS or inline styles to an app.
 
 ---
 
-## 3. Hard rules (packages/ds/**)
+## 3. Hard rules (packages/ds/\*\*)
 
 1. Each component lives in its own folder:
    `packages/ds/src/components/<bucket>/<Foo>/Foo.tsx` +
@@ -101,14 +101,14 @@ to extend the DS**, not to add CSS or inline styles to an app.
 
 ## 4. Where new things go
 
-| You need to add… | Where it goes |
-| --- | --- |
-| A new color / size / shadow / motion value | `packages/tokens/src/tokens.css` (and `theme.css` if exposed to Tailwind) |
-| A visual pattern reused 2+ places | A new DS component under the right bucket, plus an export in `packages/ds/src/index.ts` |
-| A page (route) | `apps/<app>/src/pages/<Page>.tsx` — composing DS components only |
-| A domain shape (Pick, Creator, Event types) | `packages/shared/src/types/` |
-| A Convex query / mutation | `convex/` + a hook in `packages/sdk/src/` |
-| Theme / provider concern | `packages/app-shell/src/providers/` |
+| You need to add…                            | Where it goes                                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| A new color / size / shadow / motion value  | `packages/tokens/src/tokens.css` (and `theme.css` if exposed to Tailwind)               |
+| A visual pattern reused 2+ places           | A new DS component under the right bucket, plus an export in `packages/ds/src/index.ts` |
+| A page (route)                              | `apps/<app>/src/pages/<Page>.tsx` — composing DS components only                        |
+| A domain shape (Pick, Creator, Event types) | `packages/shared/src/types/`                                                            |
+| A Convex query / mutation                   | `convex/` + a hook in `packages/sdk/src/`                                               |
+| Theme / provider concern                    | `packages/app-shell/src/providers/`                                                     |
 
 DS buckets:
 `atoms/` (Icon, Avatar, Badge, Button, Switch, …)
@@ -149,7 +149,9 @@ export const Foo = React.forwardRef<HTMLDivElement, FooProps>(function Foo(
   { tone = 'primary', size = 'md', className, ...rest },
   ref,
 ) {
-  return <div ref={ref} className={cx(s.foo, s[tone], size !== 'md' && s[size], className)} {...rest} />;
+  return (
+    <div ref={ref} className={cx(s.foo, s[tone], size !== 'md' && s[size], className)} {...rest} />
+  );
 });
 ```
 
@@ -197,25 +199,39 @@ find apps -name "*.css"
 
 ## 8. The quick "is this allowed?" checklist
 
-| Pattern | Verdict |
-| --- | --- |
-| `<div className="flex gap-3">` in an app | ❌ Use `<Row gap={3}>`. |
-| `<h2 style={{ fontSize: 30 }}>` in an app | ❌ Use `<Heading level={2} size="3xl">`. |
-| `<span style={{ color: '#1c9cf0' }}>` anywhere | ❌ Use a tokenized DS component / class. |
-| `<button className="btn-primary">` in an app | ❌ Use `<Button variant="primary">`. |
-| Adding a new `.module.css` inside `apps/web/src/` | ❌ Move it into a DS component. |
-| Importing `@digipicks/ds/components/atoms/Button/Button` | ❌ Import from `@digipicks/ds`. |
-| `padding: 14px` in a DS module | ❌ Use `var(--space-3)` or add a token. |
-| `color: #1c9cf0` in a DS module | ❌ Use `var(--primary)`. |
-| `style={{ '--av-size': size + 'px' }}` on `<Avatar>` (DS internal) | ✅ Dynamic CSS custom property. |
-| `<Row gap={3}>` in an app | ✅ Layout primitive. |
-| `<Section eyebrow="…" title="…">…</Section>` in an app | ✅ Compose DS. |
-| `<Button variant="primary" iconRight="arrow-right">…</Button>` | ✅ DS API. |
-| Adding `--space-9: 36px` to `tokens.css` because nothing fits | ✅ Token first, then reference. |
-| Building a new `<NumberStep>` DS component because two pages duplicate the same stack of DOM | ✅ Extract first, reuse. |
+| Pattern                                                                                      | Verdict                                  |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `<div className="flex gap-3">` in an app                                                     | ❌ Use `<Row gap={3}>`.                  |
+| `<h2 style={{ fontSize: 30 }}>` in an app                                                    | ❌ Use `<Heading level={2} size="3xl">`. |
+| `<span style={{ color: '#1c9cf0' }}>` anywhere                                               | ❌ Use a tokenized DS component / class. |
+| `<button className="btn-primary">` in an app                                                 | ❌ Use `<Button variant="primary">`.     |
+| Adding a new `.module.css` inside `apps/web/src/`                                            | ❌ Move it into a DS component.          |
+| Importing `@digipicks/ds/components/atoms/Button/Button`                                     | ❌ Import from `@digipicks/ds`.          |
+| `padding: 14px` in a DS module                                                               | ❌ Use `var(--space-3)` or add a token.  |
+| `color: #1c9cf0` in a DS module                                                              | ❌ Use `var(--primary)`.                 |
+| `style={{ '--av-size': size + 'px' }}` on `<Avatar>` (DS internal)                           | ✅ Dynamic CSS custom property.          |
+| `<Row gap={3}>` in an app                                                                    | ✅ Layout primitive.                     |
+| `<Section eyebrow="…" title="…">…</Section>` in an app                                       | ✅ Compose DS.                           |
+| `<Button variant="primary" iconRight="arrow-right">…</Button>`                               | ✅ DS API.                               |
+| Adding `--space-9: 36px` to `tokens.css` because nothing fits                                | ✅ Token first, then reference.          |
+| Building a new `<NumberStep>` DS component because two pages duplicate the same stack of DOM | ✅ Extract first, reuse.                 |
 
 ---
 
-**Summary in one line:** *Apps compose DS components only — no inline styles,
+**Summary in one line:** _Apps compose DS components only — no inline styles,
 no Tailwind utilities, no raw classNames, no custom CSS files. The DS
-authors all visuals; the tokens authoritatively define every value.*
+authors all visuals; the tokens authoritatively define every value._
+
+---
+
+## 9. Stitch design exports (reference zips)
+
+The product owner provides **Stitch / EdgePicks** zips per feature (`screen.png`, `code.html`, `DESIGN.md`). Full agent rules: **`.cursor/rules/stitch-design-references.mdc`**.
+
+| From Stitch                                       | In this repo                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------------------- |
+| Layout, sections, copy, flows                     | Implement with DS components + routes/Convex                               |
+| Colors, fonts, radii in `DESIGN.md` / `code.html` | **Do not** copy into `packages/tokens` — map to **existing** CSS variables |
+| New UI pattern used 2+ times                      | New component in `packages/ds/` referencing existing tokens only           |
+
+Archive checked-in references under `docs/design-references/<feature-slug>/`.

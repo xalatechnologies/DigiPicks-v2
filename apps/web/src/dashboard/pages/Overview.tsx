@@ -1,296 +1,275 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
   Card,
   CardHead,
-  Button,
+  Heading,
   Icon,
-  Stat,
-  Eyebrow,
-  Mono,
-  Badge,
   Sparkline,
-  PageHead,
-  MetricGrid,
-  PersonRow,
-  TitleSub,
-  PickCard,
-  EmptyState,
-  DashGrid,
+  Mono,
+  Serif,
+  StudioMetricRow,
+  StudioChartCard,
+  StudioAreaChart,
+  StudioDashLayout,
+  StudioDashCol,
+  ActivityFeed,
+  NextStepsPanel,
+  QuickActionGrid,
+  Eyebrow,
+  Muted,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { STUDIO } from '../../lib/studioRoutes';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
+
+const PERIOD_OPTIONS = [
+  { label: '7D', value: '7d' },
+  { label: '30D', value: '30d' },
+  { label: '90D', value: '90d' },
+];
+
+function demoActivity(navigate: (path: string) => void) {
+  return [
+    {
+      id: '1',
+      icon: 'users' as const,
+      tone: 'success' as const,
+      title: (
+        <>
+          New subscriber joined: <Serif>@jordan_picks</Serif>
+        </>
+      ),
+      time: '2 minutes ago',
+      amount: '+$49.00',
+      onClick: () => navigate(STUDIO.subscribers),
+    },
+    {
+      id: '2',
+      icon: 'card' as const,
+      tone: 'info' as const,
+      title: (
+        <>
+          Subscription renewed: <Serif>Alex M.</Serif>
+        </>
+      ),
+      time: '45 minutes ago',
+      amount: '+$29.00',
+      onClick: () => navigate(STUDIO.payouts),
+    },
+    {
+      id: '3',
+      icon: 'feed' as const,
+      tone: 'primary' as const,
+      title: (
+        <>
+          New post published: <Serif>NBA Lakers vs Celtics Analysis</Serif>
+        </>
+      ),
+      time: '3 hours ago',
+      trailingIcon: 'chevron-right' as const,
+      onClick: () => navigate(STUDIO.picks),
+    },
+    {
+      id: '4',
+      icon: 'users' as const,
+      tone: 'muted' as const,
+      title: (
+        <>
+          Subscriber canceled: <Serif>@user_123</Serif>
+        </>
+      ),
+      time: '5 hours ago',
+      onClick: () => navigate(STUDIO.subscribers),
+    },
+  ];
+}
 
 export function Overview() {
   const navigate = useNavigate();
+  const [revenuePeriod, setRevenuePeriod] = useState('7d');
+  const devPreview = hasDevStudioPreview();
 
   const me = useQuery(api.users.meSafe);
   const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
-  const recentPicks = useQuery(
-    api.picks.byCreator,
-    creator?._id ? { creatorId: creator._id, limit: 6 } : 'skip',
-  );
   const subCount = useQuery(
     api.subscriptions.countByCreator,
     creator?._id ? { creatorId: creator._id } : 'skip',
   );
 
-  const recentSubsRaw = useQuery(
-    api.subscriptions.byCreator,
-    creator?._id ? { creatorId: creator._id, limit: 5 } : 'skip',
-  );
-  const recentSubs = (recentSubsRaw ?? []).map((s) => ({
-    id: s._id,
-    name: s.subscriberName,
-    mono: s.subscriberMono,
-    color: '#3A4F7A',
-    email: s.subscriberEmail,
-    plan:
-      s.plan === 'premium'
-        ? ('Premium' as const)
-        : s.plan === 'vip'
-          ? ('VIP' as const)
-          : ('Trial' as const),
-    ltv: '—',
-  }));
+  const displayName = creator?.name ?? me?.name ?? 'Creator';
+  const activeSubs =
+    typeof subCount === 'number' ? subCount.toLocaleString() : devPreview ? '420' : '—';
+  const winRate = creator ? `${(creator.winRate * 100).toFixed(1)}%` : devPreview ? '58.2%' : '—';
+  const units = creator?.units ?? (devPreview ? '+14.2u' : '—');
 
-  const displayName = creator?.name ?? me?.name ?? 'creator';
+  const metrics = useMemo(
+    () => [
+      {
+        id: 'mrr',
+        label: 'Monthly revenue',
+        value: devPreview ? '$12,450' : '$12,480',
+        delta: { value: '12%', dir: 'up' as const },
+        onClick: () => navigate(STUDIO.payouts),
+      },
+      {
+        id: 'subs',
+        label: 'Active subs',
+        value: activeSubs,
+        delta: { value: '8.4%', dir: 'up' as const },
+        onClick: () => navigate(STUDIO.subscribers),
+      },
+      {
+        id: 'new',
+        label: 'New last 7d',
+        value: devPreview ? '+18' : '—',
+        delta: { value: '4%', dir: 'up' as const },
+        onClick: () => navigate(STUDIO.subscribers),
+      },
+      {
+        id: 'churn',
+        label: 'Churn rate',
+        value: devPreview ? '2.4%' : '—',
+        delta: { value: '0.5%', dir: 'down' as const },
+        onClick: () => navigate(STUDIO.subscribers),
+      },
+      {
+        id: 'picks',
+        label: 'Total picks',
+        value: devPreview ? '156' : '—',
+        delta: { value: 'Stable', dir: 'flat' as const },
+        onClick: () => navigate(STUDIO.picks),
+      },
+      {
+        id: 'perf',
+        label: '30d performance',
+        value: units,
+        delta: { value: '3.1u', dir: 'up' as const },
+        onClick: () => navigate(STUDIO.analytics),
+      },
+    ],
+    [activeSubs, devPreview, units, navigate],
+  );
+
+  const activityItems = useMemo(() => demoActivity(navigate), [navigate]);
 
   return (
-    <>
-      <PageHeader
-        title="Overview"
-        crumbs={[{ label: 'Studio' }, { label: 'Overview' }]}
-        actions={
-          <Row gap={2}>
-            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard/messages')}>
-              <Icon name="message" size={13} />
-              Message subscribers
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => navigate('/dashboard/create')}>
-              <Icon name="plus" size={13} />
-              Create pick
-            </Button>
+    <Container size="2xl">
+      <Stack gap={8}>
+        <Stack gap={2}>
+          <Eyebrow>Studio · Overview</Eyebrow>
+          <Row between>
+            <Stack gap={1}>
+              <Heading level={1} size="2xl">
+                Dashboard
+              </Heading>
+              <Muted>
+                Welcome back, {displayName}. Track revenue, subscribers, and performance.
+              </Muted>
+            </Stack>
           </Row>
-        }
-      />
-
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Studio overview"
-            title={`Welcome back, ${displayName}.`}
-            sub="Tonight's slate, your in-flight picks, and your fastest-growing levers."
-          />
-
-          <MetricGrid
-            items={[
-              {
-                id: 'mrr',
-                label: 'Monthly recurring revenue',
-                // TODO: convex — needs api.earnings.mrr(creatorId).
-                value: <Mono>$12,480</Mono>,
-                delta: { value: '+18.4%', dir: 'up' },
-                icon: <Icon name="dollar" size={14} />,
-              },
-              {
-                id: 'subs',
-                label: 'Active subscribers',
-                value: (
-                  <Mono>{typeof subCount === 'number' ? subCount.toLocaleString() : '—'}</Mono>
-                ),
-                icon: <Icon name="users" size={14} />,
-              },
-              {
-                id: 'win',
-                label: 'Win rate',
-                value: <Mono>{creator ? `${(creator.winRate * 100).toFixed(1)}%` : '—'}</Mono>,
-                icon: <Icon name="trophy" size={14} />,
-              },
-              {
-                id: 'units',
-                label: 'Units',
-                value: <Mono>{creator?.units ?? '—'}</Mono>,
-                icon: <Icon name="chart" size={14} />,
-              },
-            ]}
-          />
-
-          <DashGrid
-            aside={
-              <>
-                <Card>
-                  <CardHead title="Quick actions" sub="Move the needle this week" />
-                  <Stack gap={3}>
-                    <QuickAction
-                      icon="plus"
-                      title="Create a pick"
-                      sub="Publish or schedule"
-                      cta="Start"
-                      onClick={() => navigate('/dashboard/create')}
-                    />
-                    <QuickAction
-                      icon="card"
-                      title="Smart pricing"
-                      sub="Try $54/mo (recommended)"
-                      cta="Review"
-                      onClick={() => navigate('/dashboard/products')}
-                    />
-                    <QuickAction
-                      icon="megaphone"
-                      title="Growth manager"
-                      sub="3 new opportunities"
-                      cta="View"
-                      onClick={() => navigate('/dashboard/growth')}
-                    />
-                  </Stack>
-                </Card>
-
-                <Card>
-                  <CardHead
-                    title="Recent subscribers"
-                    sub="Newest joins and trial conversions"
-                    action={
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/dashboard/subscribers')}
-                      >
-                        All subs
-                        <Icon name="arrow-right" size={12} />
-                      </Button>
-                    }
-                  />
-                  <Stack gap={3}>
-                    {recentSubs.map((u) => (
-                      <PersonRow
-                        key={u.id}
-                        name={u.name}
-                        sub={u.email}
-                        mono={u.mono}
-                        color={u.color}
-                        trailing={<Stat label={u.plan} value={<Mono>{u.ltv}</Mono>} />}
-                      />
-                    ))}
-                  </Stack>
-                </Card>
-
-                <Card>
-                  <CardHead
-                    title="Track record"
-                    sub={creator?.niche ?? '—'}
-                    action={<Badge tone="green">{creator?.units ?? '—'}</Badge>}
-                  />
-                  <Row gap={4} between>
-                    <Stack gap={1}>
-                      <Eyebrow>Win rate</Eyebrow>
-                      <Mono>{creator ? `${(creator.winRate * 100).toFixed(1)}%` : '—'}</Mono>
-                    </Stack>
-                    <Stack gap={1}>
-                      <Eyebrow>Record</Eyebrow>
-                      <Mono>{creator?.record ?? '—'}</Mono>
-                    </Stack>
-                    <Sparkline
-                      values={[3, 5, 4, 6, 8, 7, 10, 12, 11, 14]}
-                      width={140}
-                      height={36}
-                    />
-                  </Row>
-                </Card>
-              </>
-            }
-          >
-            <Card>
-              <CardHead
-                title="Recent picks"
-                sub="Drafts, scheduled, and pending grade"
-                action={
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/picks')}>
-                    Open manager
-                    <Icon name="arrow-right" size={12} />
-                  </Button>
-                }
-              />
-              {recentPicks === undefined ? (
-                <EmptyState icon="inbox" title="Loading picks…" />
-              ) : recentPicks.length === 0 ? (
-                <EmptyState
-                  icon="inbox"
-                  title="No picks yet"
-                  subtitle="Publish your first pick to start building a track record."
-                  action={
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => navigate('/dashboard/create')}
-                    >
-                      <Icon name="plus" size={13} />
-                      Create pick
-                    </Button>
-                  }
-                />
-              ) : (
-                <Stack gap={3}>
-                  {recentPicks.map((p) => (
-                    <PickCard
-                      key={p._id}
-                      creatorName={creator?.name ?? ''}
-                      creatorHandle={creator?.handle ?? ''}
-                      creatorMono={creator?.avatarMono ?? ''}
-                      creatorColor={creator?.avatarColor ?? ''}
-                      creatorVerified={creator?.verified ?? false}
-                      access={p.access}
-                      sport={p.sport}
-                      event={p.eventName}
-                      eventTime={p.eventTime}
-                      posted={new Date(p.createdAt).toLocaleString()}
-                      title={p.title}
-                      market={p.market}
-                      selection={p.selection}
-                      odds={p.odds}
-                      units={p.units}
-                      body={p.body}
-                      teaser={p.teaser}
-                      status={p.grade ?? p.status}
-                    />
-                  ))}
-                </Stack>
-              )}
-            </Card>
-          </DashGrid>
         </Stack>
-      </Container>
-    </>
-  );
-}
 
-interface QuickActionProps {
-  icon: string;
-  title: string;
-  sub: string;
-  cta: string;
-  onClick?: () => void;
-}
+        <StudioMetricRow items={metrics} />
 
-function QuickAction({ icon, title, sub, cta, onClick }: QuickActionProps) {
-  return (
-    <Card hover pad="sm" onClick={onClick}>
-      <Row gap={3} between>
-        <Row gap={3}>
-          <Button variant="secondary" size="sm" iconOnly aria-label={title}>
-            <Icon name={icon} size={16} />
-          </Button>
-          <TitleSub title={title} sub={sub} />
-        </Row>
-        <Button variant="ghost" size="sm">
-          {cta}
-          <Icon name="arrow-right" size={12} />
-        </Button>
-      </Row>
-    </Card>
+        <StudioDashLayout>
+          <StudioDashCol span={8}>
+            <StudioChartCard
+              title="Revenue analytics"
+              sub="Net earnings before platform fees"
+              periodOptions={PERIOD_OPTIONS}
+              period={revenuePeriod}
+              onPeriodChange={setRevenuePeriod}
+              footer={
+                <Row between>
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
+                    <Eyebrow key={d}>{d}</Eyebrow>
+                  ))}
+                </Row>
+              }
+            >
+              <StudioAreaChart highlightLabel="Sept 12" highlightValue="$1,142.00" />
+            </StudioChartCard>
+          </StudioDashCol>
+
+          <StudioDashCol span={4}>
+            <StudioChartCard title="Subscriber growth" sub="Net audience acceleration">
+              <Sparkline
+                values={[12, 14, 13, 18, 22, 28, 35, 42]}
+                color="var(--primary)"
+                width={360}
+                height={120}
+              />
+              <Card pad="md">
+                <Row gap={3}>
+                  <Icon name="flame" size={20} />
+                  <Stack gap={1}>
+                    <Heading level={3} size="sm">
+                      High growth week
+                    </Heading>
+                    <Muted>Trending 12% above average</Muted>
+                  </Stack>
+                </Row>
+              </Card>
+            </StudioChartCard>
+          </StudioDashCol>
+
+          <StudioDashCol span={7}>
+            <ActivityFeed
+              title="Recent activity"
+              actionLabel="View all"
+              onAction={() => navigate(STUDIO.subscribers)}
+              items={activityItems}
+            />
+          </StudioDashCol>
+
+          <StudioDashCol span={5}>
+            <Stack gap={6}>
+              <NextStepsPanel
+                title="Next steps"
+                sub="Complete these tasks to optimize your revenue."
+                items={[
+                  {
+                    id: 'pick',
+                    label: 'Publish your first premium pick',
+                    done: Boolean(creator),
+                    onClick: () => navigate(STUDIO.createPick),
+                  },
+                  {
+                    id: 'plan',
+                    label: 'Set up your first subscription plan',
+                    onClick: () => navigate(STUDIO.products),
+                  },
+                  {
+                    id: 'social',
+                    label: 'Complete your public profile',
+                    onClick: () => navigate(STUDIO.profile),
+                  },
+                ]}
+              />
+              <QuickActionGrid
+                title="Quick actions"
+                items={studioCrossLinks('overview', navigate)}
+              />
+            </Stack>
+          </StudioDashCol>
+        </StudioDashLayout>
+
+        {!devPreview && !creator ? (
+          <Card pad="lg" elev>
+            <CardHead
+              title="Track record"
+              sub="Win rate and units update as picks are graded."
+              action={<Mono>{winRate}</Mono>}
+            />
+          </Card>
+        ) : null}
+      </Stack>
+    </Container>
   );
 }

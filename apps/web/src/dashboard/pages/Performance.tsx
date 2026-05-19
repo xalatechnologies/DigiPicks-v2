@@ -1,27 +1,29 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
-  Col,
+  Heading,
+  Eyebrow,
+  Muted,
+  Button,
   Card,
   CardHead,
-  Button,
-  Icon,
   Mono,
-  Muted,
-  Sparkline,
   Badge,
-  PageHead,
-  Segmented,
-  KV,
-  StatGrid,
-  TitleSub,
   EmptyState,
+  StudioSummaryGrid,
+  StudioFilterPills,
+  QuickActionGrid,
+  TitleSub,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
+import { STUDIO } from '../../lib/studioRoutes';
+import { MARKET_PERF } from '../data/studio';
 
 const RANGE_OPTIONS = [
   { label: '7D', value: '7d' },
@@ -38,7 +40,6 @@ interface MarketPerf {
   units: string;
 }
 
-/** Compute market-level performance from graded picks. */
 function computeMarketPerf(
   picks: Array<{ market: string; grade?: string; netUnits?: string }>,
 ): MarketPerf[] {
@@ -63,148 +64,152 @@ function computeMarketPerf(
 }
 
 export function Performance() {
-  const [range, setRange] = React.useState('30d');
+  const navigate = useNavigate();
+  const [range, setRange] = useState('30d');
+  const devPreview = hasDevStudioPreview();
 
   const me = useQuery(api.users.meSafe);
-  const creator = useQuery(
-    api.creators.get,
-    me?.creatorId ? { id: me.creatorId } : 'skip',
-  );
+  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const picks = useQuery(
     api.picks.byCreator,
     creator?._id ? { creatorId: creator._id, limit: 500 } : 'skip',
   );
 
-  const marketPerf = React.useMemo(
-    () => computeMarketPerf(picks ?? []),
-    [picks],
-  );
+  const marketPerf = useMemo(() => {
+    const computed = computeMarketPerf(picks ?? []);
+    if (computed.length > 0) return computed;
+    if (devPreview) {
+      return MARKET_PERF.map((m) => ({
+        market: m.market,
+        picks: m.picks,
+        wins: Math.round(m.picks * m.winRate),
+        winRate: m.winRate,
+        units: m.units,
+      }));
+    }
+    return [];
+  }, [picks, devPreview]);
 
   const winRateLabel = creator
     ? `${(creator.winRate * 100).toFixed(1)}%`
-    : '—';
+    : devPreview
+      ? '58.2%'
+      : '—';
+
+  const graded = (picks ?? []).filter((p) => p.grade && p.grade !== 'pending').length;
 
   return (
-    <>
-      <PageHeader
-        title="Performance"
-        crumbs={[{ label: 'Audience' }, { label: 'Performance' }]}
-        actions={
-          <Button variant="secondary" size="sm">
-            <Icon name="filter" size={13} />
-            Export CSV
-          </Button>
-        }
-      />
+    <Container size="2xl">
+      <Stack gap={8}>
+        <Row between wrap>
+          <Stack gap={2}>
+            <Eyebrow>Studio · Analytics</Eyebrow>
+            <Heading level={1} size="2xl">
+              Analytics
+            </Heading>
+            <Muted>Win rate, ROI, and unit results — sliced by market and rolling window.</Muted>
+          </Stack>
+          <Row gap={2} wrap>
+            <StudioFilterPills options={RANGE_OPTIONS} value={range} onChange={setRange} />
+            <Button variant="outline" size="sm" onClick={() => navigate(STUDIO.picks)}>
+              View picks
+            </Button>
+          </Row>
+        </Row>
 
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Audience"
-            title="Performance"
-            sub="Win rate, ROI, and unit results — sliced by market and rolling window."
-            actions={
-              <Segmented
-                options={RANGE_OPTIONS}
-                value={range}
-                onChange={setRange}
-                ariaLabel="Range"
-              />
+        <StudioSummaryGrid
+          items={[
+            {
+              id: 'win',
+              icon: 'chart',
+              iconTone: 'primary',
+              label: 'Win rate',
+              value: winRateLabel,
+              delta: devPreview ? { value: '+3.1%', dir: 'up' } : undefined,
+            },
+            {
+              id: 'record',
+              icon: 'trophy',
+              iconTone: 'violet',
+              label: 'Record',
+              value: creator?.record ?? (devPreview ? '92-66-4' : '—'),
+            },
+            {
+              id: 'units',
+              icon: 'flame',
+              iconTone: 'amber',
+              label: 'Units',
+              value: creator?.units ?? (devPreview ? '+14.2u' : '—'),
+              delta: devPreview ? { value: '30d', dir: 'up' } : undefined,
+            },
+            {
+              id: 'graded',
+              icon: 'feed',
+              iconTone: 'danger',
+              label: 'Graded picks',
+              value: devPreview && graded === 0 ? '156' : graded.toLocaleString(),
+            },
+          ]}
+        />
+
+        <Card pad="lg" elev>
+          <CardHead
+            title="By market"
+            sub="Performance breakdown across the markets you publish in"
+            action={
+              creator?.streak ? (
+                <Badge tone="gold" dot>
+                  {creator.streak}
+                </Badge>
+              ) : null
             }
           />
-
-          <StatGrid
-            items={[
-              {
-                id: 'win',
-                label: 'Win rate',
-                value: <Mono>{winRateLabel}</Mono>,
-                sub: (
-                  <Row gap={2}>
-                    <Muted>Lifetime · public log</Muted>
-                  </Row>
-                ),
-              },
-              {
-                id: 'record',
-                label: 'Record',
-                value: <Mono>{creator?.record ?? '—'}</Mono>,
-                sub: (
-                  <Row gap={2}>
-                    <Muted>W-L-P</Muted>
-                  </Row>
-                ),
-              },
-              {
-                id: 'units',
-                label: 'Units',
-                value: <Mono>{creator?.units ?? '—'}</Mono>,
-                sub: (
-                  <Row gap={2}>
-                    <Muted>Net since opening</Muted>
-                  </Row>
-                ),
-              },
-              {
-                id: 'last10',
-                label: 'Last 10',
-                value: <Mono>{creator?.last10 || '—'}</Mono>,
-                sub: (
-                  <Row gap={2}>
-                    {creator?.streak ? (
-                      <Badge tone="gold" dot>
-                        {creator.streak}
-                      </Badge>
-                    ) : (
-                      <Muted>—</Muted>
-                    )}
-                  </Row>
-                ),
-              },
-            ]}
-          />
-
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead title="By market" sub="Performance breakdown across the markets you publish in" />
-                {marketPerf.length === 0 ? (
-                  <EmptyState
-                    icon="chart"
-                    title="No graded picks yet."
-                    subtitle="Publish and grade picks to see market breakdowns."
+          {marketPerf.length === 0 ? (
+            <EmptyState
+              icon="chart"
+              title="No graded picks yet"
+              subtitle="Publish and grade picks to see market breakdowns."
+              action={
+                <Button variant="primary" size="sm" onClick={() => navigate(STUDIO.createPick)}>
+                  Create pick
+                </Button>
+              }
+            />
+          ) : (
+            <Stack gap={4}>
+              {marketPerf.map((m) => (
+                <Row key={m.market} gap={4} between wrap>
+                  <TitleSub
+                    title={m.market}
+                    sub={`${m.picks} picks · ${(m.winRate * 100).toFixed(1)}%`}
                   />
-                ) : (
-                  <Stack gap={4}>
-                    {marketPerf.map((m) => (
-                      <Row key={m.market} gap={4} between wrap>
-                        <TitleSub
-                          title={m.market}
-                          sub={`${m.picks} picks · ${(m.winRate * 100).toFixed(1)}%`}
-                        />
-                        <Mono>{m.units}</Mono>
-                      </Row>
-                    ))}
-                  </Stack>
-                )}
-              </Card>
-            </Col>
+                  <Mono>{m.units}</Mono>
+                </Row>
+              ))}
+            </Stack>
+          )}
+        </Card>
 
-            <Col gap={4}>
-              {/* Discipline metrics — computed from pick history */}
-              <Card>
-                <CardHead title="Discipline" sub="Risk hygiene and consistency" />
-                <Stack gap={2}>
-                  <KV k="Total picks" v={<Mono>{(picks ?? []).length}</Mono>} />
-                  <KV k="Graded" v={<Mono>{(picks ?? []).filter((p) => p.grade && p.grade !== 'pending').length}</Mono>} />
-                  <KV k="Markets" v={<Mono>{marketPerf.length}</Mono>} />
-                  <KV k="Avg unit size" v={<Mono>{creator?.units ?? '—'}</Mono>} />
-                </Stack>
-              </Card>
-            </Col>
+        <Card pad="lg" elev>
+          <CardHead title="Discipline" sub="Risk hygiene tied to your pick history" />
+          <Row gap={6} wrap>
+            <Stack gap={1}>
+              <Eyebrow>Total picks</Eyebrow>
+              <Mono>{(picks ?? []).length || (devPreview ? 156 : 0)}</Mono>
+            </Stack>
+            <Stack gap={1}>
+              <Eyebrow>Markets</Eyebrow>
+              <Mono>{marketPerf.length}</Mono>
+            </Stack>
+            <Stack gap={1}>
+              <Eyebrow>Last 10</Eyebrow>
+              <Mono>{creator?.last10 || (devPreview ? '7-3' : '—')}</Mono>
+            </Stack>
           </Row>
-        </Stack>
-      </Container>
-    </>
+        </Card>
+
+        <QuickActionGrid title="Related" items={studioCrossLinks('analytics', navigate)} />
+      </Stack>
+    </Container>
   );
 }

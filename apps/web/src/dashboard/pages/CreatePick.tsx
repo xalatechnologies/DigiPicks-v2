@@ -25,6 +25,7 @@ import {
   type AISuggestion,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { STUDIO } from '../../lib/studioRoutes';
 
 const SPORTS = ['Soccer', 'Cricket', 'Tennis'];
 
@@ -56,10 +57,7 @@ export function CreatePick() {
   const navigate = useNavigate();
 
   const me = useQuery(api.users.meSafe);
-  const creator = useQuery(
-    api.creators.get,
-    me?.creatorId ? { id: me.creatorId } : 'skip',
-  );
+  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const createPick = useMutation(api.picks.create);
 
   const [sport, setSport] = React.useState('Soccer');
@@ -71,9 +69,7 @@ export function CreatePick() {
   const [odds, setOdds] = React.useState('-110');
   const [units, setUnits] = React.useState('2u');
   const [confidence, setConfidence] = React.useState<PickConfidence>('High');
-  const [title, setTitle] = React.useState(
-    'Lakers vs Nuggets — First Half Total Over 112.5',
-  );
+  const [title, setTitle] = React.useState('Lakers vs Nuggets — First Half Total Over 112.5');
   const [body, setBody] = React.useState(
     'Both teams hovering 53–55% pace tier vs quality defenses. Denver on a back-to-back, Murray played 38 minutes Thursday.\n\nLakers 6-1 on H1 over at home this season when line sits 110.5–113.5.',
   );
@@ -116,9 +112,7 @@ export function CreatePick() {
     // Pre-fill summary into title (or body if title already set) and body
     // with the reasoning. Confidence maps to creator confidence buckets.
     if (!body) setBody(s.reasoning);
-    setConfidence(
-      s.confidence >= 75 ? 'High' : s.confidence >= 50 ? 'Medium' : 'Low',
-    );
+    setConfidence(s.confidence >= 75 ? 'High' : s.confidence >= 50 ? 'Medium' : 'Low');
     setAiSuggestion(null);
   }
 
@@ -146,7 +140,7 @@ export function CreatePick() {
         body: body || undefined,
         status,
       });
-      navigate('/dashboard/picks');
+      navigate(STUDIO.picks);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save pick.');
     } finally {
@@ -158,17 +152,13 @@ export function CreatePick() {
     <>
       <PageHeader
         title="Create pick"
-        crumbs={[
-          { label: 'Studio' },
-          { label: 'Posts & Picks' },
-          { label: 'New' },
-        ]}
+        crumbs={[{ label: 'Studio' }, { label: 'Posts & Picks' }, { label: 'New' }]}
         actions={
           <Row gap={2}>
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => navigate('/dashboard/picks')}
+              onClick={() => navigate(STUDIO.picks)}
               disabled={submitting}
             >
               Cancel
@@ -332,15 +322,8 @@ export function CreatePick() {
                     onDismiss={() => setAiSuggestion(null)}
                   />
 
-                  <Field
-                    label="Analysis"
-                    help="Reasoning subscribers see — markdown supported."
-                  >
-                    <TextArea
-                      rows={6}
-                      value={body}
-                      onChange={(e) => setBody(e.target.value)}
-                    />
+                  <Field label="Analysis" help="Reasoning subscribers see — markdown supported.">
+                    <TextArea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
                   </Field>
 
                   <Divider />

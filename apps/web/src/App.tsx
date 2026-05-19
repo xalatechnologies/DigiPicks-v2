@@ -18,6 +18,7 @@ import {
   EmptyState,
 } from '@digipicks/ds';
 import { AccountUserMenu } from './auth/AccountUserMenu';
+import { becomeCreatorCtaLabel, navigateBecomeCreator } from './lib/becomeCreator';
 import { api } from '../../../convex/_generated/api';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
@@ -151,6 +152,8 @@ function NotificationsBell() {
 function PublicHeader() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
 
   return (
     <Container size="xl">
@@ -179,8 +182,18 @@ function PublicHeader() {
         <Row gap={2}>
           <NotificationsBell />
           <ThemeIconButton />
-          <Button variant="outline" iconRight="sparkles" onClick={() => navigate('/apply')}>
-            Become a creator
+          <Button
+            variant="outline"
+            iconRight="sparkles"
+            disabled={authLoading || (isAuthenticated && me === undefined)}
+            onClick={() =>
+              navigateBecomeCreator(navigate, {
+                isAuthenticated,
+                creatorId: me?.creatorId ?? null,
+              })
+            }
+          >
+            {becomeCreatorCtaLabel(me?.creatorId ?? null)}
           </Button>
           <AccountUserMenu />
         </Row>
@@ -319,12 +332,9 @@ export function App() {
         <Route
           path="/apply"
           element={
-            <AuthGate
-              forbiddenTitle="Sign in required"
-              forbiddenSubtitle="Creator applications need a verified email account so we can follow up on your submission."
-            >
+            <React.Suspense fallback={<PageFallback title="Loading application…" />}>
               <Apply />
-            </AuthGate>
+            </React.Suspense>
           }
         />
         <Route

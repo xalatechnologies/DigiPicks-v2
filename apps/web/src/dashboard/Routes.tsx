@@ -16,6 +16,7 @@ import { Growth } from './pages/Growth';
 import { Access } from './pages/Access';
 import { Earnings } from './pages/Earnings';
 import { Messages } from './pages/Messages';
+import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { DiscordSettings } from './pages/DiscordSettings';
 import { DiscordDiscussions } from './pages/DiscordDiscussions';
@@ -48,6 +49,7 @@ export function DashboardRoutes() {
           <Route path="earnings" element={<Earnings />} />
           <Route path="messages" element={<Messages />} />
           <Route path="copilot" element={<CreatorCopilot />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="settings/discord" element={<DiscordSettings />} />
           <Route path="discord/discussions" element={<DiscordDiscussions />} />

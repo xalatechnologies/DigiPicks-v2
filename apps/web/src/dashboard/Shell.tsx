@@ -1,127 +1,36 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
-import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, ThemeToggle } from '@digipicks/ds';
+import {
+  AppLayout,
+  Sidebar,
+  NavItem,
+  Stack,
+  Card,
+  Row,
+  Muted,
+  Mono,
+  Button,
+  Badge,
+  StudioTopBar,
+  StudioSidebarBrand,
+  CreatorStudioProfile,
+} from '@digipicks/ds';
 import { AccountUserMenu } from '../auth/AccountUserMenu';
 import { api } from '../../../../convex/_generated/api';
+import { hasDevStudioPreview, clearDevStudioPreview } from '../lib/devDemoLogin';
+import { STUDIO } from '../lib/studioRoutes';
 
-// =============================================================================
-// Studio Sidebar — creator role nav (mounted at /dashboard/*)
-// =============================================================================
-
-interface StudioNavItem {
-  to: string;
-  label: string;
-  sub?: string;
-  icon: string;
-  badge?: string;
-  end?: boolean;
-}
-interface StudioNavSection {
-  title: string;
-  items: StudioNavItem[];
-}
-
-function buildNavSections(subscriberCount: string): StudioNavSection[] {
-  return [
-    {
-      title: 'Studio',
-      items: [
-        {
-          to: '/dashboard',
-          label: 'Overview',
-          sub: 'Today across your business',
-          icon: 'home',
-          end: true,
-        },
-        {
-          to: '/dashboard/picks',
-          label: 'Posts & Picks',
-          sub: 'Drafts, scheduled, graded',
-          icon: 'feed',
-        },
-        {
-          to: '/dashboard/create',
-          label: 'Create Pick',
-          sub: 'Publish before cutoff',
-          icon: 'plus',
-        },
-        {
-          to: '/dashboard/events',
-          label: 'My Events',
-          sub: 'Author custom events for review',
-          icon: 'calendar',
-        },
-        { to: '/dashboard/products', label: 'Products', sub: 'Plans & pricing tiers', icon: 'tag' },
-      ],
-    },
-    {
-      title: 'Audience',
-      items: [
-        {
-          to: '/dashboard/subscribers',
-          label: 'Subscribers',
-          sub: `${subscriberCount} active members`,
-          icon: 'users',
-        },
-        // TODO: convex — wire badge count to api.messages.unreadCount when available.
-        { to: '/dashboard/messages', label: 'Messages', sub: 'DMs from members', icon: 'message' },
-        {
-          to: '/dashboard/discord/discussions',
-          label: 'Discord',
-          sub: 'Linked threads & sentiment',
-          icon: 'discord',
-        },
-        {
-          to: '/dashboard/performance',
-          label: 'Performance',
-          sub: 'Win rate, ROI, streaks',
-          icon: 'chart',
-        },
-      ],
-    },
-    {
-      title: 'Growth',
-      items: [
-        {
-          to: '/dashboard/growth',
-          label: 'Growth Manager',
-          sub: 'Promo, referrals, funnels',
-          icon: 'megaphone',
-        },
-        {
-          to: '/dashboard/access',
-          label: 'Access Control',
-          sub: 'Map plans to content',
-          icon: 'key',
-        },
-        {
-          to: '/dashboard/earnings',
-          label: 'Earnings',
-          sub: 'MRR, payouts, invoices',
-          icon: 'dollar',
-        },
-      ],
-    },
-    {
-      title: 'Tools',
-      items: [
-        {
-          to: '/dashboard/copilot',
-          label: 'Copilot',
-          sub: 'Studio AI assistant',
-          icon: 'sparkles',
-        },
-        {
-          to: '/dashboard/settings',
-          label: 'Settings',
-          sub: 'Profile · Discord · Telegram',
-          icon: 'gear',
-        },
-      ],
-    },
-  ];
-}
+const STUDIO_NAV = [
+  { to: STUDIO.overview, label: 'Dashboard', icon: 'home', end: true },
+  { to: STUDIO.picks, label: 'Posts / Picks', icon: 'feed' },
+  { to: STUDIO.subscribers, label: 'Subscribers', icon: 'users' },
+  { to: STUDIO.products, label: 'Products / Pricing', icon: 'tag' },
+  { to: STUDIO.analytics, label: 'Analytics', icon: 'chart' },
+  { to: STUDIO.payouts, label: 'Payouts', icon: 'dollar' },
+  { to: STUDIO.profile, label: 'Profile', icon: 'user' },
+  { to: STUDIO.settings, label: 'Settings', icon: 'gear' },
+] as const;
 
 function isActive(pathname: string, to: string, end?: boolean): boolean {
   if (end) return pathname === to;
@@ -139,47 +48,79 @@ export function DashboardShell() {
     me?.creatorId ? { creatorId: me.creatorId } : 'skip',
   );
 
-  const userName = creator?.name ?? me?.name ?? 'You';
-  const userMail = me?.email ?? '';
-  const userMonogram = creator?.avatarMono ?? me?.name?.[0]?.toUpperCase() ?? 'U';
-  const subscriberCountLabel = typeof subCount === 'number' ? subCount.toLocaleString() : '—';
-
-  const sections = buildNavSections(subscriberCountLabel);
+  const userName = creator?.name ?? me?.name ?? 'Elite Editor';
+  const userMonogram = creator?.avatarMono ?? me?.name?.[0]?.toUpperCase() ?? 'E';
+  const avatarColor = creator?.avatarColor;
+  const brandTitle = creator?.name ?? 'The Elite Editorial';
+  const devPreview = hasDevStudioPreview();
 
   const header = (
-    <AppHeader
-      userName={userName}
-      userMail={userMail}
-      userMonogram={userMonogram}
+    <StudioTopBar
       userMenu={<AccountUserMenu align="right" />}
+      onPrimaryClick={() => navigate(STUDIO.createPick)}
     />
   );
 
   const sidebar = (
-    <Sidebar footer={<ThemeToggle />}>
-      {sections.map((section) => (
-        <NavSection key={section.title} title={section.title}>
-          {section.items.map((item) => (
-            <NavItem
-              key={item.to}
-              as="button"
-              type="button"
-              icon={item.icon}
-              label={item.label}
-              sub={item.sub}
-              badge={item.badge}
-              active={isActive(pathname, item.to, item.end)}
-              onClick={() => navigate(item.to)}
-            />
-          ))}
-        </NavSection>
-      ))}
+    <Sidebar
+      footer={
+        <CreatorStudioProfile
+          name={userName}
+          monogram={userMonogram}
+          color={avatarColor}
+          planLabel={
+            typeof subCount === 'number'
+              ? `${subCount.toLocaleString()} subscribers`
+              : 'Pro Account'
+          }
+        />
+      }
+    >
+      <StudioSidebarBrand title={brandTitle} tagline="Premium Curator" />
+      <Stack gap={1}>
+        {STUDIO_NAV.map((item) => (
+          <NavItem
+            key={`${item.to}-${item.label}`}
+            as="button"
+            type="button"
+            icon={item.icon}
+            label={item.label}
+            hideChevron
+            active={isActive(pathname, item.to, 'end' in item ? item.end : false)}
+            onClick={() => navigate(item.to)}
+          />
+        ))}
+      </Stack>
     </Sidebar>
   );
 
   return (
     <AppLayout header={header} sidebar={sidebar}>
-      <Outlet />
+      <Stack gap={4}>
+        {devPreview ? (
+          <Card pad="md" elev>
+            <Row gap={3}>
+              <Badge tone="amber">Dev preview</Badge>
+              <Muted>
+                Studio shell with sample metrics. Set <Mono>VITE_DEV_CREATOR_EMAIL</Mono> and{' '}
+                <Mono>VITE_DEV_CREATOR_PASSWORD</Mono> in <Mono>.env.local</Mono> for live Convex
+                data.
+              </Muted>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  clearDevStudioPreview();
+                  navigate('/apply');
+                }}
+              >
+                Exit preview
+              </Button>
+            </Row>
+          </Card>
+        ) : null}
+        <Outlet />
+      </Stack>
     </AppLayout>
   );
 }

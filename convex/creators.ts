@@ -2,7 +2,7 @@ import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { creatorStatus } from './shared/validators';
 import { internal } from './_generated/api';
-import { requireAdmin } from './shared/permissions';
+import { requireAdmin, requireCreatorOwnership } from './shared/permissions';
 
 // =============================================================================
 // Creator Queries & Mutations
@@ -113,6 +113,26 @@ export const setPromotion = mutation({
       metadata: { untilMs: args.untilMs, rank: args.rank ?? 0 },
     });
 
+    return args.creatorId;
+  },
+});
+
+// Auth-only (creator owner).
+/** Update public studio profile fields shown on the creator page. */
+export const updateStudioProfile = mutation({
+  args: {
+    creatorId: v.id('creators'),
+    name: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    niche: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireCreatorOwnership(ctx, args.creatorId);
+    const patch: Record<string, unknown> = {};
+    if (args.name !== undefined) patch.name = args.name;
+    if (args.bio !== undefined) patch.bio = args.bio;
+    if (args.niche !== undefined) patch.niche = args.niche;
+    if (Object.keys(patch).length > 0) await ctx.db.patch(args.creatorId, patch);
     return args.creatorId;
   },
 });

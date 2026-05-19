@@ -1,0 +1,34 @@
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.item {
+  border: 0;
+  background: transparent;
+  padding: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--t-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.item:hover {
+  color: var(--primary);
+}
+
+.active {
+  color: var(--primary);
+  font-weight: var(--weight-bold);
+  border-bottom-color: var(--primary);
+}
+
+.item:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}

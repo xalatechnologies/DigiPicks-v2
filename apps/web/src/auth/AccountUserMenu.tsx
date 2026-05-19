@@ -48,6 +48,15 @@ export function AccountUserMenu({
 
   const items: UserMenuItem[] = [
     { label: 'My account', icon: 'user', onClick: () => navigate('/account') },
+    ...(me?.creatorId
+      ? [
+          {
+            label: 'Creator studio',
+            icon: 'grid',
+            onClick: () => navigate('/dashboard'),
+          } satisfies UserMenuItem,
+        ]
+      : []),
     {
       label: 'Discover',
       icon: 'compass',
