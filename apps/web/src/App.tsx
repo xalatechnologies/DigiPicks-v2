@@ -31,6 +31,12 @@ import { AuthGate } from './auth/AuthGate';
 const CreatorDetail = React.lazy(() =>
   import('./pages/CreatorDetail').then((m) => ({ default: m.CreatorDetail })),
 );
+const CreatorCheckout = React.lazy(() =>
+  import('./pages/CreatorCheckout').then((m) => ({ default: m.CreatorCheckout })),
+);
+const CreatorSubscribed = React.lazy(() =>
+  import('./pages/CreatorSubscribed').then((m) => ({ default: m.CreatorSubscribed })),
+);
 const OddsIntel = React.lazy(() =>
   import('./pages/OddsIntel').then((m) => ({ default: m.OddsIntel })),
 );
@@ -44,19 +50,8 @@ const Community = React.lazy(() =>
 const Notifications = React.lazy(() =>
   import('./pages/Notifications').then((m) => ({ default: m.Notifications })),
 );
-const Admin = React.lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Admin })));
-const AdminEventReview = React.lazy(() =>
-  import('./pages/admin/EventReview').then((m) => ({
-    default: m.AdminEventReview,
-  })),
-);
-const AdminDisputeQueue = React.lazy(() =>
-  import('./pages/admin/DisputeQueue').then((m) => ({
-    default: m.DisputeQueue,
-  })),
-);
-const AdminCoupons = React.lazy(() =>
-  import('./pages/admin/Coupons').then((m) => ({ default: m.Coupons })),
+const AdminRoutes = React.lazy(() =>
+  import('./admin/Routes').then((m) => ({ default: m.AdminRoutes })),
 );
 const PricingPage = React.lazy(() =>
   import('./pages/trustLegalPages').then((m) => ({ default: m.PricingPage })),
@@ -314,6 +309,22 @@ export function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/events" element={<Events />} />
         <Route path="/creators" element={<Creators />} />
+        <Route
+          path="/creators/:id/checkout"
+          element={
+            <React.Suspense fallback={<PageFallback title="Loading checkout…" />}>
+              <CreatorCheckout />
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="/creators/:id/subscribed"
+          element={
+            <React.Suspense fallback={<PageFallback title="Loading…" />}>
+              <CreatorSubscribed />
+            </React.Suspense>
+          }
+        />
         <Route path="/creators/:id" element={<CreatorDetail />} />
         <Route path="/odds" element={<OddsIntel />} />
         <Route path="/pricing" element={<PricingPage />} />
@@ -382,51 +393,11 @@ export function App() {
           }
         />
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
-            <AuthGate
-              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
-              forbiddenTitle="Admin access required"
-              forbiddenSubtitle="The admin portal is restricted to platform admins."
-            >
-              <Admin />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/admin/events/review"
-          element={
-            <AuthGate
-              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
-              forbiddenTitle="Admin access required"
-              forbiddenSubtitle="Event review is restricted to platform admins."
-            >
-              <AdminEventReview />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/admin/disputes"
-          element={
-            <AuthGate
-              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
-              forbiddenTitle="Admin access required"
-              forbiddenSubtitle="The dispute queue is restricted to platform admins."
-            >
-              <AdminDisputeQueue />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/admin/coupons"
-          element={
-            <AuthGate
-              allowedRoles={['super_admin', 'tenant_admin', 'admin']}
-              forbiddenTitle="Admin access required"
-              forbiddenSubtitle="Promo coupons are restricted to platform admins."
-            >
-              <AdminCoupons />
-            </AuthGate>
+            <React.Suspense fallback={<PageFallback title="Loading admin…" />}>
+              <AdminRoutes />
+            </React.Suspense>
           }
         />
       </Route>

@@ -53,6 +53,8 @@ export const mySubscriptions = query({
           creatorColor: creator?.avatarColor ?? '#3A4F7A',
           creatorVerified: creator?.verified ?? false,
           creatorStartingPrice: creator?.startingPrice ?? 0,
+          creatorNiche: creator?.niche ?? '',
+          creatorSports: creator?.sports ?? [],
         };
       }),
     );
@@ -72,7 +74,24 @@ export const isSubscribed = query({
         q.eq('subscriberId', user._id).eq('creatorId', creatorId),
       )
       .first();
-    return sub !== null && sub.status === 'active';
+    if (!sub) return false;
+    return isAccessActive(sub);
+  },
+});
+
+/** Whether the caller has active access (includes past_due grace). */
+export const hasAccess = query({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, { creatorId }) => {
+    const user = await requireUser(ctx);
+    const sub = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_subscriber_and_creator', (q) =>
+        q.eq('subscriberId', user._id).eq('creatorId', creatorId),
+      )
+      .first();
+    if (!sub) return false;
+    return isAccessActive(sub);
   },
 });
 

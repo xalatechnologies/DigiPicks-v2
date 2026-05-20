@@ -12,7 +12,11 @@ export interface StudioSummaryCardProps {
   iconTone?: StudioSummaryIconTone;
   label: string;
   value: React.ReactNode;
+  /** `metric` (default) for numbers; `text` for emails, names, and longer strings. */
+  valueVariant?: 'metric' | 'text';
   delta?: { value: string; dir: MetricDir };
+  active?: boolean;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -27,15 +31,27 @@ export function StudioSummaryCard({
   iconTone = 'primary',
   label,
   value,
+  valueVariant = 'metric',
   delta,
+  active,
+  onClick,
   className,
 }: StudioSummaryCardProps) {
-  return (
-    <article className={cx(s.card, className)}>
-      <div className={s.top}>
+  const body = (
+    <>
+      <div className={s.head}>
         <span className={cx(s.iconWrap, s[iconTone])}>
           <Icon name={icon} size={20} />
         </span>
+        <p className={s.label}>{label}</p>
+      </div>
+      <div className={s.valueRow}>
+        <div
+          className={cx(s.value, valueVariant === 'text' && s.valueText)}
+          title={typeof value === 'string' ? value : undefined}
+        >
+          {value}
+        </div>
         {delta ? (
           <span className={cx(s.delta, s[`delta${capitalize(delta.dir)}`])}>
             {delta.value}
@@ -43,10 +59,23 @@ export function StudioSummaryCard({
           </span>
         ) : null}
       </div>
-      <p className={s.label}>{label}</p>
-      <div className={s.value}>{value}</div>
-    </article>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={cx(s.card, s.clickable, active && s.active, className)}
+        onClick={onClick}
+        aria-pressed={active}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return <article className={cx(s.card, active && s.active, className)}>{body}</article>;
 }
 
 function capitalize(dir: MetricDir): string {

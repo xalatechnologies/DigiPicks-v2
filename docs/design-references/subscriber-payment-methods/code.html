@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment Methods | Elite Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#dae2fd",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary-container": "#a76500",
+                        "primary-fixed-dim": "#d0bcff",
+                        "primary-fixed": "#e9ddff",
+                        "surface-tint": "#6d3bd7",
+                        "inverse-primary": "#d0bcff",
+                        "background": "#f7f9fb",
+                        "surface-variant": "#e0e3e5",
+                        "on-secondary-fixed": "#131b2e",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eceef0",
+                        "on-surface-variant": "#494454",
+                        "on-surface": "#191c1e",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-container": "#fffbff",
+                        "outline": "#7b7486",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary": "#6b38d4",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#8455ef",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#855000",
+                        "outline-variant": "#cbc3d7",
+                        "surface-dim": "#d8dadc",
+                        "secondary-fixed": "#dae2fd",
+                        "secondary": "#565e74",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#2c1700",
+                        "on-secondary-container": "#5c647a",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-background": "#191c1e",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "on-primary-fixed": "#23005c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .signature-glow { background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%); }
+        .glass-header { backdrop-filter: blur(24px); }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 h-20 w-full docked full-width top-0 sticky z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0px_20px_40px_rgba(25,28,30,0.04)]">
+<div class="flex items-center gap-8">
+<span class="text-xl font-extrabold tracking-tighter text-slate-900 dark:text-slate-50">Elite Editorial</span>
+<div class="hidden md:flex items-center bg-surface-container-low px-4 py-2 rounded-full gap-3">
+<span class="material-symbols-outlined text-slate-500">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64" placeholder="Search insights..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-slate-50 transition-all duration-300 scale-95 active:scale-90">
+<span class="material-symbols-outlined text-slate-500" data-icon="notifications">notifications</span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/20">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-slate-900 leading-none">Alex Rivera</p>
+<p class="text-xs text-slate-500">Pro Member</p>
+</div>
+<img alt="User profile" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a young male sports analyst in a minimalist modern setting. He is wearing a dark navy blazer over a white shirt. The lighting is soft and high-key, maintaining a clean light-mode aesthetic consistent with a premium editorial dashboard. The mood is confident and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmSB0Go1P_a7yU7G6G6p7W18ABB6iLSAObRz8Wk0oFQYVqpwQx59kiMottUXw2umg_9OTy8h3xKixzsfFGtYo7FRJxOB02B5772P8jQ8wYcISwOQ5GDijfo63Fo5rGudUWufRz6ktJDszR9ziaFciJiUww7FK684k8evTE5Bx-X-ZX0K4hbBBdctkK7CGgWW1I-QLABFYjLmGmRzpPaTQtpLJ9apfiEri9jKx2IlVyuMdUDHbIAr2DwZyrk6zBRXMEWi-onOLYCfQ"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col gap-2 p-6 h-screen w-72 left-0 top-0 fixed bg-slate-50 dark:bg-slate-950">
+<div class="mb-8 px-4">
+<p class="font-black text-slate-900 dark:text-slate-50 text-xl tracking-tight">The Curator</p>
+<p class="text-xs text-slate-500 font-medium">Premium Subscriber</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span> Home
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span> My Feed
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span> Saved Picks
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span> Subscriptions
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span> Discover Creators
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span> Creator Channels
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-['Manrope'] font-semibold text-sm hover:translate-x-1 hover:text-slate-900 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span> Notifications
+                </a>
+<a class="flex items-center gap-3 bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 rounded-xl shadow-sm font-bold px-4 py-3 font-['Manrope'] text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> Settings
+                </a>
+</nav>
+<div class="mt-auto p-4 bg-primary/5 rounded-2xl border border-primary/10">
+<p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Elite Insight</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Unlock advanced parlays with our AI-driven models.</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-72 p-8 max-w-6xl mx-auto w-full">
+<!-- Header Section -->
+<div class="mb-12">
+<h1 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface mb-2">Payment Methods</h1>
+<p class="text-on-surface-variant font-medium">Manage your saved cards and payment preferences.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Payment Methods -->
+<div class="lg:col-span-2 space-y-8">
+<!-- Saved Payment Methods Grid -->
+<div class="space-y-4">
+<div class="flex items-center justify-between px-2">
+<h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Your Saved Cards</h2>
+<span class="text-xs text-slate-400">3 Methods Saved</span>
+</div>
+<!-- Card 1: Default -->
+<div class="group bg-surface-container-lowest p-6 rounded-xl border border-transparent transition-all duration-300 hover:shadow-lg flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="w-16 h-10 bg-slate-100 rounded-lg flex items-center justify-center p-2">
+<img alt="Visa Logo" class="h-full object-contain" data-alt="A clean, minimalist close-up of a blue Visa card logo on a high-quality textured white plastic surface. The lighting is bright and professionally studio-lit, reflecting a premium financial service aesthetic. No numbers or sensitive data are visible." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtTIucSp7eA5tH81gv2vhO_C6GC6j7cTc_5xXel4FndymHL7NGPB_uV6CufbP55nhtf6wn-txUwaWnwpwUnkCSfEzAC61_IpUDoPwBlC8wxTsbSSqzX5mCXk5sZag74LZXHyQbiobFORSWIa-RmbdKvCL61WT32ijDRSQXRXx0NsmQ7TKOj8QgMBmXngEdmH0or-lSXJyilaLCmToTMzwy7u9lunM-YP1XJYAaZMdFOd_2pNlS9ttQDtPnUIweAl90IfrSrQEXf8g"/>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<p class="font-bold text-on-surface">Visa ending in 4242</p>
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-tighter rounded-full">Default</span>
+</div>
+<p class="text-sm text-on-surface-variant">Expires 12/26</p>
+</div>
+</div>
+<button class="text-sm font-semibold text-error hover:underline transition-opacity px-4 py-2">Remove</button>
+</div>
+<!-- Card 2: Expired -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-transparent flex items-center justify-between opacity-80">
+<div class="flex items-center gap-6">
+<div class="w-16 h-10 bg-slate-100 rounded-lg flex items-center justify-center p-2 grayscale">
+<img alt="Mastercard Logo" class="h-full object-contain" data-alt="A minimalist professional studio shot of the red and orange Mastercard overlapping circles logo centered on a light gray background. The style is clean, modern, and high-contrast, suitable for a premium financial dashboard interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeO7d0KYnnKhvbdFMqMzp3SElYzu37ucG_SLJhEoU9F7DmD3vNr1wVc01TtAfEsei-roMsgygCHtWiFgbMgTZz1Qqaf3PTuUZ_9lZYvOkPsVE8blqgGzVbt_mvBQAXeDoDCU0YEBobxdntsdnInWFEHvRLGVKNp7P4jL_Ag_CFAEvosGHkv_Ohb6K9n6HqxWoLbVPZDm1p3HnJyyMbFKUI0VYWF_SYAPzdyjZE997FLD4UB3toluYgkZ1J1GooKCeF5wr3ixGsfLg"/>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<p class="font-bold text-on-surface">Mastercard ending in 8888</p>
+<div class="flex items-center gap-1 text-error">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">error</span>
+<span class="text-[10px] font-black uppercase tracking-tighter">Expired</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant">Expired 01/24</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-sm font-bold text-primary hover:underline">Update</button>
+<button class="text-sm font-semibold text-error hover:underline">Remove</button>
+</div>
+</div>
+<!-- Card 3: Failed/Action Required -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-2 border-error/10 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="w-16 h-10 bg-slate-100 rounded-lg flex items-center justify-center p-2">
+<img alt="Amex Logo" class="h-full object-contain" data-alt="A close-up high-definition shot of a blue American Express Centurion logo on a premium metallic surface. The image is bright with subtle shadows to create depth, evoking a sense of high-end luxury financial services and security." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7722YeVEAJq-EN0BpmTdoL-ADIQi69TR2vKtaEcf6fxUAlUj3BltoucdCd9hYv_u05AUpAlBBJIfrHqza4kLmh1ahD4xRNPIzbjh2Gq1_ms0TkbgbhQnyEXVl4kfjALz6LB4MA4gRTPuSvcVPKRlnG0BbjFPhOYxfySuNVkRkTwig_V-yL-Ue-PQcQ0_4lNhqGSvGdS4O0dTRxR4aI9yBCoXAYjxMGpwLfzmcWofmYgx12Reah76Tb1bC46s8q6g48qMScSIsVIg"/>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<p class="font-bold text-on-surface">Amex ending in 1001</p>
+<div class="flex items-center gap-1 text-error animate-pulse">
+<span class="text-[10px] font-black uppercase tracking-tighter">Action Required</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant">Last payment failed</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-1.5 signature-glow text-white rounded-full text-sm font-bold uppercase tracking-tight shadow-sm active:scale-95 transition-all">Fix</button>
+<button class="text-sm font-semibold text-error hover:underline">Remove</button>
+</div>
+</div>
+</div>
+<!-- Add New Payment Method -->
+<button class="w-full py-8 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-white hover:border-primary/40 transition-all group">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</div>
+<span class="font-bold text-on-surface">Add New Payment Method</span>
+</button>
+<!-- Express Checkout Section -->
+<div class="pt-4">
+<h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-2">Express Checkout</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">ios</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Apple Pay</p>
+<p class="text-xs text-on-surface-variant">Active on this device</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-xl flex items-center justify-between opacity-50">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">google</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Google Pay</p>
+<p class="text-xs text-on-surface-variant">Not connected</p>
+</div>
+</div>
+<button class="text-xs font-bold text-primary">Connect</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar info -->
+<div class="space-y-6">
+<!-- Security Note -->
+<div class="bg-surface-container-high/50 p-6 rounded-xl space-y-4">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+<h3 class="font-bold text-sm uppercase tracking-wider">Secure Billing</h3>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                            Your payment information is encrypted and stored securely using industry-standard protocols. EdgePicks does not store full credit card numbers on our servers.
+                        </p>
+<div class="flex items-center gap-2 text-xs font-semibold text-on-surface">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+                            PCI DSS Compliant
+                        </div>
+</div>
+<!-- Subscription Summary Mini-Card -->
+<div class="bg-on-surface p-6 rounded-xl text-white">
+<p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 mb-2">Next Billing Date</p>
+<h4 class="text-2xl font-headline font-extrabold mb-4">October 24, 2023</h4>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-xs text-white/60">Subscription Tier</p>
+<p class="font-bold">Elite Monthly Pro</p>
+</div>
+<p class="text-xl font-headline font-bold">$49.00</p>
+</div>
+<hr class="my-4 border-white/10"/>
+<a class="text-sm font-bold flex items-center gap-2 hover:gap-3 transition-all" href="#">
+                            View Billing History
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Help Widget -->
+<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/10">
+<h4 class="font-bold mb-2">Need Help?</h4>
+<p class="text-sm text-on-surface-variant mb-4">Having trouble with a payment method? Our support team is here 24/7.</p>
+<button class="w-full py-3 bg-surface-container-high rounded-full font-bold text-sm hover:bg-surface-container-highest transition-colors">Contact Support</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-bold uppercase">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-[10px] font-bold uppercase">Explore</span>
+</button>
+<div class="relative -top-6">
+<button class="w-14 h-14 signature-glow rounded-full shadow-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="text-[10px] font-bold uppercase">Alerts</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[10px] font-bold uppercase">Settings</span>
+</button>
+</nav>
+</body></html>

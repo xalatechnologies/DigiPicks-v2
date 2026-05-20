@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment Issue Detected | EdgePicks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#855000",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-surface-variant": "#494454",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-dim": "#d8dadc",
+                        "on-secondary-fixed": "#131b2e",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-tertiary-fixed": "#2c1700",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#5c647a",
+                        "surface-tint": "#6d3bd7",
+                        "primary-fixed": "#e9ddff",
+                        "primary-container": "#8455ef",
+                        "outline": "#7b7486",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary-container": "#dae2fd",
+                        "secondary": "#565e74",
+                        "inverse-on-surface": "#eff1f3",
+                        "background": "#f7f9fb",
+                        "outline-variant": "#cbc3d7",
+                        "tertiary-container": "#a76500",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-background": "#191c1e",
+                        "inverse-primary": "#d0bcff",
+                        "surface-container-high": "#e6e8ea",
+                        "tertiary-fixed": "#ffdcbb",
+                        "surface": "#f7f9fb",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "primary": "#6b38d4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .signature-glow {
+            background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed antialiased">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 no-border shadow-sm shadow-slate-200/50 dark:shadow-none">
+<div class="flex items-center gap-4">
+<button class="hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-violet-600 dark:text-violet-400">arrow_back</span>
+</button>
+<h1 class="font-manrope font-bold tracking-tight text-lg text-slate-900 dark:text-white">Billing &amp; Security</h1>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xl font-black text-slate-900 dark:text-white mr-4">EdgePicks</span>
+<button class="hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">support_agent</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-6 py-12 md:py-20 flex flex-col items-center">
+<!-- Warning Header Section -->
+<div class="text-center mb-10">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-error/10 text-error mb-6">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">report</span>
+</div>
+<h2 class="font-display font-extrabold text-4xl tracking-tight mb-4 text-on-surface">Payment issue detected</h2>
+<p class="text-on-surface-variant text-lg max-w-md mx-auto leading-relaxed">
+                We were unable to process your recent subscription renewal. Update your information to keep your premium access.
+            </p>
+</div>
+<!-- Impacted Subscription Card -->
+<div class="w-full bg-surface-container-lowest rounded-[24px] p-6 mb-8 shadow-[0px_20px_40px_rgba(15,23,42,0.04)] relative overflow-hidden">
+<div class="flex items-start justify-between mb-8">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-2xl overflow-hidden bg-surface-container border-2 border-white shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a sports analyst with a confident expression, set against a blurred stadium background with soft evening lighting. The image has a premium, high-contrast editorial look with deep shadows and clean highlights, maintaining the elite brand aesthetic of the digital curator platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVrWy6Sjg08NsLjspeQirk--rBbZ0lPuhRoGQzS_xg2bLtQ7wAVf3_RBEoVJ4sGJ-16HgowPg78Dt00Vh4Kc95L_DFtOF4plJuiFADZ0WqbvVVarITv9jegd3QdKMa4bTrg3eXWk3mOqF3DPPF6kSd87OFnGR14YwFlHwLa4Kr-JMcxHp-t1tRv9l-wmJ_GezwRl0xHe31r0lsujVlLSdJoUuIs2NyLFjb1pA0paKrtWaniwMZTREZdLiUDJ2JhpWL4sQQUNe86po"/>
+</div>
+<div>
+<div class="flex items-center gap-1.5 mb-0.5">
+<h3 class="font-display font-bold text-xl text-on-surface">Elias Thorne</h3>
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="font-label text-sm uppercase tracking-widest text-on-surface-variant font-semibold">Elite Creator</p>
+</div>
+</div>
+<div class="bg-error/5 text-error px-4 py-1.5 rounded-full text-xs font-bold font-label uppercase tracking-wider">
+                    Payment Failed
+                </div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low rounded-xl p-4">
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Plan Level</p>
+<p class="font-display font-bold text-lg text-on-surface">Pro Access Monthly</p>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4 text-right">
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Subscription Price</p>
+<p class="font-display font-bold text-lg text-on-surface">$29.99<span class="text-sm font-medium text-on-surface-variant">/mo</span></p>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between px-2">
+<p class="text-sm text-on-surface-variant">Renewal Date Attempted:</p>
+<p class="text-sm font-semibold text-on-surface">October 24, 2023</p>
+</div>
+</div>
+<!-- Explanation & CTA Section -->
+<div class="w-full text-center space-y-6">
+<p class="text-on-surface-variant leading-relaxed px-4">
+                To restore access to <span class="font-bold text-on-surface">Elias Thorne</span>'s premium picks, analysis, and community channels, please retry your payment or add a new method.
+            </p>
+<div class="flex flex-col gap-3 w-full">
+<button class="signature-glow text-white font-label font-bold uppercase tracking-widest py-5 px-8 rounded-full shadow-[0px_20px_40px_rgba(107,56,212,0.2)] hover:scale-[1.02] transition-all duration-200 text-sm">
+                    Retry Payment
+                </button>
+<button class="bg-surface-container-high text-on-surface font-label font-bold uppercase tracking-widest py-5 px-8 rounded-full hover:bg-surface-variant transition-colors text-sm">
+                    Update Payment Method
+                </button>
+</div>
+</div>
+<!-- Access Warning Footer Note -->
+<div class="mt-12 w-full flex gap-3 p-4 bg-tertiary-fixed/30 rounded-2xl border border-tertiary-fixed-dim/20">
+<span class="material-symbols-outlined text-tertiary text-xl mt-0.5">hourglass_bottom</span>
+<p class="text-sm text-on-tertiary-fixed-variant leading-snug">
+<span class="font-bold">Important:</span> Your premium access will be automatically restricted if the payment issue is not resolved within the 48-hour grace period.
+            </p>
+</div>
+<!-- Support & Security Badges -->
+<div class="mt-16 flex flex-col items-center gap-8 w-full border-t border-surface-container pt-8">
+<a class="group flex items-center gap-2 text-primary font-bold hover:text-primary-container transition-colors font-label text-sm uppercase tracking-wider" href="#">
+<span>Need help? Contact Support</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<div class="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-2xl">lock</span>
+<p class="font-label text-[10px] font-black uppercase tracking-[0.2em]">SSL Secured</p>
+</div>
+<div class="w-px h-4 bg-on-surface-variant/20"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-2xl">credit_card</span>
+<p class="font-label text-[10px] font-black uppercase tracking-[0.2em]">Stripe Verified</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl shadow-[0_-10px_40px_rgba(15,23,42,0.04)] z-50 md:hidden">
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-violet-500 transition-all">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-manrope text-[10px] font-semibold uppercase tracking-widest mt-1">Curated</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-violet-500 transition-all">
+<span class="material-symbols-outlined">auto_graph</span>
+<span class="font-manrope text-[10px] font-semibold uppercase tracking-widest mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-violet-500 transition-all">
+<span class="material-symbols-outlined">stars</span>
+<span class="font-manrope text-[10px] font-semibold uppercase tracking-widest mt-1">Picks</span>
+</div>
+<div class="flex flex-col items-center justify-center text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 rounded-2xl px-5 py-2 scale-105 transition-all duration-200 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-manrope text-[10px] font-semibold uppercase tracking-widest mt-1">Account</span>
+</div>
+</nav>
+</body></html>

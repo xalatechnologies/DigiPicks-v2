@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Saved Picks | EdgePicks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-surface-variant": "#494454",
+                        "surface-container-low": "#f2f4f6",
+                        "background": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#e9ddff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-primary": "#d0bcff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-background": "#191c1e",
+                        "primary-container": "#8455ef",
+                        "secondary-container": "#dae2fd",
+                        "on-primary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container": "#eceef0",
+                        "secondary": "#565e74",
+                        "on-secondary-container": "#5c647a",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "primary": "#6b38d4",
+                        "surface-tint": "#6d3bd7",
+                        "surface": "#f7f9fb",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-bright": "#f7f9fb",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#fffbff",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary": "#855000",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-dim": "#d8dadc",
+                        "tertiary-container": "#a76500",
+                        "outline-variant": "#cbc3d7",
+                        "on-tertiary-fixed": "#2c1700",
+                        "on-primary": "#ffffff",
+                        "outline": "#7b7486",
+                        "on-secondary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-[1920px] mx-auto relative">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black text-slate-900 dark:text-white tracking-tighter font-['Manrope']">EdgePicks</span>
+<div class="hidden md:flex items-center bg-surface-container rounded-full px-4 py-2 w-96">
+<span class="material-symbols-outlined text-outline mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-outline" placeholder="Search creators/picks/events" type="text"/>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 font-medium font-['Manrope'] tracking-tight hover:text-violet-500 dark:hover:text-violet-300 transition-colors" href="#">Marketplace</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium font-['Manrope'] tracking-tight hover:text-violet-500 dark:hover:text-violet-300 transition-colors" href="#">Rankings</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium font-['Manrope'] tracking-tight hover:text-violet-500 dark:hover:text-violet-300 transition-colors" href="#">Live Score</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="User profile" data-alt="A professional close-up headshot of a modern creative professional with a friendly smile. The background is a clean, softly blurred office environment with natural high-key lighting. The style is consistent with high-end editorial photography, using a bright and clean aesthetic that matches a light-mode UI design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW6KZ6lMMhmY7nusjPjpXK5Vq5TZtwuTCYaUOHQD6pO_rINyqa624hJsnYjjBLphS1PL_S2g3Zl5Kt44uVCFoIUM9V1B_9_LA8HFO6ZgvRKTz5tJojEjsdT7Gb_1GBzpZtnC_GtsTOpnI3EvmiLiDefLbXCy8VjKAeNSbJwqeO1luLlFrrH2ReDq9t3edGPzec-OXcDsghTZP-GM_pzKBT_jks27TxY9SFSN02iTxboS8WL9X-FWGreJvRjWpS9kFuH1FudkJsLMU"/>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800 h-px w-full absolute bottom-0 opacity-50 left-0"></div>
+</div>
+</header>
+<div class="flex max-w-[1920px] mx-auto min-h-[calc(100vh-64px)]">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col gap-2 p-4 h-[calc(100vh-64px)] sticky top-16 w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200/50">
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span>Feed</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 rounded-xl shadow-sm font-['Manrope'] text-sm font-semibold scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+<span>Saved Picks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="loyalty">loyalty</span>
+<span>Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span>Discover</span>
+</a>
+<div class="my-4 mx-4 border-t border-slate-200 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Creator Channels</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 font-['Manrope'] text-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-primary-fixed/30 rounded-2xl">
+<p class="text-xs font-bold text-on-primary-fixed-variant uppercase tracking-widest mb-2">Pro Subscription</p>
+<p class="text-xs text-on-primary-fixed leading-relaxed">You have 12 unlocked expert picks this week.</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-6 md:p-10 lg:p-14 overflow-y-auto">
+<!-- Page Header -->
+<header class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-xs font-bold text-primary uppercase tracking-[0.2em] font-label">Personal Collection</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-extrabold text-on-surface tracking-tighter mb-3 font-headline">Saved Picks</h1>
+<p class="text-lg text-on-surface-variant font-medium opacity-80 max-w-2xl">Revisit the elite picks and analytical posts you’ve curated for your strategy.</p>
+</header>
+<!-- Secondary Tabs -->
+<div class="flex items-center gap-8 mb-8 border-b border-surface-container-high">
+<button class="pb-4 text-sm font-bold text-primary border-b-2 border-primary tracking-wide">SAVED PICKS</button>
+<button class="pb-4 text-sm font-semibold text-outline hover:text-on-surface transition-colors tracking-wide">SAVED CREATORS</button>
+<button class="pb-4 text-sm font-semibold text-outline hover:text-on-surface transition-colors tracking-wide">ARCHIVED</button>
+</div>
+<!-- Filter & Sort Bar -->
+<div class="flex flex-col lg:flex-row gap-4 mb-10 items-center justify-between">
+<div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-full text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Search saved items" type="text"/>
+</div>
+<!-- Filter Chips -->
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded-full text-sm font-semibold transition-colors">
+<span>Creator</span>
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded-full text-sm font-semibold transition-colors">
+<span>Sport</span>
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded-full text-sm font-semibold transition-colors">
+<span>Status</span>
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+</div>
+<div class="flex items-center gap-4 w-full lg:w-auto justify-end">
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Sort By</span>
+<select class="bg-transparent border-none text-sm font-bold text-on-surface focus:ring-0 cursor-pointer">
+<option>Recently Saved</option>
+<option>Event Date</option>
+<option>Creator Rank</option>
+</select>
+</div>
+</div>
+<!-- Saved Picks List (Grid Layout) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Card 1: Unlocked Pick -->
+<div class="group relative bg-surface-container-lowest rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-surface-container">
+<img alt="Creator Avatar" data-alt="A portrait of a sharp-dressed male analyst in a modern high-tech broadcasting studio. The background features glowing blue and violet data monitors. The lighting is sophisticated and directional, emphasizing professional authority and modern technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAthnhuyOOZWNBvE4jjWQNeTtWxKfvE-Mnv0d9b3Wu1DiRF2GkD1IPdzANzyqxeSTWankEF9H879qsYx6QLjC8-oriWBRbH4qKmimNtDuK7LwTc9rkGm4WSqghd3IYqYmLD3vVlxrgoqavf8ioZUbJCnvdQYjExk6gmfb5a67xpobWhocJxGXXN79-1iIL3_zHtLsrD6pQSr_UNNMBfnmOUQDLjlV3dglSPHezC0eLTWYm0HANv13H9bL8EMCgXOlczdAHUJOJKGrA"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline leading-tight">Marcus Vane</h4>
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">NBA EXPERT • TOP 1%</span>
+</div>
+</div>
+<button class="p-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container text-[10px] font-black uppercase tracking-widest rounded text-on-surface-variant">Lakers vs Celtics</span>
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[10px] font-black uppercase tracking-widest rounded">NBA</span>
+</div>
+<h3 class="text-xl font-extrabold text-on-surface mb-2 font-headline tracking-tight">Over 215.5 Total Points</h3>
+<p class="text-sm text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">Both teams are coming off a high-octane week with offensive ratings peaking at 118.4. Expect a fast-break heavy game with minimal interior defense...</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-6 border-t border-surface-container/50">
+<div class="text-[10px] font-bold text-outline uppercase tracking-widest">Saved Oct 24</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">Open Pick</button>
+</div>
+</div>
+<!-- Card 2: Locked Pick with Gradient Blur -->
+<div class="group relative bg-surface-container-lowest rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-surface-container">
+<img alt="Creator Avatar" data-alt="A portrait of a modern female sports analyst with headphones around her neck, sitting in a sleek, minimalist home office. Soft natural window light illuminates the scene, creating a bright and airy professional atmosphere. The aesthetic is modern, high-end editorial." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnSfpXYPGkdRsHzD8fewDB88kjO6Vahxdr2ScnuwL2ZAw53xKrUMeISUN4NQps2e-Cy31NQY69rV2hro8G2ID-AtZosHcskqmBfctPwsGKQliAM0y7hYoAL91RLQJoNNBtWFq9yvWP4ZZJJR1gHMoWBK5gKiTW8ivT9Vs5dPZ2XQpYKDynU4C20zrBxI88O3L7GwD_4Wm2Idnlej50oJUgL2dKukdi9tKAO_gyEVzrs4AvLqFKz2YUkl1eg_e9KpCJJyd-bKkkfoM"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline leading-tight">Sarah 'The Sharp'</h4>
+<span class="text-xs font-bold text-tertiary uppercase tracking-tighter">NFL SHARP • 68% ROI</span>
+</div>
+</div>
+<button class="p-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="mb-4 relative">
+<!-- Blur Overlay for Locked State -->
+<div class="absolute inset-0 bg-white/40 backdrop-blur-md z-10 flex flex-col items-center justify-center rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-primary text-4xl mb-2" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Subscriber Only</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container text-[10px] font-black uppercase tracking-widest rounded text-on-surface-variant">Chiefs vs Eagles</span>
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[10px] font-black uppercase tracking-widest rounded">NFL</span>
+</div>
+<h3 class="text-xl font-extrabold text-on-surface mb-2 font-headline tracking-tight">Eagles +3.5 Spread</h3>
+<p class="text-sm text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">This matchup hinges on the health of the Chiefs' offensive line. My sources indicate a late-breaking injury that will significantly impact...</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-6 border-t border-surface-container/50">
+<div class="text-[10px] font-bold text-outline uppercase tracking-widest">Saved Oct 23</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">Unlock Pick</button>
+</div>
+</div>
+<!-- Card 3: Unlocked Pick (Soccer) -->
+<div class="group relative bg-surface-container-lowest rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-surface-container">
+<img alt="Creator Avatar" data-alt="A portrait of an experienced male European soccer analyst in a stylish neutral-toned blazer. He is standing in front of a modern glass-walled architectural building at dusk with city lights starting to twinkle. The lighting is dramatic yet clean, reflecting a high-end European editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjrdLG6wvaS4vBO7NwFUHoZm0W8byyJNjMHnQq1CJ0UtE8KzqGlZlalahhgBOWADujmSFcO4elk05DIuLX-iMVadKuTmWm5VuosO4uKSV266uBTu-SJ4KT4ZHkUKWJQp0QMj83kgPaG1He2LQL8GZBhuzzzVt_y5rwZXi9qxFuR77jsmpnu26gB8ri_oGGEq-EVaU0EDeWb8bHozVWtAwSCl7OrcGo4vRRXRsocl2Qghpm23ESo_T4ZxQ3WkKkdJkRylsPV7Moi6w"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline leading-tight">Luca Bellini</h4>
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">PREMIER LEAGUE SPECIALIST</span>
+</div>
+</div>
+<button class="p-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container text-[10px] font-black uppercase tracking-widest rounded text-on-surface-variant">Arsenal vs Liverpool</span>
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[10px] font-black uppercase tracking-widest rounded">EPL</span>
+</div>
+<h3 class="text-xl font-extrabold text-on-surface mb-2 font-headline tracking-tight">Liverpool ML (+145)</h3>
+<p class="text-sm text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">Klopp's record at the Emirates is undeniable, and with Salah returning to form, the value on the moneyline is too high to ignore...</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-6 border-t border-surface-container/50">
+<div class="text-[10px] font-bold text-outline uppercase tracking-widest">Saved Oct 21</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">Open Pick</button>
+</div>
+</div>
+<!-- Card 4: Unlocked Pick (UFC) -->
+<div class="group relative bg-surface-container-lowest rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-surface-container">
+<img alt="Creator Avatar" data-alt="A portrait of a rugged, middle-aged MMA coach with a background of a dimly lit boxing gym. Glowing red and white neon lights catch the edges of the scene. The mood is intense, authentic, and gritty but remains high-quality and professional in its composition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSWD8t_LV6vUwlJOIVEsai8f_tj2C8YWOi_8LpiRScJEBZvKKiuUToddYPUmDZ24HVfHRqC9da8HqXUVA7S-radN4InANj2ONYHkY-OMtpqch521HMTlRzLdwO6OnwDb4RttXiTOCD5cH9FM7Xa-0lny1jcwjEeiKVLs5aIRdZB6x-mHGjUVQ4RYpT1q55tmjIvoeqb5Its_gI9qMtFte4t22WSbuRgVyRpnlG-IKrK396vkGqQ0dI4BxIrHaACDOT3-TQwH00Jz0"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline leading-tight">Coach Ken</h4>
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">UFC/MMA ELITE</span>
+</div>
+</div>
+<button class="p-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container text-[10px] font-black uppercase tracking-widest rounded text-on-surface-variant">UFC 294 Main Event</span>
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[10px] font-black uppercase tracking-widest rounded">UFC</span>
+</div>
+<h3 class="text-xl font-extrabold text-on-surface mb-2 font-headline tracking-tight">Makhachev by Decision</h3>
+<p class="text-sm text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">Islam's wrestling is leagues ahead, but Volkanovski's cardio will keep this fight going to the final bell. Expect a grinding 5-round masterclass...</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-6 border-t border-surface-container/50">
+<div class="text-[10px] font-bold text-outline uppercase tracking-widest">Saved Oct 20</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">Open Pick</button>
+</div>
+</div>
+<!-- Card 5: Locked Pick -->
+<div class="group relative bg-surface-container-lowest rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-surface-container">
+<img alt="Creator Avatar" data-alt="A portrait of a young, stylish male data scientist wearing glasses, working at a high-end dual-monitor setup with complex graphs and code on the screens. The lighting is cool-toned with purple accents, reflecting a high-energy data analysis environment. The style is sharp and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI-wjxAHQvYyMhqIAdSyeMrKUIxhRu-Fgdcfvr7Z2XIJXDMPD6ANrws_cIUinZtKvoOiwUVOm96vXQQuK_ZT8yMePtJCC4INOigo4LJHnULpcUgDv4BKYQIiKJg2U7mvj9tg6N5YKd7nEpbqQ2X2SALOOSM5t-J96qYjrS0C3FxJ_EUNKz_bjDNB3ah99oG89qBetV5gVw15ytn-0q3HQXVGLVh5-cHxJlZR9qVCTEQSdanXX6oN7ow5UswwZB7FLww9mfG9YAwJs"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline leading-tight">Algorithm Al</h4>
+<span class="text-xs font-bold text-tertiary uppercase tracking-tighter">DATA-DRIVEN MLB</span>
+</div>
+</div>
+<button class="p-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="mb-4 relative">
+<!-- Blur Overlay -->
+<div class="absolute inset-0 bg-white/40 backdrop-blur-md z-10 flex flex-col items-center justify-center rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-primary text-4xl mb-2" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Subscriber Only</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container text-[10px] font-black uppercase tracking-widest rounded text-on-surface-variant">Rangers vs D-Backs</span>
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[10px] font-black uppercase tracking-widest rounded">MLB</span>
+</div>
+<h3 class="text-xl font-extrabold text-on-surface mb-2 font-headline tracking-tight">Under 8.5 Runs</h3>
+<p class="text-sm text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">Pitching metrics for game 4 suggest a historic pitcher's duel. The expected wOBA for both lineups against these specific starters is below...</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-6 border-t border-surface-container/50">
+<div class="text-[10px] font-bold text-outline uppercase tracking-widest">Saved Oct 19</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">Unlock Pick</button>
+</div>
+</div>
+<!-- Empty State/Placeholder Card for Editorial Flow -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-3xl p-6 flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors cursor-pointer">
+<div class="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="add">add</span>
+</div>
+<h4 class="font-bold text-on-surface-variant font-headline">Find more picks</h4>
+<p class="text-xs text-outline font-medium mt-1">Explore the feed to save more elite picks to your list.</p>
+</div>
+</div>
+<!-- Contextual Insight (Bento Section) -->
+<section class="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-6">
+<div class="lg:col-span-8 bg-gradient-to-br from-primary to-primary-container rounded-[2rem] p-8 text-on-primary relative overflow-hidden flex flex-col justify-between">
+<div class="relative z-10">
+<h2 class="text-3xl font-black font-headline tracking-tighter mb-4">Your Winning Streak</h2>
+<p class="text-on-primary/80 max-w-md font-medium leading-relaxed">Picks from your saved creators are performing at an average ROI of 14.2% this week. Don't forget to track your placements.</p>
+</div>
+<div class="mt-8 flex gap-4 relative z-10">
+<button class="bg-white text-primary px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">Go to Dashboard</button>
+<button class="bg-primary-container text-on-primary border border-white/20 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all">View Statistics</button>
+</div>
+<!-- Decorative Graphic -->
+<div class="absolute right-[-5%] bottom-[-10%] opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[20rem]" data-icon="monitoring">monitoring</span>
+</div>
+</div>
+<div class="lg:col-span-4 bg-surface-container-highest rounded-[2rem] p-8 flex flex-col justify-center border border-white/50">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="font-bold text-on-surface font-headline uppercase tracking-wider text-sm">Curation Tip</h3>
+</div>
+<p class="text-on-surface-variant font-medium leading-relaxed italic">"Elite picks often see line movement within 2 hours of posting. Use notifications to never miss an entry window for your saved creators."</p>
+<div class="mt-6 flex items-center gap-2">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-highest bg-slate-200"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-highest bg-slate-300"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-highest bg-slate-400"></div>
+</div>
+<span class="text-xs font-bold text-outline">+1.2k others agree</span>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Floating Action Button (Supressed based on context rules - not required for Settings/Saved Picks details view, but shown here for creator action if needed on main feed. Rules say: "suppress the FAB on Settings, Profile, Details, and Transactional screens". This is a collection/dashboard screen, so we might keep a small 'Action' FAB or follow rules strictly.) -->
+<!-- Rule says: "Contextual FAB Suppression: ... YOU MUST suppress the FAB on Settings, Profile, Details, and Transactional screens." This page acts as a "Collection/Saved" detail view, so we will omit the global FAB for a cleaner editorial look. -->
+</body></html>

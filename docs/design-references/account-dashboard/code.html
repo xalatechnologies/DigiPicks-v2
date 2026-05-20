@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks | Subscriber Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#131b2e",
+                        "outline-variant": "#cbc3d7",
+                        "on-surface": "#191c1e",
+                        "primary": "#6b38d4",
+                        "on-primary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e0e3e5",
+                        "outline": "#7b7486",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container": "#eceef0",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#6d3bd7",
+                        "secondary-container": "#dae2fd",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#d0bcff",
+                        "tertiary-fixed": "#ffdcbb",
+                        "tertiary-container": "#a76500",
+                        "surface-dim": "#d8dadc",
+                        "on-error-container": "#93000a",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface-variant": "#494454",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#191c1e",
+                        "secondary": "#565e74",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-error": "#ffffff",
+                        "primary-container": "#8455ef",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#5c647a",
+                        "inverse-surface": "#2d3133",
+                        "primary-fixed": "#e9ddff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "tertiary": "#855000",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; color: #191c1e; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-header { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+    </script>
+</head>
+<body class="bg-background selection:bg-primary/20">
+
+    <!-- SideNavBar (Authority Source: JSON) -->
+    <aside class="h-screen w-64 fixed left-0 top-0 hidden lg:flex flex-col bg-slate-50 border-r-0 z-40">
+        <div class="text-xl font-black text-slate-900 px-8 py-8 font-headline">EdgePicks</div>
+        
+        <nav class="flex flex-col gap-1 py-4 px-4 overflow-y-auto grow">
+            <a href="#" class="bg-violet-50 text-violet-700 rounded-xl px-4 py-3 font-bold flex items-center gap-3 transition-all">
+                <span class="material-symbols-outlined">home</span>
+                <span>Home</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">rss_feed</span>
+                <span>My Feed</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">bookmark</span>
+                <span>Saved Picks</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">loyalty</span>
+                <span>Subscriptions</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">explore</span>
+                <span>Discover Creators</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">groups</span>
+                <span>Creator Channels</span>
+            </a>
+            <div class="my-4 border-t border-slate-200/50 mx-4"></div>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">notifications</span>
+                <span>Notifications</span>
+            </a>
+            <a href="#" class="text-slate-600 mx-2 px-4 py-3 hover:bg-slate-100 rounded-xl flex items-center gap-3 transition-transform duration-200 hover:translate-x-1">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="p-6">
+            <div class="bg-surface-container-low rounded-2xl p-4 flex items-center gap-3">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Curator" alt="EdgePicks Curator" class="w-10 h-10 rounded-full bg-primary-fixed" data-alt="A professional headshot of a sports analyst with a clean, modern aesthetic. The lighting is soft and high-key, fitting a light-mode editorial UI. The background is a minimalist studio with subtle violet accents and geometric shapes, conveying elite editorial authority.">
+                <div>
+                    <p class="text-sm font-bold text-on-surface">EdgePicks</p>
+                    <p class="text-xs text-slate-500">The Elite Editorial</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="lg:ml-64 min-h-screen">
+        
+        <!-- TopAppBar (Authority Source: JSON) -->
+        <header class="flex justify-between items-center px-8 h-16 w-full sticky top-0 bg-white/80 backdrop-blur-2xl z-50 shadow-sm">
+            <div class="flex-1 max-w-2xl relative">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input type="text" placeholder="Search creators, picks, events" class="w-full pl-12 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-slate-400">
+            </div>
+            
+            <div class="flex items-center gap-6 ml-8">
+                <button class="relative text-slate-500 hover:text-violet-600 transition-colors active:scale-95 duration-150">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[10px] text-white flex items-center justify-center rounded-full font-bold">3</span>
+                </button>
+                <button class="text-slate-500 hover:text-violet-600 transition-colors active:scale-95 duration-150">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+                <div class="h-8 w-[1px] bg-slate-200"></div>
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="User Avatar" class="w-10 h-10 rounded-full bg-slate-100 hover:ring-2 hover:ring-primary transition-all cursor-pointer" data-alt="A vibrant avatar of a young professional male in a sleek, modern illustration style. The color palette is composed of soft grays and bright violet highlights, consistent with a high-end sports editorial dashboard. The mood is energetic and focused.">
+            </div>
+        </header>
+
+        <div class="px-8 py-8 flex flex-col gap-10">
+            
+            <!-- Welcome Strip -->
+            <section>
+                <h1 class="text-3xl font-black font-headline tracking-tight mb-6 text-on-surface">Good afternoon, Alex</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">trending_up</span>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-black font-headline text-on-surface">8</p>
+                                <p class="text-sm font-medium text-slate-500">New Picks Today</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">star</span>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-black font-headline text-on-surface">12</p>
+                                <p class="text-sm font-medium text-slate-500">Active Subscriptions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sensors</span>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-black font-headline text-on-surface">4</p>
+                                <p class="text-sm font-medium text-slate-500">Live Events Now</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Events Strip -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Live Now & Upcoming</h2>
+                    <button class="text-primary text-xs font-bold hover:underline">View Schedule</button>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                    <div class="min-w-[300px] bg-slate-900 text-white p-5 rounded-2xl relative overflow-hidden shrink-0 shadow-lg">
+                        <div class="absolute top-0 right-0 p-3">
+                            <span class="flex items-center gap-1 bg-red-500 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase animate-pulse">
+                                <span class="w-1.5 h-1.5 bg-white rounded-full"></span> Live
+                            </span>
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">NBA Basketball</p>
+                        <h3 class="text-lg font-bold mb-4">Lakers <span class="text-slate-500">vs</span> Celtics</h3>
+                        <div class="flex justify-between items-center bg-white/10 rounded-xl p-3">
+                            <div class="text-center">
+                                <p class="text-xs text-slate-400">Q3 4:12</p>
+                                <p class="text-xl font-black">94 - 88</p>
+                            </div>
+                            <div class="h-8 w-[1px] bg-white/20"></div>
+                            <button class="text-xs font-bold bg-primary px-3 py-2 rounded-lg">Watch Now</button>
+                        </div>
+                    </div>
+                    <div class="min-w-[300px] bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/20 shrink-0 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">NFL Football • 18:00</p>
+                        <h3 class="text-lg font-bold mb-4 text-on-surface">Chiefs <span class="text-slate-400">vs</span> Eagles</h3>
+                        <div class="flex justify-between items-center bg-surface-container-low rounded-xl p-3">
+                            <p class="text-xs font-medium text-slate-600">Starting in 45m</p>
+                            <button class="text-xs font-bold text-primary border border-primary/20 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors">Notify Me</button>
+                        </div>
+                    </div>
+                    <div class="min-w-[300px] bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/20 shrink-0 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Premier League • 20:30</p>
+                        <h3 class="text-lg font-bold mb-4 text-on-surface">Man City <span class="text-slate-400">vs</span> Arsenal</h3>
+                        <div class="flex justify-between items-center bg-surface-container-low rounded-xl p-3">
+                            <p class="text-xs font-medium text-slate-600">Starting in 3h</p>
+                            <button class="text-xs font-bold text-primary border border-primary/20 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors">Pre-game Picks</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Feed Section -->
+                <div class="flex-1 space-y-6">
+                    <!-- Filter Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
+                        <button class="bg-primary text-white px-6 py-2 rounded-full text-sm font-bold shadow-md shadow-primary/20">All</button>
+                        <button class="bg-surface-container-lowest text-slate-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-100 transition-colors">Following</button>
+                        <button class="bg-surface-container-lowest text-slate-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-100 transition-colors">Live now</button>
+                        <button class="bg-surface-container-lowest text-slate-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-100 transition-colors">Locked</button>
+                        <button class="bg-surface-container-lowest text-slate-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-100 transition-colors">Free</button>
+                    </div>
+
+                    <!-- Feed Card 1: Unlocked -->
+                    <article class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-outline-variant/10 group transition-all hover:shadow-md">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex gap-4">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=AlexRivers" class="w-12 h-12 rounded-full bg-indigo-100" data-alt="A professional, minimalist illustration of an expert sports betting analyst. He is wearing a crisp shirt and glasses, appearing knowledgeable and authoritative. The style is clean vector art with soft lighting and professional violet color accents.">
+                                    <div>
+                                        <div class="flex items-center gap-1">
+                                            <h4 class="font-bold text-on-surface">Alex Rivers</h4>
+                                            <span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400 font-medium">NBA Expert • 2h ago</p>
+                                    </div>
+                                </div>
+                                <button class="text-slate-300 hover:text-slate-500"><span class="material-symbols-outlined">more_horiz</span></button>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Unlocked Pick
+                                </div>
+                                <h3 class="text-xl font-black font-headline mb-3 text-on-surface">Lakers vs Celtics — Total Over 215.5</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                                    The pace of play in the last 5 head-to-heads has averaged 102.4 possessions. With Anthony Davis returning to the lineup, we expect a high-efficiency offensive performance in the paint. Both teams have cleared this total in 4 of their last 5 outings. Expect a shootout at the Garden.
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-6 border-t border-slate-50">
+                                <div class="flex gap-2">
+                                    <button class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-500 hover:text-primary">
+                                        <span class="material-symbols-outlined">bookmark</span>
+                                        <span class="text-xs font-bold">Save</span>
+                                    </button>
+                                    <button class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-500 hover:text-primary">
+                                        <span class="material-symbols-outlined">share</span>
+                                        <span class="text-xs font-bold">Share</span>
+                                    </button>
+                                </div>
+                                <button class="px-6 py-2 bg-slate-900 text-white rounded-full text-xs font-bold hover:bg-primary transition-colors">Open Analysis</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Feed Card 2: Locked -->
+                    <article class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-outline-variant/10 relative">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex gap-4">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=SarahBrooks" class="w-12 h-12 rounded-full bg-pink-100" data-alt="A detailed digital illustration of a female sports betting creator with a focused and elite appearance. She has stylish hair and wears modern sports-chic attire. The portrait uses soft lighting and a palette that matches the premium dashboard’s violet and white aesthetic.">
+                                    <div>
+                                        <div class="flex items-center gap-1">
+                                            <h4 class="font-bold text-on-surface">Sarah Brooks</h4>
+                                            <span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400 font-medium">NFL Specialist • 4h ago</p>
+                                    </div>
+                                </div>
+                                <button class="text-slate-300"><span class="material-symbols-outlined">lock</span></button>
+                            </div>
+                            
+                            <div class="blur-md select-none pointer-events-none mb-6">
+                                <h3 class="text-xl font-black font-headline mb-3 text-on-surface">Chiefs vs Eagles — Spread -7</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    This is a highly confidential piece of analysis based on weather patterns and late injury reports from the Eagles training camp. The defensive line is missing key starters which will allow Mahomes to dominate the pocket.
+                                </p>
+                            </div>
+
+                            <!-- Lock Overlay -->
+                            <div class="absolute inset-x-0 bottom-0 top-[88px] bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                                <div class="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-primary/20">
+                                    <span class="material-symbols-outlined text-3xl">lock</span>
+                                </div>
+                                <h4 class="text-lg font-black font-headline text-on-surface mb-2">Subscriber Exclusive Pick</h4>
+                                <p class="text-sm text-slate-600 mb-6 max-w-xs">Unlock Sarah Brooks' pro analysis and 15+ other daily NFL insights.</p>
+                                <button class="px-8 py-3 bg-primary text-white rounded-full text-sm font-bold shadow-lg shadow-primary/30 hover:scale-105 transition-transform">View Plans</button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Right Sidebar -->
+                <aside class="w-full lg:w-80 space-y-8">
+                    
+                    <!-- Subscribed Creators -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/10">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Top Subscriptions</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between group cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jonas" class="w-10 h-10 rounded-full bg-slate-100" data-alt="A portrait of a male sports analyst with a friendly and confident expression. The artwork is clean, vector-based, and fits into the elite editorial visual language of the site with light-mode background and high-quality rendering.">
+                                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Jonas Vegas</p>
+                                        <p class="text-[10px] text-slate-500">2 New Picks</p>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+                            </div>
+                            <div class="flex items-center justify-between group cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Elite" class="w-10 h-10 rounded-full bg-slate-100" data-alt="A high-end illustration of a seasoned sports bettor. He is wearing professional casual clothes, appearing sharp and elite. The background is a simple studio setup in a light mode aesthetic with soft shadows and violet highlights.">
+                                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Elite Sports Lab</p>
+                                        <p class="text-[10px] text-slate-500">1 New Pick</p>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+                            </div>
+                            <div class="flex items-center justify-between group cursor-pointer opacity-60">
+                                <div class="flex items-center gap-3">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Stats" class="w-10 h-10 rounded-full bg-slate-100" data-alt="A clean, modern avatar for a data-focused sports creator. The illustration is minimalist with sharp lines and a professional tone, utilizing the dashboard's violet and cool gray color scheme.">
+                                    <div>
+                                        <p class="text-sm font-bold text-on-surface">Data Kings</p>
+                                        <p class="text-[10px] text-slate-400">Seen everything</p>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Picks Preview -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/10">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Saved for later</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 cursor-pointer transition-all">
+                                <p class="text-[10px] font-bold text-primary mb-1">SOCCER • TODAY</p>
+                                <p class="text-xs font-bold text-on-surface">Real Madrid vs Barça ML</p>
+                            </div>
+                            <div class="p-3 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 cursor-pointer transition-all">
+                                <p class="text-[10px] font-bold text-primary mb-1">NBA • SAT</p>
+                                <p class="text-xs font-bold text-on-surface">Warriors vs Suns -6.5</p>
+                            </div>
+                            <div class="p-3 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 cursor-pointer transition-all">
+                                <p class="text-[10px] font-bold text-primary mb-1">GOLF • THU</p>
+                                <p class="text-xs font-bold text-on-surface">Masters: Top 10 Finisher</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trending Categories -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/10">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Trending Topics</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-primary hover:text-white cursor-pointer transition-colors">NBA Props</span>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-primary hover:text-white cursor-pointer transition-colors">NFL Spreads</span>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-primary hover:text-white cursor-pointer transition-colors">Soccer Value</span>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-primary hover:text-white cursor-pointer transition-colors">UFC Picks</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Creator Channels Widget -->
+                    <div class="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 text-white overflow-hidden relative">
+                        <div class="relative z-10">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-white/60 mb-6">Active Channels</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-[#0088cc] rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.91-1.27 4.85-2.11 5.82-2.52 2.77-1.18 3.34-1.39 3.72-1.39.08 0 .27.02.39.12.1.08.13.19.14.27.01.06.01.24 0 .38z"/></svg>
+                                        </div>
+                                        <p class="text-xs font-bold">VIP Telegram</p>
+                                    </div>
+                                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">12 Online</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-[#5865F2] rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.27 4.58c-1.3-.6-2.68-1.05-4.13-1.32-.18.32-.38.67-.53 1.03-1.58-.24-3.15-.24-4.72 0-.15-.36-.35-.71-.53-1.03-1.45.27-2.83.72-4.13 1.32C2.65 8.44 1.93 12.2 2.25 15.85c1.71 1.26 3.36 2.02 4.97 2.53.4-.54.76-1.13 1.05-1.75-.58-.22-1.13-.49-1.64-.82.14-.1.28-.21.41-.32 3.19 1.47 6.64 1.47 9.77 0 .13.11.27.22.41.32-.51.33-1.06.6-1.64.82.29.62.65 1.21 1.05 1.75 1.61-.51 3.26-1.27 4.97-2.53.38-4.22-.67-7.92-2.79-11.27z"/></svg>
+                                        </div>
+                                        <p class="text-xs font-bold">Creator Discord</p>
+                                    </div>
+                                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Abstract glow backgrounds -->
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- FAB for quick action (Highly Contextual) -->
+    <button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-2xl shadow-2xl shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group">
+        <span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">add</span>
+    </button>
+
+</body>
+</html></style></head><body></body></html>

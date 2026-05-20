@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
-import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, ThemeToggle } from '@digipicks/ds';
+import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, Stack } from '@digipicks/ds';
 import { AccountUserMenu } from '../auth/AccountUserMenu';
 import { api } from '../../../../convex/_generated/api';
 
@@ -123,7 +123,7 @@ export function SubscriberShell() {
   );
 
   const sidebar = (
-    <Sidebar footer={<ThemeToggle />}>
+    <Sidebar>
       {sections.map((section) => (
         <NavSection key={section.title} title={section.title}>
           {section.items.map((item) => (
@@ -145,8 +145,10 @@ export function SubscriberShell() {
   );
 
   return (
-    <AppLayout header={header} sidebar={sidebar}>
-      <Outlet />
+    <AppLayout header={header} sidebar={sidebar} mainVariant="studio">
+      <Stack gap={6}>
+        <Outlet />
+      </Stack>
     </AppLayout>
   );
 }

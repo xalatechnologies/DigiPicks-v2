@@ -235,3 +235,17 @@ The product owner provides **Stitch / EdgePicks** zips per feature (`screen.png`
 | New UI pattern used 2+ times                      | New component in `packages/ds/` referencing existing tokens only           |
 
 Archive checked-in references under `docs/design-references/<feature-slug>/`.
+
+---
+
+## 10. Studio page archetypes (Account / Creator / Admin)
+
+Authenticated shells (`/account/*`, `/dashboard/*`, `/admin/*`) share a page contract:
+
+1. `Container size="2xl"` + `Stack gap={6}`
+2. `StudioPageHeader` — `eyebrow: "Account · …"` / `"Studio · …"` / `"Admin · …"`
+3. `AccountRefineCard` (alias `StudioRefineCard`) when the page has search, sort, or filters
+4. Primary content — often `StudioDashLayout` (8/4 split for inbox-style pages)
+5. `QuickActionGrid` — `accountCrossLinks`, `studioCrossLinks`, or `adminCrossLinks`
+
+**Directory-style pages** (e.g. Discover) may insert a full-width featured rail (`span={12}`) between the refine card and results. **Form/settings pages** omit the refine card.

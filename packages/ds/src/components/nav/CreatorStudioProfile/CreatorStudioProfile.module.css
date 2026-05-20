@@ -26,3 +26,17 @@
   font-size: var(--text-2xs);
   color: var(--t-3);
 }
+
+.clickable {
+  width: 100%;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.clickable:hover {
+  background: var(--bg-3);
+}

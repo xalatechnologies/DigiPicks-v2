@@ -1,0 +1,33 @@
+.card {
+  padding: var(--space-8);
+  background: var(--bg-1);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.title {
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.primaryRow {
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-2));
+  border-radius: var(--r-lg);
+}
+
+.primaryRow:hover {
+  background: color-mix(in srgb, var(--primary) 18%, var(--bg-2));
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

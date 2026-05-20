@@ -1,17 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useConvexAuth } from 'convex/react';
 import { useMutation, useQuery, useAction } from 'convex/react';
 import {
   Container,
   Stack,
   Row,
-  Col,
   Card,
   CardHead,
   Button,
   Icon,
-  Heading,
-  Eyebrow,
+  StudioPageHeader,
+  StudioSubNav,
+  StudioSummaryGrid,
   Field,
   Input,
   Muted,
@@ -27,10 +28,18 @@ import {
   type MfaState,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import type { Id } from '../../../../../convex/_generated/dataModel';
 import { urlBase64ToUint8Array } from '../../lib/pushKey';
 import { STUDIO } from '../../lib/studioRoutes';
 import { studioCrossLinks } from '../../lib/studioCrossLinks';
+import { useStudioContext } from '../useStudioContext';
+import { StudioDevHint } from '../StudioDevHint';
+
+const VIEW_TABS = [
+  { label: 'Notifications', value: 'notifications' },
+  { label: 'Integrations', value: 'integrations' },
+  { label: 'Security', value: 'security' },
+  { label: 'Account', value: 'account' },
+];
 
 interface NotificationToggle {
   id: 'pickPublished' | 'pickGraded' | 'lineMoved';
@@ -56,16 +65,29 @@ const NOTIFICATIONS: NotificationToggle[] = [
   },
 ];
 
+function pushStatusLabel(state: PushPermissionState): string {
+  if (state === 'granted') return 'Enabled';
+  if (state === 'denied') return 'Blocked';
+  if (state === 'unsupported') return 'Unsupported';
+  return 'Not set';
+}
+
 export function Settings() {
   const navigate = useNavigate();
-  const me = useQuery(api.users.me);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
+  const ctx = useStudioContext();
+  const { isAuthenticated } = useConvexAuth();
+  const authReady = isAuthenticated && Boolean(ctx.me);
+  const me = ctx.me;
+  const creator = ctx.creator;
+  const useDemo = ctx.devPreview && !authReady;
+  const [view, setView] = React.useState('notifications');
+
   const setDiscordWebhook = useMutation(api.discordSettings.setWebhookUrl);
   const testDiscordWebhook = useAction(api.discordSettings.testWebhook);
   const exportMyData = useAction(api.gdpr.exportMyData);
   const deleteMyAccount = useMutation(api.gdpr.deleteMyAccount);
 
-  const mfaStatus = useQuery(api.mfa.status);
+  const mfaStatus = useQuery(api.mfa.status, authReady ? {} : 'skip');
   const mfaEnroll = useAction(api.mfa.enrollStart);
   const mfaVerifySetup = useAction(api.mfa.verifySetup);
   const mfaVerify = useAction(api.mfa.verify);
@@ -131,30 +153,25 @@ export function Settings() {
       setMfaBusy(false);
     }
   }
-  const myPrefs = useQuery(api.notify.myPrefs);
+
+  const myPrefs = useQuery(api.notify.myPrefs, authReady ? {} : 'skip');
   const updatePrefs = useMutation(api.notify.updatePrefs);
   const startTelegramLink = useMutation(api.notify.startTelegramLink);
   const pushVapidKey = useQuery(api.pushSubscriptions.publicKey);
   const subscribePush = useMutation(api.pushSubscriptions.subscribe);
   const unsubscribePush = useMutation(api.pushSubscriptions.unsubscribe);
 
-  const [error, setError] = React.useState<string | null>(null);
-
-  // Discord state
   const [webhookUrl, setWebhookUrl] = React.useState('');
   const [webhookSaving, setWebhookSaving] = React.useState(false);
   const [webhookTesting, setWebhookTesting] = React.useState(false);
   const [webhookMsg, setWebhookMsg] = React.useState<string | null>(null);
 
-  // GDPR state
   const [gdprBusy, setGdprBusy] = React.useState<'idle' | 'exporting' | 'deleting'>('idle');
   const [gdprMsg, setGdprMsg] = React.useState<string | null>(null);
 
-  // Push state — derived from the browser + Convex.
   const [pushState, setPushState] = React.useState<PushPermissionState>('unknown');
   const [pushBusy, setPushBusy] = React.useState(false);
 
-  // Telegram link state.
   const [tgCode, setTgCode] = React.useState<string | null>(null);
   const [tgMsg, setTgMsg] = React.useState<string | null>(null);
 
@@ -184,6 +201,7 @@ export function Settings() {
   const toggleValue = (id: NotificationToggle['id']): boolean => prefs[id] !== false;
 
   const setToggle = (id: NotificationToggle['id']) => async (next: boolean) => {
+    if (!authReady) return;
     try {
       await updatePrefs({ [id]: next });
     } catch (err) {
@@ -192,8 +210,8 @@ export function Settings() {
   };
 
   async function handleEnablePush() {
-    if (!pushVapidKey) {
-      console.warn('VAPID public key not configured');
+    if (!authReady || !pushVapidKey) {
+      if (!pushVapidKey) console.warn('VAPID public key not configured');
       return;
     }
     setPushBusy(true);
@@ -226,6 +244,7 @@ export function Settings() {
   }
 
   async function handleDisablePush() {
+    if (!authReady) return;
     setPushBusy(true);
     try {
       const reg = await navigator.serviceWorker.ready;
@@ -243,6 +262,7 @@ export function Settings() {
   }
 
   async function handleLinkTelegram() {
+    if (!authReady) return;
     setTgMsg(null);
     try {
       const { code } = await startTelegramLink({});
@@ -250,6 +270,15 @@ export function Settings() {
       setTgMsg('Open Telegram and send this code to the DigiPicks bot.');
     } catch (err) {
       setTgMsg(err instanceof Error ? err.message : 'Could not start Telegram link.');
+    }
+  }
+
+  async function handleTelegramToggle(next: boolean) {
+    if (!authReady) return;
+    try {
+      await updatePrefs({ telegram: next });
+    } catch (err) {
+      console.warn('updatePrefs telegram failed:', err);
     }
   }
 
@@ -288,6 +317,7 @@ export function Settings() {
   }
 
   async function handleExportData() {
+    if (!authReady) return;
     setGdprMsg(null);
     setGdprBusy('exporting');
     try {
@@ -312,6 +342,7 @@ export function Settings() {
   }
 
   async function handleDeleteAccount() {
+    if (!authReady) return;
     if (
       !window.confirm(
         'Delete your account permanently? This anonymizes your profile, cancels active subscriptions, and clears saved picks. Audit history is retained but no longer linked to identifying data.',
@@ -331,93 +362,145 @@ export function Settings() {
     }
   }
 
+  const pushLabel = useDemo ? 'Sample' : pushStatusLabel(pushState);
+  const mfaLabel = useDemo ? 'Off' : mfaStatus?.enrolled ? 'On' : 'Off';
+  const discordLabel = useDemo
+    ? 'Not linked'
+    : creator?.discordWebhookUrl || webhookUrl
+      ? 'Webhook set'
+      : 'Not set';
+  const accountLabel = useDemo ? 'Preview' : (me?.email ?? '—');
+
   return (
-    <Container size="xl">
-      <Stack gap={8}>
-        <Row between wrap>
-          <Stack gap={2}>
-            <Eyebrow>Studio · Settings</Eyebrow>
-            <Heading level={1} size="2xl">
-              Settings
-            </Heading>
-            <Muted>Notifications, integrations, security, and account data.</Muted>
-          </Stack>
-          <Button variant="outline" size="sm" onClick={() => navigate(STUDIO.profile)}>
-            Edit profile
-          </Button>
-        </Row>
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Settings"
+          title="Settings"
+          sub="Notifications, integrations, security, and account data."
+          actions={
+            <Button variant="outline" onClick={() => navigate(STUDIO.profile)}>
+              Edit profile
+            </Button>
+          }
+        />
 
-        {error ? <Muted>{error}</Muted> : null}
+        <StudioSubNav items={VIEW_TABS} value={view} onChange={setView} />
 
-        <Row gap={5} wrap>
-          <Col gap={4}>
-            <Card>
-              <CardHead
-                title="Notifications"
-                sub="What you get pinged for, and where the alerts land"
+        <StudioSummaryGrid
+          columns={4}
+          items={[
+            {
+              id: 'push',
+              icon: 'bell',
+              iconTone: pushState === 'granted' ? 'primary' : 'amber',
+              label: 'Push alerts',
+              value: pushLabel,
+              active: view === 'notifications',
+              onClick: () => setView('notifications'),
+            },
+            {
+              id: 'mfa',
+              icon: 'shield',
+              iconTone: mfaStatus?.enrolled ? 'primary' : 'danger',
+              label: 'Two-factor',
+              value: mfaLabel,
+              active: view === 'security',
+              onClick: () => setView('security'),
+            },
+            {
+              id: 'discord',
+              icon: 'discord',
+              iconTone: 'violet',
+              label: 'Discord',
+              value: discordLabel,
+              active: view === 'integrations',
+              onClick: () => setView('integrations'),
+            },
+            {
+              id: 'account',
+              icon: 'user',
+              iconTone: 'primary',
+              label: 'Account',
+              value: accountLabel,
+              valueVariant: 'text',
+              active: view === 'account',
+              onClick: () => setView('account'),
+            },
+          ]}
+        />
+
+        {useDemo ? (
+          <StudioDevHint message="Notification, MFA, and account actions require signing in with a creator account." />
+        ) : null}
+
+        {view === 'notifications' ? (
+          <Card pad="lg" elev>
+            <CardHead
+              title="Notifications"
+              sub="What you get pinged for, and where the alerts land"
+            />
+            <Stack gap={3}>
+              <PushNotificationPrompt
+                state={pushState}
+                onEnable={handleEnablePush}
+                onDisable={handleDisablePush}
+                busy={pushBusy}
               />
-              <Stack gap={3}>
-                <PushNotificationPrompt
-                  state={pushState}
-                  onEnable={handleEnablePush}
-                  onDisable={handleDisablePush}
-                  busy={pushBusy}
-                />
-                <Divider />
-                {NOTIFICATIONS.map((n, i) => (
-                  <React.Fragment key={n.id}>
-                    {i > 0 && <Divider />}
-                    <SwitchRow
-                      label={n.label}
-                      sub={n.sub}
-                      checked={toggleValue(n.id)}
-                      onChange={setToggle(n.id)}
-                    />
-                  </React.Fragment>
-                ))}
-                <Divider />
-                <SwitchRow
-                  label="Telegram"
-                  sub={
-                    myPrefs?.telegramLinked
-                      ? 'Linked — toggle to pause Telegram delivery'
-                      : 'Link the DigiPicks bot to receive alerts in Telegram'
-                  }
-                  checked={Boolean(prefs.telegram) && Boolean(myPrefs?.telegramLinked)}
-                  onChange={(next) => updatePrefs({ telegram: next })}
-                  disabled={!myPrefs?.telegramLinked}
-                />
-                {!myPrefs?.telegramLinked && (
-                  <Row gap={2}>
-                    <Button variant="secondary" size="sm" onClick={handleLinkTelegram}>
-                      <Icon name="link" size={13} />
-                      {tgCode ? 'Refresh code' : 'Link Telegram'}
-                    </Button>
-                    {tgCode && <Mono>{`/start ${tgCode}`}</Mono>}
-                  </Row>
-                )}
-                {tgMsg && <Muted>{tgMsg}</Muted>}
-              </Stack>
-            </Card>
-          </Col>
+              <Divider />
+              {NOTIFICATIONS.map((n, i) => (
+                <React.Fragment key={n.id}>
+                  {i > 0 && <Divider />}
+                  <SwitchRow
+                    label={n.label}
+                    sub={n.sub}
+                    checked={toggleValue(n.id)}
+                    onChange={setToggle(n.id)}
+                    disabled={!authReady}
+                  />
+                </React.Fragment>
+              ))}
+              <Divider />
+              <SwitchRow
+                label="Telegram"
+                sub={
+                  myPrefs?.telegramLinked
+                    ? 'Linked — toggle to pause Telegram delivery'
+                    : 'Link the DigiPicks bot to receive alerts in Telegram'
+                }
+                checked={Boolean(prefs.telegram) && Boolean(myPrefs?.telegramLinked)}
+                onChange={handleTelegramToggle}
+                disabled={!authReady || !myPrefs?.telegramLinked}
+              />
+              {!myPrefs?.telegramLinked && (
+                <Row gap={2}>
+                  <Button variant="secondary" onClick={handleLinkTelegram} disabled={!authReady}>
+                    <Icon name="link" size={13} />
+                    {tgCode ? 'Refresh code' : 'Link Telegram'}
+                  </Button>
+                  {tgCode && <Mono>{`/start ${tgCode}`}</Mono>}
+                </Row>
+              )}
+              {tgMsg && <Muted>{tgMsg}</Muted>}
+            </Stack>
+          </Card>
+        ) : null}
 
-          <Col gap={4}>
-            {/* TODO: convex — payout method needs api.payouts.method. */}
-            <Card>
+        {view === 'integrations' ? (
+          <Stack gap={6}>
+            <Card pad="lg" elev>
               <CardHead title="Payout" sub="Current default destination" />
               <Stack gap={2}>
                 <KV k="Bank" v="Chase Business Checking" />
                 <KV k="Account" v={<Mono>•••• 4391</Mono>} />
                 <KV k="Schedule" v="1st of each month" />
-                <Row gap={2}>
-                  <Button variant="secondary" size="sm" onClick={() => navigate(STUDIO.payouts)}>
-                    View payouts
-                  </Button>
-                </Row>
+                <Button variant="secondary" onClick={() => navigate(STUDIO.payouts)}>
+                  View payouts
+                </Button>
               </Stack>
             </Card>
 
-            <Card>
+            <Card pad="lg" elev>
               <CardHead
                 title="Discord Integration"
                 sub="Deliver pick notifications to your Discord server"
@@ -431,24 +514,23 @@ export function Settings() {
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
                     placeholder="https://discord.com/api/webhooks/..."
+                    disabled={!creator}
                   />
                 </Field>
                 {webhookMsg && <Muted>{webhookMsg}</Muted>}
                 <Row gap={2}>
                   <Button
                     variant="primary"
-                    size="sm"
                     onClick={handleSaveWebhook}
-                    disabled={webhookSaving}
+                    disabled={webhookSaving || !creator}
                   >
                     <Icon name="check" size={13} />
                     {webhookSaving ? 'Saving…' : 'Save webhook'}
                   </Button>
                   <Button
                     variant="secondary"
-                    size="sm"
                     onClick={handleTestWebhook}
-                    disabled={webhookTesting || !webhookUrl}
+                    disabled={webhookTesting || !webhookUrl || !creator}
                   >
                     <Icon name="discord" size={13} />
                     {webhookTesting ? 'Sending…' : 'Test webhook'}
@@ -458,7 +540,7 @@ export function Settings() {
               </Stack>
             </Card>
 
-            <Card>
+            <Card pad="lg" elev>
               <CardHead
                 title="Advanced Discord"
                 sub="Connect your guild for inbound messages, channel mapping, alert rules, and thread linking."
@@ -468,33 +550,33 @@ export function Settings() {
                   The advanced surface uses a full OAuth-installed bot — keep the legacy webhook
                   above active until you migrate.
                 </Muted>
-                <Row gap={2}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => navigate(STUDIO.settingsDiscord)}
-                  >
-                    <Icon name="discord" size={13} />
-                    Open advanced
-                  </Button>
-                </Row>
+                <Button variant="secondary" onClick={() => navigate(STUDIO.settingsDiscord)}>
+                  <Icon name="discord" size={13} />
+                  Open advanced
+                </Button>
               </Stack>
             </Card>
+          </Stack>
+        ) : null}
 
-            <MfaEnrollmentCard
-              state={mfaState}
-              secrets={mfaSecrets ?? undefined}
-              remainingRecoveryCodes={mfaStatus?.remainingRecoveryCodes}
-              lastVerifiedAt={mfaStatus?.lastVerifiedAt ?? null}
-              busy={mfaBusy}
-              error={mfaError}
-              onStartEnroll={handleMfaStart}
-              onConfirmEnroll={handleMfaConfirm}
-              onVerify={handleMfaVerify}
-              onDisable={handleMfaDisable}
-            />
+        {view === 'security' ? (
+          <MfaEnrollmentCard
+            state={mfaState}
+            secrets={mfaSecrets ?? undefined}
+            remainingRecoveryCodes={mfaStatus?.remainingRecoveryCodes}
+            lastVerifiedAt={mfaStatus?.lastVerifiedAt ?? null}
+            busy={mfaBusy}
+            error={mfaError}
+            onStartEnroll={handleMfaStart}
+            onConfirmEnroll={handleMfaConfirm}
+            onVerify={handleMfaVerify}
+            onDisable={handleMfaDisable}
+          />
+        ) : null}
 
-            <Card>
+        {view === 'account' ? (
+          <Stack gap={6}>
+            <Card pad="lg" elev>
               <CardHead
                 title="Privacy & data"
                 sub="Export everything we have on you, or remove your account entirely (GDPR Articles 15 & 17)."
@@ -504,18 +586,16 @@ export function Settings() {
                 <Row gap={2}>
                   <Button
                     variant="secondary"
-                    size="sm"
                     onClick={handleExportData}
-                    disabled={gdprBusy !== 'idle'}
+                    disabled={gdprBusy !== 'idle' || !authReady}
                   >
                     <Icon name="arrow-down" size={13} />
                     {gdprBusy === 'exporting' ? 'Preparing…' : 'Export my data'}
                   </Button>
                   <Button
                     variant="danger"
-                    size="sm"
                     onClick={handleDeleteAccount}
-                    disabled={gdprBusy !== 'idle'}
+                    disabled={gdprBusy !== 'idle' || !authReady}
                   >
                     <Icon name="trash" size={13} />
                     {gdprBusy === 'deleting' ? 'Deleting…' : 'Delete my account'}
@@ -524,24 +604,24 @@ export function Settings() {
               </Stack>
             </Card>
 
-            <Card>
+            <Card pad="lg" elev>
               <CardHead title="Danger zone" />
               <Stack gap={2}>
                 <Muted>
                   Pausing hides your profile and stops new sign-ups. Existing subs keep access.
                 </Muted>
                 <Row gap={2}>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" disabled={!authReady}>
                     Pause profile
                   </Button>
-                  <Button variant="danger" size="sm">
+                  <Button variant="danger" disabled={!authReady}>
                     Close studio
                   </Button>
                 </Row>
               </Stack>
             </Card>
-          </Col>
-        </Row>
+          </Stack>
+        ) : null}
 
         <QuickActionGrid title="Related" items={studioCrossLinks('settings', navigate)} />
       </Stack>

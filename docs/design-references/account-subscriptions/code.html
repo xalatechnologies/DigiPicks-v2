@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subscriptions | EdgePicks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d8dadc",
+                        "secondary-container": "#dae2fd",
+                        "primary-fixed-dim": "#d0bcff",
+                        "outline-variant": "#cbc3d7",
+                        "outline": "#7b7486",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-primary-container": "#fffbff",
+                        "secondary": "#565e74",
+                        "inverse-primary": "#d0bcff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-low": "#f2f4f6",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dae2fd",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary": "#6b38d4",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#191c1e",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed": "#2c1700",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary": "#855000",
+                        "primary-fixed": "#e9ddff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-tint": "#6d3bd7",
+                        "surface-container": "#eceef0",
+                        "on-surface-variant": "#494454",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed": "#131b2e",
+                        "tertiary-container": "#a76500",
+                        "primary-container": "#8455ef",
+                        "on-secondary-container": "#5c647a",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-tertiary-container": "#fffbff",
+                        "tertiary-fixed": "#ffdcbb",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">EdgePicks</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 hover:text-slate-900 font-manrope font-semibold tracking-tight transition-all" href="#">Home</a>
+<a class="text-slate-500 hover:text-slate-900 font-manrope font-semibold tracking-tight transition-all" href="#">Discover</a>
+<a class="text-violet-600 font-bold border-b-2 border-violet-600 font-manrope tracking-tight transition-all" href="#">Subscriptions</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low rounded-full border-none focus:ring-2 focus:ring-primary w-64 text-sm" placeholder="Search creators..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-slate-100/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-slate-200 ml-2">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A clean, professional portrait of a modern male user in a high-key setting. The lighting is soft and flattering, reflecting a high-end SaaS profile image. The background is a minimalist, neutral studio grey, keeping the focus on the user's friendly and sophisticated expression. The overall aesthetic is polished and editorial, fitting the EdgePicks brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZb_rNawFAysfQqjl1-XugvlHCAwpLt4HNljGao-8C957naCeVQz5nsEWWvyZ9pzLovDyYB35tunC0rr-lx_NyeLzFMbjmLFnFV9bo_B-qYIVOjpSs_1O0qW5AMn5WWGhoZCNp_04bGALL-lyO4FXBQlBPsFAUo4WbvuV-aIZnVuG3LpcUVVWlJeK3caKQ2vVoxgbwybCSbkrV8tyot2zUuQr16AyfweZ2we7vNzZViJ1KevUhQQO8LuB3niSsb6Lydq4S-4ycSF4"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-slate-50 dark:bg-slate-950 hidden lg:block z-40 border-r border-transparent">
+<div class="flex flex-col gap-2 p-4 pt-20">
+<div class="mb-6 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest text-sm">EdgePicks</h3>
+<p class="text-slate-500 text-xs font-medium">Elite Editorial</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+                    Home
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+                    Feed
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+                    Saved
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-violet-600 shadow-sm rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="loyalty" style="font-variation-settings: 'FILL' 1;">loyalty</span>
+                    Subscriptions
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+                    Discover
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-transform duration-200 hover:translate-x-1 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                    Channels
+                </a>
+</nav>
+<div class="mt-auto p-4 bg-primary-container/10 rounded-2xl border border-primary/10">
+<p class="text-xs font-bold text-primary mb-2 uppercase tracking-wider">Pro Access</p>
+<p class="text-xs text-on-surface-variant mb-4">Get unlimited betting insights and expert picks.</p>
+<button class="w-full py-2 bg-gradient-to-br from-primary to-primary-container text-white text-xs font-bold uppercase rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                    Upgrade to Pro
+                </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 px-6 pb-12 max-w-[1440px] mx-auto">
+<!-- Header -->
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-1">Subscriptions</h1>
+<p class="text-on-surface-variant text-lg">Manage your active creator memberships.</p>
+</header>
+<!-- Summary Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Active Subscriptions</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">12</span>
+<span class="p-2 bg-primary/10 text-primary rounded-lg">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Total Monthly Spend</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">$294.50</span>
+<span class="p-2 bg-tertiary/10 text-tertiary rounded-lg">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Renewing This Week</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">3</span>
+<span class="p-2 bg-secondary-container text-primary rounded-lg">
+<span class="material-symbols-outlined" data-icon="event_repeat">event_repeat</span>
+</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Recently Added</span>
+<div class="flex items-end justify-between">
+<span class="text-xl font-bold text-on-surface">Marcus Vane</span>
+<div class="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
+<img alt="Marcus Vane" class="w-full h-full object-cover" data-alt="A portrait of a confident sports analyst in a modern office environment. He is wearing a professional tailored suit and smiling warmly. The lighting is professional studio quality with cool blue and warm violet highlights that match the EdgePicks editorial palette. The depth of field is shallow, creating a clean, high-end look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQt3l6H-AhOewCZ2jcFvkM-k61k48fCz0T3AD7bXfGPhxmo-PxKtd5M8376XcSjfb1yFdn6-b2Kvg3A_3Y-9yzrn8_0qbPxSWMXLosObWo0PZNyGJy02T9NBlJZ6TyyL9QUnEhT6NJmgClqZNW7E1ZPC3aS-RE19OFjjsG_5Y3NWfesJAd9dBtp5AqJG5bl7dmJwVAQ5Vo_VxfWbq8ba7vLe6Uj_8KcZyPadFIeYWzvwmNvg33bmbVMK8UMkkXhESPLh84nf0f0YI"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Dashboard Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Subscription Cards List -->
+<div class="xl:col-span-2 space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-extrabold text-on-surface">Your Subscriptions</h2>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-high rounded-full text-xs font-bold uppercase tracking-wider">All</button>
+<button class="px-4 py-2 text-on-surface-variant text-xs font-bold uppercase tracking-wider">NBA</button>
+<button class="px-4 py-2 text-on-surface-variant text-xs font-bold uppercase tracking-wider">NFL</button>
+</div>
+</div>
+<!-- Creator Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">
+<span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                            3 New Posts Today
+                        </span>
+</div>
+<div class="flex flex-col md:flex-row md:items-center gap-6">
+<div class="relative">
+<img alt="Marcus Vane" class="w-24 h-24 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A close-up shot of Marcus Vane, a professional sports bettor and analyst, set against an abstract backdrop of digital sports statistics in soft violet tones. He wears a neutral linen shirt, projecting an approachable yet expert persona. The lighting is bright and editorial, emphasizing clarity and trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-kBA_dllzlv0EwIudLrPZVKKIk1WaOLhByWpO5UFNeNP-kQitlRMlw1cgmrPAF36Nv07KP_afLTTi-zRgf8P7C3HEbpQ_Lv1Bms6cxR6MopU-uSoBTp9HIIuffPyficeDi_6D677cTnMVMh_HTsitPmv043s11k7pQoLymKef5GmIcc9iG9eKuXsbLZCBOR44tRYWmQgaDZsFIbePNVJGK5MfZdl2HUEmY2RqqkWMMw0z8cNn4cyREB_WccIhG7NcgTflV2ZmDRs"/>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white p-1 rounded-lg border-2 border-white">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="text-xl font-extrabold text-on-surface">Marcus Vane</h3>
+<span class="text-[10px] px-2 py-0.5 bg-surface-container-highest text-on-surface-variant font-bold rounded uppercase">NBA Expert</span>
+</div>
+<p class="text-primary text-sm font-bold mb-4">Gold Picks Plan <span class="text-on-surface-variant font-medium ml-2">• $29/mo</span></p>
+<div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-on-surface-variant font-medium">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">event</span> Renews Oct 24, 2023</span>
+<span class="flex items-center gap-1.5 text-emerald-600"><span class="material-symbols-outlined text-sm">check_circle</span> Active</span>
+</div>
+</div>
+<div class="flex md:flex-col gap-2">
+<button class="flex-1 md:w-32 py-2.5 bg-surface-container-high text-on-surface text-xs font-bold uppercase rounded-full hover:bg-surface-dim transition-colors">View Creator</button>
+<button class="flex-1 md:w-32 py-2.5 bg-surface-container-high text-on-surface text-xs font-bold uppercase rounded-full hover:bg-surface-dim transition-colors">Manage</button>
+</div>
+</div>
+</div>
+<!-- Creator Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] relative overflow-hidden group">
+<div class="flex flex-col md:flex-row md:items-center gap-6">
+<div class="relative">
+<img alt="Sarah 'The Sharp'" class="w-24 h-24 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A portrait of Sarah 'The Sharp', a focused professional athlete and sports strategist. She is dressed in athletic-chic attire with a modern minimalist background featuring subtle geometric patterns in soft cool greys. The lighting is dramatic but bright, highlighting her expertise and confident gaze." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqbWMRQIiEH4gx_dgQrXC_bthYQPXUcmirFw6DYz8SCS_bq1JOPWuBWme4BSo447Afvx_RxhAKLESwPzbuya9X6-EArREVyeMfFDd99tmigeDWfEd0vMzvetJxo6GjNkNm8vBwpFWOB9UprZZz2P3LXXW13yD0WUS9OpBPD7I2wedfV8cskFcXLOijkVmFzvBUG7PZ8Aean5FboVUHILZolZt6vDl8Ao1khwKOf8JL00E4tjLbB1Ptw9vdpcKT-lhar8z_lCphOPM"/>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white p-1 rounded-lg border-2 border-white">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="text-xl font-extrabold text-on-surface">Sarah 'The Sharp'</h3>
+<span class="text-[10px] px-2 py-0.5 bg-surface-container-highest text-on-surface-variant font-bold rounded uppercase">NHL Analytics</span>
+</div>
+<p class="text-primary text-sm font-bold mb-4">Elite Edge Plan <span class="text-on-surface-variant font-medium ml-2">• $45/mo</span></p>
+<div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-on-surface-variant font-medium">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">event</span> Ends Oct 21, 2023</span>
+<span class="flex items-center gap-1.5 text-amber-600"><span class="material-symbols-outlined text-sm">cancel</span> Cancels at period end</span>
+</div>
+</div>
+<div class="flex md:flex-col gap-2">
+<button class="flex-1 md:w-32 py-2.5 bg-surface-container-high text-on-surface text-xs font-bold uppercase rounded-full hover:bg-surface-dim transition-colors">View Creator</button>
+<button class="flex-1 md:w-32 py-2.5 bg-primary/10 text-primary text-xs font-bold uppercase rounded-full hover:bg-primary/20 transition-colors">Resubscribe</button>
+</div>
+</div>
+</div>
+<!-- Creator Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] relative overflow-hidden group">
+<div class="flex flex-col md:flex-row md:items-center gap-6">
+<div class="relative">
+<img alt="Luca Bellini" class="w-24 h-24 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A portrait of Luca Bellini, a sophisticated Italian sports analyst with a background in luxury editorial. He is wearing a dark navy polo shirt in a bright, sun-drenched modern apartment setting. The lighting is warm and natural, suggesting a premium lifestyle and reliable, high-level analysis." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7J2eL_K1vWlV4FMjgQG2hR6vtx5XM3TEYrkIfCPAu0PaBe7J6E6OcYEHogJBH_Y9hyKsZcgieHCjUGOkFo6T3XrcGtefXx6vYvoQ4QGyxuC5kadiE4RrM8KbjpDv_lE8NccC4jyrT-pVPiysdgaSf3GGy0ubX_TauKAvmaBDylP4YfOyJsP1OpD-Ut3rdRLsgR6yLlpd3Cv0p-n-CvTIVaB6PiBdnNnDFQ5g1eA_WYLfCyleiXeLuz0Yfi6SV63wbzVLl8VEbBNY"/>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white p-1 rounded-lg border-2 border-white">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="text-xl font-extrabold text-on-surface">Luca Bellini</h3>
+<span class="text-[10px] px-2 py-0.5 bg-surface-container-highest text-on-surface-variant font-bold rounded uppercase">Soccer Tips</span>
+</div>
+<p class="text-primary text-sm font-bold mb-4">Pro League Plan <span class="text-on-surface-variant font-medium ml-2">• $19/mo</span></p>
+<div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-on-surface-variant font-medium">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">sync_problem</span> Retrying Payment</span>
+<span class="flex items-center gap-1.5 text-error font-bold uppercase tracking-tighter">Payment Issue</span>
+</div>
+</div>
+<div class="flex md:flex-col gap-2">
+<button class="flex-1 md:w-32 py-2.5 bg-error text-white text-xs font-bold uppercase rounded-full hover:opacity-90 transition-opacity">Update Now</button>
+<button class="flex-1 md:w-32 py-2.5 bg-surface-container-high text-on-surface text-xs font-bold uppercase rounded-full hover:bg-surface-dim transition-colors">Manage</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar / Billing Panel -->
+<div class="space-y-8">
+<!-- Payment Method Section -->
+<section class="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/15">
+<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6">Payment Method</h3>
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm mb-6 flex items-center justify-between border border-primary/5">
+<div class="flex items-center gap-4">
+<div class="w-12 h-8 bg-slate-900 rounded flex items-center justify-center">
+<span class="text-white font-bold text-[10px]">VISA</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Visa ending in 4242</p>
+<p class="text-xs text-on-surface-variant">Expires 12/25</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">more_horiz</span>
+</div>
+<button class="w-full py-3 bg-surface-container-highest text-on-surface text-xs font-bold uppercase rounded-full hover:bg-surface-dim transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">credit_card</span>
+                        Update Payment Method
+                    </button>
+</section>
+<!-- Billing History Section -->
+<section class="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/15">
+<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6">Billing History</h3>
+<div class="space-y-4 mb-6">
+<div class="flex items-center justify-between py-2 border-b border-surface-container-highest last:border-0">
+<div>
+<p class="text-sm font-bold text-on-surface">Oct 12, 2023</p>
+<p class="text-xs text-on-surface-variant">Marcus Vane • Gold Picks</p>
+</div>
+<span class="text-sm font-black text-on-surface">$29.00</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-surface-container-highest last:border-0">
+<div>
+<p class="text-sm font-bold text-on-surface">Oct 05, 2023</p>
+<p class="text-xs text-on-surface-variant">Sarah 'The Sharp' • Elite Edge</p>
+</div>
+<span class="text-sm font-black text-on-surface">$45.00</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-surface-container-highest last:border-0">
+<div>
+<p class="text-sm font-bold text-on-surface">Sep 28, 2023</p>
+<p class="text-xs text-on-surface-variant">Luca Bellini • Pro League</p>
+</div>
+<span class="text-sm font-black text-on-surface">$19.00</span>
+</div>
+</div>
+<button class="w-full text-center text-xs font-bold text-primary uppercase tracking-widest hover:underline transition-all">
+                        View All Transactions
+                    </button>
+</section>
+<!-- Promo Banner -->
+<section class="relative rounded-3xl overflow-hidden aspect-square bg-slate-900 group">
+<img alt="Promotional Banner" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" data-alt="A dramatic high-contrast photograph of an empty, brightly lit stadium at night. The field is lush green under powerful floodlights, casting long shadows. A thin layer of violet mist clings to the surface, creating a futuristic, high-stakes atmosphere. Overlaid is a subtle glassmorphic panel with bold typography promoting an annual subscription." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANKV9Y_yAcN8Ssza979TcgWwbF8Xd9K3h2Dc1W7oJckFo7DgV8eHCwGj9-2wFkiAMQ4Kc1pzB0aFwOf3qhizWsWCUOd3icSUAwphTUeB6jRpnm4Khd5yGtbXJ2IHEn_2jhX45eB9-SxT4yCPh3-av97oryYdhwnCdub8Ty4SsZ18dhakAvdk5KviHuYbfs6qTIrGCUzzOTE0Ex_gn7OJPbiGYYxFjKCT7e5xW6hsGoiAootWsdhH48d-1vo2UpNEpsI19cQg09j6M"/>
+<div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-slate-950 to-transparent">
+<h4 class="text-2xl font-black text-white leading-tight mb-4">Go Annual.<br/>Save 20% Today.</h4>
+<button class="w-full py-4 bg-white text-slate-900 text-xs font-black uppercase rounded-full hover:bg-slate-200 transition-all">Switch to Yearly</button>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-surface-container shadow-2xl flex justify-around items-center h-16 px-4 z-50">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Discover</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-violet-600">
+<span class="material-symbols-outlined" data-icon="loyalty" style="font-variation-settings: 'FILL' 1;">loyalty</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Subs</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Profile</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#d0bcff",
+                        "tertiary-fixed": "#ffdcbb",
+                        "tertiary-container": "#a76500",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-dim": "#d8dadc",
+                        "on-error-container": "#93000a",
+                        "background": "#f7f9fb",
+                        "outline-variant": "#cbc3d7",
+                        "on-surface": "#191c1e",
+                        "primary": "#6b38d4",
+                        "on-primary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#131b2e",
+                        "surface-tint": "#6d3bd7",
+                        "secondary-container": "#dae2fd",
+                        "surface-container-highest": "#e0e3e5",
+                        "outline": "#7b7486",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container": "#eceef0",
+                        "error": "#ba1a1a",
+                        "tertiary": "#855000",
+                        "primary-fixed": "#e9ddff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface": "#f7f9fb",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#191c1e",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface-variant": "#494454",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#8455ef",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#5c647a",
+                        "inverse-surface": "#2d3133",
+                        "secondary": "#565e74",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .signature-glow {
+            background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(203, 195, 215, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-6 py-3 bg-white/80 backdrop-blur-2xl shadow-sm border-b border-slate-100/20">
+<div class="flex items-center gap-4">
+<span class="text-xl font-extrabold text-slate-900 font-headline tracking-tight">The Elite Editorial</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-500 hover:bg-slate-50 transition-colors px-3 py-1 rounded-lg" href="#">Discover</a>
+<a class="text-slate-500 hover:bg-slate-50 transition-colors px-3 py-1 rounded-lg" href="#">Insights</a>
+<a class="text-slate-500 hover:bg-slate-50 transition-colors px-3 py-1 rounded-lg" href="#">Locker</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors">help_outline</button>
+<button class="material-symbols-outlined text-violet-600 font-bold p-2 rounded-full transition-colors bg-violet-50">account_circle</button>
+</div>
+</header>
+<main class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+<div class="flex flex-col md:grid md:grid-cols-12 gap-10">
+<!-- Left Column: Summary & Creator Info -->
+<aside class="md:col-span-5 space-y-8">
+<!-- Creator Profile Card -->
+<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(15,23,42,0.04)] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">verified</span>
+</div>
+<div class="flex items-center gap-5 mb-8">
+<div class="relative">
+<img alt="Alex Rivers Avatar" class="w-20 h-20 rounded-2xl object-cover" data-alt="A professional portrait of a male sports analyst in his late 30s with a sharp, confident expression. He is wearing a modern charcoal grey suit and is set against a blurred background of a high-tech sports broadcast studio. The lighting is crisp and professional, utilizing soft-key highlights to create a premium editorial look consistent with a high-end sports magazine." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf-fftEM8E0MyTRuk5C3RJa00nUjDp7D3M1v4abQLXZ6P-Js38aYupDC5jy9N8SjX4qPU2bSpZTZtFBEa6wGdJAwqlsa4ZACe--FO4tz5zuaiVbdmOagze62RUdmzMKlYltjncqrQmd-_vPq0elEVvsS9Zd6ploPwWUvyzaKZ4ZLfJFCTm-GlIBmV8srXjrlHY9uOu5aNXvWDaUh5oIpTWcuizCKE5WLqYyUqLlkhnaF1zXJsZtF8AiOMy4kXHd-9dUc3VfsJ34W8"/>
+<div class="absolute -bottom-2 -right-2 bg-primary p-1 rounded-lg shadow-lg">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<h2 class="font-headline font-extrabold text-2xl tracking-tight">Alex "The Analyst" Rivers</h2>
+<p class="text-primary font-semibold text-sm uppercase tracking-widest mt-1">NBA &amp; NFL Props Specialist</p>
+</div>
+</div>
+<!-- Plan Details -->
+<div class="bg-surface-container-low rounded-2xl p-6 space-y-5">
+<div class="flex justify-between items-end">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-slate-400">Current Selection</span>
+<h3 class="font-headline font-bold text-xl mt-1">Pro Access</h3>
+</div>
+<div class="text-right">
+<span class="text-2xl font-extrabold font-headline">$29.99</span>
+<span class="text-slate-400 text-sm font-medium">/mo</span>
+</div>
+</div>
+<div class="h-[1px] bg-slate-200/50"></div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+<span class="text-sm font-medium leading-tight">Daily expert prop picks &amp; betting models</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+<span class="text-sm font-medium leading-tight">In-depth statistical premium analysis</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+<span class="text-sm font-medium leading-tight">Exclusive private community discord access</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Testimonial/Trust Moment -->
+<div class="px-4 border-l-2 border-primary/20">
+<p class="italic text-slate-500 text-sm leading-relaxed">
+                        "Joining Alex's inner circle changed how I view the props market. The level of detail in the analysis is unmatched in the industry."
+                    </p>
+<div class="mt-3 flex items-center gap-2">
+<div class="flex text-yellow-400">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-xs font-bold text-on-surface">Verified Member</span>
+</div>
+</div>
+</aside>
+<!-- Right Column: Checkout Form -->
+<div class="md:col-span-7 bg-surface-container-lowest rounded-3xl p-8 md:p-12 shadow-[0px_20px_40px_rgba(15,23,42,0.06)] ghost-border">
+<h1 class="font-headline font-extrabold text-3xl tracking-tight mb-8">Complete Your Subscription</h1>
+<!-- Express Checkout -->
+<div class="space-y-4 mb-10">
+<span class="text-xs font-bold uppercase tracking-widest text-slate-400">Express Checkout</span>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-black text-white h-12 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="font-bold">Apple Pay</span>
+</button>
+<button class="bg-white border border-slate-200 h-12 rounded-full flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors">
+<span class="font-bold">Google Pay</span>
+</button>
+</div>
+</div>
+<div class="relative flex py-5 items-center">
+<div class="flex-grow border-t border-slate-100"></div>
+<span class="flex-shrink mx-4 text-xs font-bold uppercase text-slate-400 tracking-widest">Or pay with card</span>
+<div class="flex-grow border-t border-slate-100"></div>
+</div>
+<!-- Payment Details Form -->
+<form class="space-y-6 mt-6">
+<div class="space-y-1.5">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Cardholder Name</label>
+<input class="w-full bg-surface-container-low border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none ghost-border" placeholder="John Doe" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Card Number</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none ghost-border pr-12" placeholder="0000 0000 0000 0000" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-4 text-slate-400">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Expiry Date</label>
+<input class="w-full bg-surface-container-low border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none ghost-border" placeholder="MM / YY" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">CVC</label>
+<input class="w-full bg-surface-container-low border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none ghost-border" placeholder="123" type="text"/>
+</div>
+</div>
+<div class="space-y-1.5 pt-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Promo Code</label>
+<div class="flex gap-2">
+<input class="flex-grow bg-surface-container-low border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none ghost-border uppercase" placeholder="ENTER CODE" type="text"/>
+<button class="px-6 rounded-2xl font-bold bg-surface-container-high text-on-surface text-sm hover:bg-surface-dim transition-colors" type="button">Apply</button>
+</div>
+</div>
+<!-- Price Summary -->
+<div class="bg-surface-container-low/50 rounded-2xl p-6 space-y-3 mt-8">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 font-medium">Subtotal</span>
+<span class="font-bold">$29.99</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 font-medium">Platform Fee</span>
+<span class="text-primary font-bold">$0.00</span>
+</div>
+<div class="h-[1px] bg-slate-200"></div>
+<div class="flex justify-between items-center pt-1">
+<span class="font-headline font-bold text-lg">Total Due Today</span>
+<span class="font-headline font-extrabold text-2xl text-on-surface">$29.99</span>
+</div>
+</div>
+<!-- CTA -->
+<button class="w-full signature-glow text-white font-bold h-16 rounded-full text-lg shadow-xl hover:translate-y-[-2px] hover:shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3" type="submit">
+                        Subscribe &amp; Unlock Access
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<!-- Trust Signals -->
+<div class="flex flex-col items-center gap-4 pt-6">
+<div class="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all">
+<img alt="Stripe" class="h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1NVlGF-RmC8oyTCaSALz0G3zpwAuHm2OIjzJxwGeN5zVqNv2Loa7ZkdD4Pj_mLgbbCj3cEzfg_3pfG__KyCqMfs3dU_Ssqjbb7zFDBiGtvDv0q1qch2hn4JUu3Ji8yaQXzPuY6o33bUorVWyPOgkbDnUU650bw7xmBA7XeHw8VfATxt02bSi-NOkvBnxZPKyyNUAC4UQuCUFzbRHZRjDB7Yuh9sbetxBRn_GidsTHd4ZQl-1tetbNqg0M41H4cN-vEYtjV7MXNRA"/>
+<img alt="Visa" class="h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABSbvmxk9BIBm8EFxGcIIKLs_mh9Z3ANHo_VwqN0x3wxwHQ8QxAM03Og-C4B9uU4cXz_XG_mNs6lNhBIrCCDSC11JM9yppf1nckwBGFuCfJmIpIfAbpfst8T-Mn9OMBFzJo9mBwlhL9T9jbM5r0ADIfzdai5tlpU1i90W1uo8j8NKHy9J8NqFQ-98wyzYf2vMeSQx_oBBW8LtveV5rqAS6wHnq5cqMNmnXZbvoJm-9Sobo8MEHbx8TprzBXKExcaX4REfyyvRbUGQ"/>
+<img alt="Mastercard" class="h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFnihq2XCKM2n4GdvmCav1ONYI5wGvwgYP0zpKMB4E2nZ1HZH_2N3dfLOorgD_n9pS_GcQ_3ZXd6USw36lz_kEdcNhc3L9BlcoM3lum-PWzomlhDBCvjRgKnrtv3hOBq9IYwbVRSjsRFQv9gUTTxVJSjdLBxkRjcP3eeQnHK_1JQ8yBE_u4yT2MqhMJmdPEDC4cD6xhwazZQ9_L3GropO3brdYhVY1eU_YL7qzEy42JjDJvhhpBo0uMzRSCeqkbFyLxyT19p6-zh8"/>
+</div>
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-sm">lock</span>
+<p class="text-[10px] font-bold uppercase tracking-tighter">Secure 256-Bit SSL Encrypted Checkout</p>
+</div>
+</div>
+</form>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-100 bg-slate-50">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-headline font-black text-slate-900 text-lg">The Elite Editorial</span>
+<p class="font-inter text-xs text-slate-400">© 2024 The Elite Editorial. Secured by Curated Pay.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-inter text-xs text-slate-400 hover:text-slate-900 transition-opacity" href="#">Privacy</a>
+<a class="font-inter text-xs text-slate-400 hover:text-slate-900 transition-opacity" href="#">Terms</a>
+<a class="font-inter text-xs text-slate-400 hover:text-slate-900 transition-opacity" href="#">Support</a>
+<a class="font-inter text-xs text-slate-400 hover:text-slate-900 transition-opacity" href="#">Refunds</a>
+</div>
+</footer>
+</body></html>

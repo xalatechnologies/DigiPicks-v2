@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Admin - Creators Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f7f9fb",
+                    "primary-container": "#8455ef",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "surface-variant": "#e0e3e5",
+                    "inverse-primary": "#d0bcff",
+                    "on-surface-variant": "#494454",
+                    "secondary-container": "#dae2fd",
+                    "primary-fixed": "#e9ddff",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#e0e3e5",
+                    "surface": "#f7f9fb",
+                    "on-primary-container": "#fffbff",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#eceef0",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-secondary-container": "#5c647a",
+                    "surface-container-high": "#e6e8ea",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "inverse-surface": "#2d3133",
+                    "tertiary": "#855000",
+                    "tertiary-fixed": "#ffdcbb",
+                    "surface-dim": "#d8dadc",
+                    "primary-fixed-dim": "#d0bcff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5516be",
+                    "on-primary-fixed": "#23005c",
+                    "outline-variant": "#cbc3d7",
+                    "on-surface": "#191c1e",
+                    "secondary-fixed": "#dae2fd",
+                    "background": "#f7f9fb",
+                    "outline": "#7b7486",
+                    "tertiary-container": "#a76500",
+                    "secondary": "#565e74",
+                    "on-tertiary-fixed": "#2c1700",
+                    "surface-tint": "#6d3bd7",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb869",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "primary": "#6b38d4",
+                    "on-background": "#191c1e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "display": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<!-- SIDE NAVIGATION BAR -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-white dark:bg-slate-900 bg-slate-50 dark:bg-slate-950 shadow-[20px_0_40px_rgba(0,0,0,0.02)] flex flex-col h-full py-8 px-6 font-manrope antialiased tracking-tight z-50">
+<div class="mb-10">
+<h1 class="text-xl font-black text-violet-700 dark:text-violet-400 tracking-tighter">The Curator</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 mt-1">Elite Admin Console</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 scale-100 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-violet-600 dark:text-violet-400 font-bold border-r-4 border-violet-600 bg-slate-50 dark:bg-slate-800/50 scale-100 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-sm font-medium">Creators</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 scale-100 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-sm font-medium">Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 scale-100 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="article">article</span>
+<span class="text-sm font-medium">Content</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 scale-100 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-8">
+<button class="w-full py-4 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-lg hover:translate-y-[-2px] transition-all duration-300 active:scale-95">
+                Invite Creator
+            </button>
+<div class="mt-8 flex items-center gap-3 px-2">
+<img alt="Admin curator profile" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a senior administrator in a high-end corporate setting. He is wearing a tailored charcoal suit and a crisp white shirt, looking directly into the camera with a confident, slight smile. The background is a blurred office environment with floor-to-ceiling windows and soft, cool daylight streaming in, emphasizing a premium and elite professional atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCDOcfOGENk_Mtd8BFyUOK_nlO9lxozg-WIGjw_QYTHBimG9vC-kjwVBqRuCRmxvGkoSp17w7Dlu6GfjR_r4BVTZIICKlkO9P4EHdQyvyPSLrQ2PuItivU80y9Z7P6Mm2c-3ARC3SZBA8Ys9BkutQKfcwBviIIKGoTY4MvC-1OgDdB438U1AJZ3RsabOtVjUkZiu0ALnyTvmjwhSLQUHRFUmopk_Dn7meeINivy7Tx7pnEbiLtsP5MYYi3i2DejLCVFRFSvfBZ810"/>
+<div>
+<p class="text-xs font-bold text-on-surface">Alex Curator</p>
+<p class="text-[10px] text-on-surface-variant">Senior Curator</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TOP APP BAR -->
+<header class="fixed top-0 right-0 left-64 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl flex items-center justify-between px-10 h-20 w-auto font-manrope font-medium">
+<div class="flex items-center gap-8">
+<h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Creators Management</h2>
+<div class="relative group">
+<span class="absolute inset-y-0 left-4 flex items-center text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</span>
+<input class="bg-surface-container-low border-none rounded-full pl-12 pr-6 py-2.5 w-80 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Search creators, handles, or IDs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-400 hover:text-violet-500 transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="text-slate-400 hover:text-violet-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+<button class="text-slate-400 hover:text-violet-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- MAIN CONTENT CANVAS -->
+<main class="ml-64 pt-24 pb-10 px-10 h-screen overflow-y-auto no-scrollbar grid grid-cols-12 gap-8">
+<div class="col-span-12 lg:col-span-8 space-y-10">
+<!-- SUMMARY CARDS -->
+<section class="grid grid-cols-5 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-3xl transition-all duration-300 border-none shadow-[0_20px_40px_rgba(0,0,0,0.02)] group hover:translate-y-[-4px]">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Creators</p>
+<h3 class="text-3xl font-black text-on-surface">1,240</h3>
+<div class="mt-4 flex items-center text-[10px] text-green-500 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="ml-1">+4.2%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl transition-all duration-300 border-none shadow-[0_20px_40px_rgba(0,0,0,0.02)] group hover:translate-y-[-4px]">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Active</p>
+<h3 class="text-3xl font-black text-on-surface">1,120</h3>
+<div class="mt-4 w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[90%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl transition-all duration-300 border-none shadow-[0_20px_40px_rgba(0,0,0,0.02)] group hover:translate-y-[-4px]">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Suspended</p>
+<h3 class="text-3xl font-black text-on-surface">42</h3>
+<div class="mt-4 flex items-center text-[10px] text-red-500 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span class="ml-1">-2.1%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl transition-all duration-300 border-none shadow-[0_20px_40px_rgba(0,0,0,0.02)] group hover:translate-y-[-4px]">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Performers</p>
+<h3 class="text-3xl font-black text-primary">185</h3>
+<div class="mt-4 flex items-center text-[10px] text-violet-500 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="star">star</span>
+<span class="ml-1">TOP 15%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl transition-all duration-300 border-none shadow-[0_20px_40px_rgba(0,0,0,0.02)] group hover:translate-y-[-4px]">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">At-Risk</p>
+<h3 class="text-3xl font-black text-on-surface">12</h3>
+<div class="mt-4 flex items-center text-[10px] text-amber-500 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="assignment_late">assignment_late</span>
+<span class="ml-1">REACTION REQ</span>
+</div>
+</div>
+</section>
+<!-- FILTER BAR -->
+<section class="bg-surface-container-lowest p-4 rounded-[2rem] flex flex-wrap items-center gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.02)]">
+<div class="flex-1 min-w-[200px] relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" data-icon="filter_list">filter_list</span>
+<select class="w-full bg-surface-container border-none rounded-2xl pl-10 pr-4 py-2 text-sm appearance-none focus:ring-primary/20">
+<option>All Sports</option>
+<option>NFL</option>
+<option>NBA</option>
+<option>MLB</option>
+<option>UFC</option>
+</select>
+</div>
+<div class="flex-1 min-w-[140px]">
+<select class="w-full bg-surface-container border-none rounded-2xl px-4 py-2 text-sm appearance-none focus:ring-primary/20">
+<option>Status: Active</option>
+<option>Status: Suspended</option>
+<option>Status: Pending</option>
+</select>
+</div>
+<div class="flex-1 min-w-[140px]">
+<select class="w-full bg-surface-container border-none rounded-2xl px-4 py-2 text-sm appearance-none focus:ring-primary/20">
+<option>Revenue: All</option>
+<option>Elite Tier (10k+)</option>
+<option>Pro Tier (1k+)</option>
+</select>
+</div>
+<div class="flex-1 min-w-[140px]">
+<select class="w-full bg-surface-container border-none rounded-2xl px-4 py-2 text-sm appearance-none focus:ring-primary/20">
+<option>Verified: All</option>
+<option>Verified Only</option>
+<option>Unverified</option>
+</select>
+</div>
+<button class="bg-on-surface text-white px-6 py-2 rounded-2xl text-sm font-bold hover:bg-slate-800 transition-colors">Apply Filters</button>
+</section>
+<!-- CREATOR TABLE -->
+<section class="bg-surface-container-lowest rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.02)]">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+<th class="px-8 py-5">Creator</th>
+<th class="px-4 py-5">Verified</th>
+<th class="px-4 py-5">Subscribers</th>
+<th class="px-4 py-5">Revenue</th>
+<th class="px-4 py-5">Status</th>
+<th class="px-4 py-5">Joined</th>
+<th class="px-8 py-5 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/50">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-2xl object-cover" data-alt="Close up portrait of a young female sports analyst with a bright smile. She is wearing professional smart-casual attire against a minimal, brightly lit background that suggests a modern digital content studio. The lighting is crisp and airy, emphasizing a high-end, contemporary creator aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIW8PPDsWgjYspp99JbA0bv1gjMqdo5Uu2b7afozkGG7ls2MV9Y1vOvkFSfGiaEXvZweohxx6L8CiRMh6bU5xoYc9CBqBnISH_A4x-tM4TJ0ww_QC0f_aoUODtZhKHJY4g_cFM69O4edHMmJZE_JWaWoK0JZrWYiVHRMS2CYiHlIFpETZZxHBech3ivN6r7KTTcGhShpLSDFjidq3shgNARLiFXOT4C4jfz0Wq8gagRfm4qyFqHGZevo0mECrJ_z3PnnL7CZZ7A_s"/>
+<div>
+<p class="text-sm font-bold text-on-surface">Jordan Picks</p>
+<p class="text-[11px] text-slate-400">@jordan_betting</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="verified" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+</td>
+<td class="px-4 py-4 text-sm font-medium">12.4K</td>
+<td class="px-4 py-4 text-sm font-bold">$18,200</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Active
+                                    </span>
+</td>
+<td class="px-4 py-4 text-[11px] text-slate-400 font-medium">Oct 12, 2023</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors" title="View Profile"><span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span></button>
+<button class="p-2 text-slate-400 hover:text-amber-500 transition-colors" title="Moderation"><span class="material-symbols-outlined text-xl" data-icon="shield">shield</span></button>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors" title="Options"><span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer bg-surface-container-lowest border-l-4 border-primary">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-2xl object-cover" data-alt="A portrait of a confident male content creator in his late 20s, with stylish short hair and a focused expression. He is wearing a minimalist navy blue hoodie in a professional home-office setting with soft ambient LED backlighting in deep violet. The overall aesthetic is premium, moody yet clean, and tailored for a modern sports curator platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6VMtFDyIiDO1k8l9-SUKkWQzZyhFa_Qfx0kr5mggFbMkJVuFy-9T-1K1YZKM1S8HBSnKM3TCEzTwI-EdjaTLBSlJTXsdu1FNG2xY57kHlYEh0tqLIU0N6yGt4p9Uq0f7j55B1gHMoRv7jve_IfMW_SonhgpoRlbpyY-0eABTlPyg0SDdQWJe3HZLlrHfBFR3OCj9BWSR_2OcyT08TAWVlzt7NoIQwhT1tLtZBfGK-L1_56Lm-Bul1DIj0Jodd4gLFbYgqRMOW_b8"/>
+<div>
+<p class="text-sm font-bold text-on-surface">The Sharp Eye</p>
+<p class="text-[11px] text-slate-400">@sharp_eye_nfl</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="material-symbols-outlined text-slate-300 text-lg" data-icon="verified">verified</span>
+</td>
+<td class="px-4 py-4 text-sm font-medium">4.2K</td>
+<td class="px-4 py-4 text-sm font-bold">$5,400</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Active
+                                    </span>
+</td>
+<td class="px-4 py-4 text-[11px] text-slate-400 font-medium">Dec 01, 2023</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:text-primary-container transition-colors" title="View Profile"><span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span></button>
+<button class="p-2 text-slate-400 hover:text-amber-500 transition-colors" title="Moderation"><span class="material-symbols-outlined text-xl" data-icon="shield">shield</span></button>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors" title="Options"><span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-2xl object-cover" data-alt="A portrait of a male content creator with a charismatic presence. He has well-groomed facial hair and is wearing a dark, high-quality linen shirt. The setting is a bright, minimal workspace with natural light coming from the side, creating soft shadows. The visual style is professional, high-end editorial, consistent with an elite sports management interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0E_KdYgtU8nGgt8QxkkUDe7xS63kgi85n5mqBEdL1bRP8NjvFuXolEMYO3puCPaLI1y7z4NRQAG3zB7olWsZqJCtYk_GTtwOprq3xWOosyqkreysaiqx3K4qcuHCPT7YB1WciK9nyGNrAFVS0Ue48RfhO6JE-0-zw5zBUqfwhkCwjGvrKBrkrQEZLag9vGnchk7JLPrbCgEGdKqqZZ4IDquoWlMxhV_IGIOqUT9Npk2n4b873rTSCoIFXvGGT93Znejl-0Mflbik"/>
+<div>
+<p class="text-sm font-bold text-on-surface">UFC Insiders</p>
+<p class="text-[11px] text-slate-400">@ufc_inside_track</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="verified" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+</td>
+<td class="px-4 py-4 text-sm font-medium">32.1K</td>
+<td class="px-4 py-4 text-sm font-bold">$42,900</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Suspended
+                                    </span>
+</td>
+<td class="px-4 py-4 text-[11px] text-slate-400 font-medium">Jan 15, 2024</td>
+<td class="px-8 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors" title="View Profile"><span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span></button>
+<button class="p-2 text-slate-400 hover:text-amber-500 transition-colors" title="Moderation"><span class="material-symbols-outlined text-xl" data-icon="shield">shield</span></button>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors" title="Options"><span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-8 py-6 bg-surface-container-low flex items-center justify-between">
+<p class="text-xs text-slate-400 font-medium">Showing 1 to 10 of 1,240 creators</p>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-white hover:text-primary transition-all"><span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span></button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-white hover:text-primary transition-all text-xs font-bold">2</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-white hover:text-primary transition-all text-xs font-bold">3</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-white hover:text-primary transition-all"><span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</section>
+</div>
+<!-- DETAIL PANEL (RIGHT SIDEBAR) -->
+<div class="col-span-12 lg:col-span-4 h-full">
+<aside class="sticky top-0 bg-surface-container-lowest rounded-[3rem] h-[calc(100vh-140px)] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.04)] overflow-hidden">
+<!-- Profile Header -->
+<div class="relative h-48 flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A premium panoramic shot of a modern, neon-lit sports broadcast studio at dusk. The background features blurred glass panels reflecting vibrant violet and electric green lights, with high-tech monitors showing abstract data visualizations. The mood is sophisticated, energetic, and highly professional, perfectly suited for the elite branding of an admin dashboard's profile preview section." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDThG6fBIaGLRt8rHLFfvJ1olfQQXuKSgke12HVdVUihgNwcRAWhAddtZhQw7l5-XXGbrd0xU046xiHQh447ALECnv0xaY9g6Y0JRUCKWEJLHf5xjTeSmdAQuKnubnkdlOg7iifZUeLF7EGqP3tXBjPnfYWwVyJvO0kQWHgmVKPfSRL72K_WcZ9sv9RyKgGaonDpkCATrOkyu53IrFQLMibeKOYcbncZVgQFzbrDAAQqa4dcVOvdn1Zm4zhwPh3KQ60nVt9UP0kPH8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute -bottom-10 left-8">
+<img class="w-24 h-24 rounded-[2rem] border-4 border-white shadow-xl object-cover" data-alt="Close-up avatar of a modern sports creator, featuring a young man with a creative haircut and trendy attire. He is looking off-camera with an air of professional authority. The background of the avatar is a subtle, out-of-focus urban environment at golden hour, giving the image a high-quality, personal feel that fits into the premium UI layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5C2TevApD_kywqK5f_NN2gTzMnfV9WuiqZDOnvpS9I1L0WMplnotYl6VHgAinnP9OW38Gl3lOAn9UJ5qbK8lqbPg74P7nDDbsBzxqt1ajCjuZiFizEvBA9B3DZfj5_2Pm8RRh1MVcGLeGucJeou08mU3Fkq2U4HbR4LBd_yjd1E13dO23iUc0gL3MBvqIRa_hBq1Z6U1ykyQuEbcmF5affhLU3vqR2UttYVfUdHBqv40xSkvkUtJLAzG1WGkRPhaZCTjP-aw_zAk"/>
+</div>
+<div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md rounded-full px-4 py-1.5 text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-white/20">
+<span class="w-2 h-2 rounded-full bg-green-400"></span> Online
+                    </div>
+</div>
+<div class="px-8 pt-14 pb-6 flex-shrink-0">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-xl font-black text-on-surface">The Sharp Eye</h3>
+<p class="text-xs text-slate-400 font-medium tracking-tight">@sharp_eye_nfl • NFL Specialist</p>
+</div>
+<button class="bg-primary/10 text-primary px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all">Verify</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="px-8 flex-shrink-0 flex gap-6 border-b border-surface-container overflow-x-auto no-scrollbar">
+<button class="pb-4 text-xs font-bold text-primary border-b-2 border-primary whitespace-nowrap">Performance</button>
+<button class="pb-4 text-xs font-bold text-slate-400 hover:text-on-surface transition-colors whitespace-nowrap">Subscribers</button>
+<button class="pb-4 text-xs font-bold text-slate-400 hover:text-on-surface transition-colors whitespace-nowrap">History</button>
+<button class="pb-4 text-xs font-bold text-slate-400 hover:text-on-surface transition-colors whitespace-nowrap">Notes</button>
+</div>
+<!-- Detail Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto no-scrollbar p-8 space-y-8">
+<!-- Revenue Insights -->
+<div>
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-xs font-bold uppercase tracking-widest text-slate-400">Revenue Performance</h4>
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">30D</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container p-4 rounded-2xl">
+<p class="text-[10px] text-slate-400 mb-1">Monthly Rev</p>
+<p class="text-lg font-black text-on-surface">$5,400</p>
+</div>
+<div class="bg-surface-container p-4 rounded-2xl">
+<p class="text-[10px] text-slate-400 mb-1">Growth Rate</p>
+<p class="text-lg font-black text-green-500">+12%</p>
+</div>
+</div>
+<!-- Mini Chart Simulation -->
+<div class="mt-4 h-24 w-full flex items-end gap-1 px-1">
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[40%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[55%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[45%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[70%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[60%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[85%] transition-all hover:bg-primary-container"></div>
+<div class="flex-1 bg-slate-100 rounded-t-sm h-[75%] transition-all hover:bg-primary-container"></div>
+</div>
+</div>
+<!-- Open Cases -->
+<div>
+<h4 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Support &amp; Moderation</h4>
+<div class="space-y-3">
+<div class="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-500 mt-0.5" data-icon="report">report</span>
+<div>
+<p class="text-[11px] font-bold text-amber-900">Flagged Post: NFL Week 18</p>
+<p class="text-[10px] text-amber-700/70 mt-0.5">Potential duplicate content reported by system.</p>
+</div>
+</div>
+<div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-400 mt-0.5" data-icon="check_circle">check_circle</span>
+<div>
+<p class="text-[11px] font-bold text-slate-600">Verification Pending</p>
+<p class="text-[10px] text-slate-400 mt-0.5">ID and social handles validated by Tier 1.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Admin Notes Inset -->
+<div>
+<h4 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Internal Admin Notes</h4>
+<div class="bg-surface-container-low p-4 rounded-2xl">
+<textarea class="w-full bg-transparent border-none p-0 text-xs focus:ring-0 placeholder:text-slate-300 resize-none h-20" placeholder="Add a note about this creator..."></textarea>
+<div class="flex justify-end mt-2">
+<button class="text-[10px] font-bold text-primary uppercase tracking-widest">Save Note</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-8 border-t border-surface-container bg-surface-container-low flex gap-4 flex-shrink-0">
+<button class="flex-1 bg-white border border-slate-200 text-on-surface py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm active:scale-95">Suspend</button>
+<button class="flex-1 bg-on-surface text-white py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md active:scale-95">Full Edit</button>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

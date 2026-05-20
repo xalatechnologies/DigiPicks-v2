@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
-  PageHead,
   Container,
   Stack,
-  Row,
-  Col,
   Card,
   CardHead,
   Button,
@@ -15,9 +13,16 @@ import {
   PersonRow,
   Badge,
   ChatPanel,
+  Search,
+  StudioPageHeader,
+  AccountRefineCard,
+  StudioDashLayout,
+  StudioDashCol,
   type ChatPanelMessage,
+  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 function fmtTime(ms: number): string {
@@ -29,19 +34,15 @@ function fmtTime(ms: number): string {
   });
 }
 
-/**
- * Subscriber-side DM inbox. Mirror of the creator-side dashboard
- * Messages page but reads via api.dmThreads.myThreads. The list of
- * threads is filtered to the calling user; messages are queried per-
- * thread via api.dmThreads.messagesIn.
- */
 export function AccountMessages() {
+  const navigate = useNavigate();
   const me = useQuery(api.users.me);
   const threads = useQuery(api.dmThreads.myThreads);
-  const [activeId, setActiveId] = React.useState<Id<'dmThreads'> | null>(null);
-  const [draft, setDraft] = React.useState('');
-  const [sending, setSending] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [activeId, setActiveId] = useState<Id<'dmThreads'> | null>(null);
+  const [draft, setDraft] = useState('');
+  const [search, setSearch] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const messages = useQuery(
     api.dmThreads.messagesIn,
@@ -50,11 +51,21 @@ export function AccountMessages() {
   const send = useMutation(api.dmThreads.send);
   const markRead = useMutation(api.dmThreads.markRead);
 
+  const filteredThreads = useMemo(() => {
+    if (!threads) return undefined;
+    if (!search.trim()) return threads;
+    const q = search.toLowerCase();
+    return threads.filter(
+      ({ creator }) =>
+        creator?.name.toLowerCase().includes(q) || creator?.handle.toLowerCase().includes(q),
+    );
+  }, [threads, search]);
+
   React.useEffect(() => {
-    if (!activeId && threads && threads.length > 0) {
-      setActiveId(threads[0]!.thread._id);
+    if (!activeId && filteredThreads && filteredThreads.length > 0) {
+      setActiveId(filteredThreads[0]!.thread._id);
     }
-  }, [activeId, threads]);
+  }, [activeId, filteredThreads]);
 
   React.useEffect(() => {
     if (activeId) {
@@ -62,18 +73,18 @@ export function AccountMessages() {
     }
   }, [activeId, markRead]);
 
-  const active = threads?.find((t) => t.thread._id === activeId) ?? null;
+  const active = filteredThreads?.find((t) => t.thread._id === activeId) ?? null;
 
   const chatMessages: ChatPanelMessage[] = (messages ?? []).map((m) => {
     const isOwn = m.senderUserId === me?._id;
     return {
       id: m._id,
-      senderName: isOwn ? me?.name ?? 'You' : active?.creator?.name ?? 'Creator',
+      senderName: isOwn ? (me?.name ?? 'You') : (active?.creator?.name ?? 'Creator'),
       senderHandle: isOwn ? undefined : active?.creator?.handle,
       senderMono: isOwn
-        ? me?.name?.[0]?.toUpperCase() ?? 'U'
-        : active?.creator?.avatarMono ?? '·',
-      senderColor: isOwn ? '#1c9cf0' : active?.creator?.avatarColor ?? '#3A4F7A',
+        ? (me?.name?.[0]?.toUpperCase() ?? 'U')
+        : (active?.creator?.avatarMono ?? '·'),
+      senderColor: isOwn ? '#1c9cf0' : (active?.creator?.avatarColor ?? '#3A4F7A'),
       senderVerified: !isOwn && Boolean(active?.creator?.verified),
       body: m.body,
       createdAt: m.createdAt,
@@ -95,96 +106,121 @@ export function AccountMessages() {
     }
   }
 
+  const threadList =
+    threads === undefined ? (
+      <EmptyState icon="message" title="Loading threads…" />
+    ) : filteredThreads!.length === 0 ? (
+      <EmptyState
+        icon="message"
+        title={threads.length === 0 ? 'No DMs yet' : 'No threads match'}
+        subtitle={
+          threads.length === 0
+            ? 'Subscribe to a creator and open a DM thread from their profile.'
+            : 'Try another search term.'
+        }
+      />
+    ) : (
+      <Stack gap={1}>
+        {filteredThreads!.map(({ thread, creator, unread }) => (
+          <Card key={thread._id} hover pad="sm" onClick={() => setActiveId(thread._id)}>
+            <PersonRow
+              name={creator?.name ?? 'Creator'}
+              sub={thread.lastMessageAt ? fmtTime(thread.lastMessageAt) : 'No messages yet'}
+              mono={creator?.avatarMono ?? '·'}
+              color={creator?.avatarColor ?? '#3A4F7A'}
+              trailing={
+                unread > 0 ? (
+                  <Badge tone="blue" dot>
+                    {unread}
+                  </Badge>
+                ) : null
+              }
+            />
+          </Card>
+        ))}
+      </Stack>
+    );
+
+  const chatPane = !active ? (
+    <Card>
+      <EmptyState
+        icon="message"
+        title="Pick a thread"
+        subtitle="Select a conversation on the left to read and reply."
+      />
+    </Card>
+  ) : (
+    <Card>
+      <CardHead
+        title={active.creator?.name ?? 'Creator'}
+        sub={active.creator?.handle ? `@${active.creator.handle}` : ''}
+        action={
+          active.creator?.handle ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/creators/${active.creator!.handle}`)}
+            >
+              View profile
+            </Button>
+          ) : null
+        }
+      />
+      {error ? <Muted>{error}</Muted> : null}
+      <ChatPanel
+        messages={chatMessages}
+        loading={messages === undefined}
+        draft={draft}
+        onDraftChange={setDraft}
+        onSend={handleSend}
+        sending={sending}
+        placeholder="Message the creator…"
+        emptyTitle="Say hi"
+        emptySubtitle="Send the first message to open this thread."
+      />
+    </Card>
+  );
+
+  const unreadTotal = threads?.reduce((n, t) => n + t.unread, 0) ?? 0;
+
   return (
-    <Container size="xl">
-      <Stack gap={5}>
-        <PageHead
-          eyebrow="Inbox"
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Account · Inbox"
           title="Direct messages"
           sub="Private threads with the creators you subscribe to."
         />
 
-        <Row gap={4} wrap>
-          <Col gap={3}>
+        <AccountRefineCard
+          title="Refine inbox"
+          sub="Search creators you message with."
+          summary={
+            threads === undefined
+              ? 'Loading threads…'
+              : `${filteredThreads?.length ?? 0} thread${(filteredThreads?.length ?? 0) === 1 ? '' : 's'}${unreadTotal > 0 ? ` · ${unreadTotal} unread` : ''}`
+          }
+          onReset={search.trim() ? () => setSearch('') : undefined}
+        >
+          <Search
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by creator name or handle"
+            aria-label="Search message threads"
+          />
+        </AccountRefineCard>
+
+        <StudioDashLayout>
+          <StudioDashCol span={4}>
             <Card pad="sm">
               <CardHead title="Threads" sub="Most recent first" />
-              {threads === undefined ? (
-                <EmptyState icon="message" title="Loading threads…" />
-              ) : threads.length === 0 ? (
-                <EmptyState
-                  icon="message"
-                  title="No DMs yet"
-                  subtitle="Subscribe to a creator and open a DM thread from their profile."
-                />
-              ) : (
-                <Stack gap={1}>
-                  {threads.map(({ thread, creator, unread }) => (
-                    <Card
-                      key={thread._id}
-                      hover
-                      pad="sm"
-                      onClick={() => setActiveId(thread._id)}
-                    >
-                      <PersonRow
-                        name={creator?.name ?? 'Creator'}
-                        sub={
-                          thread.lastMessageAt
-                            ? fmtTime(thread.lastMessageAt)
-                            : 'No messages yet'
-                        }
-                        mono={creator?.avatarMono ?? '·'}
-                        color={creator?.avatarColor ?? '#3A4F7A'}
-                        trailing={
-                          unread > 0 ? (
-                            <Badge tone="blue" dot>
-                              {unread}
-                            </Badge>
-                          ) : null
-                        }
-                      />
-                    </Card>
-                  ))}
-                </Stack>
-              )}
+              {threadList}
             </Card>
-          </Col>
+          </StudioDashCol>
+          <StudioDashCol span={8}>{chatPane}</StudioDashCol>
+        </StudioDashLayout>
 
-          <Col gap={3}>
-            {!active ? (
-              <Card>
-                <EmptyState
-                  icon="message"
-                  title="Pick a thread"
-                  subtitle="Select a conversation on the left to read and reply."
-                />
-              </Card>
-            ) : (
-              <Card>
-                <CardHead
-                  title={active.creator?.name ?? 'Creator'}
-                  sub={active.creator?.handle ? `${active.creator.handle}` : ''}
-                  action={
-                    <Button variant="ghost" size="sm" iconOnly aria-label="More">
-                      <Icon name="more" size={14} />
-                    </Button>
-                  }
-                />
-                {error && <Muted>{error}</Muted>}
-                <ChatPanel
-                  messages={chatMessages}
-                  loading={messages === undefined}
-                  draft={draft}
-                  onDraftChange={setDraft}
-                  onSend={handleSend}
-                  sending={sending}
-                  placeholder="Message the creator…"
-                  emptyTitle="Say hi"
-                  emptySubtitle="Send the first message to open this thread."
-                />
-              </Card>
-            )}
-          </Col>
-        </Row>
+        <QuickActionGrid title="Related" items={accountCrossLinks('messages', navigate)} />
       </Stack>
     </Container>
   );

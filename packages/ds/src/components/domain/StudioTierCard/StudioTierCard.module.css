@@ -5,21 +5,26 @@
   min-height: 100%;
   padding: var(--space-8);
   background: var(--bg-1);
+  border: 1px solid var(--line);
   border-radius: var(--r-2xl);
   box-shadow: var(--shadow-md);
+  color: var(--t-1);
   overflow: hidden;
 }
 
 .advanced {
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--line));
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent),
     var(--shadow-lg);
 }
 
 .elite {
-  background: var(--t-1);
-  color: var(--bg-1);
-  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--violet) 42%, var(--line));
+  background: var(--bg-1);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--violet) 12%, transparent),
+    var(--shadow-lg);
 }
 
 .popular {
@@ -55,7 +60,7 @@
 }
 
 .elite .tierLabel {
-  color: var(--blue-soft);
+  color: var(--violet);
 }
 
 .name {
@@ -64,6 +69,7 @@
   font-size: var(--text-2xl);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-tight);
+  color: var(--t-1);
 }
 
 .priceRow {
@@ -76,6 +82,7 @@
   font-size: var(--text-3xl);
   font-weight: var(--weight-extrabold);
   font-variant-numeric: tabular-nums;
+  color: var(--t-1);
 }
 
 .advanced .price {
@@ -83,17 +90,13 @@
 }
 
 .elite .price {
-  color: color-mix(in srgb, var(--primary) 75%, var(--bg-1));
+  color: var(--violet);
 }
 
 .period {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--t-3);
-}
-
-.elite .period {
-  color: color-mix(in srgb, var(--bg-1) 60%, transparent);
 }
 
 .features {
@@ -124,23 +127,13 @@
   color: var(--t-4);
 }
 
-.elite .feature,
-.elite .featureOn {
-  color: var(--bg-1);
-  font-weight: var(--weight-semibold);
-}
-
-.elite .featureOff {
-  color: color-mix(in srgb, var(--bg-1) 45%, transparent);
-}
-
 .featureIcon {
   flex-shrink: 0;
   color: var(--primary);
 }
 
 .elite .featureIcon {
-  color: color-mix(in srgb, var(--primary) 75%, var(--bg-1));
+  color: var(--violet);
 }
 
 .featureIconOff {
@@ -155,7 +148,8 @@
   gap: var(--space-3);
   padding-top: var(--space-6);
   margin-top: auto;
-  background: color-mix(in srgb, var(--bg-3) 50%, transparent);
+  background: var(--bg-2);
+  border-top: 1px solid var(--line-soft);
   margin-left: calc(-1 * var(--space-8));
   margin-right: calc(-1 * var(--space-8));
   margin-bottom: calc(-1 * var(--space-8));
@@ -165,7 +159,8 @@
 }
 
 .elite .foot {
-  background: color-mix(in srgb, var(--bg-1) 8%, transparent);
+  background: color-mix(in srgb, var(--violet) 8%, var(--bg-2));
+  border-top-color: color-mix(in srgb, var(--violet) 22%, var(--line-soft));
 }
 
 .subs {
@@ -179,7 +174,7 @@
 }
 
 .elite .subs {
-  color: color-mix(in srgb, var(--primary) 75%, var(--bg-1));
+  color: var(--violet);
 }
 
 .actions {
@@ -199,11 +194,19 @@
   background: transparent;
   color: var(--t-3);
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .iconBtn:hover {
   background: var(--bg-3);
+  color: var(--t-1);
+}
+
+.iconBtn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 .iconBtnDanger:hover {
@@ -212,14 +215,15 @@
 }
 
 .elite .iconBtn {
-  color: color-mix(in srgb, var(--bg-1) 85%, transparent);
+  color: var(--t-3);
 }
 
 .elite .iconBtn:hover {
-  background: color-mix(in srgb, var(--bg-1) 12%, transparent);
+  background: color-mix(in srgb, var(--violet) 14%, var(--bg-3));
+  color: var(--violet);
 }
 
 .elite .iconBtnDanger:hover {
-  background: color-mix(in srgb, var(--red) 25%, transparent);
-  color: var(--red-soft);
+  background: var(--red-soft);
+  color: var(--red);
 }

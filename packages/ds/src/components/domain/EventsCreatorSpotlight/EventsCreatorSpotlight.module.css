@@ -1,0 +1,88 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 17.5rem;
+  padding: var(--space-6);
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.interactive {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+}
+
+.interactive:hover {
+  border-color: var(--line);
+  transform: translateY(-4px);
+}
+
+.interactive:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.avatarWrap {
+  position: relative;
+  width: var(--size-12xl);
+  height: var(--size-12xl);
+}
+
+.verified {
+  position: absolute;
+  right: calc(var(--space-1) * -1);
+  bottom: calc(var(--space-1) * -1);
+  width: var(--size-6xl);
+  height: var(--size-6xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 2px solid var(--bg-1);
+  border-radius: var(--r-pill);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.handle {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--t-3);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  color: var(--t-3);
+  background: var(--bg-2);
+  border-radius: var(--r-sm);
+}
+
+.eventsToday {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--primary);
+}

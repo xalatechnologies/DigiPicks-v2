@@ -2,6 +2,40 @@
   position: relative;
   width: 100%;
 }
+
+.toolbar {
+  width: 100%;
+  flex-shrink: 1;
+}
+
+.toolbar .input {
+  height: var(--size-8xl);
+  font-size: var(--text-sm);
+  border-radius: var(--r-pill);
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+}
+
+.toolbar .input::placeholder {
+  color: var(--t-2);
+}
+
+.toolbar .input:hover {
+  border-color: var(--line-strong);
+  background: var(--bg-1);
+}
+
+.toolbar .input:focus {
+  border-color: var(--primary);
+  background: var(--bg-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.toolbar .icon {
+  color: var(--t-2);
+}
+
 .input {
   display: block;
   width: 100%;

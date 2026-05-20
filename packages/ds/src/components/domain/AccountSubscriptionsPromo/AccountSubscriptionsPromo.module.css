@@ -1,0 +1,52 @@
+.promo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: var(--size-15xl);
+  padding: var(--space-8);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--primary) 55%, var(--t-1)),
+    var(--t-1)
+  );
+  color: var(--primary-foreground);
+  text-align: left;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    70% 80% at 80% 20%,
+    color-mix(in srgb, var(--primary) 35%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: color-mix(in srgb, var(--primary-foreground) 82%, transparent);
+}

@@ -1,0 +1,31 @@
+.bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.pills {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.searchSlot {
+  flex: 1 1 auto;
+  min-width: var(--search-w);
+  max-width: var(--search-max-w);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.searchSlot > * {
+  width: 100%;
+}
+
+.trailing {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+}

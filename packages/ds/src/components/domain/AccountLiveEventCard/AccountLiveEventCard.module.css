@@ -1,0 +1,98 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 18.75rem;
+  padding: var(--space-5);
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  flex-shrink: 0;
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.live {
+  border-color: color-mix(in srgb, var(--red) 35%, var(--line-soft));
+  background: var(--bg-0);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--t-4);
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--primary-foreground);
+  background: var(--red);
+  border-radius: var(--r-full);
+}
+
+.liveDot {
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--r-pill);
+  background: var(--primary-foreground);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.vs {
+  color: var(--t-4);
+  font-weight: var(--weight-medium);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-2);
+  border-radius: var(--r-xl);
+}
+
+.live .foot {
+  background: color-mix(in srgb, var(--bg-2) 80%, var(--bg-1));
+}
+
+.status {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--t-3);
+}
+
+.score {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-extrabold);
+  color: var(--t-1);
+}

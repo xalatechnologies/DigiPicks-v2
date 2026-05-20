@@ -1,31 +1,32 @@
 .panel {
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: var(--space-8);
   border-radius: var(--r-xl);
-  background: linear-gradient(
-    135deg,
-    var(--t-1) 0%,
-    color-mix(in srgb, var(--t-1) 85%, var(--primary)) 100%
-  );
-  color: var(--bg-1);
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  box-shadow: var(--shadow-md);
 }
 
 .content {
-  position: relative;
-  z-index: 1;
+  flex: 1;
+  min-height: 0;
 }
 
 .title {
   margin: 0;
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
+  color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
 }
 
 .sub {
   margin: var(--space-2) 0 var(--space-6);
   font-size: var(--text-sm);
-  color: color-mix(in srgb, var(--bg-1) 65%, transparent);
+  color: var(--t-2);
+  line-height: var(--leading-relaxed);
 }
 
 .list {
@@ -34,7 +35,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .row {
@@ -43,54 +44,64 @@
   gap: var(--space-3);
   width: 100%;
   border: 0;
+  border-radius: var(--r-md);
   background: transparent;
-  padding: 0;
+  padding: var(--space-2) var(--space-3);
+  margin: 0 calc(var(--space-3) * -1);
   text-align: left;
   cursor: pointer;
   color: inherit;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.row:not(:disabled):hover {
+  background: var(--bg-2);
 }
 
 .row:disabled {
   cursor: default;
 }
 
+.row:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
 .check {
   width: var(--size-2xl);
   height: var(--size-2xl);
   border-radius: var(--r-pill);
-  border: 2px solid color-mix(in srgb, var(--primary) 50%, transparent);
+  border: 2px solid var(--line-strong);
+  background: var(--bg-2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .checkDone {
   border-color: var(--primary);
   color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  background: color-mix(in srgb, var(--primary) 14%, var(--bg-2));
 }
 
 .label {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  color: color-mix(in srgb, var(--bg-1) 80%, transparent);
+  color: var(--t-2);
   transition: color var(--dur-fast) var(--ease-out);
 }
 
 .row:not(:disabled):hover .label {
-  color: var(--bg-1);
+  color: var(--t-1);
 }
 
 .labelDone {
-  color: var(--bg-1);
-}
-
-.watermark {
-  position: absolute;
-  bottom: calc(var(--space-10) * -1);
-  right: calc(var(--space-10) * -1);
-  opacity: 0.05;
-  transform: rotate(12deg);
-  pointer-events: none;
+  color: var(--t-3);
 }

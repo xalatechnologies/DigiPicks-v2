@@ -12,6 +12,7 @@ export interface StudioFilterPillsProps {
   value: string;
   onChange: (value: string) => void;
   ariaLabel?: string;
+  nowrap?: boolean;
   className?: string;
 }
 
@@ -20,10 +21,11 @@ export function StudioFilterPills({
   value,
   onChange,
   ariaLabel = 'Filter picks',
+  nowrap,
   className,
 }: StudioFilterPillsProps) {
   return (
-    <div className={cx(s.wrap, className)} role="group" aria-label={ariaLabel}>
+    <div className={cx(s.wrap, nowrap && s.nowrap, className)} role="group" aria-label={ariaLabel}>
       {options.map((opt) => (
         <button
           key={opt.value}

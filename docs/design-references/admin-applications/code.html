@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Admin - Creator Applications</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdcbb",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "tertiary-container": "#a76500",
+                        "primary-container": "#8455ef",
+                        "on-secondary-container": "#5c647a",
+                        "on-secondary-fixed": "#131b2e",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "on-surface-variant": "#494454",
+                        "surface-tint": "#6d3bd7",
+                        "inverse-on-surface": "#eff1f3",
+                        "primary-fixed": "#e9ddff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "tertiary": "#855000",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed": "#2c1700",
+                        "primary": "#6b38d4",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed": "#dae2fd",
+                        "surface-container-low": "#f2f4f6",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#d0bcff",
+                        "secondary": "#565e74",
+                        "on-primary-container": "#fffbff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "secondary-container": "#dae2fd",
+                        "primary-fixed-dim": "#d0bcff",
+                        "outline-variant": "#cbc3d7",
+                        "outline": "#7b7486",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(24px); }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 overflow-y-auto bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-1 h-full z-50">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+</div>
+<div>
+<div class="text-2xl font-black text-violet-600 dark:text-violet-400 uppercase italic leading-none">EdgePicks</div>
+<div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">Admin Console</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">grid_view</span> Overview
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 shadow-sm rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">how_to_reg</span> Creator Applications
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">verified_user</span> Creators
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">group</span> Users
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">gavel</span> Content Moderation
+            </a>
+<div class="h-px bg-slate-200 dark:bg-slate-800 my-4 mx-4"></div>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">payments</span> Billing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span> Payouts
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">ads_click</span> Campaigns
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">monitoring</span> Analytics
+            </a>
+<div class="mt-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all active:translate-x-1 font-manrope text-sm font-semibold" href="#">
+<span class="material-symbols-outlined">settings</span> System Settings
+                </a>
+</div>
+</nav>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl h-16 flex items-center justify-between px-8 shadow-sm">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Global search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-sm font-bold text-slate-900">Alex Rivera</p>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Lead Administrator</p>
+</div>
+<img alt="Administrator Avatar" class="w-10 h-10 rounded-xl object-cover bg-slate-200" data-alt="A professional studio portrait of a young male executive with short dark hair and a neat beard, wearing a high-end charcoal suit jacket over a crisp white shirt. The lighting is soft and directional, typical of an office setting, with a clean, minimalist background of cool-toned architectural glass and soft white walls. The overall mood is serious, capable, and authoritative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaKsTzCrWHQh0JmIFMu6WKV4IwlLB9LiQrzb4pZN0Jol7BPp2oAULKvbpIrgTj8Mgs8hagnXFPrKdWgGA46nZoYdNaVPOPVlmF_RK4lJPoFbn29YW84FkpVy4vJTk1Ti4Bf3VarSFZZnzGU_1c4WoSMDHTawdcAWMWMJXtD5Dc5--DMLcnN36f_rQEdgGP81qOnm8ESRytKnziyb-_BeoZu3p3UCuzKgMERFFyqwb5YQ1CFal13kfkzIF17Vjr1b9adB1SEHYulZQ"/>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800 h-px w-full absolute bottom-0 left-0"></div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-8 min-h-[calc(100vh-4rem)] overflow-y-auto relative pr-[420px]">
+<!-- Page Header -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<span class="text-[11px] uppercase tracking-[0.2em] font-bold text-primary">Operational Hub</span>
+<div class="h-px w-8 bg-primary/30"></div>
+</div>
+<h1 class="text-4xl font-black tracking-tight text-slate-900">Creator Applications</h1>
+<p class="text-slate-500 font-medium mt-1">Reviewing <span class="text-slate-900 font-bold">42</span> new requests for creator status</p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-base">file_download</span>
+                EXPORT REPORT
+            </button>
+</div>
+<!-- Filter Bar -->
+<div class="bg-surface-container-lowest rounded-2xl p-2 mb-8 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between px-4 pt-2">
+<div class="flex gap-2">
+<button class="px-5 py-2 rounded-xl bg-primary text-white font-bold text-sm shadow-md transition-all">Pending</button>
+<button class="px-5 py-2 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50 transition-all">In Review</button>
+<button class="px-5 py-2 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50 transition-all">Approved</button>
+<button class="px-5 py-2 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50 transition-all">Rejected</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative">
+<select class="appearance-none pl-4 pr-10 py-2 bg-surface-container-low border-none rounded-xl text-xs font-bold text-slate-700 focus:ring-primary/20">
+<option>Sport/Niche</option>
+<option>NBA</option>
+<option>NFL</option>
+<option>Soccer</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none pl-4 pr-10 py-2 bg-surface-container-low border-none rounded-xl text-xs font-bold text-slate-700 focus:ring-primary/20">
+<option>Last 7 Days</option>
+<option>Last 30 Days</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">calendar_today</span>
+</div>
+</div>
+</div>
+<div class="h-px bg-slate-100 w-full"></div>
+<div class="px-4 pb-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm py-2 pl-10" placeholder="Search by name, handle, or email..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Table -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-slate-50/50">
+<tr>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Applicant</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Email Address</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Primary Niche</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Submitted</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Status</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400">Evidence</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-400 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Active/Selected Row -->
+<tr class="bg-primary/5 border-l-4 border-primary">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Marcus Thorne Avatar" class="w-10 h-10 rounded-xl object-cover" data-alt="A professional high-resolution profile portrait of Marcus Thorne, a modern sports analyst in his late 20s. He has a sharp, confident expression, styled dark hair, and is wearing a premium knit polo shirt. The lighting is bright and clean with a soft blue-to-white gradient background that matches a high-end corporate aesthetic. The mood is trustworthy and expert-driven." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFXLSsQzY46w7HIeieQc5PaUoJuXmbnO9A7rNPxOjsnWJtOXoStxrw4oFvyBhxQQl2_2MgywTP8OYCSUev9tqgWHCx6v_t2QVfQa2sESQ27tgRC1Qb2zMJ362j4ArHXzXaaIRNj4XNbfry2VD_f806YupWt7f9Aa92F6wolYFlPatIcUzPTRdqKREAaxt1ln8opwcb-u3P7zb-0U37kueps_yzNojHeMXXnvasbbpejAkEmxxB-Dmj-Ufki8-MKIZ0IC61sE_29Ns"/>
+<div>
+<p class="font-bold text-slate-900 leading-none">Marcus Thorne</p>
+<p class="text-xs font-medium text-slate-500 mt-1">@mthorne_picks</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">m.thorne@vantage-sports.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 bg-violet-100 text-violet-700 text-[10px] font-bold rounded-lg uppercase tracking-wide">NBA Props</span>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-500">2 hours ago</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+<span class="text-xs font-bold text-amber-700">Pending</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-lg">brand_awareness</span>
+<span class="material-symbols-outlined text-lg">videocam</span>
+<span class="material-symbols-outlined text-lg">share</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm hover:shadow-md transition-all">View Details</button>
+<button class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Sara Lopez Avatar" class="w-10 h-10 rounded-xl object-cover bg-slate-200" data-alt="A portrait of a confident woman in her early 30s with long dark hair, wearing stylish glasses and a modern blazer. She looks like a professional data scientist or sports analyst. The background is a clean, bright interior with soft natural light. The aesthetic is professional, sophisticated, and modern, utilizing a high-key lighting setup." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9Jip4JVCNsKpM4u4L5k1FZYbHRkJ30rdpPyTVeUdPi9dZNKx1FVdjG0GoZ_WpkpVIgq0IUb7BJ4Cf0G-RCnnoZoWN_26Yv3rlqK1X0cIbKdWKVPQt46L4NBBDfc7PG8cbpVq2dycQcXAYcrQj96Qm2wO_qCaOBCf6F3mXVw0QdbHdMX-ALE3_RDWru0O9WfRhSPs2tBFXmvuq3U8kPrYVHdmJWDxGGber4POGTAM9RT5Al4-yhq0H9wwZ0eG94wgTcKb35pDkyhM"/>
+<div>
+<p class="font-bold text-slate-900 leading-none">Sara Lopez</p>
+<p class="text-xs font-medium text-slate-500 mt-1">@slopez_bets</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">sara.lopez@datahub.io</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg uppercase tracking-wide">NFL Spreads</span>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-500">5 hours ago</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-blue-400 rounded-full"></span>
+<span class="text-xs font-bold text-blue-700">In Review</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-lg">brand_awareness</span>
+<span class="material-symbols-outlined text-lg">share</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-all">View Details</button>
+<button class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- More generic rows for visual density -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="James King Avatar" class="w-10 h-10 rounded-xl object-cover bg-slate-200" data-alt="A portrait of a male sports fan in his mid-30s, clean-shaven, wearing a branded sports cap and a premium hoodie. He has a friendly, professional smile. The background is a slightly blurred modern stadium interior. The lighting is warm and cinematic, emphasizing a professional yet accessible persona for a sports betting expert." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPYjwzQIk1rYK6L3FJD3XsLtJhAdHCI85XtoPq6ChgRG7z8cOuCax-jLD_z_xQEK_3Dux0xL-CRPKiSz3yRvqtSd4dcYxRnBP9kYbzqGRxdWgRdoO48TPQ9KTOdnk8GsDSVrTxTN1r8qxv516NqDjsjtOJAzPG4-8nnLT0ArdCys7oNYXcJbkG3odJdHVXrtCFt0Ds12byz_WOVdFlwM7vi6fpzoB21dLGePl21g6UKaAgoJwKDmCpybizXtO-TqbwP77VZwWtOg4"/>
+<div>
+<p class="font-bold text-slate-900 leading-none">James King</p>
+<p class="text-xs font-medium text-slate-500 mt-1">@kingofparlays</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">j.king@gmail.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-wide">Soccer/MLS</span>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-500">Yesterday</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-amber-400 rounded-full"></span>
+<span class="text-xs font-bold text-amber-700">Pending</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-lg">videocam</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-all">View Details</button>
+<button class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+<!-- Detail Drawer (Open state) -->
+<aside class="fixed top-0 right-0 h-screen w-[420px] bg-white shadow-2xl z-50 flex flex-col border-l border-slate-100">
+<!-- Drawer Header -->
+<div class="p-6 border-b border-slate-100">
+<div class="flex items-center justify-between mb-6">
+<button class="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">share</span>
+</button>
+<button class="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">flag</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<img alt="Marcus Thorne Large Avatar" class="w-20 h-20 rounded-2xl object-cover shadow-lg" data-alt="Close-up professional portrait of a male sports analyst, mid-20s, with a charismatic smile and confident posture. He's wearing a high-quality navy blue polo shirt. The lighting is warm and balanced, with a subtle bokeh background of a high-tech media studio featuring screens and soft blue neon accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbqgS2x-Sp85BSJxnu96hIEVinDE_rCSRcNtQ14IS7wq-i-uw9egAwmBc55zCwv0C06sIuVq5NSOW43QEKJJAvSBdE2WGlGRP7NLRTS5rUOS7mzGIWueCb92uqSfaxU57f4sxkERHxBOgWypqD1DH01x9d89vCtW_g5IM5ELI9Ofe1Cu5VkNduVrgUtzJGFYloAnb9AmernJgPiqeESU8_icqVxkfqJhAGoYXledt5Vtiib-QgR8SQjbhwQI_y4kmKqkOcacCZBLM"/>
+<div>
+<h2 class="text-2xl font-black text-slate-900 tracking-tight">Marcus Thorne</h2>
+<p class="text-slate-500 font-semibold tracking-tight">NBA Specialist • @mthorne_picks</p>
+<div class="flex gap-2 mt-2">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check_circle</span> Verified Identity
+                        </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8">
+<!-- Bio & Metrics -->
+<section>
+<h3 class="text-xs uppercase tracking-widest font-black text-slate-400 mb-4">Professional Overview</h3>
+<p class="text-sm text-slate-600 leading-relaxed font-medium">
+                    "Former analyst at Vantage Sports. Specialized in NBA player performance props and mid-game situational spreads. 64% win rate over the 2023-24 season with verified tracking on Action Network."
+                </p>
+<div class="grid grid-cols-2 gap-3 mt-6">
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<p class="text-[10px] uppercase font-bold text-slate-500 mb-1">Twitter (X)</p>
+<p class="text-lg font-black text-slate-900">52.4K</p>
+<p class="text-[10px] text-emerald-600 font-bold flex items-center">
+<span class="material-symbols-outlined text-[10px]">trending_up</span> +12% MoM
+                        </p>
+</div>
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<p class="text-[10px] uppercase font-bold text-slate-500 mb-1">IG Reach</p>
+<p class="text-lg font-black text-slate-900">18.2K</p>
+<p class="text-[10px] text-slate-400 font-bold">Consistent activity</p>
+</div>
+</div>
+</section>
+<!-- Evidence / Performance -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xs uppercase tracking-widest font-black text-slate-400">Evidence &amp; Performance</h3>
+<button class="text-primary text-[10px] font-bold hover:underline">VIEW ALL 6 ATTACHMENTS</button>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<div class="flex-shrink-0 w-32 h-48 bg-slate-200 rounded-xl overflow-hidden shadow-sm relative group">
+<img alt="Win Rate Screenshot" class="w-full h-full object-cover" data-alt="A clean, professional screenshot of a sports betting analytics dashboard. The image shows a vibrant violet line graph trending upwards with 'Win Rate: 64%' prominently displayed in bold typography. The interface is modern, dark-themed, and filled with detailed data points, betting history entries, and green profit markers. The aesthetic is focused on high-trust financial data." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4Lj3dsAlpikst94bCb2-cIUtIBTDILJxMu7hPXME0QxRY7Zd3JFG6ptAs3HF6RlTmA8uNbLFRT__sG3QjUFkwlY2M2CawMbaRJGNDJuN5RmYlzg5ZsWQMzQRq_d8KBr582ihSrBEqLT_sTfwbkyknMpYMqYxG-TgkjxYx_jbIpB9_EM_NbgWt-lQ3c2BuqxIT6k1Cn-wYm5t9_iTeq_dqehZ--UX4BbnI3CVbCXbVP0e6n8FhXGZTngBNUA8TegyQGvdFh4nLZfU"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-32 h-48 bg-slate-200 rounded-xl overflow-hidden shadow-sm relative group">
+<img alt="History Log" class="w-full h-full object-cover" data-alt="A detailed digital log of betting history presented in a modern, professional spreadsheet UI. The screen shows rows of NBA games, specific odds, and green 'WON' badges for nearly all entries. The lighting is a soft glow from a digital monitor, creating an atmosphere of verified expertise and operational success. The UI elements are sleek and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_4DbcelnbJkx9L9Ybbu-W3krzYfXLsEWSvjWpxavglahutNUJn8q6QXzZlYqWLPg_vPVOjGt7KAZNz7PQCX4yYUvbemUL4aNNpW2zTEbsam9llru2s127-afpXUkh51WRo77mXEzMGMyknLWziUa1fQS5xQQWxQJtCISat0XfE8yZ4g7f4sDvIwA9iBC79WoVvLFmfk-s529SN_jYIcr23j26kNqMzXLZPIhcHg_fAX_9wxSURkYMqV7FrokGBtAjjoZkFchDVoY"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Internal History -->
+<section>
+<h3 class="text-xs uppercase tracking-widest font-black text-slate-400 mb-4">Internal History</h3>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">JD</div>
+<div class="flex-1 bg-surface-container-low p-3 rounded-2xl rounded-tl-none">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold text-slate-900">Jane Doe</span>
+<span class="text-[9px] text-slate-400 font-medium">1 HOUR AGO</span>
+</div>
+<p class="text-[11px] text-slate-600">Checked social metrics. Engagement rate is high (4.2%). Waiting on ID verification to clear.</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">SM</div>
+<div class="flex-1 bg-surface-container-low p-3 rounded-2xl rounded-tl-none">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold text-slate-900">System Monitor</span>
+<span class="text-[9px] text-slate-400 font-medium">2 HOURS AGO</span>
+</div>
+<p class="text-[11px] text-slate-600">Background check initiated. No flags found in primary database.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Decision Panel (Sticky Bottom) -->
+<div class="p-6 bg-white border-t border-slate-100 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
+<div class="grid grid-cols-2 gap-3 mb-4">
+<button class="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Approve Creator
+                </button>
+<button class="flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-sm hover:bg-red-100 transition-all">
+<span class="material-symbols-outlined text-base">block</span>
+                    Reject
+                </button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl font-bold text-[11px] hover:bg-slate-100 transition-all">
+<span class="material-symbols-outlined text-sm">mail</span>
+                    Request Info
+                </button>
+<button class="flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl font-bold text-[11px] hover:bg-slate-100 transition-all">
+<span class="material-symbols-outlined text-sm">add_comment</span>
+                    Add Admin Note
+                </button>
+</div>
+</div>
+</aside>
+</body></html>

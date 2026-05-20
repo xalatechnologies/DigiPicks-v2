@@ -1,0 +1,53 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.row:first-child {
+  padding-top: 0;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.sub {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--t-3);
+  line-height: var(--leading-relaxed);
+}
+
+.channels {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.channel {
+  color: var(--t-4);
+}
+
+.channelOn {
+  color: var(--primary);
+}

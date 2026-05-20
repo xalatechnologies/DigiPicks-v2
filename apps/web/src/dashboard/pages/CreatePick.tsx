@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
@@ -16,7 +15,8 @@ import {
   TextArea,
   Segmented,
   PickCard,
-  PageHead,
+  StudioPageHeader,
+  QuickActionGrid,
   Muted,
   Eyebrow,
   Divider,
@@ -26,6 +26,7 @@ import {
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { STUDIO } from '../../lib/studioRoutes';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 const SPORTS = ['Soccer', 'Cricket', 'Tennis'];
 
@@ -149,229 +150,224 @@ export function CreatePick() {
   }
 
   return (
-    <>
-      <PageHeader
-        title="Create pick"
-        crumbs={[{ label: 'Studio' }, { label: 'Posts & Picks' }, { label: 'New' }]}
-        actions={
-          <Row gap={2}>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate(STUDIO.picks)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleSubmit('draft')}
-              disabled={submitting || !creator}
-            >
-              Save draft
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => handleSubmit('published')}
-              disabled={submitting || !creator}
-            >
-              Publish now
-            </Button>
-          </Row>
-        }
-      />
+    <Container size="xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Posts"
+          title="Create a pick"
+          sub="Compose, attach analysis, set access — preview live as you write."
+          actions={
+            <Row gap={2}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate(STUDIO.picks)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSubmit('draft')}
+                disabled={submitting || !creator}
+              >
+                Save draft
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleSubmit('published')}
+                disabled={submitting || !creator}
+              >
+                Publish now
+              </Button>
+            </Row>
+          }
+        />
 
-      <Container size="xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="New post"
-            title="Create a pick"
-            sub="Compose, attach analysis, set access — preview live as you write."
-          />
+        {error && (
+          <Card>
+            <Row gap={3}>
+              <Badge tone="red" dot>
+                Error
+              </Badge>
+              <Muted>{error}</Muted>
+            </Row>
+          </Card>
+        )}
 
-          {error && (
+        <Row gap={5} wrap>
+          <Col gap={4}>
             <Card>
-              <Row gap={3}>
-                <Badge tone="red" dot>
-                  Error
-                </Badge>
-                <Muted>{error}</Muted>
-              </Row>
-            </Card>
-          )}
-
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead title="Pick details" sub="The matchup and the wager" />
-                <Stack gap={4}>
-                  <Field label="Title" required>
-                    <Input
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="A short, scannable headline"
-                    />
-                  </Field>
-
-                  <Row gap={3} wrap>
-                    <Col gap={0}>
-                      <Field label="Sport">
-                        <Select value={sport} onChange={(e) => setSport(e.target.value)}>
-                          {SPORTS.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </Select>
-                      </Field>
-                    </Col>
-                    <Col gap={0}>
-                      <Field label="League">
-                        <Input
-                          value={league}
-                          onChange={(e) => setLeague(e.target.value)}
-                          placeholder="e.g. EPL"
-                        />
-                      </Field>
-                    </Col>
-                    <Col gap={0}>
-                      <Field label="Market">
-                        <Select value={market} onChange={(e) => setMarket(e.target.value)}>
-                          {MARKET_OPTIONS.map((m) => (
-                            <option key={m} value={m}>
-                              {m}
-                            </option>
-                          ))}
-                        </Select>
-                      </Field>
-                    </Col>
-                  </Row>
-
-                  <Row gap={3} wrap>
-                    <Col gap={0}>
-                      <Field label="Event" required>
-                        <Input
-                          value={eventName}
-                          onChange={(e) => setEventName(e.target.value)}
-                          placeholder="Lakers vs Nuggets"
-                        />
-                      </Field>
-                    </Col>
-                    <Col gap={0}>
-                      <Field label="Event time">
-                        <Input
-                          value={eventTime}
-                          onChange={(e) => setEventTime(e.target.value)}
-                          placeholder="Tonight 7:30 PM ET"
-                        />
-                      </Field>
-                    </Col>
-                  </Row>
-
-                  <Row gap={3} wrap>
-                    <Col gap={0}>
-                      <Field label="Selection" required>
-                        <Input
-                          value={selection}
-                          onChange={(e) => setSelection(e.target.value)}
-                          placeholder="e.g. Over 112.5"
-                        />
-                      </Field>
-                    </Col>
-                    <Col gap={0}>
-                      <Field label="Odds">
-                        <Input
-                          value={odds}
-                          onChange={(e) => setOdds(e.target.value)}
-                          placeholder="-110"
-                        />
-                      </Field>
-                    </Col>
-                    <Col gap={0}>
-                      <Field label="Units">
-                        <Input
-                          value={units}
-                          onChange={(e) => setUnits(e.target.value)}
-                          placeholder="2u"
-                        />
-                      </Field>
-                    </Col>
-                  </Row>
-
-                  <Field label="Confidence">
-                    <Select
-                      value={confidence}
-                      onChange={(e) => setConfidence(e.target.value as PickConfidence)}
-                    >
-                      {CONFIDENCE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-
-                  <AIAssistPanel
-                    suggestion={aiSuggestion}
-                    busy={aiBusy}
-                    error={aiError}
-                    onSuggest={handleSuggest}
-                    onAccept={handleAccept}
-                    onDismiss={() => setAiSuggestion(null)}
+              <CardHead title="Pick details" sub="The matchup and the wager" />
+              <Stack gap={4}>
+                <Field label="Title" required>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="A short, scannable headline"
                   />
+                </Field>
 
-                  <Field label="Analysis" help="Reasoning subscribers see — markdown supported.">
-                    <TextArea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
-                  </Field>
+                <Row gap={3} wrap>
+                  <Col gap={0}>
+                    <Field label="Sport">
+                      <Select value={sport} onChange={(e) => setSport(e.target.value)}>
+                        {SPORTS.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </Col>
+                  <Col gap={0}>
+                    <Field label="League">
+                      <Input
+                        value={league}
+                        onChange={(e) => setLeague(e.target.value)}
+                        placeholder="e.g. EPL"
+                      />
+                    </Field>
+                  </Col>
+                  <Col gap={0}>
+                    <Field label="Market">
+                      <Select value={market} onChange={(e) => setMarket(e.target.value)}>
+                        {MARKET_OPTIONS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </Col>
+                </Row>
 
-                  <Divider />
+                <Row gap={3} wrap>
+                  <Col gap={0}>
+                    <Field label="Event" required>
+                      <Input
+                        value={eventName}
+                        onChange={(e) => setEventName(e.target.value)}
+                        placeholder="Lakers vs Nuggets"
+                      />
+                    </Field>
+                  </Col>
+                  <Col gap={0}>
+                    <Field label="Event time">
+                      <Input
+                        value={eventTime}
+                        onChange={(e) => setEventTime(e.target.value)}
+                        placeholder="Tonight 7:30 PM ET"
+                      />
+                    </Field>
+                  </Col>
+                </Row>
 
-                  <Field
-                    label="Access"
-                    help="Free picks are public. Premium and VIP require an active plan."
+                <Row gap={3} wrap>
+                  <Col gap={0}>
+                    <Field label="Selection" required>
+                      <Input
+                        value={selection}
+                        onChange={(e) => setSelection(e.target.value)}
+                        placeholder="e.g. Over 112.5"
+                      />
+                    </Field>
+                  </Col>
+                  <Col gap={0}>
+                    <Field label="Odds">
+                      <Input
+                        value={odds}
+                        onChange={(e) => setOdds(e.target.value)}
+                        placeholder="-110"
+                      />
+                    </Field>
+                  </Col>
+                  <Col gap={0}>
+                    <Field label="Units">
+                      <Input
+                        value={units}
+                        onChange={(e) => setUnits(e.target.value)}
+                        placeholder="2u"
+                      />
+                    </Field>
+                  </Col>
+                </Row>
+
+                <Field label="Confidence">
+                  <Select
+                    value={confidence}
+                    onChange={(e) => setConfidence(e.target.value as PickConfidence)}
                   >
-                    <Segmented
-                      options={ACCESS_OPTIONS}
-                      value={access}
-                      onChange={(v) => setAccess(v as PickAccess)}
-                      ariaLabel="Access level"
-                    />
-                  </Field>
-                </Stack>
-              </Card>
-            </Col>
+                    {CONFIDENCE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
 
-            <Col gap={4}>
-              <Stack gap={2}>
-                <Eyebrow>Live preview</Eyebrow>
-                <Muted>This is what subscribers will see in their feed.</Muted>
+                <AIAssistPanel
+                  suggestion={aiSuggestion}
+                  busy={aiBusy}
+                  error={aiError}
+                  onSuggest={handleSuggest}
+                  onAccept={handleAccept}
+                  onDismiss={() => setAiSuggestion(null)}
+                />
+
+                <Field label="Analysis" help="Reasoning subscribers see — markdown supported.">
+                  <TextArea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
+                </Field>
+
+                <Divider />
+
+                <Field
+                  label="Access"
+                  help="Free picks are public. Premium and VIP require an active plan."
+                >
+                  <Segmented
+                    options={ACCESS_OPTIONS}
+                    value={access}
+                    onChange={(v) => setAccess(v as PickAccess)}
+                    ariaLabel="Access level"
+                  />
+                </Field>
               </Stack>
+            </Card>
+          </Col>
 
-              <PickCard
-                creatorName={creator?.name ?? me?.name ?? 'You'}
-                creatorHandle={creator?.handle ?? ''}
-                creatorMono={creator?.avatarMono ?? ''}
-                creatorColor={creator?.avatarColor ?? ''}
-                creatorVerified={creator?.verified ?? false}
-                access={access}
-                sport={sport}
-                event={eventName}
-                eventTime={eventTime}
-                posted="just now"
-                title={title || 'Untitled pick'}
-                market={market}
-                selection={selection || '—'}
-                odds={odds || '—'}
-                units={units || '—'}
-                body={body}
-                status="pending"
-              />
-            </Col>
-          </Row>
-        </Stack>
-      </Container>
-    </>
+          <Col gap={4}>
+            <Stack gap={2}>
+              <Eyebrow>Live preview</Eyebrow>
+              <Muted>This is what subscribers will see in their feed.</Muted>
+            </Stack>
+
+            <PickCard
+              creatorName={creator?.name ?? me?.name ?? 'You'}
+              creatorHandle={creator?.handle ?? ''}
+              creatorMono={creator?.avatarMono ?? ''}
+              creatorColor={creator?.avatarColor ?? ''}
+              creatorVerified={creator?.verified ?? false}
+              access={access}
+              sport={sport}
+              event={eventName}
+              eventTime={eventTime}
+              posted="just now"
+              title={title || 'Untitled pick'}
+              market={market}
+              selection={selection || '—'}
+              odds={odds || '—'}
+              units={units || '—'}
+              body={body}
+              status="pending"
+            />
+          </Col>
+        </Row>
+
+        <QuickActionGrid title="Related" items={studioCrossLinks('createPick', navigate)} />
+      </Stack>
+    </Container>
   );
 }

@@ -1,31 +1,31 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from 'convex/react';
 import {
   AppLayout,
+  Container,
   Sidebar,
   NavItem,
   Stack,
-  Card,
-  Row,
-  Muted,
-  Mono,
-  Button,
-  Badge,
   StudioTopBar,
   StudioSidebarBrand,
   CreatorStudioProfile,
+  StudioDevBanner,
 } from '@digipicks/ds';
 import { AccountUserMenu } from '../auth/AccountUserMenu';
-import { api } from '../../../../convex/_generated/api';
-import { hasDevStudioPreview, clearDevStudioPreview } from '../lib/devDemoLogin';
+import {
+  hasDevStudioPreview,
+  clearDevStudioPreview,
+  canDevAutoSignInCreator,
+} from '../lib/devDemoLogin';
 import { STUDIO } from '../lib/studioRoutes';
+import { useStudioContext } from './useStudioContext';
 
 const STUDIO_NAV = [
   { to: STUDIO.overview, label: 'Dashboard', icon: 'home', end: true },
   { to: STUDIO.picks, label: 'Posts / Picks', icon: 'feed' },
   { to: STUDIO.subscribers, label: 'Subscribers', icon: 'users' },
   { to: STUDIO.products, label: 'Products / Pricing', icon: 'tag' },
+  { to: STUDIO.access, label: 'Access levels', icon: 'lock' },
   { to: STUDIO.analytics, label: 'Analytics', icon: 'chart' },
   { to: STUDIO.payouts, label: 'Payouts', icon: 'dollar' },
   { to: STUDIO.profile, label: 'Profile', icon: 'user' },
@@ -40,24 +40,18 @@ function isActive(pathname: string, to: string, end?: boolean): boolean {
 export function DashboardShell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { displayName, activeSubs, devPreview, creator, me } = useStudioContext();
 
-  const me = useQuery(api.users.meSafe);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
-  const subCount = useQuery(
-    api.subscriptions.countByCreator,
-    me?.creatorId ? { creatorId: me.creatorId } : 'skip',
-  );
-
-  const userName = creator?.name ?? me?.name ?? 'Elite Editor';
   const userMonogram = creator?.avatarMono ?? me?.name?.[0]?.toUpperCase() ?? 'E';
   const avatarColor = creator?.avatarColor;
   const brandTitle = creator?.name ?? 'The Elite Editorial';
-  const devPreview = hasDevStudioPreview();
+  const subLabel =
+    activeSubs > 0 ? `${activeSubs.toLocaleString()} subscribers` : 'Premium Curator';
 
   const header = (
     <StudioTopBar
       userMenu={<AccountUserMenu align="right" />}
-      onPrimaryClick={() => navigate(STUDIO.createPick)}
+      onSearch={() => navigate(STUDIO.subscribers)}
     />
   );
 
@@ -65,14 +59,11 @@ export function DashboardShell() {
     <Sidebar
       footer={
         <CreatorStudioProfile
-          name={userName}
+          name={displayName}
           monogram={userMonogram}
           color={avatarColor}
-          planLabel={
-            typeof subCount === 'number'
-              ? `${subCount.toLocaleString()} subscribers`
-              : 'Pro Account'
-          }
+          planLabel={subLabel}
+          onClick={() => navigate(STUDIO.profile)}
         />
       }
     >
@@ -95,29 +86,22 @@ export function DashboardShell() {
   );
 
   return (
-    <AppLayout header={header} sidebar={sidebar}>
-      <Stack gap={4}>
-        {devPreview ? (
-          <Card pad="md" elev>
-            <Row gap={3}>
-              <Badge tone="amber">Dev preview</Badge>
-              <Muted>
-                Studio shell with sample metrics. Set <Mono>VITE_DEV_CREATOR_EMAIL</Mono> and{' '}
-                <Mono>VITE_DEV_CREATOR_PASSWORD</Mono> in <Mono>.env.local</Mono> for live Convex
-                data.
-              </Muted>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  clearDevStudioPreview();
-                  navigate('/apply');
-                }}
-              >
-                Exit preview
-              </Button>
-            </Row>
-          </Card>
+    <AppLayout header={header} sidebar={sidebar} mainVariant="studio">
+      <Stack gap={6}>
+        {devPreview && !creator ? (
+          <Container size="2xl">
+            <StudioDevBanner
+              onExit={() => {
+                clearDevStudioPreview();
+                navigate('/apply');
+              }}
+              onSignIn={
+                canDevAutoSignInCreator()
+                  ? () => navigate(`/auth?next=${encodeURIComponent(STUDIO.overview)}`)
+                  : undefined
+              }
+            />
+          </Container>
         ) : null}
         <Outlet />
       </Stack>

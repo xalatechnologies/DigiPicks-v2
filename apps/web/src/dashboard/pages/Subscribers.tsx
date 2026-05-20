@@ -1,25 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'convex/react';
 import {
   Container,
   Stack,
-  Row,
-  Heading,
-  Eyebrow,
-  Muted,
+  StudioPageHeader,
   Button,
   EmptyState,
   Card,
   StudioSummaryGrid,
-  StudioFilterPills,
+  StudioFilterBar,
   StudioMetaChip,
   StudioSubscribersTable,
   QuickActionGrid,
   type StudioSubscriberRowData,
 } from '@digipicks/ds';
-import { api } from '../../../../../convex/_generated/api';
-import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { useStudioContext } from '../useStudioContext';
 import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
@@ -134,62 +129,76 @@ function toRow(u: {
   };
 }
 
+function matchesSearch(row: StudioSubscriberRowData, query: string): boolean {
+  if (!query.trim()) return true;
+  const q = query.toLowerCase();
+  return (
+    row.name.toLowerCase().includes(q) ||
+    (row.handle?.toLowerCase().includes(q) ?? false) ||
+    row.mono.toLowerCase().includes(q)
+  );
+}
+
 export function Subscribers() {
   const navigate = useNavigate();
-  const devPreview = hasDevStudioPreview();
+  const ctx = useStudioContext();
   const [planFilter, setPlanFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'active' | 'all'>('active');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  const me = useQuery(api.users.meSafe);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
-  const activeCount = useQuery(
-    api.subscriptions.countByCreator,
-    creator?._id ? { creatorId: creator._id } : 'skip',
-  );
-  const subsRaw = useQuery(
-    api.subscriptions.byCreator,
-    creator?._id ? { creatorId: creator._id, limit: 200 } : 'skip',
-  );
-
-  const subs = subsRaw ?? [];
-  const totalCount = typeof activeCount === 'number' ? activeCount : devPreview ? 420 : subs.length;
+  const allRows = useMemo(() => {
+    if (ctx.subs.length > 0) return ctx.subs.map(toRow);
+    if (ctx.devPreview) return DEMO_ROWS;
+    return [];
+  }, [ctx.subs, ctx.devPreview]);
 
   const rows = useMemo(() => {
-    const source = subs.length > 0 ? subs.map(toRow) : devPreview ? DEMO_ROWS : [];
-
-    return source.filter((r) => {
+    return allRows.filter((r) => {
       if (planFilter !== 'all' && r.plan !== planFilter) return false;
       if (statusFilter === 'active' && r.status !== 'active') return false;
-      return true;
+      return matchesSearch(r, search);
     });
-  }, [subs, devPreview, planFilter, statusFilter]);
+  }, [allRows, planFilter, statusFilter, search]);
 
-  const newThisWeek = useMemo(() => {
-    if (devPreview) return 18;
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return subs.filter((s) => s.startedAt >= weekAgo).length;
-  }, [subs, devPreview]);
+  const stats = useMemo(() => {
+    const active = allRows.filter((r) => r.status === 'active').length;
+    const pastDue = allRows.filter((r) => r.status === 'past_due').length;
+    const cancelled = allRows.filter((r) => r.status === 'cancelled').length;
+    const churnDisplay = ctx.churnRate ? `${ctx.churnRate}%` : '—';
 
-  const churnRate = useMemo(() => {
-    if (devPreview) return '2.4%';
-    if (subs.length === 0) return '—';
-    const cancelled = subs.filter((s) => s.status === 'cancelled').length;
-    return `${((cancelled / subs.length) * 100).toFixed(1)}%`;
-  }, [subs, devPreview]);
+    return {
+      total: allRows.length > 0 ? allRows.length : ctx.devPreview ? ctx.activeSubs : 0,
+      active,
+      newThisWeek: ctx.newSubs7d,
+      churnDisplay,
+      pastDue,
+      cancelled,
+    };
+  }, [allRows, ctx.activeSubs, ctx.churnRate, ctx.devPreview, ctx.newSubs7d]);
 
-  const loading = subsRaw === undefined && !devPreview && Boolean(creator?._id);
+  const loading = ctx.subsLoading && !ctx.devPreview;
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [planFilter, statusFilter, search]);
 
   return (
     <Container size="2xl">
-      <Stack gap={8}>
-        <Stack gap={2}>
-          <Eyebrow>Audience · Subscribers</Eyebrow>
-          <Heading level={1} size="2xl">
-            Subscribers
-          </Heading>
-          <Muted>Manage your audience and track subscriber growth.</Muted>
-        </Stack>
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Subscribers"
+          title="Subscribers"
+          sub="Manage your audience and track subscriber growth."
+          actions={
+            <>
+              <Button variant="outline" onClick={() => navigate(STUDIO.products)}>
+                View plans
+              </Button>
+              <Button variant="primary">Export list</Button>
+            </>
+          }
+        />
 
         <StudioSummaryGrid
           items={[
@@ -198,55 +207,82 @@ export function Subscribers() {
               icon: 'users',
               iconTone: 'primary',
               label: 'Total subscribers',
-              value: totalCount.toLocaleString(),
-              delta: { value: '+12%', dir: 'up' },
+              value: stats.total.toLocaleString(),
+              delta: { value: `${stats.active} active`, dir: 'flat' as const },
+              active: planFilter === 'all' && statusFilter === 'all',
+              onClick: () => {
+                setPlanFilter('all');
+                setStatusFilter('all');
+              },
             },
             {
               id: 'new',
               icon: 'users',
               iconTone: 'violet',
               label: 'New this week',
-              value: `+${newThisWeek}`,
-              delta: { value: '+4%', dir: 'up' },
+              value: `+${stats.newThisWeek}`,
+              delta: { value: '7d', dir: 'up' as const },
+              active: statusFilter === 'active' && planFilter === 'all',
+              onClick: () => {
+                setPlanFilter('all');
+                setStatusFilter('active');
+              },
             },
             {
               id: 'churn',
-              icon: 'users',
+              icon: 'chart',
               iconTone: 'danger',
               label: 'Churn rate',
-              value: churnRate,
-              delta: { value: '-0.5%', dir: 'down' },
+              value: stats.churnDisplay,
+              delta:
+                stats.cancelled > 0
+                  ? { value: `${stats.cancelled} cancelled`, dir: 'down' as const }
+                  : undefined,
+              active: statusFilter === 'all',
+              onClick: () => setStatusFilter('all'),
             },
             {
               id: 'rev',
               icon: 'dollar',
               iconTone: 'amber',
               label: 'Revenue / sub',
-              value: devPreview ? '$29.60' : '—',
-              delta: { value: '+2%', dir: 'up' },
+              value: ctx.devPreview ? '$29.60' : '—',
+              delta: { value: '30d avg', dir: 'up' as const },
+              onClick: () => navigate(STUDIO.payouts),
             },
           ]}
         />
 
-        <Row between wrap>
-          <Row gap={3} wrap>
-            <StudioFilterPills options={PLAN_FILTERS} value={planFilter} onChange={setPlanFilter} />
-            <StudioMetaChip
-              icon="filter"
-              label={statusFilter === 'active' ? 'Status: Active' : 'Status: All'}
-              onClick={() => setStatusFilter((s) => (s === 'active' ? 'all' : 'active'))}
-            />
-            <StudioMetaChip icon="calendar" label="Last 30 days" />
-          </Row>
-          <Row gap={2} wrap>
-            <Button variant="outline" size="sm" onClick={() => navigate(STUDIO.products)}>
-              View plans
-            </Button>
-            <Button variant="primary" size="sm">
-              Export list
-            </Button>
-          </Row>
-        </Row>
+        <StudioFilterBar
+          options={PLAN_FILTERS}
+          value={planFilter}
+          onChange={setPlanFilter}
+          ariaLabel="Filter subscribers by plan"
+          search={{
+            value: search,
+            onChange: (e) => setSearch(e.target.value),
+            placeholder: 'Search subscribers…',
+            'aria-label': 'Search subscribers',
+          }}
+          trailing={
+            <>
+              <StudioMetaChip
+                icon="filter"
+                label={statusFilter === 'active' ? 'Status: Active' : 'Status: All'}
+                onClick={() => setStatusFilter((s) => (s === 'active' ? 'all' : 'active'))}
+              />
+              {stats.pastDue > 0 ? (
+                <StudioMetaChip
+                  icon="flag"
+                  label={`${stats.pastDue} past due`}
+                  onClick={() => setStatusFilter('all')}
+                />
+              ) : (
+                <StudioMetaChip icon="calendar" label="Last 30 days" />
+              )}
+            </>
+          }
+        />
 
         {loading ? (
           <Card pad="lg" elev>
@@ -256,8 +292,23 @@ export function Subscribers() {
           <Card pad="lg" elev>
             <EmptyState
               icon="users"
-              title="No subscribers yet"
-              subtitle="Share your creator link to start building your audience."
+              title={search ? 'No subscribers match your search' : 'No subscribers yet'}
+              subtitle={
+                search
+                  ? 'Try a different query or clear filters.'
+                  : 'Share your creator link to start building your audience.'
+              }
+              action={
+                search ? (
+                  <Button variant="secondary" onClick={() => setSearch('')}>
+                    Clear search
+                  </Button>
+                ) : (
+                  <Button variant="primary" onClick={() => navigate(STUDIO.products)}>
+                    Set up plans
+                  </Button>
+                )
+              }
             />
           </Card>
         ) : (

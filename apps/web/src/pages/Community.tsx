@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
@@ -11,7 +11,6 @@ import {
   Card,
   CardHead,
   Button,
-  Icon,
   Badge,
   Mono,
   Muted,
@@ -19,10 +18,18 @@ import {
   EmptyState,
   ChatPanel,
   LockedChannelPanel,
+  Search,
+  StudioPageHeader,
+  AccountRefineCard,
+  StudioDashLayout,
+  StudioDashCol,
+  QuickActionGrid,
   type ChatPanelMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
+import { accountLayoutPaths, type LayoutContext } from '../lib/accountLayoutPaths';
+import { accountCrossLinks } from '../lib/accountCrossLinks';
 
 function fmtDate(ms: number): string {
   return new Date(ms).toLocaleDateString(undefined, {
@@ -31,33 +38,50 @@ function fmtDate(ms: number): string {
   });
 }
 
-export function Community() {
+export interface CommunityProps {
+  layoutContext?: LayoutContext;
+}
+
+export function Community({ layoutContext = 'public' }: CommunityProps) {
   const navigate = useNavigate();
+  const paths = accountLayoutPaths(layoutContext);
+  const isAccount = layoutContext === 'account';
+
   const me = useQuery(api.users.meSafe);
   const channels = useQuery(api.channels.list, { limit: 50 });
-  const [activeId, setActiveId] = React.useState<Id<'channels'> | null>(null);
-  const [draft, setDraft] = React.useState('');
-  const [sending, setSending] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [activeId, setActiveId] = useState<Id<'channels'> | null>(null);
+  const [draft, setDraft] = useState('');
+  const [channelSearch, setChannelSearch] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const messages = useQuery(
     api.messages.listByChannel,
     activeId ? { channelId: activeId, limit: 100 } : 'skip',
   );
-  const myAccess = useQuery(
-    api.channels.myAccess,
-    activeId ? { channelId: activeId } : 'skip',
-  );
+  const myAccess = useQuery(api.channels.myAccess, activeId ? { channelId: activeId } : 'skip');
   const postToChannel = useMutation(api.messages.postToChannel);
   const toggleReaction = useMutation(api.messages.toggleReaction);
 
-  React.useEffect(() => {
-    if (!activeId && channels && channels.length > 0) {
-      setActiveId(channels[0]!.channel._id);
-    }
-  }, [activeId, channels]);
+  const filteredChannels = useMemo(() => {
+    if (!channels) return undefined;
+    if (!channelSearch.trim()) return channels;
+    const q = channelSearch.toLowerCase();
+    return channels.filter(
+      ({ channel, creator }) =>
+        channel.name.toLowerCase().includes(q) ||
+        channel.slug.toLowerCase().includes(q) ||
+        creator?.name.toLowerCase().includes(q),
+    );
+  }, [channels, channelSearch]);
 
-  const active = channels?.find((c) => c.channel._id === activeId) ?? null;
+  React.useEffect(() => {
+    if (!activeId && filteredChannels && filteredChannels.length > 0) {
+      setActiveId(filteredChannels[0]!.channel._id);
+    }
+  }, [activeId, filteredChannels]);
+
+  const active = filteredChannels?.find((c) => c.channel._id === activeId) ?? null;
 
   const chatMessages: ChatPanelMessage[] = (messages ?? []).map((m) => ({
     id: m._id,
@@ -101,6 +125,146 @@ export function Community() {
     }
   }
 
+  const channelList =
+    channels === undefined ? (
+      <EmptyState icon="message" title="Loading channels…" />
+    ) : filteredChannels!.length === 0 ? (
+      <EmptyState
+        icon="message"
+        title={channels.length === 0 ? 'No channels yet.' : 'No channels match'}
+        subtitle={
+          channels.length === 0
+            ? 'Verified creators can spin up community rooms from their dashboard.'
+            : 'Try another search term.'
+        }
+      />
+    ) : (
+      <Stack gap={1}>
+        {filteredChannels!.map(({ channel, creator }) => {
+          const isActive = channel._id === activeId;
+          return (
+            <Card key={channel._id} hover pad="sm" onClick={() => setActiveId(channel._id)}>
+              <PersonRow
+                name={channel.name}
+                sub={creator ? `by ${creator.name}` : (channel.description ?? 'Community channel')}
+                mono={creator?.avatarMono ?? '#'}
+                color={creator?.avatarColor ?? '#3A4F7A'}
+                trailing={
+                  isActive ? (
+                    <Badge tone="blue" dot>
+                      Open
+                    </Badge>
+                  ) : channel.lastMessageAt ? (
+                    <Mono>{fmtDate(channel.lastMessageAt)}</Mono>
+                  ) : (
+                    <Muted>new</Muted>
+                  )
+                }
+              />
+            </Card>
+          );
+        })}
+      </Stack>
+    );
+
+  const chatPane = !active ? (
+    <Card>
+      <EmptyState
+        icon="message"
+        title="Pick a channel"
+        subtitle="Choose a community on the left to read and join the conversation."
+      />
+    </Card>
+  ) : (
+    <Card>
+      <CardHead
+        title={active.channel.name}
+        sub={
+          active.creator
+            ? `Hosted by ${active.creator.name}`
+            : (active.channel.description ?? 'Community channel')
+        }
+        action={
+          <Badge tone={active.channel.type === 'public' ? 'green' : 'gold'}>
+            {active.channel.type === 'public' ? 'Public' : 'Subscribers'}
+          </Badge>
+        }
+      />
+      {error ? <Muted>{error}</Muted> : null}
+      {myAccess && !myAccess.allowed ? (
+        <LockedChannelPanel
+          requiredTier={myAccess.requiredTier}
+          creatorName={active.creator?.name}
+          onUnlock={() =>
+            active.creator ? navigate(`/creators/${active.creator.handle}`) : undefined
+          }
+        />
+      ) : (
+        <ChatPanel
+          messages={chatMessages}
+          loading={messages === undefined}
+          draft={draft}
+          onDraftChange={setDraft}
+          onSend={handleSend}
+          onToggleReaction={handleToggleReaction}
+          sending={sending}
+          placeholder={`Message #${active.channel.slug}`}
+          emptyTitle="Be the first to post."
+          emptySubtitle={`Say hi in #${active.channel.slug} — your message will appear instantly for everyone in the room.`}
+        />
+      )}
+    </Card>
+  );
+
+  if (isAccount) {
+    return (
+      <Container size="2xl">
+        <Stack gap={6}>
+          <StudioPageHeader
+            eyebrow="Account · Community"
+            title="Live discussions"
+            sub="Public rooms hosted by verified creators. Pick a channel to join the conversation around tonight's slate."
+            actions={
+              <Button variant="outline" iconLeft="users" onClick={() => navigate(paths.discover)}>
+                Find creators
+              </Button>
+            }
+          />
+
+          <AccountRefineCard
+            title="Refine channels"
+            sub="Search by room name, slug, or host."
+            summary={
+              channels === undefined
+                ? 'Loading channels…'
+                : `${filteredChannels?.length ?? 0} channel${(filteredChannels?.length ?? 0) === 1 ? '' : 's'}`
+            }
+            onReset={channelSearch.trim() ? () => setChannelSearch('') : undefined}
+          >
+            <Search
+              value={channelSearch}
+              onChange={(e) => setChannelSearch(e.target.value)}
+              placeholder="Search channels"
+              aria-label="Search community channels"
+            />
+          </AccountRefineCard>
+
+          <StudioDashLayout>
+            <StudioDashCol span={4}>
+              <Card pad="sm">
+                <CardHead title="Channels" sub="Public rooms" />
+                {channelList}
+              </Card>
+            </StudioDashCol>
+            <StudioDashCol span={8}>{chatPane}</StudioDashCol>
+          </StudioDashLayout>
+
+          <QuickActionGrid title="Related" items={accountCrossLinks('community', navigate)} />
+        </Stack>
+      </Container>
+    );
+  }
+
   return (
     <main>
       <Container size="xl">
@@ -113,7 +277,7 @@ export function Community() {
               <Button
                 variant="secondary"
                 iconLeft="users"
-                onClick={() => navigate('/creators')}
+                onClick={() => navigate(paths.creatorsBrowse)}
               >
                 Find creators
               </Button>
@@ -126,106 +290,10 @@ export function Community() {
             <Col gap={3}>
               <Card pad="sm">
                 <CardHead title="Channels" sub="Public rooms" />
-                {channels === undefined ? (
-                  <EmptyState icon="message" title="Loading channels…" />
-                ) : channels.length === 0 ? (
-                  <EmptyState
-                    icon="message"
-                    title="No channels yet."
-                    subtitle="Verified creators can spin up community rooms from their dashboard."
-                  />
-                ) : (
-                  <Stack gap={1}>
-                    {channels.map(({ channel, creator }) => {
-                      const isActive = channel._id === activeId;
-                      return (
-                        <Card
-                          key={channel._id}
-                          hover
-                          pad="sm"
-                          onClick={() => setActiveId(channel._id)}
-                        >
-                          <PersonRow
-                            name={channel.name}
-                            sub={
-                              creator
-                                ? `by ${creator.name}`
-                                : channel.description ?? 'Community channel'
-                            }
-                            mono={creator?.avatarMono ?? '#'}
-                            color={creator?.avatarColor ?? '#3A4F7A'}
-                            trailing={
-                              isActive ? (
-                                <Badge tone="blue" dot>
-                                  Open
-                                </Badge>
-                              ) : channel.lastMessageAt ? (
-                                <Mono>{fmtDate(channel.lastMessageAt)}</Mono>
-                              ) : (
-                                <Muted>new</Muted>
-                              )
-                            }
-                          />
-                        </Card>
-                      );
-                    })}
-                  </Stack>
-                )}
+                {channelList}
               </Card>
             </Col>
-
-            <Col gap={3}>
-              {!active ? (
-                <Card>
-                  <EmptyState
-                    icon="message"
-                    title="Pick a channel"
-                    subtitle="Choose a community on the left to read and join the conversation."
-                  />
-                </Card>
-              ) : (
-                <Card>
-                  <CardHead
-                    title={active.channel.name}
-                    sub={
-                      active.creator
-                        ? `Hosted by ${active.creator.name}`
-                        : active.channel.description ?? 'Community channel'
-                    }
-                    action={
-                      <Badge tone={active.channel.type === 'public' ? 'green' : 'gold'}>
-                        {active.channel.type === 'public' ? 'Public' : 'Subscribers'}
-                      </Badge>
-                    }
-                  />
-                  {error && <Muted>{error}</Muted>}
-                  {myAccess && !myAccess.allowed ? (
-                    <LockedChannelPanel
-                      requiredTier={myAccess.requiredTier}
-                      creatorName={active.creator?.name}
-                      onUnlock={() =>
-                        active.creator
-                          ? navigate(`/creators/${active.creator.handle}`)
-                          : undefined
-                      }
-                    />
-                  ) : (
-                    <ChatPanel
-                      messages={chatMessages}
-                      loading={messages === undefined}
-                      draft={draft}
-                      onDraftChange={setDraft}
-                      onSend={handleSend}
-                      onToggleReaction={handleToggleReaction}
-                      sending={sending}
-                      placeholder={`Message #${active.channel.slug}`}
-                      emptyTitle="Be the first to post."
-                      emptySubtitle={`Say hi in #${active.channel.slug} — your message will appear instantly for everyone in the room.`}
-                    />
-                  )}
-                </Card>
-              )}
-            </Col>
+            <Col gap={3}>{chatPane}</Col>
           </Row>
         </Section>
       </Container>

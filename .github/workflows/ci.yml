@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, integration/digipicks-1-0]
   pull_request:
-    branches: [main]
+    branches: [main, integration/digipicks-1-0]
 
 # Cancel in-flight runs on the same branch when a new commit lands.
 concurrency:
@@ -96,3 +96,32 @@ jobs:
             exit 1
           fi
           echo "✓ thin-app guardrails clean"
+
+  e2e:
+    name: playwright · public smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @digipicks/web exec playwright install chromium --with-deps
+
+      - name: E2E (public routes)
+        run: pnpm --filter @digipicks/web e2e

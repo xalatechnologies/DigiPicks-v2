@@ -5,10 +5,10 @@ import { AuthGate } from '../auth/AuthGate';
 import { SubscriberShell } from './Shell';
 
 // Existing pages (re-used inside account layout)
-import { Saved } from '../pages/Saved';
-import { Community } from '../pages/Community';
-import { Notifications } from '../pages/Notifications';
-import { Events } from '../pages/Events';
+import { Saved } from './pages/Saved';
+import { Notifications } from './pages/Notifications';
+import { AccountEvents } from './pages/Events';
+import { AccountCommunity } from './pages/Community';
 
 // Account-specific pages
 import { Dashboard } from './pages/Dashboard';
@@ -19,6 +19,9 @@ import { AccountSettings } from './pages/AccountSettings';
 import { Watchlists } from './pages/Watchlists';
 import { Copilot } from './pages/Copilot';
 import { AccountMessages } from './pages/Messages';
+import { PaymentMethods } from './pages/PaymentMethods';
+import { BillingHistory } from './pages/BillingHistory';
+import { PaymentIssue } from './pages/PaymentIssue';
 
 export function AccountRoutes() {
   return (
@@ -30,16 +33,19 @@ export function AccountRoutes() {
         <Route element={<SubscriberShell />}>
           <Route index element={<Dashboard />} />
           <Route path="discover" element={<Discover />} />
-          <Route path="events" element={<Events />} />
+          <Route path="events" element={<AccountEvents />} />
           <Route path="results" element={<Results />} />
           <Route path="saved" element={<Saved />} />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="notifications" element={<Notifications />} />
-          <Route path="community" element={<Community />} />
+          <Route path="community" element={<AccountCommunity />} />
           <Route path="messages" element={<AccountMessages />} />
           <Route path="watchlists" element={<Watchlists />} />
           <Route path="copilot" element={<Copilot />} />
           <Route path="settings" element={<AccountSettings />} />
+          <Route path="payment-methods" element={<PaymentMethods />} />
+          <Route path="billing-history" element={<BillingHistory />} />
+          <Route path="billing/payment-issue" element={<PaymentIssue />} />
         </Route>
       </Routes>
     </AuthGate>

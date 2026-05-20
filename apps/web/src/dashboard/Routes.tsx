@@ -14,6 +14,7 @@ import { Performance } from './pages/Performance';
 import { Products } from './pages/Products';
 import { Growth } from './pages/Growth';
 import { Access } from './pages/Access';
+import { PayoutOnboarding } from './pages/PayoutOnboarding';
 import { Earnings } from './pages/Earnings';
 import { Messages } from './pages/Messages';
 import { Profile } from './pages/Profile';
@@ -47,6 +48,7 @@ export function DashboardRoutes() {
           <Route path="growth" element={<Growth />} />
           <Route path="access" element={<Access />} />
           <Route path="earnings" element={<Earnings />} />
+          <Route path="earnings/onboarding" element={<PayoutOnboarding />} />
           <Route path="messages" element={<Messages />} />
           <Route path="copilot" element={<CreatorCopilot />} />
           <Route path="profile" element={<Profile />} />

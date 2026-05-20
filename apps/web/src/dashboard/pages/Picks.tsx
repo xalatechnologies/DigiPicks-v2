@@ -4,22 +4,21 @@ import { useQuery } from 'convex/react';
 import {
   Container,
   Stack,
-  Row,
-  Heading,
-  Eyebrow,
-  Muted,
-  Select,
+  StudioPageHeader,
+  StudioSubNav,
   Button,
   EmptyState,
   Card,
-  StudioSubNav,
-  StudioFilterPills,
+  StudioSummaryGrid,
+  StudioFilterBar,
+  StudioMetaChip,
   StudioPicksTable,
   QuickActionGrid,
   type StudioPickRowData,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { useStudioContext } from '../useStudioContext';
+import { demoPickRows } from '../picksDemo';
 import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
@@ -36,42 +35,6 @@ const VIEW_TABS = [
   { label: 'Archive', value: 'archive' },
 ];
 
-const DEMO_ROWS: StudioPickRowData[] = [
-  {
-    id: 'demo-1',
-    sport: 'NBA',
-    eventName: 'Lakers vs Celtics',
-    eventTime: 'Nov 24, 2023 · 7:30 PM EST',
-    pickTitle: 'Over 215.5 Points',
-    odds: '-110',
-    access: 'premium',
-    status: 'published',
-    result: 'pending',
-  },
-  {
-    id: 'demo-2',
-    sport: 'NFL',
-    eventName: 'Chiefs vs Eagles',
-    eventTime: 'Nov 23, 2023 · 8:15 PM EST',
-    pickTitle: 'Chiefs ML',
-    odds: '+105',
-    access: 'free',
-    status: 'draft',
-    result: null,
-  },
-  {
-    id: 'demo-3',
-    sport: 'Soccer',
-    eventName: 'Man City vs Liverpool',
-    eventTime: 'Nov 22, 2023 · 12:30 PM EST',
-    pickTitle: 'Both teams to score',
-    odds: '-140',
-    access: 'vip',
-    status: 'published',
-    result: 'win',
-  },
-];
-
 function formatEventTime(value: string | number | undefined): string {
   if (value === undefined || value === '') return '—';
   const ms = typeof value === 'number' ? value : Date.parse(value);
@@ -83,6 +46,11 @@ function formatEventTime(value: string | number | undefined): string {
     hour: 'numeric',
     minute: '2-digit',
   });
+}
+
+function eventSortKey(row: StudioPickRowData): number {
+  const ms = Date.parse(row.eventTime);
+  return Number.isNaN(ms) ? 0 : ms;
 }
 
 function toRow(
@@ -104,9 +72,11 @@ function toRow(
     p.status === 'published' ||
     p.status === 'draft' ||
     p.status === 'scheduled' ||
-    p.status === 'pending'
-      ? p.status
-      : 'pending';
+    p.status === 'archived'
+      ? p.status === 'archived'
+        ? 'published'
+        : p.status
+      : 'published';
 
   const result =
     p.grade === 'win' || p.grade === 'loss' || p.grade === 'push'
@@ -123,36 +93,45 @@ function toRow(
     pickTitle: p.selection || p.title,
     odds: p.odds,
     access: p.access,
-    status,
+    status: status as StudioPickRowData['status'],
     result,
     onEdit: () => navigate(STUDIO.createPick),
+    onDuplicate: () => navigate(STUDIO.createPick),
   };
+}
+
+function matchesSearch(row: StudioPickRowData, query: string): boolean {
+  if (!query.trim()) return true;
+  const q = query.toLowerCase();
+  return (
+    row.eventName.toLowerCase().includes(q) ||
+    row.pickTitle.toLowerCase().includes(q) ||
+    row.sport.toLowerCase().includes(q)
+  );
 }
 
 export function Picks() {
   const navigate = useNavigate();
-  const devPreview = hasDevStudioPreview();
+  const ctx = useStudioContext();
   const [view, setView] = useState('activity');
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('event');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  const me = useQuery(api.users.meSafe);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const picks = useQuery(
     api.picks.byCreator,
-    creator?._id ? { creatorId: creator._id, limit: 100 } : 'skip',
+    ctx.creatorId ? { creatorId: ctx.creatorId, limit: 200 } : 'skip',
   );
 
-  const rows = useMemo(() => {
-    const source =
-      picks && picks.length > 0
-        ? picks.map((p) => toRow(p, navigate))
-        : devPreview
-          ? DEMO_ROWS
-          : [];
+  const allRows = useMemo(() => {
+    if (picks && picks.length > 0) return picks.map((p) => toRow(p, navigate));
+    if (ctx.devPreview) return demoPickRows(navigate);
+    return [];
+  }, [picks, ctx.devPreview, navigate]);
 
-    let list = [...source];
+  const rows = useMemo(() => {
+    let list = [...allRows];
 
     if (view === 'archive') {
       list = list.filter((r) => r.result === 'win' || r.result === 'loss' || r.result === 'push');
@@ -166,51 +145,142 @@ export function Picks() {
       list = list.filter((r) => r.status === filter);
     }
 
+    list = list.filter((r) => matchesSearch(r, search));
+
     if (sort === 'access') {
       list.sort((a, b) => a.access.localeCompare(b.access));
     } else if (sort === 'result') {
       list.sort((a, b) => (a.result ?? '').localeCompare(b.result ?? ''));
+    } else {
+      list.sort((a, b) => eventSortKey(b) - eventSortKey(a));
     }
 
     return list;
-  }, [picks, devPreview, view, filter, sort, navigate]);
+  }, [allRows, view, filter, sort, search]);
 
-  const loading = picks === undefined && !devPreview && Boolean(creator?._id);
+  const stats = useMemo(() => {
+    const published = allRows.filter((r) => r.status === 'published').length;
+    const drafts = allRows.filter((r) => r.status === 'draft').length;
+    const scheduled = allRows.filter((r) => r.status === 'scheduled').length;
+    const graded = allRows.filter(
+      (r) => r.result === 'win' || r.result === 'loss' || r.result === 'push',
+    );
+    const wins = graded.filter((r) => r.result === 'win').length;
+    const winRate = graded.length > 0 ? `${((wins / graded.length) * 100).toFixed(1)}%` : '—';
+
+    return {
+      total: allRows.length,
+      published,
+      drafts,
+      scheduled,
+      winRate,
+      gradedCount: graded.length,
+    };
+  }, [allRows]);
+
+  const loading = picks === undefined && !ctx.devPreview && Boolean(ctx.creatorId);
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [view, filter, sort, search]);
+
+  const sortLabel =
+    sort === 'event' ? 'Sort: Event date' : sort === 'result' ? 'Sort: Result' : 'Sort: Access';
 
   return (
     <Container size="2xl">
-      <Stack gap={8}>
-        <Stack gap={3}>
-          <Eyebrow>Studio · Posts &amp; picks</Eyebrow>
-          <Row between wrap>
-            <Stack gap={2}>
-              <Heading level={1} size="2xl">
-                Posts &amp; picks
-              </Heading>
-              <StudioSubNav items={VIEW_TABS} value={view} onChange={setView} />
-            </Stack>
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Posts & picks"
+          title="Posts & picks"
+          sub="Publish picks, manage drafts, and track results across your slate."
+          actions={
             <Button variant="primary" iconLeft="plus" onClick={() => navigate(STUDIO.createPick)}>
               New pick
             </Button>
-          </Row>
-        </Stack>
+          }
+        />
 
-        <Row between wrap>
-          <StudioFilterPills options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
-          <Stack gap={1}>
-            <Eyebrow>Sort by</Eyebrow>
-            <Select
-              id="picks-sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              aria-label="Sort picks"
-            >
-              <option value="event">Latest event date</option>
-              <option value="result">Performance (result)</option>
-              <option value="access">Access level</option>
-            </Select>
-          </Stack>
-        </Row>
+        <StudioSubNav items={VIEW_TABS} value={view} onChange={setView} />
+
+        <StudioSummaryGrid
+          items={[
+            {
+              id: 'total',
+              icon: 'feed',
+              iconTone: 'primary',
+              label: 'Total picks',
+              value: stats.total.toLocaleString(),
+              active: filter === 'all' && view === 'activity',
+              onClick: () => {
+                setView('activity');
+                setFilter('all');
+              },
+            },
+            {
+              id: 'pub',
+              icon: 'card',
+              iconTone: 'violet',
+              label: 'Published',
+              value: stats.published.toLocaleString(),
+              active: filter === 'all' && view === 'activity',
+              onClick: () => {
+                setView('activity');
+                setFilter('all');
+              },
+            },
+            {
+              id: 'drafts',
+              icon: 'edit',
+              iconTone: 'amber',
+              label: 'Drafts',
+              value: stats.drafts.toLocaleString(),
+              delta:
+                stats.scheduled > 0
+                  ? { value: `${stats.scheduled} scheduled`, dir: 'flat' as const }
+                  : undefined,
+              active: filter === 'draft',
+              onClick: () => {
+                setView('activity');
+                setFilter('draft');
+              },
+            },
+            {
+              id: 'wr',
+              icon: 'chart',
+              iconTone: 'danger',
+              label: 'Win rate',
+              value: stats.winRate,
+              delta:
+                stats.gradedCount > 0
+                  ? { value: `${stats.gradedCount} graded`, dir: 'up' as const }
+                  : undefined,
+              active: view === 'archive',
+              onClick: () => setView('archive'),
+            },
+          ]}
+        />
+
+        <StudioFilterBar
+          options={FILTER_OPTIONS}
+          value={filter}
+          onChange={setFilter}
+          search={{
+            value: search,
+            onChange: (e) => setSearch(e.target.value),
+            placeholder: 'Search picks…',
+            'aria-label': 'Search picks',
+          }}
+          trailing={
+            <StudioMetaChip
+              icon="sort"
+              label={sortLabel}
+              onClick={() =>
+                setSort((s) => (s === 'event' ? 'result' : s === 'result' ? 'access' : 'event'))
+              }
+            />
+          }
+        />
 
         {loading ? (
           <Card pad="lg" elev>
@@ -220,16 +290,26 @@ export function Picks() {
           <Card pad="lg" elev>
             <EmptyState
               icon="inbox"
-              title="Create your first pick"
-              subtitle="Your dashboard is ready — publish a pick to start building your track record and subscriber base."
+              title={search ? 'No picks match your search' : 'Create your first pick'}
+              subtitle={
+                search
+                  ? 'Try a different query or clear filters.'
+                  : 'Publish a pick to start building your track record and subscriber base.'
+              }
               action={
-                <Button
-                  variant="primary"
-                  iconLeft="plus"
-                  onClick={() => navigate('/dashboard/create')}
-                >
-                  Get started
-                </Button>
+                search ? (
+                  <Button variant="secondary" onClick={() => setSearch('')}>
+                    Clear search
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    iconLeft="plus"
+                    onClick={() => navigate(STUDIO.createPick)}
+                  >
+                    Get started
+                  </Button>
+                )
               }
             />
           </Card>

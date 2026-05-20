@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
@@ -10,7 +9,8 @@ import {
   Card,
   CardHead,
   Button,
-  PageHead,
+  StudioPageHeader,
+  QuickActionGrid,
   EventCard,
   EventForm,
   EventSourceBadge,
@@ -20,8 +20,20 @@ import {
   type EventFormValue,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
-const SPORTS = ['Soccer', 'Cricket', 'Tennis', 'Basketball', 'Football', 'Tennis', 'Hockey', 'Baseball', 'MMA', 'Rugby'];
+const SPORTS = [
+  'Soccer',
+  'Cricket',
+  'Tennis',
+  'Basketball',
+  'Football',
+  'Tennis',
+  'Hockey',
+  'Baseball',
+  'MMA',
+  'Rugby',
+];
 
 const INITIAL_VALUE: EventFormValue = {
   sport: 'Soccer',
@@ -39,10 +51,7 @@ export function CreateEvent() {
   const navigate = useNavigate();
 
   const me = useQuery(api.users.meSafe);
-  const creator = useQuery(
-    api.creators.get,
-    me?.creatorId ? { id: me.creatorId } : 'skip',
-  );
+  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const createEvent = useMutation(api.events.createByCreator);
 
   const [value, setValue] = React.useState<EventFormValue>(INITIAL_VALUE);
@@ -85,107 +94,88 @@ export function CreateEvent() {
   }
 
   return (
-    <>
-      <PageHeader
-        title="Create event"
-        crumbs={[
-          { label: 'Studio' },
-          { label: 'My Events' },
-          { label: 'New' },
-        ]}
-        actions={
-          <Row gap={2}>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/dashboard/events')}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleSubmit}
-              disabled={submitting || !canSubmit || !creator}
-            >
-              Submit for review
-            </Button>
-          </Row>
-        }
-      />
+    <Container size="xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Events"
+          title="Add a custom event"
+          sub="Create local matches, tournaments, or livestream events. Submitted events go through admin review before they surface on the public feed."
+          actions={
+            <Row gap={2}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate('/dashboard/events')}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSubmit}
+                disabled={submitting || !canSubmit || !creator}
+              >
+                Submit for review
+              </Button>
+            </Row>
+          }
+        />
 
-      <Container size="xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="New event"
-            title="Add a custom event"
-            sub="Create local matches, tournaments, livestream events, or any matchup the providers don't cover. Submitted events go through admin review before they surface on the public feed."
-          />
+        {error && (
+          <Card>
+            <Row gap={3}>
+              <Badge tone="red" dot>
+                Error
+              </Badge>
+              <Muted>{error}</Muted>
+            </Row>
+          </Card>
+        )}
 
-          {error && (
+        <Row gap={5} wrap>
+          <Col gap={4}>
             <Card>
-              <Row gap={3}>
-                <Badge tone="red" dot>
-                  Error
-                </Badge>
-                <Muted>{error}</Muted>
-              </Row>
+              <CardHead title="Event details" sub="Source, participants, and visibility" />
+              <EventForm value={value} onChange={setValue} sports={SPORTS} disabled={submitting} />
             </Card>
-          )}
+          </Col>
 
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead
-                  title="Event details"
-                  sub="Source, participants, and visibility"
-                />
-                <EventForm
-                  value={value}
-                  onChange={setValue}
-                  sports={SPORTS}
-                  disabled={submitting}
-                />
-              </Card>
-            </Col>
+          <Col gap={4}>
+            <Stack gap={2}>
+              <Eyebrow>Live preview</Eyebrow>
+              <Muted>
+                This is roughly how the event will appear to subscribers once an admin approves it.
+              </Muted>
+            </Stack>
 
-            <Col gap={4}>
-              <Stack gap={2}>
-                <Eyebrow>Live preview</Eyebrow>
-                <Muted>
-                  This is roughly how the event will appear to subscribers
-                  once an admin approves it.
-                </Muted>
-              </Stack>
+            <EventCard
+              sport={value.sport || 'Sport'}
+              league={value.league}
+              home={value.home || 'Home'}
+              away={value.away || 'Away'}
+              time={value.time || 'TBD'}
+              sourceType="creator"
+            />
 
-              <EventCard
-                sport={value.sport || 'Sport'}
-                league={value.league}
-                home={value.home || 'Home'}
-                away={value.away || 'Away'}
-                time={value.time || 'TBD'}
-                sourceType="creator"
-              />
+            <Stack gap={2}>
+              <Eyebrow>Review status</Eyebrow>
+              <Row gap={2}>
+                <Badge tone="amber" dot>
+                  Pending review
+                </Badge>
+                <EventSourceBadge source="creator" />
+              </Row>
+              <Muted>
+                After submission, an admin will verify the event before it surfaces publicly. You'll
+                see it in your "My Events" list with status updates.
+              </Muted>
+            </Stack>
+          </Col>
+        </Row>
 
-              <Stack gap={2}>
-                <Eyebrow>Review status</Eyebrow>
-                <Row gap={2}>
-                  <Badge tone="amber" dot>
-                    Pending review
-                  </Badge>
-                  <EventSourceBadge source="creator" />
-                </Row>
-                <Muted>
-                  After submission, an admin will verify the event before it
-                  surfaces publicly. You'll see it in your "My Events" list
-                  with status updates.
-                </Muted>
-              </Stack>
-            </Col>
-          </Row>
-        </Stack>
-      </Container>
-    </>
+        <QuickActionGrid title="Related" items={studioCrossLinks('createEvent', navigate)} />
+      </Stack>
+    </Container>
   );
 }

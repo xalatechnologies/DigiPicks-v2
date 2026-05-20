@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Admin | Payouts &amp; Finance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#5c647a",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-error": "#ffffff",
+                        "background": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "on-primary-container": "#fffbff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "surface": "#f7f9fb",
+                        "on-surface-variant": "#494454",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "outline": "#7b7486",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-primary-fixed": "#23005c",
+                        "tertiary": "#855000",
+                        "secondary-container": "#dae2fd",
+                        "outline-variant": "#cbc3d7",
+                        "inverse-surface": "#2d3133",
+                        "primary-container": "#8455ef",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary-fixed": "#2c1700",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#6d3bd7",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#d0bcff",
+                        "on-surface": "#191c1e",
+                        "on-background": "#191c1e",
+                        "surface-container-low": "#f2f4f6",
+                        "primary": "#6b38d4",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary-container": "#a76500",
+                        "secondary": "#565e74",
+                        "primary-fixed-dim": "#d0bcff",
+                        "primary-fixed": "#e9ddff",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-fixed": "#dae2fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .headline-font { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar (from JSON) -->
+<aside class="w-72 h-screen fixed left-0 top-0 z-40 bg-[#F7F9FB] dark:bg-slate-950 flex flex-col p-6 gap-2 font-['Manrope'] font-medium tracking-tight">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-xl font-black text-[#191C1E] dark:text-white tracking-tighter uppercase">Elite Curator</span>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto hide-scrollbar">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">assignment_ind</span>
+<span>Creator Applications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">star</span>
+<span>Creators</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span>Content Moderation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">credit_card</span>
+<span>Subscriptions &amp; Billing</span>
+</a>
+<!-- ACTIVE TAB: Payouts & Finance -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#8B5CF6] font-bold bg-[#8B5CF6]/5 rounded-xl active:scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Payouts &amp; Finance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span>Notifications &amp; Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span>Support &amp; Disputes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>Analytics &amp; Platform Health</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>System Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/60 dark:text-slate-400 font-medium hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6] transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Audit Logs</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-[#ECEEF0] dark:border-slate-900/50">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white rounded-full py-4 text-sm font-bold uppercase tracking-wider shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                Generate Insight
+            </button>
+</div>
+</aside>
+<!-- TopAppBar (from JSON) -->
+<header class="fixed top-0 right-0 w-[calc(100%-18rem)] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl flex justify-between items-center px-10 py-4 ml-72 font-['Manrope'] font-semibold shadow-[0px_20px_40px_rgba(15,23,42,0.04)]">
+<div class="flex items-center gap-8">
+<span class="text-lg font-bold text-[#191C1E] dark:text-white">The Elite Editorial</span>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/60">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-12 pr-6 py-2 w-80 text-sm focus:ring-2 focus:ring-[#8B5CF6]/20 focus:bg-white transition-all" placeholder="Search financials..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity flex items-center gap-1">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity flex items-center gap-1">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="flex items-center gap-3 border-l border-[#E0E3E5]/30 pl-6">
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">Julian Vance</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Platform Admin</p>
+</div>
+<img alt="Admin user profile" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" data-alt="A professional headshot of a male platform administrator with a confident expression. He is wearing a tailored charcoal suit and a crisp white shirt, standing against a neutral studio background. The lighting is soft and directional, highlighting his features in a high-trust, editorial corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxcHKag3UCMfxsY6HIIPDi0mQdvoM9rXXlMlZh7sFv7oEuttpMVc8Lb9Qlyi4_BP6Y1QZEMpnUbLIa_5S0IIUXqJKA_yzMKfMYkqdRLC6ouTZu8DHu2HZ6gbUbXGnBaVbtP7HOyOuszgiQOR1RI2nJnDixbRgsGI_sN1w0g_dica9KwSfG5GqG9uQQqkLh7bQRcGMYFcSAo_p2W6UAHFl6CPwdzHjvw1tzL7aU7SZPsgidUk9ZoVOmNFqpkluZkUV6huL0vqdTppo"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-72 pt-28 px-10 pb-12">
+<!-- Dashboard Header -->
+<div class="mb-10">
+<h1 class="text-4xl font-extrabold headline-font tracking-tight text-on-surface">Payouts &amp; Finance</h1>
+<p class="text-on-surface-variant font-medium mt-1">Global platform fiscal management and creator disbursements.</p>
+</div>
+<!-- Summary Cards (5-column Grid) -->
+<div class="grid grid-cols-5 gap-4 mb-10">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Total Payouts</p>
+<h3 class="text-2xl font-extrabold headline-font text-on-surface">$452,400</h3>
+<div class="mt-4 flex items-center text-primary text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                    +12.5% from last month
+                </div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Pending</p>
+<h3 class="text-2xl font-extrabold headline-font text-on-surface">128 Items</h3>
+<p class="mt-4 text-xs font-medium text-on-surface-variant">Scheduled for Tuesday</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm ring-1 ring-error/10">
+<p class="text-xs font-bold uppercase tracking-widest text-error mb-2">Failed Flagged</p>
+<h3 class="text-2xl font-extrabold headline-font text-error">3 Items</h3>
+<p class="mt-4 text-xs font-medium text-error/60">Requires manual review</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Platform Revenue</p>
+<h3 class="text-2xl font-extrabold headline-font text-on-surface">$84,200</h3>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[18%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Creator Earnings</p>
+<h3 class="text-2xl font-extrabold headline-font text-on-surface">$368,200</h3>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[82%]"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Left: Payouts Management (8 cols) -->
+<section class="col-span-8 space-y-8">
+<div class="bg-surface-container-lowest rounded-3xl p-8">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-xl font-extrabold headline-font">Creator Payout Management</h2>
+<div class="flex gap-2">
+<button class="bg-surface-container px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">calendar_today</span>
+                                Date Range
+                            </button>
+<button class="bg-surface-container px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                                Status
+                            </button>
+</div>
+</div>
+<table class="w-full text-left">
+<thead>
+<tr class="text-[10px] uppercase tracking-widest text-on-surface-variant border-b border-surface-container">
+<th class="pb-4 font-black">Creator</th>
+<th class="pb-4 font-black">Current Balance</th>
+<th class="pb-4 font-black">Upcoming</th>
+<th class="pb-4 font-black">Status</th>
+<th class="pb-4 font-black">Method</th>
+<th class="pb-4 font-black text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/50">
+<!-- Row 1 -->
+<tr class="group">
+<td class="py-5">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close-up portrait of a charismatic sports creator with a stylish modern haircut and stubble. He is in an urban studio setting with warm, ambient lighting. The aesthetic is professional and high-energy, matching the Elite Editorial brand with soft depth-of-field and clean composition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVVECHTrKZZFf9mXNkY-D5cq3vzVBjtkYiTQKhkgPTDLPZxDterl-RxyhYGzvczP79eNck8x2w4rGX2R7tqyr4QkZaDbCZ9asO6u85-s4hLC7WAscdXGpoZPa8mfqf38SgdevTZfko_1R34Mbv0hP5NVc7sOUWvOoIenbzFs29w5JvHylG_kB6WippGAbeMlnfG7dEmq2DDgWUfH9ZnWnxjN2wA_obZNp8pJw_Rz_zwG33N2vk20HhaPGubz36XVS2oDuJmUNv-mo"/>
+<div>
+<p class="text-sm font-bold">Marcus Sterling</p>
+<p class="text-[10px] text-on-surface-variant">Top Tier Analyst</p>
+</div>
+</div>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold">$12,450.00</p>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold text-primary">$4,200.00</p>
+<p class="text-[10px] text-on-surface-variant">Oct 24, 2023</p>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded-full">Scheduled</span>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase rounded-full flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-xs">account_balance</span> Stripe
+                                    </span>
+</td>
+<td class="py-5 text-right">
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group">
+<td class="py-5">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of a female digital sports influencer, looking directly into the camera with a confident smile. She is in a minimalist loft office with large windows providing bright, natural morning light. Her style is clean and contemporary, fitting the premium editorial design system of EdgePicks." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwYtSjzbu_eCS5sFfKmAxfS7aZjTsQcRvJSKM7sWiHuLi75_BjPHyM_KzYZM_HsstgKpvwz1R6HLdWTYgUN2LAyd8WjfSfx9uKiP5c3tqYyOWfAuxa8x7vZURirpqPad8maWbjc7549A7wvYNN3NJnmOMfBIeKsq0teagkqbijZkhYGSD3R7degMUqbZjJpuNlxQEQQRJ89M9SPqVJG5rZULGqkYcBsRhZ7Q5I3O8UmW3llycIJQJ23XTNw6a_q2pia_QZyATdVzQ"/>
+<div>
+<p class="text-sm font-bold">Elena Rodriguez</p>
+<p class="text-[10px] text-on-surface-variant">Betting Specialist</p>
+</div>
+</div>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold">$8,920.00</p>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold text-primary">$2,100.00</p>
+<p class="text-[10px] text-on-surface-variant">Oct 24, 2023</p>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase rounded-full">Hold</span>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase rounded-full flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-xs">payments</span> Bank
+                                    </span>
+</td>
+<td class="py-5 text-right">
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group">
+<td class="py-5">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Close-up headshot of a focused male professional in a modern studio. He is lit with a subtle purple backlight that complements the primary brand color. The lighting is crisp and the expression is serious, conveying financial reliability and professional expertise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZtSltqmXh0aq-v_QDDBiroIFGt45H8FLTS9By0syCFbWW42-pqoSbL9gHwO0UIyux0ccdNJYQE0AdPI8GWESBu2j-ljmp8xaN_mamIYo6tYmLe26myZvNsOCdeKDl1msMOe2W2Y3-lrC8hW3m7GPRwmIrPOo7MRPvGscHBueRMwWDf0EqczO1VdB1__fkv-p4TxftpbjL1ZFEoeJodG4wxPFHS8XMK3V87OcRFBx0BjwpokQrkJnlVlpeZyCFXrJSXRcWXCDDAfE"/>
+<div>
+<p class="text-sm font-bold">Kevin Zhao</p>
+<p class="text-[10px] text-on-surface-variant">Data Modeler</p>
+</div>
+</div>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold">$42,100.00</p>
+</td>
+<td class="py-5">
+<p class="text-sm font-bold text-error">$15,400.00</p>
+<p class="text-[10px] text-error/60 font-medium">Failed Oct 18</p>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-bold uppercase rounded-full">Failed</span>
+</td>
+<td class="py-5">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase rounded-full flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-xs">account_balance</span> Stripe
+                                    </span>
+</td>
+<td class="py-5 text-right">
+<button class="px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase rounded-lg hover:opacity-90 transition-opacity">Retry</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Recent Transactions Table -->
+<div class="bg-surface-container-lowest rounded-3xl p-8">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-xl font-extrabold headline-font">Recent Platform Transactions</h2>
+<button class="text-primary text-sm font-bold hover:underline">Download CSV</button>
+</div>
+<table class="w-full text-left">
+<thead>
+<tr class="text-[10px] uppercase tracking-widest text-on-surface-variant border-b border-surface-container">
+<th class="pb-4 font-black">Transaction ID</th>
+<th class="pb-4 font-black">Date</th>
+<th class="pb-4 font-black">Type</th>
+<th class="pb-4 font-black">Entity</th>
+<th class="pb-4 font-black">Status</th>
+<th class="pb-4 font-black text-right">Amount</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/50">
+<tr>
+<td class="py-4 text-xs font-medium text-on-surface-variant">TXN-882910</td>
+<td class="py-4 text-xs font-medium">Oct 22, 14:20</td>
+<td class="py-4"><span class="text-xs font-bold text-on-surface">Commission</span></td>
+<td class="py-4 text-xs font-bold">User: @draft_king</td>
+<td class="py-4"><span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span> Completed</span></td>
+<td class="py-4 text-right text-sm font-bold">+$124.00</td>
+</tr>
+<tr>
+<td class="py-4 text-xs font-medium text-on-surface-variant">TXN-882911</td>
+<td class="py-4 text-xs font-medium">Oct 22, 15:45</td>
+<td class="py-4"><span class="text-xs font-bold text-primary">Payout</span></td>
+<td class="py-4 text-xs font-bold">Creator: @m_sterling</td>
+<td class="py-4"><span class="flex items-center gap-1 text-[10px] font-bold text-primary"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> Pending</span></td>
+<td class="py-4 text-right text-sm font-bold">-$4,200.00</td>
+</tr>
+<tr>
+<td class="py-4 text-xs font-medium text-on-surface-variant">TXN-882912</td>
+<td class="py-4 text-xs font-medium">Oct 22, 16:10</td>
+<td class="py-4"><span class="text-xs font-bold text-on-surface">Referral</span></td>
+<td class="py-4 text-xs font-bold">User: @bet_pro</td>
+<td class="py-4"><span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span> Completed</span></td>
+<td class="py-4 text-right text-sm font-bold">+$25.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right: Creator Payout Detail Panel (4 cols) -->
+<aside class="col-span-4 sticky top-28 space-y-6">
+<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+<div class="text-center mb-6">
+<div class="relative w-24 h-24 mx-auto mb-4">
+<img class="w-full h-full rounded-full object-cover ring-4 ring-primary/10" data-alt="Detailed view of a creator's profile picture, focused on the eyes to convey clarity and vision. The shot is high-contrast black and white with a subtle purple glow around the circular frame, set against a clean white administrative interface background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj1juF9fKtimA61qz9cHZ4km2UrPDK4UjbuYRkgcHlfOBplvTyZGHhY7hZ9HalYlmuNGuLmOfcri8aaMax0QNFeFAAWOZ2EJdyI5E3Fm8-KBulBiaisnFdLPKvPcaP7cAjspIgzqJ30MoSQkxKTmc3mjuyVSOoWF0ewx-8j4yD5DTQAm7svJAQM211ytUFZ8quItqp-mxqks15XHsasYGjpzl-VkVx_quHwhFSQ21lTMPUHMsQLU1eZ4MoHW9waUx3wxiHEod_v68"/>
+<span class="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full ring-4 ring-white">
+<span class="material-symbols-outlined text-xs leading-none">verified</span>
+</span>
+</div>
+<h2 class="text-xl font-extrabold headline-font">Marcus Sterling</h2>
+<div class="flex items-center justify-center gap-2 mt-1">
+<span class="text-[10px] font-bold uppercase text-emerald-600 tracking-widest">Verified Payout Account</span>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<p class="text-[10px] uppercase font-black tracking-widest text-on-surface-variant mb-4">Earnings Momentum</p>
+<!-- Mini Graph Visualization Placeholder -->
+<div class="h-24 w-full bg-surface-container-low rounded-xl relative overflow-hidden flex items-end">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent"></div>
+<svg class="w-full h-16 stroke-primary stroke-2 fill-transparent" preserveaspectratio="none">
+<path d="M0 40 Q 25 35, 50 20 T 100 45 T 150 15 T 200 30 T 250 10 T 300 35 T 350 5" fill="none" stroke-linecap="round" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+<div class="flex justify-between mt-2 text-[9px] font-bold text-on-surface-variant uppercase">
+<span>Sep 01</span>
+<span>Oct 24</span>
+</div>
+</div>
+<div class="space-y-4">
+<p class="text-[10px] uppercase font-black tracking-widest text-on-surface-variant">Last 5 Payouts</p>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-medium">Oct 12, 2023</span>
+<span class="font-bold">$3,850.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-medium">Sep 28, 2023</span>
+<span class="font-bold">$4,120.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-medium">Sep 14, 2023</span>
+<span class="font-bold">$2,900.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-medium">Aug 31, 2023</span>
+<span class="font-bold">$3,400.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-medium">Aug 17, 2023</span>
+<span class="font-bold">$3,150.00</span>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-surface-container">
+<p class="text-[10px] uppercase font-black tracking-widest text-on-surface-variant mb-2">Internal Compliance Note</p>
+<div class="bg-surface-container p-3 rounded-xl text-xs text-on-secondary-container leading-relaxed">
+                                High volume growth noted in Q3. KYC refreshed Oct 2023. No disputes flagged in last 12 months. Safe for auto-disbursement.
+                            </div>
+</div>
+<div class="flex gap-2 pt-2">
+<button class="flex-1 bg-surface-container-high text-on-surface font-bold text-sm py-3 rounded-xl hover:bg-surface-container-highest transition-colors">Hold Payout</button>
+<button class="flex-1 bg-primary text-white font-bold text-sm py-3 rounded-xl hover:opacity-90 transition-opacity">Review Profile</button>
+</div>
+</div>
+</div>
+<div class="bg-primary/5 rounded-3xl p-6 ring-1 ring-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h4 class="font-bold text-on-surface">Financial Health</h4>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-4">Platform health is currently <span class="text-emerald-600 font-bold uppercase tracking-tight">Optimal</span>. All creator payout pools are fully funded for the upcoming cycle.</p>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[94%]"></div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Floating Action Button Suppression Check: Should not be here on finance screen per guidelines -->
+</body></html>

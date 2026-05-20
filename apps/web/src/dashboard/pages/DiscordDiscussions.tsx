@@ -1,7 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAction, useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
@@ -9,7 +9,8 @@ import {
   CardHead,
   Button,
   Icon,
-  PageHead,
+  StudioPageHeader,
+  QuickActionGrid,
   Muted,
   EmptyState,
   Heading,
@@ -18,6 +19,7 @@ import {
   CopilotResponsibleNote,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 // =============================================================================
@@ -81,6 +83,7 @@ function PickDiscussionRow({ pickId, pickTitle, pickSport }: PickDiscussionRowPr
 }
 
 export function DiscordDiscussions() {
+  const navigate = useNavigate();
   const me = useQuery(api.users.me);
   const creatorId = me?.creatorId ?? null;
 
@@ -122,84 +125,79 @@ export function DiscordDiscussions() {
   const pickList = recentPicks ?? [];
 
   return (
-    <>
-      <PageHeader
-        title="Discord Discussions"
-        crumbs={[{ label: 'Studio' }, { label: 'Discord' }, { label: 'Discussions' }]}
-        actions={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleGenerate}
-            disabled={busy || !creatorId}
-          >
-            <Icon name="sparkles" size={13} />
-            {busy ? 'Generating…' : 'Generate summaries'}
-          </Button>
-        }
-      />
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Community"
+          title="Linked discussions"
+          sub="Discord threads tied to your picks, events, and livestreams. Sentiment rollups are refreshed on demand."
+          actions={
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleGenerate}
+              disabled={busy || !creatorId}
+            >
+              <Icon name="sparkles" size={13} />
+              {busy ? 'Generating…' : 'Generate summaries'}
+            </Button>
+          }
+        />
 
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Community"
-            title="Linked discussions"
-            sub="Discord threads tied to your picks, events, and livestreams. Sentiment rollups are produced by Claude Haiku and refreshed on demand."
-          />
+        {error && <Muted>{error}</Muted>}
+        {statusMsg && <Muted>{statusMsg}</Muted>}
 
-          {error && <Muted>{error}</Muted>}
-          {statusMsg && <Muted>{statusMsg}</Muted>}
-
-          {integrations === undefined ? (
-            <Card>
-              <EmptyState icon="discord" title="Loading integrations…" />
+        {integrations === undefined ? (
+          <Card>
+            <EmptyState icon="discord" title="Loading integrations…" />
+          </Card>
+        ) : integrationList.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon="discord"
+              title="No Discord guilds connected"
+              subtitle="Connect a guild from Studio → Settings → Discord to start linking threads to your picks."
+            />
+          </Card>
+        ) : (
+          integrationList.map((integ) => (
+            <Card key={integ._id}>
+              <CardHead title={integ.guildName} sub={`Status · ${integ.status}`} />
+              <Stack gap={3}>
+                <Heading level={4} size="md">
+                  Recent picks with linked threads
+                </Heading>
+                {recentPicks === undefined ? (
+                  <EmptyState icon="feed" title="Loading picks…" />
+                ) : pickList.length === 0 ? (
+                  <EmptyState
+                    icon="feed"
+                    title="No recent picks yet"
+                    subtitle="Publish a pick and link a Discord thread to it from the pick detail page."
+                  />
+                ) : (
+                  <Stack gap={3}>
+                    {pickList.map((pick) => (
+                      <PickDiscussionRow
+                        key={pick._id}
+                        pickId={pick._id}
+                        pickTitle={pick.title}
+                        pickSport={pick.sport}
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
             </Card>
-          ) : integrationList.length === 0 ? (
-            <Card>
-              <EmptyState
-                icon="discord"
-                title="No Discord guilds connected"
-                subtitle="Connect a guild from Studio → Settings → Discord to start linking threads to your picks."
-              />
-            </Card>
-          ) : (
-            integrationList.map((integ) => (
-              <Card key={integ._id}>
-                <CardHead title={integ.guildName} sub={`Status · ${integ.status}`} />
-                <Stack gap={3}>
-                  <Heading level={4} size="md">
-                    Recent picks with linked threads
-                  </Heading>
-                  {recentPicks === undefined ? (
-                    <EmptyState icon="feed" title="Loading picks…" />
-                  ) : pickList.length === 0 ? (
-                    <EmptyState
-                      icon="feed"
-                      title="No recent picks yet"
-                      subtitle="Publish a pick and link a Discord thread to it from the pick detail page."
-                    />
-                  ) : (
-                    <Stack gap={3}>
-                      {pickList.map((pick) => (
-                        <PickDiscussionRow
-                          key={pick._id}
-                          pickId={pick._id}
-                          pickTitle={pick.title}
-                          pickSport={pick.sport}
-                        />
-                      ))}
-                    </Stack>
-                  )}
-                </Stack>
-              </Card>
-            ))
-          )}
+          ))
+        )}
 
-          <Row gap={3}>
-            <CopilotResponsibleNote />
-          </Row>
-        </Stack>
-      </Container>
-    </>
+        <Row gap={3}>
+          <CopilotResponsibleNote />
+        </Row>
+
+        <QuickActionGrid title="Related" items={studioCrossLinks('discordDiscussions', navigate)} />
+      </Stack>
+    </Container>
   );
 }

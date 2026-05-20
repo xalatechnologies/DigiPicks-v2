@@ -160,13 +160,9 @@ export const createCheckoutSession = action({
     if (!creator) throw new Error('Creator not found');
 
     const priceId =
-      args.plan === 'premium'
-        ? creator.stripePriceIdPremium
-        : creator.stripePriceIdVip;
+      args.plan === 'premium' ? creator.stripePriceIdPremium : creator.stripePriceIdVip;
     if (!priceId) {
-      throw new Error(
-        `Creator has no Stripe price configured for the ${args.plan} plan.`,
-      );
+      throw new Error(`Creator has no Stripe price configured for the ${args.plan} plan.`);
     }
 
     // Get or create the Stripe customer for this user.
@@ -189,8 +185,9 @@ export const createCheckoutSession = action({
     }
 
     const baseUrl = process.env.WEB_BASE_URL ?? 'http://localhost:5173';
-    const successUrl = `${baseUrl}/creators/${args.creatorId}?subscribed=1&session={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${baseUrl}/creators/${args.creatorId}?cancelled=1`;
+    const handle = encodeURIComponent(creator.handle);
+    const successUrl = `${baseUrl}/creators/${handle}/subscribed?session={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/creators/${handle}/checkout?cancelled=1`;
 
     const params = new URLSearchParams();
     params.set('mode', 'subscription');
@@ -247,6 +244,46 @@ export const createCheckoutSession = action({
     const url = session.url as string | undefined;
     if (!url) throw new Error('Stripe did not return a checkout URL.');
 
+    return { url };
+  },
+});
+
+/**
+ * Stripe Customer Portal — update payment method, view invoices, cancel.
+ * Returns a redirect URL for the authenticated subscriber.
+ */
+export const createCustomerPortalSession = action({
+  args: {
+    returnPath: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<{ url: string }> => {
+    const me = await ctx.runQuery(internal.stripe._meForCheckout, {});
+    if (!me) throw new Error('Unauthorized');
+    if (!me.stripeCustomerId) {
+      throw new Error('No billing profile yet. Subscribe to a creator first.');
+    }
+
+    await rateLimiter.limit(ctx, 'stripeCheckout', {
+      key: me._id,
+      throws: true,
+    });
+
+    const baseUrl = process.env.WEB_BASE_URL ?? 'http://localhost:5173';
+    const returnPath = args.returnPath?.startsWith('/')
+      ? args.returnPath
+      : '/account/subscriptions';
+    const returnUrl = `${baseUrl}${returnPath}`;
+
+    const params = new URLSearchParams();
+    params.set('customer', me.stripeCustomerId);
+    params.set('return_url', returnUrl);
+
+    const session = await stripeFetch('/billing_portal/sessions', {
+      body: params,
+      idempotencyKey: `portal:${me._id}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
+    });
+    const url = session.url as string | undefined;
+    if (!url) throw new Error('Stripe did not return a portal URL.');
     return { url };
   },
 });

@@ -1,18 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation } from 'convex/react';
 import {
   Container,
   Stack,
-  Row,
   Grid,
-  Heading,
-  Eyebrow,
+  StudioPageHeader,
   Muted,
   Button,
   EmptyState,
   Card,
   StudioSummaryGrid,
+  StudioSubNav,
+  StudioFilterBar,
+  StudioMetaChip,
   StudioTierCard,
   StudioFeatureCompare,
   StudioPlanConfigurator,
@@ -22,7 +23,7 @@ import {
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
-import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { useStudioContext } from '../useStudioContext';
 import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
@@ -32,6 +33,19 @@ const COMPARE_ROWS = [
   { id: 'discord', label: 'Exclusive Discord Channels', free: false, premium: true, vip: true },
   { id: 'support', label: 'Priority Support', free: false, premium: false, vip: true },
   { id: 'bankroll', label: 'Bankroll Management Suite', free: false, premium: false, vip: true },
+];
+
+const TIER_FILTERS = [
+  { label: 'All tiers', value: 'all' },
+  { label: 'Free', value: 'free' },
+  { label: 'Premium', value: 'premium' },
+  { label: 'VIP', value: 'vip' },
+];
+
+const VIEW_TABS = [
+  { label: 'Pricing tiers', value: 'tiers' },
+  { label: 'Feature matrix', value: 'compare' },
+  { label: 'Configure plan', value: 'configure' },
 ];
 
 const DEMO_TIERS = [
@@ -103,23 +117,30 @@ function perksToFeatures(perks: string[]): StudioTierFeature[] {
   return perks.map((text) => ({ text, included: true }));
 }
 
+type TierCardModel = {
+  id: string;
+  tierId?: Id<'pricingTiers'>;
+  variant: StudioTierVariant;
+  tierLabel: string;
+  name: string;
+  price: string;
+  features: StudioTierFeature[];
+  activeSubs: number;
+  popular: boolean;
+  legacyPlan: string;
+};
+
 export function Products() {
   const navigate = useNavigate();
-  const devPreview = hasDevStudioPreview();
-  const me = useQuery(api.users.meSafe);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
-  const tiers = useQuery(
-    api.pricingTiers.byCreator,
-    creator?._id ? { creatorId: creator._id } : 'skip',
-  );
-  const subs = useQuery(
-    api.subscriptions.byCreator,
-    creator?._id ? { creatorId: creator._id, limit: 500 } : 'skip',
-  );
+  const ctx = useStudioContext();
+  const tiers = ctx.tiers;
 
   const createTier = useMutation(api.pricingTiers.create);
   const archiveTier = useMutation(api.pricingTiers.archive);
 
+  const [view, setView] = useState('tiers');
+  const [tierFilter, setTierFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [planName, setPlanName] = useState('');
@@ -130,16 +151,16 @@ export function Products() {
 
   const subsByPlan = useMemo(() => {
     const counts = { free: 0, premium: 0, vip: 0 };
-    for (const s of subs ?? []) {
+    for (const s of ctx.subs) {
       if (s.status !== 'active') continue;
       const p = s.plan as keyof typeof counts;
       if (p in counts) counts[p] += 1;
     }
     return counts;
-  }, [subs]);
+  }, [ctx.subs]);
 
-  const tierCards = useMemo(() => {
-    if (tiers && tiers.length > 0) {
+  const allTierCards = useMemo((): TierCardModel[] => {
+    if (tiers.length > 0) {
       return tiers.map((tier) => {
         const legacy = tier.legacyPlan ?? 'premium';
         const variant = TIER_VARIANT[legacy] ?? 'advanced';
@@ -154,49 +175,65 @@ export function Products() {
           features: perksToFeatures(tier.perks),
           activeSubs:
             activeSubs ||
-            (devPreview ? DEMO_TIERS.find((d) => d.legacyPlan === legacy)?.activeSubs : 0),
+            (ctx.devPreview
+              ? (DEMO_TIERS.find((d) => d.legacyPlan === legacy)?.activeSubs ?? 0)
+              : 0),
           popular: legacy === 'premium',
+          legacyPlan: legacy,
         };
       });
     }
-    if (devPreview) {
-      return DEMO_TIERS.map((d) => ({ ...d, tierId: undefined as Id<'pricingTiers'> | undefined }));
+    if (ctx.devPreview) {
+      return DEMO_TIERS.map((d) => ({ ...d, tierId: undefined }));
     }
     return [];
-  }, [tiers, subsByPlan, devPreview]);
+  }, [tiers, subsByPlan, ctx.devPreview]);
+
+  const tierCards = useMemo(() => {
+    return allTierCards.filter((tier) => {
+      if (tierFilter !== 'all' && tier.legacyPlan !== tierFilter) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        tier.name.toLowerCase().includes(q) ||
+        tier.tierLabel.toLowerCase().includes(q) ||
+        tier.legacyPlan.toLowerCase().includes(q)
+      );
+    });
+  }, [allTierCards, tierFilter, search]);
 
   const monthlyRevenue = useMemo(() => {
-    if (devPreview) return '$14,240.50';
-    if (!subs?.length) return '—';
+    if (ctx.devPreview && ctx.subs.length === 0) return '$14,240.50';
+    if (!ctx.subs.length) return '—';
     let cents = 0;
-    for (const s of subs) {
+    for (const s of ctx.subs) {
       if (s.status !== 'active') continue;
-      const tier = tiers?.find((t) => t.legacyPlan === s.plan);
+      const tier = tiers.find((t) => t.legacyPlan === s.plan);
       if (tier) cents += tier.priceCents;
     }
-    if (cents === 0) return '—';
+    if (cents === 0) return ctx.devPreview ? '$14,240.50' : '—';
     return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }, [subs, tiers, devPreview]);
+  }, [ctx.subs, ctx.devPreview, tiers]);
 
   const arpu = useMemo(() => {
-    if (devPreview) return '$42.18';
-    const active = subs?.filter((s) => s.status === 'active').length ?? 0;
-    if (!active || !subs) return '—';
+    const active = ctx.subs.filter((s) => s.status === 'active').length;
+    if (ctx.devPreview && active === 0) return '$42.18';
+    if (!active) return '—';
     let cents = 0;
-    for (const s of subs) {
+    for (const s of ctx.subs) {
       if (s.status !== 'active') continue;
-      const tier = tiers?.find((t) => t.legacyPlan === s.plan);
+      const tier = tiers.find((t) => t.legacyPlan === s.plan);
       if (tier) cents += tier.priceCents;
     }
     return `$${(cents / active / 100).toFixed(2)}`;
-  }, [subs, tiers, devPreview]);
+  }, [ctx.subs, ctx.devPreview, tiers]);
 
   const activeSubsTotal = useMemo(() => {
-    if (devPreview) return 338;
-    return subs?.filter((s) => s.status === 'active').length ?? 0;
-  }, [subs, devPreview]);
+    const active = ctx.subs.filter((s) => s.status === 'active').length;
+    return active > 0 ? active : ctx.devPreview ? 338 : 0;
+  }, [ctx.subs, ctx.devPreview]);
 
-  const loading = tiers === undefined && !devPreview && Boolean(creator?._id);
+  const loading = ctx.tiersLoading && !ctx.devPreview;
 
   async function handleArchive(tierId: Id<'pricingTiers'>) {
     if (!window.confirm('Archive this tier? Existing subscribers stay active.')) return;
@@ -219,8 +256,18 @@ export function Products() {
     setSelectedAccess(['props', 'discord']);
   }
 
+  function scrollToConfigure() {
+    setView('configure');
+    requestAnimationFrame(() => {
+      document.getElementById('studio-plan-config')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  }
+
   async function handleSavePlan() {
-    if (!me?.creatorId) return;
+    if (!ctx.me?.creatorId) return;
     const name = planName.trim();
     const priceUsd = Number(price);
     if (!name) {
@@ -241,7 +288,7 @@ export function Products() {
     setBusy(true);
     try {
       await createTier({
-        creatorId: me.creatorId,
+        creatorId: ctx.me.creatorId,
         name,
         priceCents: Math.round(priceUsd * 100),
         interval,
@@ -261,114 +308,154 @@ export function Products() {
 
   return (
     <Container size="2xl">
-      <Stack gap={8}>
-        <Row between wrap>
-          <Stack gap={2}>
-            <Eyebrow>Studio · Products</Eyebrow>
-            <Heading level={1} size="2xl">
-              Products &amp; Pricing
-            </Heading>
-            <Muted>Manage your subscription tiers and content accessibility rules.</Muted>
-          </Stack>
-          <Row gap={2} wrap>
-            <Button variant="outline" size="sm" iconLeft="sliders">
-              Pricing Strategy
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              iconLeft="plus"
-              disabled={busy || !me?.creatorId}
-              onClick={() => {
-                const el = document.getElementById('studio-plan-config');
-                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-            >
-              New tier
-            </Button>
-          </Row>
-        </Row>
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Products"
+          title="Products & Pricing"
+          sub="Manage your subscription tiers and content accessibility rules."
+          actions={
+            <>
+              <Button variant="outline" iconLeft="sliders" onClick={() => setView('compare')}>
+                Pricing strategy
+              </Button>
+              <Button
+                variant="primary"
+                iconLeft="plus"
+                disabled={busy || !ctx.me?.creatorId}
+                onClick={scrollToConfigure}
+              >
+                New tier
+              </Button>
+            </>
+          }
+        />
 
         {error ? <Muted>{error}</Muted> : null}
 
+        <StudioSubNav items={VIEW_TABS} value={view} onChange={setView} />
+
         <StudioSummaryGrid
+          columns={3}
           items={[
             {
               id: 'mrr',
-              icon: 'card',
+              icon: 'dollar',
               iconTone: 'primary',
-              label: 'Monthly Revenue',
+              label: 'Monthly revenue',
               value: monthlyRevenue,
-              delta: devPreview ? { value: '+12.5%', dir: 'up' } : undefined,
+              delta: ctx.devPreview ? { value: '+12.5%', dir: 'up' as const } : undefined,
+              onClick: () => navigate(STUDIO.payouts),
             },
             {
               id: 'arpu',
               icon: 'chart',
               iconTone: 'violet',
-              label: 'Avg. Revenue / User',
+              label: 'Avg. revenue / user',
               value: arpu,
+              delta: { value: '30d', dir: 'flat' as const },
+              active: view === 'configure',
+              onClick: scrollToConfigure,
             },
             {
               id: 'subs',
               icon: 'users',
               iconTone: 'amber',
-              label: 'Active Subscriptions',
+              label: 'Active subscriptions',
               value: activeSubsTotal.toLocaleString(),
+              delta: { value: `${allTierCards.length} tiers`, dir: 'flat' as const },
+              onClick: () => navigate(STUDIO.subscribers),
             },
           ]}
         />
 
-        {loading ? (
-          <Card pad="lg" elev>
-            <EmptyState icon="card" title="Loading tiers…" />
-          </Card>
-        ) : tierCards.length === 0 ? (
-          <Card pad="lg" elev>
-            <EmptyState
-              icon="card"
-              title="No pricing tiers yet"
-              subtitle="Use Configure New Plan below or New tier to create your first offering."
+        {view === 'tiers' ? (
+          <>
+            <StudioFilterBar
+              options={TIER_FILTERS}
+              value={tierFilter}
+              onChange={setTierFilter}
+              ariaLabel="Filter pricing tiers"
+              search={{
+                value: search,
+                onChange: (e) => setSearch(e.target.value),
+                placeholder: 'Search tiers…',
+                'aria-label': 'Search tiers',
+              }}
+              trailing={<StudioMetaChip icon="plus" label="New tier" onClick={scrollToConfigure} />}
             />
-          </Card>
-        ) : (
-          <Grid cols={3} gap={8} stagger={false}>
-            {tierCards.map((tier) => (
-              <StudioTierCard
-                key={tier.id}
-                variant={tier.variant}
-                tierLabel={tier.tierLabel}
-                name={tier.name}
-                price={tier.price}
-                features={tier.features}
-                activeSubs={tier.activeSubs}
-                popular={tier.popular}
-                onDelete={tier.tierId ? () => handleArchive(tier.tierId!) : undefined}
-              />
-            ))}
-          </Grid>
-        )}
 
-        <StudioFeatureCompare rows={COMPARE_ROWS} />
+            {loading ? (
+              <Card pad="lg" elev>
+                <EmptyState icon="card" title="Loading tiers…" />
+              </Card>
+            ) : tierCards.length === 0 ? (
+              <Card pad="lg" elev>
+                <EmptyState
+                  icon="card"
+                  title={search ? 'No tiers match your search' : 'No pricing tiers yet'}
+                  subtitle={
+                    search
+                      ? 'Try a different query or clear filters.'
+                      : 'Configure a plan below or use New tier to create your first offering.'
+                  }
+                  action={
+                    search ? (
+                      <Button variant="secondary" onClick={() => setSearch('')}>
+                        Clear search
+                      </Button>
+                    ) : (
+                      <Button variant="primary" iconLeft="plus" onClick={scrollToConfigure}>
+                        Create tier
+                      </Button>
+                    )
+                  }
+                />
+              </Card>
+            ) : (
+              <Grid cols={3} gap={8} stagger={false}>
+                {tierCards.map((tier) => (
+                  <StudioTierCard
+                    key={tier.id}
+                    variant={tier.variant}
+                    tierLabel={tier.tierLabel}
+                    name={tier.name}
+                    price={tier.price}
+                    features={tier.features}
+                    activeSubs={tier.activeSubs}
+                    popular={tier.popular}
+                    onDelete={tier.tierId ? () => handleArchive(tier.tierId!) : undefined}
+                  />
+                ))}
+              </Grid>
+            )}
+          </>
+        ) : null}
 
-        <div id="studio-plan-config">
-          <StudioPlanConfigurator
-            planName={planName}
-            price={price}
-            interval={interval}
-            features={features}
-            selectedAccess={selectedAccess}
-            busy={busy}
-            onPlanNameChange={setPlanName}
-            onPriceChange={setPrice}
-            onIntervalChange={setInterval}
-            onFeatureChange={(i, v) => setFeatures((prev) => prev.map((f, j) => (j === i ? v : f)))}
-            onAddFeature={() => setFeatures((prev) => [...prev, ''])}
-            onRemoveFeature={(i) => setFeatures((prev) => prev.filter((_, j) => j !== i))}
-            onToggleAccess={toggleAccess}
-            onDiscard={resetForm}
-            onSave={handleSavePlan}
-          />
-        </div>
+        {view === 'compare' ? <StudioFeatureCompare rows={COMPARE_ROWS} /> : null}
+
+        {view === 'configure' ? (
+          <div id="studio-plan-config">
+            <StudioPlanConfigurator
+              planName={planName}
+              price={price}
+              interval={interval}
+              features={features}
+              selectedAccess={selectedAccess}
+              busy={busy}
+              onPlanNameChange={setPlanName}
+              onPriceChange={setPrice}
+              onIntervalChange={setInterval}
+              onFeatureChange={(i, v) =>
+                setFeatures((prev) => prev.map((f, j) => (j === i ? v : f)))
+              }
+              onAddFeature={() => setFeatures((prev) => [...prev, ''])}
+              onRemoveFeature={(i) => setFeatures((prev) => prev.filter((_, j) => j !== i))}
+              onToggleAccess={toggleAccess}
+              onDiscard={resetForm}
+              onSave={handleSavePlan}
+            />
+          </div>
+        ) : null}
 
         <QuickActionGrid title="Related" items={studioCrossLinks('products', navigate)} />
       </Stack>

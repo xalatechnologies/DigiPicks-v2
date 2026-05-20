@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Admin - Audit Logs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#855000",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "background": "#f7f9fb",
+                        "on-surface-variant": "#494454",
+                        "surface-container": "#eceef0",
+                        "surface-tint": "#6d3bd7",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "primary-fixed": "#e9ddff",
+                        "tertiary-container": "#a76500",
+                        "primary-container": "#8455ef",
+                        "on-secondary-container": "#5c647a",
+                        "on-secondary-fixed": "#131b2e",
+                        "surface-bright": "#f7f9fb",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d8dadc",
+                        "secondary-container": "#dae2fd",
+                        "primary-fixed-dim": "#d0bcff",
+                        "outline-variant": "#cbc3d7",
+                        "outline": "#7b7486",
+                        "inverse-primary": "#d0bcff",
+                        "secondary": "#565e74",
+                        "on-primary-container": "#fffbff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "secondary-fixed": "#dae2fd",
+                        "surface-container-low": "#f2f4f6",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "primary": "#6b38d4",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface-container-high": "#e6e8ea"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(24px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-72 fixed left-0 top-0 overflow-y-auto bg-[#F7F9FB] dark:bg-[#121416] flex flex-col p-6 space-y-2 z-50">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<h1 class="text-2xl font-black tracking-tight text-[#6B38D4] dark:text-[#8B5CF6]">EdgePicks</h1>
+<p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/60">Elite Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Manrope'] font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span class="font-['Manrope'] font-medium">Creator Applications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-['Manrope'] font-medium">Creators</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-['Manrope'] font-medium">Content Moderation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-['Manrope'] font-medium">Subscriptions &amp; Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-['Manrope'] font-medium">Payouts &amp; Finance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-['Manrope'] font-medium">Notifications &amp; Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<span class="font-['Manrope'] font-medium">Support &amp; Disputes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-['Manrope'] font-medium">Analytics &amp; Platform Health</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#191C1E]/70 dark:text-[#E0E3E5]/70 hover:text-[#6B38D4] dark:hover:text-[#8B5CF6] transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Manrope'] font-medium">System Settings</span>
+</a>
+<!-- Active Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#6B38D4] dark:text-[#8B5CF6] font-bold bg-[#6B38D4]/10 dark:bg-[#8B5CF6]/10 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Manrope'] font-medium">Audit Logs</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-high/50 rounded-2xl">
+<div class="flex items-center gap-3 mb-4">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A professional male administrator with a confident expression, wearing a high-end charcoal gray suit and a clean white shirt. The portrait is captured in a bright, modern studio with soft, even lighting that emphasizes detail and a premium aesthetic. The background is a minimalist blur of a high-tech office space with cool tones and glass surfaces, conveying authority and technical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6O_rvdFR03cBbeFXJNQZpWm5qyIOar1f8tvd3QVcQrzpcSAqKPm-d0zcP13Xy9ImU_Tna6lpHtORRLtPPqK5_JZtzA6eQpubWBptlQjwcyQ4CnY5DTdZswuJyrsWtFyK5Fnoj1BD7KltF4QH830zvfxAfn7gEv00nFRpk5VxsyWHHAxCvHJJS-RNLbdKYnRTU5Aj5aAU8JyURbw2iRGlZUzKcN4ffeMNGY3do4AgF-IOyLuRX18S3-48a8CgaqKIJfHBjSEa0sjg"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold truncate">Admin User</p>
+<p class="text-[10px] text-on-surface-variant font-medium">System Principal</p>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-white rounded-xl text-xs font-bold transition-all active:scale-95">Invite Admin</button>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-72 h-20 bg-white/80 dark:bg-[#191C1E]/80 backdrop-blur-xl flex items-center justify-between px-8 w-full z-40">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
+<input class="bg-surface-container/50 border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 w-64 transition-all" placeholder="Search audit logs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-[#F7F9FB] rounded-full transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-[#F7F9FB] rounded-full transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3">
+<p class="text-sm font-semibold font-['Manrope']">EdgePicks Admin</p>
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-xs">shield_person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-72 mt-20 p-8 min-h-screen relative flex">
+<!-- Content Container (Log Table + Header) -->
+<div class="flex-1 pr-96">
+<div class="mb-10">
+<h2 class="text-4xl font-black tracking-tight text-on-surface mb-2 font-display">Audit Logs</h2>
+<p class="text-on-surface-variant font-medium">Trace important admin and system activity with forensic precision.</p>
+</div>
+<!-- Filters Bento Section -->
+<div class="grid grid-cols-12 gap-3 mb-8">
+<div class="col-span-2 bg-surface-container-lowest p-1 rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.03)]">
+<label class="block text-[10px] font-bold text-primary px-3 pt-2 uppercase tracking-tighter">Actor</label>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface py-1 px-3">
+<option>All Actors</option>
+<option>Jordan Reed</option>
+<option>System Bot</option>
+</select>
+</div>
+<div class="col-span-2 bg-surface-container-lowest p-1 rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.03)]">
+<label class="block text-[10px] font-bold text-primary px-3 pt-2 uppercase tracking-tighter">Action Type</label>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface py-1 px-3">
+<option>All Actions</option>
+<option>Update</option>
+<option>Delete</option>
+<option>Login</option>
+</select>
+</div>
+<div class="col-span-2 bg-surface-container-lowest p-1 rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.03)]">
+<label class="block text-[10px] font-bold text-primary px-3 pt-2 uppercase tracking-tighter">Target</label>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface py-1 px-3">
+<option>All Targets</option>
+<option>Subscriptions</option>
+<option>User Accounts</option>
+</select>
+</div>
+<div class="col-span-4 bg-surface-container-lowest p-1 rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.03)]">
+<label class="block text-[10px] font-bold text-primary px-3 pt-2 uppercase tracking-tighter">Date Range</label>
+<div class="flex items-center px-3 py-1 gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">calendar_today</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface p-0" type="text" value="Nov 1, 2024 - Nov 24, 2024"/>
+</div>
+</div>
+<div class="col-span-2 bg-surface-container-lowest p-1 rounded-2xl shadow-[0px_4px_12px_rgba(0,0,0,0.03)]">
+<label class="block text-[10px] font-bold text-primary px-3 pt-2 uppercase tracking-tighter">Severity</label>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface py-1 px-3">
+<option>All Severities</option>
+<option class="text-blue-500">Info</option>
+<option class="text-amber-500">Warning</option>
+<option class="text-red-500">Critical</option>
+</select>
+</div>
+</div>
+<!-- Table Section -->
+<div class="bg-surface-container-lowest rounded-[24px] overflow-hidden shadow-[0px_20px_40px_rgba(15,23,42,0.03)]">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low/50 border-b border-surface-container">
+<tr>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Timestamp</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Actor</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Action</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Target</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Result</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">Metadata</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/50">
+<tr class="hover:bg-surface-container-low/40 transition-colors group cursor-pointer bg-primary/5 ring-1 ring-inset ring-primary/20">
+<td class="px-6 py-5">
+<p class="text-xs font-bold text-on-surface">Nov 24, 2024</p>
+<p class="text-[10px] text-on-surface-variant">14:22:10</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<img class="w-7 h-7 rounded-full object-cover" data-alt="A detailed portrait of a focused male administrator named Jordan Reed, with sharp facial features and a professional beard. He is wearing a minimalist, designer navy blue turtleneck. The environment is a clean, architectural office space with high-end furniture and soft morning sunlight filtering through large floor-to-ceiling windows, creating a polished and authoritative atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2IibbIgqLNFWR4cGfLOptMbgYIaX2izuV5SbRqUzGbCDZxP3jY0JAYbnqfHh7MBuZ1vYNMnJqbnQ8r6p9bAWyU2mP9sfGe_vVi6y-9XNECCE3qqMMWSoD4gil4bmuuIrAHCxje6y_pCoJW1_ThC5OZrUJoRlFye-bQ-i6S0PA4BiCmmiY952VdgVNFOW-mSzZc7J415cY8aHJZY_TPq-jAO2Msw3LFpNXX_hrJbwJY2GQ5MHvyv_OyuGU2fMrjJEL1GGMzldwskk"/>
+<span class="text-xs font-bold">Jordan Reed</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-medium text-on-surface">Updated Subscription Plan</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full font-bold">VIP ELITE PLAN</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[10px] font-black uppercase">Success</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<code class="text-[10px] text-on-surface-variant font-mono bg-surface-container p-1 rounded">price: 49.99 -&gt; 59.99</code>
+</td>
+</tr>
+<!-- Repeat rows with variations -->
+<tr class="hover:bg-surface-container-low/40 transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="text-xs font-bold text-on-surface">Nov 24, 2024</p>
+<p class="text-[10px] text-on-surface-variant">13:05:44</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 bg-surface-container-highest rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-xs">smart_toy</span>
+</div>
+<span class="text-xs font-bold">System Bot</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-medium text-on-surface">Auto-Payout Processed</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-[10px] bg-surface-container text-on-surface-variant px-2 py-1 rounded-full font-bold">CREATOR #9283</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[10px] font-black uppercase">Success</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<code class="text-[10px] text-on-surface-variant font-mono bg-surface-container p-1 rounded">amount: 1,240.00 USD</code>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/40 transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="text-xs font-bold text-on-surface">Nov 24, 2024</p>
+<p class="text-[10px] text-on-surface-variant">12:12:01</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<img class="w-7 h-7 rounded-full object-cover" data-alt="A professional female executive with a sharp, intelligent look, wearing premium ivory business wear. She is positioned in a sleek, glass-walled conference room with high-end minimalist aesthetics. The lighting is crisp and natural, highlighting her confident demeanor. The scene is imbued with a sense of elite corporate culture and sophisticated digital curation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7mpiv44PioiEDaFw6ifQTLmm_H5p5jPrBQMiS4bF3F4SP4A6wDV51esFYM3QoamXaeNOtHgpFgYTNI4xRx-xP3cG2EDPEGWpwEKHDvUMwcylrm-o71xhZ71xbtgCcu1UOita9Wn9PDQKFwkEriXKrXBUs7gJnRusD3Pbu8Ae-w2aATtyPJPiwYXNY1vxV3Mue8VO3gDLI1rlGWnqQRnSSlbIICXK44sjhiL4RSDYlJueBJ8OZJqi_BXRH1ruqazPzARSWxLU1nds"/>
+<span class="text-xs font-bold">Elena Vance</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-medium text-on-surface">Flagged Content Removed</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-[10px] bg-error-container text-on-error-container px-2 py-1 rounded-full font-bold">POST ID: AF901</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[10px] font-black uppercase">Success</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<code class="text-[10px] text-on-surface-variant font-mono bg-surface-container p-1 rounded">reason: TOS Section 4.2</code>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/40 transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="text-xs font-bold text-on-surface">Nov 24, 2024</p>
+<p class="text-[10px] text-on-surface-variant">10:45:30</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 bg-primary/20 text-primary rounded-full flex items-center justify-center text-[10px] font-bold">MK</span>
+<span class="text-xs font-bold">Marcus King</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-medium text-on-surface">Admin Login Attempt</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-[10px] bg-surface-container text-on-surface-variant px-2 py-1 rounded-full font-bold">CONSOLE</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 text-error">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">cancel</span>
+<span class="text-[10px] font-black uppercase">Failed</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<code class="text-[10px] text-on-surface-variant font-mono bg-surface-container p-1 rounded">error: Invalid MFA Token</code>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-surface-container-low/30 flex justify-between items-center">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Showing 24 of 1,240 events</p>
+<div class="flex gap-2">
+<button class="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Log Detail Drawer -->
+<aside class="fixed right-0 top-20 bottom-0 w-96 bg-white shadow-[-20px_0px_40px_rgba(25,28,30,0.04)] border-l border-surface-container/50 z-30 p-8 overflow-y-auto no-scrollbar">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-lg font-black tracking-tight font-display">Log Details</h3>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="space-y-8">
+<!-- Action Header -->
+<div class="bg-surface-container-low p-5 rounded-[20px]">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">edit_square</span>
+</div>
+<div>
+<p class="text-[10px] font-black text-primary uppercase tracking-widest">Update Operation</p>
+<p class="text-xs font-bold">Jordan Reed updated subscription price for VIP Elite plan</p>
+</div>
+</div>
+</div>
+<!-- Diff View -->
+<section>
+<h4 class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-3 px-1">Value Transformation</h4>
+<div class="grid grid-cols-2 gap-px bg-surface-container rounded-2xl overflow-hidden">
+<div class="bg-surface-container-lowest p-4">
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase mb-1">Old Value</p>
+<p class="text-lg font-black text-on-surface/50 line-through">$49.99</p>
+</div>
+<div class="bg-surface-container-lowest p-4">
+<p class="text-[10px] font-bold text-primary uppercase mb-1">New Value</p>
+<p class="text-lg font-black text-primary">$59.99</p>
+</div>
+</div>
+<div class="mt-3 p-4 bg-surface-container-low rounded-2xl border border-primary/10">
+<p class="text-[10px] font-bold text-on-surface-variant mb-2">Affected Field</p>
+<div class="flex items-center gap-2">
+<span class="text-xs font-mono font-medium text-primary">pricing.monthly_rate</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">arrow_forward</span>
+<span class="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full font-bold uppercase">Modified</span>
+</div>
+</div>
+</section>
+<!-- Related Objects -->
+<section>
+<h4 class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-3 px-1">Related Objects</h4>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-xl border border-surface-container hover:border-primary/30 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">person</span>
+<div class="text-[10px]">
+<p class="font-bold">Jordan Reed</p>
+<p class="text-on-surface-variant font-mono">ID: ADMIN_7721</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">open_in_new</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-xl border border-surface-container hover:border-primary/30 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">diamond</span>
+<div class="text-[10px]">
+<p class="font-bold">VIP Elite Plan</p>
+<p class="text-on-surface-variant font-mono">ID: PLAN_X01</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">open_in_new</span>
+</div>
+</div>
+</section>
+<!-- Contextual Info -->
+<section>
+<h4 class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-3 px-1">Forensic Context</h4>
+<div class="bg-surface-container-low rounded-[24px] p-6 space-y-4">
+<div>
+<p class="text-[10px] font-black text-on-surface-variant/60 uppercase mb-1 tracking-tighter">IP Address</p>
+<p class="text-xs font-mono font-bold text-on-surface">192.168.1.104 <span class="text-[10px] text-primary/70 font-sans ml-2">(Dublin, IE)</span></p>
+</div>
+<div>
+<p class="text-[10px] font-black text-on-surface-variant/60 uppercase mb-1 tracking-tighter">User Agent</p>
+<p class="text-[10px] font-mono leading-relaxed text-on-surface-variant">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36</p>
+</div>
+<div>
+<p class="text-[10px] font-black text-on-surface-variant/60 uppercase mb-1 tracking-tighter">Session ID</p>
+<p class="text-xs font-mono font-bold text-on-surface">sess_4a9b2c8d1e0f3g5h7i9j</p>
+</div>
+</div>
+</section>
+<!-- Security Hash -->
+<div class="p-4 border border-dashed border-outline-variant/50 rounded-2xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-primary">verified</span>
+<p class="text-[10px] font-bold text-on-surface uppercase">Blockchain Verified Log</p>
+</div>
+<p class="text-[9px] font-mono break-all text-on-surface-variant/70">SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
+</div>
+</div>
+</aside>
+</main>
+<!-- Contextual FAB Suppression (Audit logs is a detail/forensic page, FAB suppressed as per instructions) -->
+</body></html>

@@ -41,7 +41,6 @@ export function NextStepsPanel({ title, sub, items, className }: NextStepsPanelP
           ))}
         </ul>
       </div>
-      <Icon name="flag" size={180} className={s.watermark} aria-hidden />
     </article>
   );
 }

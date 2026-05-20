@@ -442,6 +442,7 @@ export const _gradedContext = internalQuery({
 export const updatePrefs = mutation({
   args: {
     push: v.optional(v.boolean()),
+    email: v.optional(v.boolean()),
     telegram: v.optional(v.boolean()),
     pickPublished: v.optional(v.boolean()),
     pickGraded: v.optional(v.boolean()),

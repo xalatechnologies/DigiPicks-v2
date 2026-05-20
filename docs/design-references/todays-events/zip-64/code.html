@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks | Today's Events</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#bec6e0",
+                    "primary": "#6b38d4",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f2f4f6",
+                    "on-background": "#191c1e",
+                    "inverse-primary": "#d0bcff",
+                    "tertiary-container": "#a76500",
+                    "surface-container-high": "#e6e8ea",
+                    "tertiary-fixed": "#ffdcbb",
+                    "surface": "#f7f9fb",
+                    "surface-tint": "#6d3bd7",
+                    "primary-fixed": "#e9ddff",
+                    "primary-container": "#8455ef",
+                    "outline": "#7b7486",
+                    "inverse-surface": "#2d3133",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#fffbff",
+                    "on-secondary-container": "#5c647a",
+                    "outline-variant": "#cbc3d7",
+                    "surface-container-highest": "#e0e3e5",
+                    "secondary-container": "#dae2fd",
+                    "secondary": "#565e74",
+                    "inverse-on-surface": "#eff1f3",
+                    "background": "#f7f9fb",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "on-tertiary-fixed": "#2c1700",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f7f9fb",
+                    "surface-variant": "#e0e3e5",
+                    "on-primary-container": "#fffbff",
+                    "primary-fixed-dim": "#d0bcff",
+                    "surface-dim": "#d8dadc",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-primary-fixed-variant": "#5516be",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#eceef0",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#23005c",
+                    "tertiary": "#855000",
+                    "secondary-fixed": "#dae2fd",
+                    "on-surface": "#191c1e",
+                    "on-surface-variant": "#494454",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb869"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "display": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .signature-glow {
+            background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(203, 195, 215, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-[#191C1E]/80 backdrop-blur-2xl fixed top-0 left-0 w-full z-50">
+<div class="flex justify-between items-center h-16 px-6 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black tracking-tighter text-[#191C1E] dark:text-white">EdgePicks</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#8B5CF6] dark:text-[#3fe769] font-bold border-b-2 border-[#8B5CF6] h-16 flex items-center" href="#">Today</a>
+<a class="text-[#191C1E]/60 dark:text-white/60 hover:text-[#8B5CF6] transition-colors h-16 flex items-center" href="#">Discover</a>
+<a class="text-[#191C1E]/60 dark:text-white/60 hover:text-[#8B5CF6] transition-colors h-16 flex items-center" href="#">Insights</a>
+<a class="text-[#191C1E]/60 dark:text-white/60 hover:text-[#8B5CF6] transition-colors h-16 flex items-center" href="#">Creators</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 max-w-screen-2xl mx-auto px-6">
+<!-- Hero Section -->
+<section class="mb-12">
+<div class="flex flex-col md:flex-row items-end justify-between gap-6">
+<div>
+<span class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-4">Live Sports Coverage</span>
+<h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-4">Today’s Events</h1>
+<p class="text-on-surface-variant max-w-2xl text-lg font-medium leading-relaxed">
+                        Browse the biggest games happening today and see which creators are covering them. Get expert insights before the whistle blows.
+                    </p>
+</div>
+<div class="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-tighter text-on-surface-variant/60">
+<div class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span> Live events</div>
+<div class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span> Creator coverage</div>
+<div class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span> Premium picks</div>
+<div class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span> Daily updates</div>
+</div>
+</div>
+</section>
+<!-- Live/Starting Soon Strip -->
+<section class="mb-12">
+<div class="bg-surface-container-lowest rounded-xl p-1 ghost-border shadow-sm flex items-center gap-2 overflow-x-auto no-scrollbar">
+<div class="flex items-center gap-2 px-4 py-2 border-r border-outline-variant/20 whitespace-nowrap">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
+</span>
+<span class="text-xs font-bold uppercase tracking-widest text-error">Live &amp; Soon</span>
+</div>
+<div class="flex gap-4 px-4 overflow-x-auto whitespace-nowrap py-1">
+<div class="flex items-center gap-3 text-sm">
+<span class="font-bold">LAL vs BOS</span>
+<span class="text-primary font-medium">Q4 2:14</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 text-sm">
+<span class="font-bold">MCI vs LIV</span>
+<span class="text-on-surface-variant">Starts 15m</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 text-sm">
+<span class="font-bold">NYY vs LAD</span>
+<span class="text-on-surface-variant">Starts 45m</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 text-sm">
+<span class="font-bold">CHG vs PHI</span>
+<span class="text-primary font-medium">Q2 8:45</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Search & Filters -->
+<section class="mb-12 flex flex-col gap-6">
+<div class="relative w-full max-w-3xl">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-2xl bg-surface-container-lowest ghost-border focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-on-surface font-medium" placeholder="Search teams, leagues, or events" type="text"/>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-6">
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2 rounded-full bg-on-surface text-surface text-sm font-bold">All</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-bold hover:bg-surface-container-highest transition-colors">Featured</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-bold hover:bg-surface-container-highest transition-colors">Live now</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-bold hover:bg-surface-container-highest transition-colors">Starting soon</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-bold hover:bg-surface-container-highest transition-colors">Today</button>
+</div>
+<div class="flex gap-3">
+<div class="group relative">
+<button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-lowest ghost-border text-sm font-bold">
+                            Sport <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+<div class="group relative">
+<button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-lowest ghost-border text-sm font-bold">
+                            League <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+<div class="group relative">
+<button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-lowest ghost-border text-sm font-bold">
+                            Sort by <span class="material-symbols-outlined text-sm">swap_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Events -->
+<section class="mb-16">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Featured Card 1 -->
+<div class="group relative overflow-hidden rounded-[24px] bg-surface-container-lowest ghost-border shadow-sm p-8 flex flex-col justify-between min-h-[340px]">
+<div class="absolute top-0 right-0 p-8">
+<span class="bg-error text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Live Now
+                        </span>
+</div>
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">NBA • Regular Season</span>
+<div class="flex items-center justify-between gap-4 mb-8">
+<div class="flex flex-col items-center gap-2 text-center">
+<div class="w-20 h-20 rounded-full bg-surface-container overflow-hidden p-3 mb-2">
+<img class="w-full h-full object-contain filter grayscale" data-alt="A professional basketball team logo with bold primary colors and a sharp, modern sports shield design, set against a clean white studio background with professional lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqu8GZA9e1Ex8F2_xXBtUAOqadOselGmVnmkVrgsC3LroLEmSoZCb-o8GBRJZzFwGyXElQrRtFkZzE1fPFIrzdhTLI5QnL7Q5tECcNiMoGUT5We4LBqAoMULlDPqQqcoMDS9BPTeVvtCeuGwwOZ_534OqinrrSDEfjVyKFMTWIjtw5bdynFwcKJTYFwtEJP796pQKuhIbU1JNwh2o6nuFRGBCKHt4VPah3BXEIE8AwiKxNrgvLzeH1W0lmMZDtsAHHp8xvP7lOchY"/>
+</div>
+<span class="font-black text-xl">Lakers</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="text-4xl font-black text-on-surface">112 - 108</span>
+<span class="text-sm font-bold text-on-surface-variant/60">Q4 • 5:12</span>
+</div>
+<div class="flex flex-col items-center gap-2 text-center">
+<div class="w-20 h-20 rounded-full bg-surface-container overflow-hidden p-3 mb-2">
+<img class="w-full h-full object-contain filter grayscale" data-alt="A professional basketball team emblem featuring a classic green and white clover aesthetic, styled as a premium athletic brand mark with subtle texture and soft lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yvAzQ24b62kf9C0PgC60hmH8LnRETeSSUgroRun1D8puYS-09a_DT2yqXhahHK-e996Vym6fVVXnj0GMey1hoO70KrCdcqvSJI3n0Met-HhY9czQQgLZvARqhW2ADgBC4DccF2tT_3A_NqoNLS5MNIldSOAnV9pSO78JNmRAiavYangxaPpU9snlz0YsMhgN3W4vO-4JcncyVCC1E3xAR550WTb24rMDzqMRmNzkyVPvWfOWalHICfsUqt4_zQ31z-SJg1Xcysc"/>
+</div>
+<span class="font-black text-xl">Celtics</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant/10">
+<div class="flex items-center -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of a stylish male sports analyst wearing modern glasses and a casual linen shirt, set in a bright, sunlit architectural environment with a minimalist vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrypRh57Vg7vgMdVYpwevMLn_Iphst4VgAxCs97ygiK3AHQ0vbjL-gpdqVKqiFobdK9wjGPdZQ3e4jeGk5bkAL9oN854TUKuXBNDlaVfjeqEtyL8nIZif11LxXnZUJKek41dMTkBZ9y3Nn2fmXpxeQhLWYzLuILt30IhxkCj31XMcZU4UieSJ14x651vQx4n0HM0no0pp3TL5gxpB7M2jAmcOfssD-gYMiMhoP_ei3pGavDFBPd3sTSMZaZxMhiAB78CGPMgGrEl4"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Detailed portrait of a professional female creator with a friendly expression, soft natural lighting, and a blurred modern workspace background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1lNupsYWqG77NXRIJY280zJk5xFgMtGsRkmtOKvLoI9GCJQokTYaN-vXSfSCOK-VTOUaZJ7VI-QqFa6Q0Tlt1a7qBJbAfI6hQoy6I5ZQBilKZ4cYtIRxn1dsfZt9c4QKE06qtNvqaNqOWtQWLkm7dw-njX_02zKMtLG-x6Ogp2m0klHBdY7USltJzOOfisGzf-IEgEPUmn6Ch-Ix4ybHsifpLlaWwaRD6liNpJlgzeTdRVSXQSb0HIbh_9DuJJ44X77tAVjruPRM"/>
+</div>
+<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-surface-container text-[10px] font-bold text-on-surface-variant">
+                                +12
+                            </div>
+<span class="pl-5 text-sm font-medium text-on-surface-variant">14 Creators Covering</span>
+</div>
+<button class="signature-glow text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform">View 8 Picks</button>
+</div>
+</div>
+<!-- Featured Card 2 -->
+<div class="group relative overflow-hidden rounded-[24px] bg-surface-container-lowest ghost-border shadow-sm p-8 flex flex-col justify-between min-h-[340px]">
+<div class="absolute top-0 right-0 p-8">
+<span class="bg-surface-container-high text-on-surface px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                            Starts 18:30
+                        </span>
+</div>
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">Premier League • Matchday 12</span>
+<div class="flex items-center justify-between gap-4 mb-8">
+<div class="flex flex-col items-center gap-2 text-center">
+<div class="w-20 h-20 rounded-full bg-surface-container overflow-hidden p-3 mb-2">
+<img class="w-full h-full object-contain filter grayscale" data-alt="A high-end soccer club crest with a blue and white aesthetic, presented as a clean graphic element against a minimalist, bright light-mode surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpokn47zzu9PHuHRMEelSoRndtVZaEb6IwNmtb-ek-mzxQQOjvVk7UxM20JunCOvwxCogaiYg7aW9zhTkbIJH_3j3emeodQlQeNqa11cvqTh2tvAbMVpvCj1PXQoXMGahKVCSvXxbpmGpeXPnAvHjrVCxn6p6VmhaGR0Q3uJTRo1c-4lVwr9THP5iEdEndiL1pGold5QxhVPMVVVcSUVQH2Q6f_dWQUQCvVx68xaN3t8zvDFEGbM-YIs-BfgtbYO6MegiOc5e4tqg"/>
+</div>
+<span class="font-black text-xl">Man City</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="text-4xl font-black text-on-surface-variant/20">vs</span>
+<span class="text-xs font-bold text-on-surface-variant/40">ETIHAD STADIUM</span>
+</div>
+<div class="flex flex-col items-center gap-2 text-center">
+<div class="w-20 h-20 rounded-full bg-surface-container overflow-hidden p-3 mb-2">
+<img class="w-full h-full object-contain filter grayscale" data-alt="A prestigious red and gold soccer club badge with intricate heraldry, shown in a modern, flat-design style with professional studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlHIkdqn58DPf3YIljPN6hQyvxRN9kC6tFgXSI_PrKMzlYjaOKJ_WnEY2VEOJjlragxXbPdJYtbckhp8fHUR_tFDjJ24euh_BI4JcZ_P7gdgZms9UtppyTH_sEshYC9aa9XcV3PdPBR35kx9mWeKZ6YyB6JOJWYjuo_4CS8vNkzezMDjSqYOeLhu-eIT9GTGEuGa-wBQ0Bo6jx3_v-S4ZxbVVC_RyZu9jzgwfJp07FnOYn2koTS9M8T2RGmHf4LvVippCCmRQ5OQE"/>
+</div>
+<span class="font-black text-xl">Liverpool</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant/10">
+<div class="flex items-center -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up headshot of a mature sports journalist with a focused, authoritative look, lit by soft side lighting in a professional editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPpM8Ifrm9R4uqSobpDfO4-mOfEZ5OKfhpFxQeEN1TVZzZQ_M6-05RkKxVl9sya3bUDm63c7exllOUVgrH8yl7o0DmetT2jZTwFyNXap6qgjPM7sHq-xe3mmBcVvwhn10EzFrFQIZMRELmgFb5EQLyZWV_872Y9X70BvCXhstXtOBm3Stk60b5ejO21wTtoCbXDX-Xg1_TUDsnYkJLiqyZpbYkeCcsNc0L3Er-MY8J-cDTQteW3-7PwV51ru8WxSvmiWdeO0rKjM4"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of an expert female analyst in a sleek navy blazer, featuring bright, clean lighting and a high-key professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4x22tehttNO88sMxOiuVcB0gWmd27YXgDeiuTH6qf0GbttUYMsCFl19aPkyHcyHwKztlzgzKEPYmFP8lM9EGRu_ZOkpWPgWY1LgfB4lu1r9B7_3LtQCLVUpejVufWbra71XzYsMarRXb5Sqkxao9wDJhPBUFQTsz74-Q8Y9RzqZdhmiCCsokRNVbw4vGBPHhH4gAbkUv8pdGXTWpQx-Sipos_crkbj0kPwzCJhCwlEHj0Sm9GYk4TGnnpTj9Jz_ffifnHA8acRkw"/>
+</div>
+<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-surface-container text-[10px] font-bold text-on-surface-variant">
+                                +24
+                            </div>
+<span class="pl-5 text-sm font-medium text-on-surface-variant">26 Creators Covering</span>
+</div>
+<button class="signature-glow text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform">View 15 Picks</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Events Grouped by Sport -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+<div class="lg:col-span-2 space-y-12">
+<!-- NBA Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-black tracking-tight flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">sports_basketball</span> NBA
+                        </h2>
+<a class="text-sm font-bold text-primary hover:underline uppercase tracking-widest" href="#">View all</a>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<div class="p-5 rounded-2xl bg-surface-container-lowest ghost-border flex items-center justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center gap-6">
+<span class="text-xs font-bold text-on-surface-variant/40 w-12">20:00</span>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">MIL</span>
+</div>
+<span class="text-xs font-bold text-outline-variant">@</span>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">GSW</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex flex-col items-end">
+<span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">Coverage</span>
+<span class="text-xs font-bold">8 Experts</span>
+</div>
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="p-5 rounded-2xl bg-surface-container-lowest ghost-border flex items-center justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center gap-6">
+<span class="text-xs font-bold text-primary w-12">Live</span>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">DEN</span>
+</div>
+<span class="text-xs font-bold text-outline-variant">@</span>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">PHX</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-sm font-black text-on-surface">88-82</span>
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- NFL Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-black tracking-tight flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">sports_football</span> NFL
+                        </h2>
+<a class="text-sm font-bold text-primary hover:underline uppercase tracking-widest" href="#">View all</a>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<div class="p-5 rounded-2xl bg-surface-container-lowest ghost-border flex items-center justify-between group">
+<div class="flex items-center gap-6">
+<span class="text-xs font-bold text-on-surface-variant/40 w-12">20:15</span>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">KC</span>
+</div>
+<span class="text-xs font-bold text-outline-variant">vs</span>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-surface-container"></div>
+<span class="font-bold text-sm">LV</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex flex-col items-end">
+<span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">Picks</span>
+<span class="text-xs font-bold text-primary">12 Active</span>
+</div>
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Detail Preview Block Sidebar -->
+<div class="lg:col-span-1">
+<div class="sticky top-24 space-y-8">
+<div class="bg-surface-container-lowest rounded-[24px] ghost-border p-6 shadow-sm">
+<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant/60 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">verified</span> Pick Highlight
+                        </h3>
+<div class="mb-6">
+<div class="flex items-center gap-3 mb-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Minimalist headshot of a modern digital artist with soft warm lighting, a neutral gray background, and a clean editorial photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlaxKlNXW-lp0xfxk9jxsIzBUHbV2XJ7Q-oWLAPKwRQRdW0D060Dh2gj5r3w4M8IBIm8xB_Braqw0ostqNrjRmC9euBLa80-3x2OD0txeCWINILUeFVJlwvxaiA_KD-EruQDlPTeS5i9rftRJVd7omD8d7mcWKRsqQlwvG5_A53o0uOsu-x8hmRsS7wqFs3AYp92AP-ixi4I5NToRZ_IihAkRt_eN19W6Ng1dDjAPHvMsrIrXyM9qwta8g3C-9hodlfTXoaqSoJ8g"/>
+<div>
+<p class="text-sm font-bold">@SharpAnalysis</p>
+<p class="text-[10px] font-medium text-on-surface-variant">Top NBA Creator • 84% Win Rate</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-4 mb-4">
+<span class="text-[10px] font-black text-primary uppercase tracking-widest block mb-2">The Insight</span>
+<p class="text-sm font-medium leading-relaxed italic text-on-surface">
+                                    "Lakers interior defense is struggling tonight with AD in foul trouble. Expect the Celtics to push the pace in the paint during the final 5 mins."
+                                </p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs font-bold">
+<span>BOS Moneyline</span>
+<span class="text-primary">-110</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full w-[65%] signature-glow"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant/60 font-medium">65% of experts agree on this pick</span>
+</div>
+</div>
+<button class="w-full bg-on-surface text-surface py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Unlock Full Strategy</button>
+</div>
+<div class="p-6 rounded-[24px] bg-primary/5 border border-primary/10">
+<h3 class="text-sm font-black tracking-tight mb-2">Unlock Premium Insights</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-4">Get access to every locked pick from 500+ verified creators today.</p>
+<button class="text-xs font-bold text-primary flex items-center gap-1 group">
+                            Learn about EdgePicks Pro <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Creators Covering Today’s Top Games -->
+<section class="mt-20">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-3xl font-black tracking-tight">Today’s Top Creators</h2>
+<button class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-on-surface">
+                    View Rankings <span class="material-symbols-outlined text-sm">trending_up</span>
+</button>
+</div>
+<div class="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
+<!-- Creator Card -->
+<div class="min-w-[280px] bg-surface-container-lowest ghost-border rounded-2xl p-6 hover:translate-y-[-4px] transition-all cursor-pointer">
+<div class="relative w-16 h-16 mb-4">
+<img class="w-full h-full rounded-2xl object-cover" data-alt="Professional portrait of a male data scientist in a modern studio environment, soft lighting, minimalist aesthetic, focused expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcf-iGFmtAt53dkb9kmfILWfMrgcMd0p0AJWbRD-KkKweaE1TuqW6VnLbXYEIJsqqwZiXfKGpFcLxU3Fozy9K6-8RXcDusEpoPeVUJCMYvnvKstsFxBELGgkYgJBVE2d_CIA_MZ1OLB2tE9yG3WBFqEDMytkLy5gegFtJdbFwH6ZjzP3QvS7KJXMb5CdR_9AQiktd2XogxKTcLBbRjjjwi2wn8UjIv1xtFDK4m7yOiXnq--ymQXFdD8fMYrSWZU-6jS0PaAPlXhug"/>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-on-surface">Marcus Knight</h4>
+<p class="text-xs text-on-surface-variant mb-4">@mknight_analytics</p>
+<div class="flex gap-2 mb-4">
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">NBA</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">NFL</span>
+</div>
+<div class="text-[10px] font-black uppercase tracking-widest text-primary">4 Events Today</div>
+</div>
+<!-- Creator Card 2 -->
+<div class="min-w-[280px] bg-surface-container-lowest ghost-border rounded-2xl p-6 hover:translate-y-[-4px] transition-all cursor-pointer">
+<div class="relative w-16 h-16 mb-4">
+<img class="w-full h-full rounded-2xl object-cover" data-alt="Editorial portrait of a female sports broadcaster with bright, clean studio lighting and a high-key professional look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqyS8WDcSBOa71udN7yB2ts90pHVlohFY7tl2b5U-ftfpWLYmqmtMyCVhkGjjvGi2CqjOvmSLiEe7qDRSV64C5GH7Z-7a8tSMb0Y4_UCy0ztu2PThqhm45sSrLQlV2IexZCoLmE8nTBuo0Um8Pei-kytlfbnqqD-Pv9-g4GrdADZD7rSYJywJD5ZoRLOfiNwtqcQQqhKf7hw6tdEkmqBEnmwiDJKSy3ziiO1JCP7DDRV3sZxC6A9ll90Tik2AwLY-J-C_vrC2ZZyA"/>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-on-surface">Sarah Chen</h4>
+<p class="text-xs text-on-surface-variant mb-4">@chen_soccer</p>
+<div class="flex gap-2 mb-4">
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">Premier League</span>
+</div>
+<div class="text-[10px] font-black uppercase tracking-widest text-primary">6 Events Today</div>
+</div>
+<!-- Creator Card 3 -->
+<div class="min-w-[280px] bg-surface-container-lowest ghost-border rounded-2xl p-6 hover:translate-y-[-4px] transition-all cursor-pointer">
+<div class="relative w-16 h-16 mb-4">
+<img class="w-full h-full rounded-2xl object-cover" data-alt="Minimalist headshot of a young entrepreneur in a modern office, cinematic natural lighting, soft focus background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMIfWrHhjbHKEHWipUrXXxkPVwItDdujvDKEkGOnQzPcIjvfmuFZO3efZb3kayadcL2mR9Fsgxzgoq7yT71CPPK2YFl7zIh4uQ6RlA701L2pY2ZbeEAWPRxfCzBH_7Crk9fI1L8X1in0t45qFO-IcLQAmo6x0y43NY2Xf5sNh9mvOj2x8aJDF_AIZCK8h7nhIilV_BCePSsz8pqoSxoFt5KaXjV6c-XEuI5p3ZsljlvlU9AGZq345oP0Lu0xRI3sS2FWhZUO3Yh9A"/>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-on-surface">Alex Rivera</h4>
+<p class="text-xs text-on-surface-variant mb-4">@arivera_mma</p>
+<div class="flex gap-2 mb-4">
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">UFC</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">Boxing</span>
+</div>
+<div class="text-[10px] font-black uppercase tracking-widest text-primary">2 Events Today</div>
+</div>
+<!-- Creator Card 4 -->
+<div class="min-w-[280px] bg-surface-container-lowest ghost-border rounded-2xl p-6 hover:translate-y-[-4px] transition-all cursor-pointer">
+<div class="relative w-16 h-16 mb-4">
+<img class="w-full h-full rounded-2xl object-cover" data-alt="Professional female creator portrait with soft editorial lighting, neutral tones, and a sophisticated minimalist look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1u5Ksaz_QgTK_KwXrbFOI5T5dI4j-zsqhzFyDAHJxC0b2enQMX2YXuIjA6lqTByorwduAsTVF27GYjexc706hdb151cECHaQetUiHOxYee8GkJxANBv4HPUJQn7ent3kWX4uadj3TytQBibmvfwoRVQHMT7nyFxHZPE2pt7eB6FJuLdpvuknHzpfhPlZ4vEs4AR3AwsOO6AHrfNjxHQSui0YAUOWDZU3Tw8W64gTqZK3Md6rh7AIrasu0u-G6MW_AFRohJ2zHyzs"/>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-on-surface">Emma Watson</h4>
+<p class="text-xs text-on-surface-variant mb-4">@e_watson_stats</p>
+<div class="flex gap-2 mb-4">
+<span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-bold">MLB</span>
+</div>
+<div class="text-[10px] font-black uppercase tracking-widest text-primary">8 Events Today</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-4 pb-safe bg-white/95 dark:bg-[#191C1E]/95 backdrop-blur-md z-50 rounded-t-[24px] border-t-[0.5px] border-black/5 shadow-[0_-10px_40px_rgba(15,23,42,0.06)]">
+<a class="flex flex-col items-center justify-center bg-[#8B5CF6]/10 dark:bg-[#8B5CF6]/20 text-[#8B5CF6] dark:text-[#3fe769] rounded-[16px] px-4 py-1.5" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-widest mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#191C1E]/40 dark:text-white/40 hover:text-[#8B5CF6]" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-widest mt-1">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#191C1E]/40 dark:text-white/40 hover:text-[#8B5CF6]" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-widest mt-1">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#191C1E]/40 dark:text-white/40 hover:text-[#8B5CF6]" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="bg-surface-container-low pt-24 pb-32 md:pb-12 border-t border-outline-variant/10">
+<div class="max-w-screen-2xl mx-auto px-6">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+<div class="col-span-1 md:col-span-2">
+<span class="text-2xl font-black tracking-tighter text-[#191C1E] mb-6 block">EdgePicks</span>
+<p class="text-on-surface-variant max-w-sm mb-8 leading-relaxed">
+                        The ultimate destination for premium sports insights, data-driven analysis, and creator-led coverage of the sports you love.
+                    </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all" href="#"><span class="material-symbols-outlined">share</span></a>
+</div>
+</div>
+<div>
+<h5 class="text-xs font-black uppercase tracking-widest text-on-surface mb-6">Platform</h5>
+<ul class="space-y-4 text-sm font-medium text-on-surface-variant">
+<li><a class="hover:text-primary transition-colors" href="#">How it works</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">For Creators</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Expert Rankings</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Pricing</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-xs font-black uppercase tracking-widest text-on-surface mb-6">Support</h5>
+<ul class="space-y-4 text-sm font-medium text-on-surface-variant">
+<li><a class="hover:text-primary transition-colors" href="#">Help Center</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+</ul>
+</div>
+</div>
+<div class="pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-xs text-on-surface-variant/60 font-medium">© 2024 EdgePicks Editorial. All rights reserved.</p>
+<div class="flex gap-8 text-xs font-medium text-on-surface-variant/60">
+<a class="hover:text-primary" href="#">Cookies</a>
+<a class="hover:text-primary" href="#">Compliance</a>
+<a class="hover:text-primary" href="#">Editorial Guidelines</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

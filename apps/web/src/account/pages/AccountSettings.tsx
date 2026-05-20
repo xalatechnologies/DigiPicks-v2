@@ -1,29 +1,34 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import {
-  PageHeader,
-  PageHead,
   Container,
   Stack,
   Row,
-  Card,
-  CardHead,
   Button,
-  Icon,
   Badge,
-  PersonRow,
-  Divider,
-  SwitchRow,
-  DashGrid,
   Field,
   Input,
   Select,
-  SectionHead,
-  InsightCard,
-  RowList,
+  Segmented,
+  FilterChips,
+  SwitchRow,
+  EmptyState,
+  StudioPageHeader,
+  StudioDashLayout,
+  StudioDashCol,
+  AccountSettingsPanel,
+  AccountProfileSettingsCard,
+  AccountNotificationTriggerRow,
+  AccountSettingsActionRow,
+  AccountSidebarPanel,
+  AccountBillingPanel,
+  Eyebrow,
+  Muted,
+  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 type Locale = 'en' | 'nb';
 
@@ -32,101 +37,88 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'nb', label: 'Norsk bokmål' },
 ];
 
-const NOTIFICATION_SECTIONS = [
+const THEME_OPTIONS = [
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+  { label: 'System', value: 'system' },
+];
+
+const SPORT_OPTIONS = ['NBA', 'NFL', 'Soccer', 'Tennis', 'Cricket'];
+const MARKET_OPTIONS = ['Props', 'Spreads', 'Parlays', 'Totals'];
+
+const NOTIFY_TRIGGERS = [
   {
-    title: 'Pick notifications',
-    eyebrow: 'Pick alerts',
-    sub: 'Stay in the loop the moment a creator publishes.',
-    items: [
-      {
-        id: 'newPick',
-        label: 'New pick alerts',
-        sub: 'When a subscribed creator publishes',
-        defaultOn: true,
-      },
-      {
-        id: 'gradeAlert',
-        label: 'Grading updates',
-        sub: 'When followed picks are graded',
-        defaultOn: true,
-      },
-      {
-        id: 'urgentPick',
-        label: 'Urgent picks',
-        sub: 'Picks with cutoffs under 1h',
-        defaultOn: true,
-      },
-    ],
+    id: 'pickPublished' as const,
+    label: 'New professional picks',
+    sub: 'Get notified instantly when followed creators lock in new insights.',
   },
   {
-    title: 'Billing',
-    eyebrow: 'Billing',
-    sub: 'Renewals, failed payments, price changes.',
-    items: [
-      {
-        id: 'billing',
-        label: 'Billing alerts',
-        sub: 'Failed payments and renewals',
-        defaultOn: true,
-      },
-      {
-        id: 'priceChange',
-        label: 'Price changes',
-        sub: 'Creator pricing updates',
-        defaultOn: true,
-      },
-    ],
+    id: 'pickGraded' as const,
+    label: 'Creator daily posts',
+    sub: 'Analysis, breakdowns, and long-form editorial content.',
   },
   {
-    title: 'Community',
-    eyebrow: 'Community',
-    sub: 'Weekly digest and reply notifications.',
-    items: [
-      {
-        id: 'digest',
-        label: 'Weekly digest',
-        sub: 'Top picks and win-rate movers',
-        defaultOn: false,
-      },
-      { id: 'community', label: 'Mentions', sub: 'When someone replies to you', defaultOn: false },
-    ],
+    id: 'lineMoved' as const,
+    label: 'Live event reminders',
+    sub: 'Real-time alerts for betting windows and starting lineups.',
   },
 ];
+
+function fmtMemberSince(ms?: number): string {
+  if (!ms) return '—';
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+}
+
+function fmtBillingDate(ms?: number): string {
+  if (!ms) return '—';
+  return new Date(ms).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 export function AccountSettings() {
   const navigate = useNavigate();
   const me = useQuery(api.users.me);
+  const subs = useQuery(api.subscriptions.mySubscriptions);
   const updateProfile = useMutation(api.users.updateProfile);
+  const updatePrefs = useMutation(api.notify.updatePrefs);
+  const exportMyData = useAction(api.gdpr.exportMyData);
 
-  const [name, setName] = React.useState('');
-  const [locale, setLocale] = React.useState<Locale>('en');
-  const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [saved, setSaved] = React.useState(false);
+  const [name, setName] = useState('');
+  const [locale, setLocale] = useState<Locale>('en');
+  const [theme, setTheme] = useState('light');
+  const [sports, setSports] = useState<string | null>(null);
+  const [markets, setMarkets] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [toggles, setToggles] = React.useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    for (const section of NOTIFICATION_SECTIONS) {
-      for (const item of section.items) initial[item.id] = item.defaultOn;
-    }
-    return initial;
-  });
-
-  const [weeklyCap, setWeeklyCap] = React.useState(false);
-  const [cooldown, setCooldown] = React.useState(false);
-  const [privateProfile, setPrivateProfile] = React.useState(false);
-  const [hideLeaderboards, setHideLeaderboards] = React.useState(false);
+  const prefs = me?.notifyPrefs;
 
   React.useEffect(() => {
     if (me?.name) setName(me.name);
     if (me?.locale) setLocale(me.locale);
   }, [me?.name, me?.locale]);
 
-  function setToggle(id: string) {
-    return (next: boolean) => setToggles((prev) => ({ ...prev, [id]: next }));
-  }
+  const activeSub = subs?.find((s) => s.status === 'active');
+  const nextRenewal = activeSub?.renewsAt;
 
-  async function handleSave() {
+  const billingHistory = useMemo(() => {
+    return (subs ?? [])
+      .filter((s) => s.startedAt)
+      .sort((a, b) => b.startedAt - a.startedAt)
+      .slice(0, 3)
+      .map((s) => ({
+        id: s._id,
+        dateLabel: fmtBillingDate(s.startedAt),
+        detail: `${s.creatorName} subscription`,
+        amount: `$${s.creatorStartingPrice.toFixed(2)}`,
+      }));
+  }, [subs]);
+
+  async function handleSaveProfile() {
     setError(null);
     setSaved(false);
     setSaving(true);
@@ -141,271 +133,248 @@ export function AccountSettings() {
     }
   }
 
-  const memberSince = me?._creationTime
-    ? new Date(me._creationTime).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
-    : '—';
+  async function handlePrefChange(
+    key: 'pickPublished' | 'pickGraded' | 'lineMoved' | 'push' | 'email',
+    value: boolean,
+  ) {
+    try {
+      await updatePrefs({ [key]: value });
+    } catch {
+      /* useQuery recovers */
+    }
+  }
 
-  const aside = (
-    <>
-      <InsightCard
-        tone="blue"
-        eyebrow="Connected"
-        title="Sign-in providers"
-        sub="Add backup providers to stay locked in."
-      >
-        <RowList
-          items={[
-            {
-              id: 'google',
-              name: 'Google',
-              sub: me?.email ?? 'Not connected',
-              mono: 'G',
-              color: 'var(--brand-google)',
-              connected: true,
-            },
-            {
-              id: 'discord',
-              name: 'Discord',
-              sub: 'Not connected',
-              mono: 'D',
-              color: 'var(--brand-discord)',
-              connected: false,
-            },
-            {
-              id: 'apple',
-              name: 'Apple',
-              sub: 'Not connected',
-              mono: 'A',
-              color: 'var(--brand-apple)',
-              connected: false,
-            },
-          ]}
-          getKey={(p) => p.id}
-          renderItem={(p) => (
-            <PersonRow
-              name={p.name}
-              sub={p.sub}
-              mono={p.mono}
-              color={p.color}
-              trailing={
-                p.connected ? (
-                  <Badge tone="green">Connected</Badge>
-                ) : (
-                  <Button variant="outline" size="sm">
-                    Connect
-                  </Button>
-                )
-              }
-            />
-          )}
-        />
-      </InsightCard>
+  async function handleExport() {
+    try {
+      await exportMyData({});
+    } catch {
+      /* user notified via browser if needed */
+    }
+  }
 
-      <InsightCard
-        tone="green"
-        eyebrow="Recommended"
-        title="Responsible betting"
-        sub="Soft guards to stay disciplined when variance bites."
-      >
-        <RowList
-          items={[
-            {
-              id: 'weeklyCap',
-              label: 'Weekly play cap',
-              sub: 'Limit to 20 plays per week',
-              checked: weeklyCap,
-              onChange: setWeeklyCap,
-            },
-            {
-              id: 'cooldown',
-              label: 'Cooldown period',
-              sub: 'Pause after 3+ losses in a row',
-              checked: cooldown,
-              onChange: setCooldown,
-            },
-          ]}
-          getKey={(it) => it.id}
-          renderItem={(it) => (
-            <SwitchRow label={it.label} sub={it.sub} checked={it.checked} onChange={it.onChange} />
-          )}
-        />
-      </InsightCard>
+  if (me === undefined) {
+    return (
+      <Container size="2xl">
+        <EmptyState icon="gear" title="Loading settings…" />
+      </Container>
+    );
+  }
 
-      <InsightCard tone="mute" eyebrow="Privacy" title="Profile visibility">
-        <RowList
-          items={[
-            {
-              id: 'private',
-              label: 'Private profile',
-              sub: 'Hide portfolio from other subscribers',
-              checked: privateProfile,
-              onChange: setPrivateProfile,
-            },
-            {
-              id: 'leaderboard',
-              label: 'Hide from leaderboards',
-              sub: 'Exclude me from public rankings',
-              checked: hideLeaderboards,
-              onChange: setHideLeaderboards,
-            },
-          ]}
-          getKey={(it) => it.id}
-          renderItem={(it) => (
-            <SwitchRow label={it.label} sub={it.sub} checked={it.checked} onChange={it.onChange} />
-          )}
-        />
-      </InsightCard>
-
-      <InsightCard
-        tone="red"
-        eyebrow="Danger zone"
-        title="Pause or delete"
-        sub="Pausing hides your activity. Deleting is permanent and cannot be undone."
-      >
-        <Row gap={2} wrap>
-          <Button variant="outline" size="sm">
-            Export data
-          </Button>
-          <Button variant="outline" size="sm">
-            Pause
-          </Button>
-          <Button variant="danger" size="sm">
-            Delete
-          </Button>
-        </Row>
-      </InsightCard>
-    </>
-  );
+  const emailOn = prefs?.email === true;
+  const pushOn = prefs?.push === true;
 
   return (
-    <>
-      <PageHeader
-        title="Settings"
-        crumbs={[{ label: 'Account' }, { label: 'Settings' }]}
-        actions={
-          <Row gap={2}>
-            {saved && (
-              <Badge tone="green" dot>
-                Saved
-              </Badge>
-            )}
-            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
-              <Icon name="check" size={13} />
-              {saving ? 'Saving…' : 'Save changes'}
-            </Button>
-          </Row>
-        }
-      />
-
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Account"
-            title="Settings"
-            sub="Profile, notifications, privacy, and connected accounts — fine-tune how DigiPicks works for you."
-          />
-
-          {error && (
-            <InsightCard
-              tone="red"
-              eyebrow="Save failed"
-              title="Could not update your profile"
-              sub={error}
-              action={
-                <Button variant="ghost" size="sm" onClick={() => setError(null)}>
-                  Dismiss
-                </Button>
-              }
-            />
-          )}
-
-          <DashGrid aside={aside}>
-            {/* Identity & profile */}
-            <SectionHead
-              eyebrow="Profile"
-              title="Your identity"
-              sub="How you appear across DigiPicks."
-              action={
-                <Badge tone={me?.creatorId ? 'green' : 'blue'}>
-                  {me?.creatorId ? 'Creator' : 'Subscriber'}
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Account · Settings"
+          title="Account settings"
+          sub="Profile and notification preferences save to your account. Theme and sport filters are preview-only until personalization sync ships."
+          actions={
+            <Row gap={2}>
+              {saved ? (
+                <Badge tone="green" dot>
+                  Saved
                 </Badge>
-              }
-            />
-            <Card pad="md">
-              <Stack gap={4}>
-                <PersonRow
-                  name={me?.name ?? 'Loading…'}
-                  sub={me?.email ?? ''}
+              ) : null}
+              <Button variant="primary" onClick={handleSaveProfile} disabled={saving}>
+                {saving ? 'Saving…' : 'Save changes'}
+              </Button>
+            </Row>
+          }
+        />
+
+        {error ? (
+          <AccountSidebarPanel title="Save failed" variant="accent">
+            <Muted>{error}</Muted>
+          </AccountSidebarPanel>
+        ) : null}
+
+        <StudioDashLayout>
+          <StudioDashCol span={8}>
+            <Stack gap={6}>
+              <AccountSettingsPanel
+                title="Profile details"
+                icon="user"
+                footer={
+                  <Button variant="primary" onClick={handleSaveProfile} disabled={saving}>
+                    {saving ? 'Saving…' : 'Save changes'}
+                  </Button>
+                }
+              >
+                <AccountProfileSettingsCard
+                  name={me?.name ?? '—'}
+                  email={me?.email ?? ''}
                   mono={me?.name?.[0]?.toUpperCase() ?? 'U'}
                   color="var(--primary)"
-                  size={48}
-                  trailing={<Badge tone="mute">{`Member since ${memberSince}`}</Badge>}
-                />
-                <Divider />
-                <Field label="Display name" required>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} />
-                </Field>
-                <Field label="Email">
-                  <Input value={me?.email ?? ''} readOnly />
-                </Field>
-                <Field label="Language">
-                  <Select value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
-                    {LOCALE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </Select>
-                </Field>
-              </Stack>
-            </Card>
+                  memberSince={fmtMemberSince(me?._creationTime)}
+                  roleLabel={me?.creatorId ? 'Creator' : 'Subscriber'}
+                >
+                  <Field label="Display name" required>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} />
+                  </Field>
+                  <Field label="Email address">
+                    <Input value={me?.email ?? ''} readOnly />
+                  </Field>
+                  <Field label="Language">
+                    <Select
+                      value={locale}
+                      onChange={(e) => setLocale(e.target.value as Locale)}
+                      aria-label="Language"
+                    >
+                      {LOCALE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </AccountProfileSettingsCard>
+              </AccountSettingsPanel>
 
-            {/* Notifications */}
-            <SectionHead
-              eyebrow="Notifications"
-              title="What you hear from us"
-              sub="Pick alerts, billing notices, and community signals."
-            />
-            {NOTIFICATION_SECTIONS.map((section) => (
-              <Card key={section.title} pad="md">
-                <CardHead title={section.title} sub={section.sub} />
-                <RowList
-                  items={section.items}
-                  getKey={(item) => item.id}
-                  renderItem={(item) => (
-                    <SwitchRow
-                      label={item.label}
-                      sub={item.sub}
-                      checked={toggles[item.id] ?? false}
-                      onChange={setToggle(item.id)}
+              <AccountSettingsPanel title="Intelligence triggers" icon="bell">
+                <Stack gap={2}>
+                  <SwitchRow
+                    label="Email channel"
+                    sub="Receive pick alerts in your inbox"
+                    checked={emailOn}
+                    onChange={(v) => handlePrefChange('email', v)}
+                  />
+                  <SwitchRow
+                    label="Push channel"
+                    sub="Browser and device notifications"
+                    checked={pushOn}
+                    onChange={(v) => handlePrefChange('push', v)}
+                  />
+                  {NOTIFY_TRIGGERS.map((row) => (
+                    <AccountNotificationTriggerRow
+                      key={row.id}
+                      label={row.label}
+                      sub={row.sub}
+                      checked={prefs?.[row.id] !== false}
+                      onChange={(v) => handlePrefChange(row.id, v)}
+                      emailActive={emailOn}
+                      pushActive={pushOn}
                     />
-                  )}
-                />
-              </Card>
-            ))}
+                  ))}
+                  <AccountNotificationTriggerRow
+                    label="Billing & security updates"
+                    sub="Important notices regarding your account health."
+                    checked
+                    disabled
+                    emailActive
+                    pushActive={pushOn}
+                  />
+                </Stack>
+              </AccountSettingsPanel>
 
-            {/* Creator CTA */}
-            {!me?.creatorId && (
-              <InsightCard
-                tone="amber"
-                eyebrow="Become a creator"
-                title="Have a track record? Publish picks."
-                sub="Apply once, get verified, and keep 87% of every subscription."
-                action={
+              <AccountSettingsPanel title="Personalization" icon="sliders">
+                <Stack gap={6}>
+                  <Muted>Preview only — not saved to your account yet.</Muted>
+                  <Stack gap={3}>
+                    <Eyebrow>Theme visuals</Eyebrow>
+                    <Segmented
+                      options={THEME_OPTIONS}
+                      value={theme}
+                      onChange={setTheme}
+                      ariaLabel="Theme"
+                      fullWidth
+                    />
+                  </Stack>
+                  <Stack gap={3}>
+                    <Eyebrow>Focus sports</Eyebrow>
+                    <FilterChips
+                      options={SPORT_OPTIONS}
+                      value={sports}
+                      onChange={setSports}
+                      allLabel="All"
+                    />
+                  </Stack>
+                  <Stack gap={3}>
+                    <Eyebrow>Market interests</Eyebrow>
+                    <FilterChips
+                      options={MARKET_OPTIONS}
+                      value={markets}
+                      onChange={setMarkets}
+                      allLabel="All markets"
+                    />
+                  </Stack>
+                </Stack>
+              </AccountSettingsPanel>
+
+              {!me?.creatorId ? (
+                <AccountSidebarPanel title="Become a creator" variant="accent">
+                  <Muted>
+                    Have a track record? Publish picks and keep 87% of every subscription.
+                  </Muted>
                   <Button
                     variant="primary"
-                    size="sm"
                     iconRight="arrow-right"
                     onClick={() => navigate('/apply')}
                   >
                     Apply now
                   </Button>
+                </AccountSidebarPanel>
+              ) : null}
+            </Stack>
+          </StudioDashCol>
+
+          <StudioDashCol span={4}>
+            <Stack gap={6}>
+              <AccountBillingPanel
+                paymentBrand="VISA"
+                paymentLabel="Card on file"
+                paymentSub={
+                  nextRenewal
+                    ? `Next billing ${fmtBillingDate(nextRenewal)}`
+                    : 'Manage payment in subscriptions'
                 }
+                onUpdatePayment={() => navigate('/account/payment-methods')}
+                history={billingHistory}
+                onViewAllHistory={() => navigate('/account/billing-history')}
               />
-            )}
-          </DashGrid>
-        </Stack>
-      </Container>
-    </>
+
+              <AccountSidebarPanel title="Integrations">
+                <AccountSettingsActionRow
+                  label="Google"
+                  trailing={me?.email ? 'Connected' : undefined}
+                  trailingTone="primary"
+                />
+                <AccountSettingsActionRow
+                  label="Discord"
+                  trailing={me?.discordId ? 'Connected' : 'Link'}
+                  trailingTone={me?.discordId ? 'primary' : 'default'}
+                />
+                <AccountSettingsActionRow label="Apple ID" trailing="Link" />
+              </AccountSidebarPanel>
+
+              <AccountSidebarPanel title="Security vault">
+                <AccountSettingsActionRow label="Change password" onClick={() => {}} />
+                <AccountSettingsActionRow
+                  label="Two-factor (2FA)"
+                  trailing="Off"
+                  trailingTone="danger"
+                />
+                <AccountSettingsActionRow label="Active sessions" trailing="View" />
+                <Button variant="outline" block>
+                  Logout all devices
+                </Button>
+              </AccountSidebarPanel>
+
+              <AccountSidebarPanel title="Privacy compliance">
+                <Button variant="secondary" block iconLeft="arrow-down" onClick={handleExport}>
+                  Download my personal data
+                </Button>
+                <Button variant="ghost" block onClick={() => navigate('/account')}>
+                  Delete account
+                </Button>
+              </AccountSidebarPanel>
+            </Stack>
+          </StudioDashCol>
+        </StudioDashLayout>
+
+        <QuickActionGrid title="Related" items={accountCrossLinks('settings', navigate)} />
+      </Stack>
+    </Container>
   );
 }

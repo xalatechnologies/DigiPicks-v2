@@ -72,9 +72,6 @@ export function PortfolioHero({
 
   return (
     <section className={cx(s.hero, empty && s.empty, className)} aria-label="Portfolio summary">
-      <div className={s.aurora} aria-hidden="true" />
-      <div className={s.grain} aria-hidden="true" />
-
       <div className={s.head}>
         <div className={s.text}>
           {eyebrow && <div className={s.eyebrow}>{eyebrow}</div>}
@@ -113,9 +110,7 @@ export function PortfolioHero({
               {kpis.map((kpi, i) => (
                 <div className={s.kpi} key={`${kpi.label}-${i}`}>
                   <div className={s.kpiLabel}>{kpi.label}</div>
-                  <div className={cx(s.kpiValue, kpi.tone && s[`v_${kpi.tone}`])}>
-                    {kpi.value}
-                  </div>
+                  <div className={cx(s.kpiValue, kpi.tone && s[`v_${kpi.tone}`])}>{kpi.value}</div>
                 </div>
               ))}
             </div>

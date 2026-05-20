@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Content Moderation | Elite Editorial Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Manrope', sans-serif; }
+        .signature-glow {
+            background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(203, 195, 215, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e9ddff",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-primary-container": "#fffbff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdcbb",
+                        "secondary": "#565e74",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-primary-fixed-variant": "#5516be",
+                        "outline-variant": "#cbc3d7",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "primary": "#6b38d4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface-variant": "#494454",
+                        "on-secondary-container": "#5c647a",
+                        "inverse-primary": "#d0bcff",
+                        "on-tertiary-fixed": "#2c1700",
+                        "secondary-fixed": "#dae2fd",
+                        "outline": "#7b7486",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-surface": "#191c1e",
+                        "on-background": "#191c1e",
+                        "tertiary": "#855000",
+                        "secondary-container": "#dae2fd",
+                        "error": "#ba1a1a",
+                        "surface": "#f7f9fb",
+                        "tertiary-container": "#a76500",
+                        "surface-tint": "#6d3bd7",
+                        "on-secondary-fixed": "#131b2e",
+                        "background": "#f7f9fb",
+                        "surface-container-low": "#f2f4f6",
+                        "primary-container": "#8455ef",
+                        "surface-dim": "#d8dadc",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#23005c",
+                        "primary-fixed-dim": "#d0bcff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface-container-high": "#e6e8ea",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-72 fixed left-0 top-0 z-50 overflow-y-auto bg-white dark:bg-slate-950 shadow-[20px_0_40px_rgba(25,28,30,0.03)] flex flex-col gap-1 p-6">
+<div class="mb-10 px-2">
+<h1 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Elite Editorial</h1>
+<p class="text-xs font-medium text-slate-500 tracking-wider">Creator Management</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span>Creator Applications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span>Creators</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-violet-600 dark:text-violet-400 font-bold bg-slate-50 dark:bg-slate-900 rounded-l-full" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span>Content Moderation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Payouts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span>Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-medium hover:text-violet-600 dark:hover:text-violet-400 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span>Audit Logs</span>
+</a>
+</nav>
+</aside>
+<!-- TopAppBar -->
+<header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between px-10 py-4 ml-72">
+<div class="flex items-center bg-surface-container rounded-full px-4 py-2 w-96 focus-within:ring-2 focus-within:ring-violet-500/20">
+<span class="material-symbols-outlined text-slate-400 text-lg mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-medium w-full" placeholder="Search creators, content or logs..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="p-2 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-full transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="p-2 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-slate-100">
+<div class="text-right">
+<p class="text-sm font-manrope font-semibold text-on-surface">Chief Admin</p>
+<p class="text-[10px] uppercase tracking-widest text-slate-400">Admin Panel</p>
+</div>
+<img alt="Admin Profile" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a mature male executive with silvering hair and a confident, kind expression. He is wearing a high-end charcoal gray suit against a clean, softly lit studio background that emphasizes a premium, minimalist corporate aesthetic. The lighting is sophisticated, creating a professional yet approachable tone for an elite administrator." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg2YyQ4eXN6rqeWLdfTxYcFxLtX1_BT0X4t4cIX0okJyY3vPvZyLxIQRvMH3FVrSnStEDm4yQgftpXDv_svLN8xG_rHYThFZaRYvqAJ39c-xZfcDR825YxW4NUZjWCRFy4adbN2TMneP3PQafCkT9LbthyI2k2YcvqGmN5lh1wDy1iyfl1tU_pH0CJza5RprGN-74F9inO1DGoYXYOMxjDoL_t2nlCExA0prT84hZ_8Y2NobacQ3dkXEFlOpjJDIQUHxgcRFl6Yyc"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-72 p-8 flex flex-col gap-8 pr-[420px]">
+<!-- Header -->
+<div class="flex items-end justify-between">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-1 block">Trust &amp; Safety Dashboard</span>
+<h2 class="text-4xl font-black text-on-surface tracking-tighter">Content Moderation</h2>
+</div>
+<div class="flex gap-2">
+<button class="px-6 py-2 bg-surface-container-high rounded-full text-sm font-bold text-on-surface hover:bg-surface-container-highest transition-colors">Export Report</button>
+<button class="px-6 py-2 signature-glow rounded-full text-sm font-bold text-white shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">Automated Rules</button>
+</div>
+</div>
+<!-- Summary Metrics -->
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-2xl ghost-border">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">New flags today</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">42</span>
+<span class="text-xs font-bold text-primary">+12% vs avg</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ghost-border">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Pending review</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">128</span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ghost-border">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 text-error">High priority</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">14</span>
+<span class="text-[10px] px-2 py-0.5 bg-error/10 text-error rounded-full font-black">URGENT</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ghost-border">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Resolved</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">312</span>
+<p class="text-[10px] text-slate-400 uppercase font-medium">Last 24h</p>
+</div>
+</div>
+</div>
+<!-- Moderation Tabs -->
+<div class="flex border-b border-surface-container-highest">
+<button class="px-6 py-4 text-sm font-bold text-primary border-b-2 border-primary">All</button>
+<button class="px-6 py-4 text-sm font-semibold text-slate-500 hover:text-on-surface transition-colors">Flagged picks</button>
+<button class="px-6 py-4 text-sm font-semibold text-slate-500 hover:text-on-surface transition-colors">Flagged posts</button>
+<button class="px-6 py-4 text-sm font-semibold text-slate-500 hover:text-on-surface transition-colors">Reported creators</button>
+<button class="px-6 py-4 text-sm font-semibold text-slate-500 hover:text-on-surface transition-colors">Auto-detected issues</button>
+</div>
+<!-- Moderation Queue Table -->
+<div class="bg-surface-container-lowest rounded-2xl ghost-border overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Content Type</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Creator</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Reason Flagged</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Severity</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Date Flagged</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Status</th>
+<th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">sports_basketball</span>
+<span class="text-sm font-semibold text-on-surface">Game Pick</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="Creator" class="w-7 h-7 rounded-full object-cover" data-alt="A minimalist, professional portrait of a tech-savvy content creator in a bright modern studio. The subject has an alert, professional gaze, wearing high-end urban athletic apparel. The background is a soft, blurry office space with violet accents that align with a premium digital curation brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDenfzgSiW9cT6G3xj1RnhLl9tZ3KefGzve_WzrptPxBJmrrPAAIoMdu-2rQKudUBm9oeOM3x5uaMvebFFZYQI1qgkKAb4iqqCyBGMd8BkC_JZUotmFJofeyGTgHn1fWkEuiXXTwE_YdkE6Odez1uaZP66BX5TSeP77Nwi0kNoAqqQxZiE15nDHx29qSh45HMYvlo0sLEx8NmI7JFJ3bGXgORIzQt0a1xLNE-q5I4ylj5FomS63gZpv2wQJtdo5PEGlDgJlxzwA2N0"/>
+<span class="text-sm font-medium text-on-surface">The Sharp Eye</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Unverified Claim</td>
+<td class="px-6 py-4">
+<span class="text-[10px] px-2 py-0.5 bg-error/10 text-error rounded-full font-black uppercase tracking-tighter">Critical</span>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-slate-500">Today, 2:45 PM</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-xs font-bold text-tertiary">Under Review</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<button class="p-1.5 hover:bg-primary/10 text-primary rounded transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">block</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">forward_to_inbox</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">article</span>
+<span class="text-sm font-semibold text-on-surface">Forum Post</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="Creator" class="w-7 h-7 rounded-full object-cover" data-alt="A portrait of a young professional editor with a focus on sports analytics. He is set against a clean, modern workspace background with large windows and soft natural light. The overall mood is serious and analytical, featuring a cool-toned palette with violet highlights typical of an elite digital sports editorial." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBCgK2HO57CoqR6lfxBW5Vb4ClTXFjWrvwtge6gMAaDXCg55hvV_Jw_hWkuL8IKzXUyY8wouSPNdF3ikFKDd2xbItnQLQ7SFNyZbEyenv1QZHBLJHvW3gx6drj3s1sjRwRfJtxLn3tKxZhCL_uT6QNCAUlwzCVq92-QqACCJ4hbUthyyzDcOVHEyx9AkLkEoVtILPr3jdGMaIuyktX6WUQGELuTqUyz5CJalEheAUt6oPwgDdMGUbcXR2tUPnZeQcTF9ANtAJcZY8"/>
+<span class="text-sm font-medium text-on-surface">Courtside_King</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Harassment</td>
+<td class="px-6 py-4">
+<span class="text-[10px] px-2 py-0.5 bg-tertiary/10 text-tertiary rounded-full font-black uppercase tracking-tighter">High</span>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-slate-500">Oct 24, 11:20 AM</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span class="text-xs font-bold text-slate-400">Pending</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<button class="p-1.5 hover:bg-primary/10 text-primary rounded transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">block</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+<button class="p-1.5 hover:bg-slate-100 text-slate-400 rounded transition-colors"><span class="material-symbols-outlined text-sm">forward_to_inbox</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+<!-- Content Review Detail Panel (Side Drawer) -->
+<aside class="fixed right-0 top-[73px] bottom-0 w-[420px] bg-white border-l border-surface-container shadow-2xl flex flex-col z-30">
+<div class="p-6 border-b border-surface-container flex justify-between items-center bg-surface-container-lowest">
+<div>
+<span class="text-[10px] font-black uppercase tracking-widest text-primary">Moderation Detail</span>
+<h3 class="text-xl font-black text-on-surface tracking-tighter">Review Flagged Content #8291</h3>
+</div>
+<button class="p-2 hover:bg-surface-container rounded-full text-slate-400"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Creator Profile -->
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded-2xl">
+<img alt="Creator" class="w-12 h-12 rounded-full object-cover" data-alt="A close-up portrait of a professional sports analyst. The image features high-key lighting and a crisp, modern aesthetic. The background is a blur of high-tech studio monitors displaying sports data, with subtle purple and white accents that reinforce the elite editorial brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAX52NKzKk77plL_dz_0JYU5WsupwPYYojknX1U42Cr0XY5aN2BEPmAssEgL5sTbHQ6QIRt8cL9oUA8fqNuQxmFJHXYmCSOJmPt5FD5AWxfzkbubPUTlUYW2w3Zwd-gcfM4ELn7BUTc0oAvVdJI45trBBH50exTcxNzTsIvrUufrzR-6vBECwFsKrFTE8Z2kIvBy2t7Wa3qOVNIrU0pdZIVZLXZTsBkp5kAVArqgcNsks2Dd71_X1egt2xkp6c9iBfIfuVShwmEKc"/>
+<div>
+<h4 class="font-bold text-on-surface">The Sharp Eye</h4>
+<p class="text-xs text-slate-500 font-medium">@sharpeye_pro • 12.4k Followers</p>
+</div>
+<div class="ml-auto flex flex-col items-end">
+<span class="text-[10px] font-black text-error bg-error/10 px-2 py-0.5 rounded">Trust: 64%</span>
+</div>
+</div>
+<!-- Flagged Content -->
+<div class="space-y-3">
+<p class="text-xs font-black uppercase tracking-wider text-slate-400">Original Content</p>
+<div class="p-4 bg-on-surface text-white rounded-2xl font-body text-sm leading-relaxed border-l-4 border-primary">
+<p class="font-bold mb-2">NBA Lakers vs Celtics - Over 230.5</p>
+<p class="opacity-80">"Insider info confirms LeBron is playing with a secret injury that the team hasn't disclosed. Take the over on points as defense will be sluggish in the second half. Guaranteed winner."</p>
+</div>
+</div>
+<!-- Report Details -->
+<div class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Reason</p>
+<p class="text-sm font-bold text-on-surface">Medical Misinformation</p>
+</div>
+<div>
+<p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Reports</p>
+<p class="text-sm font-bold text-on-surface">12 unique users</p>
+</div>
+</div>
+<div class="p-4 bg-surface-container rounded-2xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-lg">event</span>
+<span class="text-xs font-bold uppercase tracking-wider text-on-surface">Linked Event</span>
+</div>
+<p class="text-sm font-medium text-slate-600">Lakers vs Celtics (Today, 7:00 PM)</p>
+</div>
+</div>
+<!-- Notes & History -->
+<div class="space-y-4">
+<div class="bg-amber-50 p-4 rounded-2xl border-l-4 border-amber-400">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-amber-600 text-lg">info</span>
+<span class="text-xs font-bold uppercase text-amber-700">System Note</span>
+</div>
+<p class="text-xs text-amber-800 font-medium">System detected high similarity to a deleted post from 2022. Possible recurring violation pattern.</p>
+</div>
+<div class="space-y-2">
+<p class="text-xs font-black uppercase tracking-wider text-slate-400">Moderation History</p>
+<div class="flex gap-2">
+<span class="text-[10px] px-2 py-1 bg-surface-container-highest rounded-full font-bold">2 Warnings</span>
+<span class="text-[10px] px-2 py-1 bg-error/10 text-error rounded-full font-bold">1 Removal</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Panel -->
+<div class="p-6 bg-surface-container-low border-t border-surface-container space-y-3">
+<div class="grid grid-cols-2 gap-3">
+<button class="py-3 px-4 border border-outline rounded-full text-xs font-black uppercase tracking-widest hover:bg-white transition-colors">Mark Safe</button>
+<button class="py-3 px-4 bg-error text-white rounded-full text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity">Remove Content</button>
+</div>
+<button class="w-full py-3 px-4 border border-primary text-primary rounded-full text-xs font-black uppercase tracking-widest hover:bg-primary/5 transition-colors">Warn Creator</button>
+<div class="pt-2 flex justify-between">
+<button class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-error transition-colors">Suspend Creator</button>
+<button class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors">Escalate to T&amp;S</button>
+</div>
+</div>
+</aside>
+</body></html>

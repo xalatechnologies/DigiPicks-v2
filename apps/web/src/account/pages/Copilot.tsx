@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAction, useMutation, usePaginatedQuery } from 'convex/react';
 import {
   Container,
   Stack,
   Row,
-  Col,
-  PageHead,
   Card,
   CardHead,
   Button,
@@ -15,17 +14,20 @@ import {
   EmptyState,
   PersonRow,
   CopilotChat,
+  Search,
+  StudioPageHeader,
+  AccountRefineCard,
+  StudioDashLayout,
+  StudioDashCol,
   type CopilotMessage,
+  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
-/**
- * Subscriber-side AI Copilot. Multi-turn conversation list on the left,
- * active conversation on the right. Tool turns hidden by default; the
- * "Show tool trace" toggle is for power users + debugging.
- */
 export function Copilot() {
+  const navigate = useNavigate();
   const {
     results: conversations,
     status: convStatus,
@@ -36,11 +38,12 @@ export function Copilot() {
   const archive = useMutation(api.aiCopilot.mutations.archiveConversation);
   const respond = useAction(api.aiCopilot.respond.respond);
 
-  const [activeId, setActiveId] = React.useState<Id<'aiConversations'> | null>(null);
-  const [draft, setDraft] = React.useState('');
-  const [sending, setSending] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [showTrace, setShowTrace] = React.useState(false);
+  const [activeId, setActiveId] = useState<Id<'aiConversations'> | null>(null);
+  const [draft, setDraft] = useState('');
+  const [search, setSearch] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showTrace, setShowTrace] = useState(false);
 
   const { results: messages, status: msgStatus } = usePaginatedQuery(
     api.aiCopilot.queries.messages,
@@ -48,11 +51,17 @@ export function Copilot() {
     { initialNumItems: 50 },
   );
 
+  const filteredConversations = useMemo(() => {
+    if (!search.trim()) return conversations;
+    const q = search.toLowerCase();
+    return conversations.filter((c) => c.title.toLowerCase().includes(q));
+  }, [conversations, search]);
+
   React.useEffect(() => {
-    if (!activeId && conversations.length > 0) {
-      setActiveId(conversations[0]!._id);
+    if (!activeId && filteredConversations.length > 0) {
+      setActiveId(filteredConversations[0]!._id);
     }
-  }, [activeId, conversations]);
+  }, [activeId, filteredConversations]);
 
   async function handleStart() {
     setError(null);
@@ -106,13 +115,90 @@ export function Copilot() {
     createdAt: m.createdAt,
   }));
 
-  const list = conversations;
+  const conversationList =
+    convStatus === 'LoadingFirstPage' ? (
+      <EmptyState icon="sparkles" title="Loading…" />
+    ) : filteredConversations.length === 0 ? (
+      <EmptyState
+        icon="sparkles"
+        title={conversations.length === 0 ? 'No conversations yet' : 'No matches'}
+        subtitle={
+          conversations.length === 0
+            ? 'Start a new conversation to ask the Copilot something.'
+            : 'Try another search term.'
+        }
+      />
+    ) : (
+      <Stack gap={1}>
+        {filteredConversations.map((c) => (
+          <Card key={c._id} hover pad="sm" onClick={() => setActiveId(c._id)}>
+            <Row gap={3} between>
+              <PersonRow
+                name={c.title}
+                sub={`${c.messageCount} message${c.messageCount === 1 ? '' : 's'}`}
+                mono="AI"
+                color="#1c9cf0"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleArchive(c._id);
+                }}
+                aria-label="Archive"
+              >
+                <Icon name="trash" size={13} />
+              </Button>
+            </Row>
+          </Card>
+        ))}
+        {convStatus === 'CanLoadMore' ? (
+          <Button variant="ghost" size="sm" onClick={() => loadMoreConvs(20)}>
+            Load more
+          </Button>
+        ) : null}
+      </Stack>
+    );
+
+  const chatPane = !activeId ? (
+    <Card>
+      <EmptyState
+        icon="sparkles"
+        title="Pick a conversation"
+        subtitle="Or start a new one to ask the Copilot anything."
+      />
+    </Card>
+  ) : (
+    <Card>
+      <CardHead
+        title="Conversation"
+        sub={
+          <>
+            <Mono>copilot</Mono>
+            <Muted> · grounded answers with citations</Muted>
+          </>
+        }
+      />
+      {error ? <Muted>{error}</Muted> : null}
+      <CopilotChat
+        messages={chatMessages}
+        loading={msgStatus === 'LoadingFirstPage'}
+        draft={draft}
+        onDraftChange={setDraft}
+        onSend={handleSend}
+        sending={sending}
+        showToolTurns={showTrace}
+        onToggleToolTurns={setShowTrace}
+      />
+    </Card>
+  );
 
   return (
     <Container size="2xl">
-      <Stack gap={5}>
-        <PageHead
-          eyebrow="Intelligence"
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Account · Intelligence"
           title="Copilot"
           sub="Ask grounded questions about creators, events, and outcomes. Every claim cites the underlying query."
           actions={
@@ -123,83 +209,31 @@ export function Copilot() {
           }
         />
 
-        <Row gap={4} wrap>
-          <Col gap={3}>
-            <Card pad="sm">
-              <CardHead title="Conversations" sub={`${list.length} active`} />
-              {convStatus === 'LoadingFirstPage' ? (
-                <EmptyState icon="sparkles" title="Loading…" />
-              ) : list.length === 0 ? (
-                <EmptyState
-                  icon="sparkles"
-                  title="No conversations yet"
-                  subtitle="Tap New conversation to ask the Copilot something."
-                />
-              ) : (
-                <Stack gap={1}>
-                  {list.map((c) => (
-                    <Card key={c._id} hover pad="sm" onClick={() => setActiveId(c._id)}>
-                      <Row gap={3} between>
-                        <PersonRow
-                          name={c.title}
-                          sub={`${c.messageCount} message${c.messageCount === 1 ? '' : 's'}`}
-                          mono="AI"
-                          color="#1c9cf0"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleArchive(c._id);
-                          }}
-                          aria-label="Archive"
-                        >
-                          <Icon name="trash" size={13} />
-                        </Button>
-                      </Row>
-                    </Card>
-                  ))}
-                </Stack>
-              )}
-            </Card>
-          </Col>
+        <AccountRefineCard
+          title="Refine conversations"
+          sub="Search by conversation title."
+          summary={`${filteredConversations.length} of ${conversations.length} conversation${conversations.length === 1 ? '' : 's'}`}
+          onReset={search.trim() ? () => setSearch('') : undefined}
+        >
+          <Search
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search conversations"
+            aria-label="Search Copilot conversations"
+          />
+        </AccountRefineCard>
 
-          <Col gap={3}>
-            {!activeId ? (
-              <Card>
-                <EmptyState
-                  icon="sparkles"
-                  title="Pick a conversation"
-                  subtitle="Or start a new one to ask the Copilot anything."
-                />
-              </Card>
-            ) : (
-              <Card>
-                <CardHead
-                  title="Conversation"
-                  sub={
-                    <>
-                      <Mono>copilot</Mono>
-                      <Muted> · grounded answers with citations</Muted>
-                    </>
-                  }
-                />
-                {error && <Muted>{error}</Muted>}
-                <CopilotChat
-                  messages={chatMessages}
-                  loading={msgStatus === 'LoadingFirstPage'}
-                  draft={draft}
-                  onDraftChange={setDraft}
-                  onSend={handleSend}
-                  sending={sending}
-                  showToolTurns={showTrace}
-                  onToggleToolTurns={setShowTrace}
-                />
-              </Card>
-            )}
-          </Col>
-        </Row>
+        <StudioDashLayout>
+          <StudioDashCol span={4}>
+            <Card pad="sm">
+              <CardHead title="Conversations" sub="Most recent first" />
+              {conversationList}
+            </Card>
+          </StudioDashCol>
+          <StudioDashCol span={8}>{chatPane}</StudioDashCol>
+        </StudioDashLayout>
+
+        <QuickActionGrid title="Related" items={accountCrossLinks('copilot', navigate)} />
       </Stack>
     </Container>
   );

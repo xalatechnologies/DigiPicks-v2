@@ -1,18 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'convex/react';
 import {
   Container,
   Stack,
   Row,
   Card,
-  CardHead,
-  Heading,
   Icon,
-  Sparkline,
+  InsightCard,
   Mono,
   Serif,
-  StudioMetricRow,
+  Button,
+  StudioSummaryGrid,
   StudioChartCard,
   StudioAreaChart,
   StudioDashLayout,
@@ -20,11 +18,12 @@ import {
   ActivityFeed,
   NextStepsPanel,
   QuickActionGrid,
-  Eyebrow,
+  StudioPageHeader,
+  CardHead,
   Muted,
 } from '@digipicks/ds';
-import { api } from '../../../../../convex/_generated/api';
-import { hasDevStudioPreview } from '../../lib/devDemoLogin';
+import { useStudioContext } from '../useStudioContext';
+import { buildOverviewSummary, chartHighlightForPeriod } from '../studioMetrics';
 import { STUDIO } from '../../lib/studioRoutes';
 import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
@@ -93,89 +92,66 @@ function demoActivity(navigate: (path: string) => void) {
 export function Overview() {
   const navigate = useNavigate();
   const [revenuePeriod, setRevenuePeriod] = useState('7d');
-  const devPreview = hasDevStudioPreview();
+  const ctx = useStudioContext();
 
-  const me = useQuery(api.users.meSafe);
-  const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
-  const subCount = useQuery(
-    api.subscriptions.countByCreator,
-    creator?._id ? { creatorId: creator._id } : 'skip',
+  const summaryItems = useMemo(
+    () =>
+      buildOverviewSummary(
+        {
+          devPreview: ctx.devPreview,
+          activeSubs: ctx.activeSubs,
+          newSubs7d: ctx.newSubs7d,
+          churnRate: ctx.churnRate,
+          publishedPicks: ctx.publishedPicks,
+          units: ctx.units,
+        },
+        navigate,
+      ),
+    [ctx, navigate],
   );
 
-  const displayName = creator?.name ?? me?.name ?? 'Creator';
-  const activeSubs =
-    typeof subCount === 'number' ? subCount.toLocaleString() : devPreview ? '420' : '—';
-  const winRate = creator ? `${(creator.winRate * 100).toFixed(1)}%` : devPreview ? '58.2%' : '—';
-  const units = creator?.units ?? (devPreview ? '+14.2u' : '—');
+  const chartHighlight = chartHighlightForPeriod(revenuePeriod);
+  const activityItems = useMemo(() => demoActivity(navigate), [navigate]);
 
-  const metrics = useMemo(
+  const nextSteps = useMemo(
     () => [
       {
-        id: 'mrr',
-        label: 'Monthly revenue',
-        value: devPreview ? '$12,450' : '$12,480',
-        delta: { value: '12%', dir: 'up' as const },
-        onClick: () => navigate(STUDIO.payouts),
+        id: 'pick',
+        label: 'Publish your first premium pick',
+        done: ctx.hasPublishedPick,
+        onClick: () => navigate(STUDIO.createPick),
       },
       {
-        id: 'subs',
-        label: 'Active subs',
-        value: activeSubs,
-        delta: { value: '8.4%', dir: 'up' as const },
-        onClick: () => navigate(STUDIO.subscribers),
+        id: 'plan',
+        label: 'Set up your first subscription plan',
+        done: ctx.hasTiers,
+        onClick: () => navigate(STUDIO.products),
       },
       {
-        id: 'new',
-        label: 'New last 7d',
-        value: devPreview ? '+18' : '—',
-        delta: { value: '4%', dir: 'up' as const },
-        onClick: () => navigate(STUDIO.subscribers),
-      },
-      {
-        id: 'churn',
-        label: 'Churn rate',
-        value: devPreview ? '2.4%' : '—',
-        delta: { value: '0.5%', dir: 'down' as const },
-        onClick: () => navigate(STUDIO.subscribers),
-      },
-      {
-        id: 'picks',
-        label: 'Total picks',
-        value: devPreview ? '156' : '—',
-        delta: { value: 'Stable', dir: 'flat' as const },
-        onClick: () => navigate(STUDIO.picks),
-      },
-      {
-        id: 'perf',
-        label: '30d performance',
-        value: units,
-        delta: { value: '3.1u', dir: 'up' as const },
-        onClick: () => navigate(STUDIO.analytics),
+        id: 'profile',
+        label: 'Complete your public profile',
+        done: ctx.hasProfile,
+        onClick: () => navigate(STUDIO.profile),
       },
     ],
-    [activeSubs, devPreview, units, navigate],
+    [ctx.hasPublishedPick, ctx.hasTiers, ctx.hasProfile, navigate],
   );
-
-  const activityItems = useMemo(() => demoActivity(navigate), [navigate]);
 
   return (
     <Container size="2xl">
-      <Stack gap={8}>
-        <Stack gap={2}>
-          <Eyebrow>Studio · Overview</Eyebrow>
-          <Row between>
-            <Stack gap={1}>
-              <Heading level={1} size="2xl">
-                Dashboard
-              </Heading>
-              <Muted>
-                Welcome back, {displayName}. Track revenue, subscribers, and performance.
-              </Muted>
-            </Stack>
-          </Row>
-        </Stack>
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Overview"
+          title="Dashboard"
+          sub={`Welcome back, ${ctx.displayName}. Track revenue, subscribers, and performance.`}
+          actions={
+            <Button variant="primary" iconLeft="plus" onClick={() => navigate(STUDIO.createPick)}>
+              New pick
+            </Button>
+          }
+        />
 
-        <StudioMetricRow items={metrics} />
+        <StudioSummaryGrid columns={3} items={summaryItems} />
 
         <StudioDashLayout>
           <StudioDashCol span={8}>
@@ -188,34 +164,27 @@ export function Overview() {
               footer={
                 <Row between>
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-                    <Eyebrow key={d}>{d}</Eyebrow>
+                    <span key={d}>{d}</span>
                   ))}
                 </Row>
               }
             >
-              <StudioAreaChart highlightLabel="Sept 12" highlightValue="$1,142.00" />
+              <StudioAreaChart
+                highlightLabel={chartHighlight.label}
+                highlightValue={chartHighlight.value}
+              />
             </StudioChartCard>
           </StudioDashCol>
 
           <StudioDashCol span={4}>
             <StudioChartCard title="Subscriber growth" sub="Net audience acceleration">
-              <Sparkline
-                values={[12, 14, 13, 18, 22, 28, 35, 42]}
-                color="var(--primary)"
-                width={360}
-                height={120}
+              <StudioAreaChart size="sm" highlightValue="" />
+              <InsightCard
+                tone="amber"
+                icon={<Icon name="flame" size={20} />}
+                title="High growth week"
+                sub="Trending 12% above average"
               />
-              <Card pad="md">
-                <Row gap={3}>
-                  <Icon name="flame" size={20} />
-                  <Stack gap={1}>
-                    <Heading level={3} size="sm">
-                      High growth week
-                    </Heading>
-                    <Muted>Trending 12% above average</Muted>
-                  </Stack>
-                </Row>
-              </Card>
             </StudioChartCard>
           </StudioDashCol>
 
@@ -233,24 +202,7 @@ export function Overview() {
               <NextStepsPanel
                 title="Next steps"
                 sub="Complete these tasks to optimize your revenue."
-                items={[
-                  {
-                    id: 'pick',
-                    label: 'Publish your first premium pick',
-                    done: Boolean(creator),
-                    onClick: () => navigate(STUDIO.createPick),
-                  },
-                  {
-                    id: 'plan',
-                    label: 'Set up your first subscription plan',
-                    onClick: () => navigate(STUDIO.products),
-                  },
-                  {
-                    id: 'social',
-                    label: 'Complete your public profile',
-                    onClick: () => navigate(STUDIO.profile),
-                  },
-                ]}
+                items={nextSteps}
               />
               <QuickActionGrid
                 title="Quick actions"
@@ -260,15 +212,23 @@ export function Overview() {
           </StudioDashCol>
         </StudioDashLayout>
 
-        {!devPreview && !creator ? (
-          <Card pad="lg" elev>
-            <CardHead
-              title="Track record"
-              sub="Win rate and units update as picks are graded."
-              action={<Mono>{winRate}</Mono>}
-            />
-          </Card>
-        ) : null}
+        <Card pad="lg" elev>
+          <CardHead
+            title="Track record"
+            sub="Win rate and units update as picks are graded."
+            action={<Mono>{ctx.winRate}</Mono>}
+          />
+          <Row gap={6} wrap>
+            <Stack gap={1}>
+              <Muted>Record</Muted>
+              <Mono>{ctx.record}</Mono>
+            </Stack>
+            <Stack gap={1}>
+              <Muted>Units</Muted>
+              <Mono>{ctx.units}</Mono>
+            </Stack>
+          </Row>
+        </Card>
       </Stack>
     </Container>
   );

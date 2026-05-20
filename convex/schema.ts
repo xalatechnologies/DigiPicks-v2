@@ -403,6 +403,26 @@ export default defineSchema({
      *  promotedUntil > now() ordered by promotedRank desc. */
     promotedUntil: v.optional(v.number()),
     promotedRank: v.optional(v.number()),
+    /** Default access tier for newly published picks. */
+    defaultPickAccess: v.optional(pickAccess),
+    /** Stripe Connect Express account for creator payouts. */
+    stripeConnectAccountId: v.optional(v.string()),
+    connectStatus: v.optional(
+      v.union(
+        v.literal('not_started'),
+        v.literal('pending'),
+        v.literal('restricted'),
+        v.literal('active'),
+      ),
+    ),
+    integrationsTelegramEnabled: v.optional(v.boolean()),
+    integrationsDiscordEnabled: v.optional(v.boolean()),
+    integrationsTelegramMinAccess: v.optional(
+      v.union(v.literal('public'), v.literal('subscriber'), v.literal('vip')),
+    ),
+    integrationsDiscordMinAccess: v.optional(
+      v.union(v.literal('public'), v.literal('subscriber'), v.literal('vip')),
+    ),
   })
     .index('by_handle', ['handle'])
     .index('by_verified', ['verified'])
@@ -1102,6 +1122,105 @@ export default defineSchema({
   })
     .index('by_status', ['status', 'submittedAt'])
     .index('by_email', ['email']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BILLING CASES (admin finance — Stitch zip 90)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  billingCases: defineTable({
+    caseNumber: v.string(),
+    subscriberId: v.id('users'),
+    creatorId: v.id('creators'),
+    subscriptionId: v.optional(v.id('subscriptions')),
+    amountCents: v.number(),
+    issueType: v.union(
+      v.literal('content'),
+      v.literal('accidental'),
+      v.literal('subscription'),
+      v.literal('chargeback'),
+    ),
+    status: v.union(
+      v.literal('open'),
+      v.literal('under_review'),
+      v.literal('pending_finance'),
+      v.literal('escalated'),
+      v.literal('refunded'),
+      v.literal('denied'),
+      v.literal('closed'),
+    ),
+    priority: v.optional(v.union(v.literal('normal'), v.literal('urgent'))),
+    stripeChargeId: v.optional(v.string()),
+    internalNotes: v.array(
+      v.object({
+        authorUserId: v.id('users'),
+        body: v.string(),
+        createdAt: v.number(),
+      }),
+    ),
+    resolvedByAdminId: v.optional(v.id('users')),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_status', ['status', 'createdAt'])
+    .index('by_subscriber', ['subscriberId', 'createdAt'])
+    .index('by_caseNumber', ['caseNumber']),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENTITLEMENTS (admin inspector — Stitch zip 92)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  entitlements: defineTable({
+    userId: v.id('users'),
+    creatorId: v.id('creators'),
+    resourceType: v.union(
+      v.literal('subscription'),
+      v.literal('pick_feed'),
+      v.literal('telegram'),
+      v.literal('discord'),
+      v.literal('channel'),
+    ),
+    resourceId: v.string(),
+    status: v.union(v.literal('active'), v.literal('expired'), v.literal('revoked')),
+    source: v.union(
+      v.literal('subscription'),
+      v.literal('manual_override'),
+      v.literal('promo'),
+      v.literal('trial'),
+    ),
+    validUntil: v.optional(v.number()),
+    grantedByAdminId: v.optional(v.id('users')),
+    reason: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['userId', 'createdAt'])
+    .index('by_user_creator', ['userId', 'creatorId']),
+
+  accessLogs: defineTable({
+    userId: v.id('users'),
+    resourceId: v.string(),
+    result: v.union(v.literal('allowed'), v.literal('denied')),
+    reason: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index('by_user', ['userId', 'createdAt']),
+
+  campaigns: defineTable({
+    title: v.string(),
+    body: v.string(),
+    channel: v.union(v.literal('email'), v.literal('push'), v.literal('in_app')),
+    status: v.union(v.literal('draft'), v.literal('scheduled'), v.literal('sent')),
+    scheduledAt: v.optional(v.number()),
+    sentAt: v.optional(v.number()),
+    createdByAdminId: v.id('users'),
+    createdAt: v.number(),
+  }).index('by_status', ['status', 'createdAt']),
+
+  platformSettings: defineTable({
+    key: v.string(),
+    value: v.string(),
+    updatedAt: v.number(),
+    updatedByAdminId: v.optional(v.id('users')),
+  }).index('by_key', ['key']),
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SYSTEM — circuit breakers for external providers

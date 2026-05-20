@@ -28,7 +28,7 @@
 
 .card:hover {
   border-color: color-mix(in srgb, var(--ic-accent) 38%, var(--line));
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .strip {
@@ -97,7 +97,7 @@
 .sub {
   font-family: var(--f-sans);
   font-size: var(--text-xs);
-  color: var(--t-3);
+  color: var(--t-2);
   line-height: 1.5;
 }
 

@@ -55,8 +55,8 @@ Governance / Rules) so a contributor can pick any module up cold.
 Each module page documents what's **shipped**, what's **partial**, and
 what's **planned**. As of the latest commit:
 
-- **Fully shipped (backend + UI):** M01, M02, M03, M04, M05, M06, M07, M08, M09, M10, M11, M12, M13, M14, M15, M16, M17, M18, M19, M21, M22, M23, M24, M25
-- **Outbound shipped; inbound / full vision partial:** M20 (Discord — see `convex/discord/inbound.ts` and [discord-integration.md](../discord-integration.md))
+- **Fully shipped (backend + UI):** M01, M02, M03, M04, M05, M06, M07, M08, M09, M10, M11, M12, M13, M14, M15, M16, M17, M18, M19, M20, M21, M22, M23, M24, M25
+- **M20 note:** Inbound cron + studio inbound panel shipped; rich slash-command bot UX remains incremental per [discord-integration.md](../discord-integration.md)
 
 ## Companion Documents
 

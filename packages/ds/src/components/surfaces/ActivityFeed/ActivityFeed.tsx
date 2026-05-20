@@ -11,6 +11,7 @@ export interface ActivityFeedItemData {
   icon: IconName;
   tone?: ActivityFeedTone;
   title: React.ReactNode;
+  sub?: React.ReactNode;
   time: string;
   amount?: React.ReactNode;
   trailingIcon?: IconName;
@@ -51,6 +52,7 @@ export function ActivityFeed({
               </span>
               <div className={s.copy}>
                 <p className={s.itemTitle}>{item.title}</p>
+                {item.sub ? <p className={s.itemSub}>{item.sub}</p> : null}
                 <p className={s.time}>{item.time}</p>
               </div>
               {item.amount ? <span className={s.amount}>{item.amount}</span> : null}

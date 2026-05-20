@@ -1,0 +1,55 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--r-lg);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.row:hover {
+  background: var(--bg-2);
+}
+
+.row:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.rowStatic {
+  cursor: default;
+}
+
+.rowStatic:hover {
+  background: transparent;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.trailing {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--t-3);
+}
+
+.trailingPrimary {
+  color: var(--primary);
+}
+
+.trailingDanger {
+  color: var(--red);
+}

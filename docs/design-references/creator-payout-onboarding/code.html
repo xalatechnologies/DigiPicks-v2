@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Creator Payout Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#bec6e0",
+                        "primary": "#6b38d4",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#6d3bd7",
+                        "tertiary-container": "#a76500",
+                        "secondary": "#565e74",
+                        "on-tertiary-fixed": "#2c1700",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed": "#dae2fd",
+                        "background": "#f7f9fb",
+                        "outline": "#7b7486",
+                        "outline-variant": "#cbc3d7",
+                        "surface-dim": "#d8dadc",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-primary-fixed": "#23005c",
+                        "tertiary-fixed": "#ffdcbb",
+                        "tertiary": "#855000",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "inverse-surface": "#2d3133",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eceef0",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary-container": "#5c647a",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-container": "#dae2fd",
+                        "primary-fixed": "#e9ddff",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface": "#f7f9fb",
+                        "on-primary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "inverse-primary": "#d0bcff",
+                        "on-surface-variant": "#494454",
+                        "surface-bright": "#f7f9fb",
+                        "primary-container": "#8455ef",
+                        "on-tertiary-fixed-variant": "#673d00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .signature-glow-button {
+            background: linear-gradient(135deg, #6B38D4 0%, #8455EF 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm font-headline antialiased tracking-tight">
+<div class="flex justify-between items-center px-6 py-4 max-w-[1440px] mx-auto relative">
+<div class="text-xl font-extrabold tracking-tighter text-slate-900">The Elite Curator</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors duration-200" href="#">Editorial</a>
+<a class="text-violet-600 font-bold border-b-2 border-violet-600 transition-colors duration-200" href="#">Payouts</a>
+<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors duration-200" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-500 hover:text-violet-600 active:scale-95 transition-all">help</button>
+<button class="material-symbols-outlined text-slate-500 hover:text-violet-600 active:scale-95 transition-all">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high">
+<img alt="Creator profile avatar" data-alt="A professional close-up portrait of a high-end digital creator with a clean, well-groomed appearance. The lighting is soft and cinematic, highlighting sophisticated features against a minimalist, high-contrast studio background. The overall aesthetic is polished, premium, and authoritative, matching the elite editorial brand identity of a top-tier sports curator." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsuHQAm3q0QPrxTnRDCkeRb6w9Jh0cmomZyuWXAbEroXDnVQs1iZDQHa4dPw7-BcENk2N6vlljskNVSBfiXtN_x2M_0DdGPagGOg-JLDhjfDWNpvMtu0tkdxDGyE1G2mQU6ubMxsvNREqIN6BbL4-hPJnNz7E7am5uV2GDZ_bQ1b4xH-VZRf9kS9QzH9uSwpctLAsFnDHnzWEmyTMtZ2cFAKBhPJkcGhAvZ3m_mc61cBOLW2tRyeJ4DiOE154bSzCfk8Cnt1zSWvI"/>
+</div>
+</div>
+<div class="bg-slate-100/50 h-[1px] w-full absolute bottom-0 left-0"></div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 hidden md:flex flex-col p-4 gap-6 bg-slate-50 border-r-0 pt-24 font-headline text-sm font-medium">
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div>
+<div class="text-lg font-bold text-slate-900">Creator Hub</div>
+<div class="text-[10px] uppercase tracking-widest text-primary font-bold">Elite Tier</div>
+</div>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">insights</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white text-violet-600 shadow-sm rounded-lg hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+                Payouts
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+                Editorial
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg hover:translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container rounded-2xl">
+<p class="text-xs text-on-surface-variant mb-3">Need assistance with your financial setup?</p>
+<button class="w-full py-2 bg-on-surface text-white text-xs font-bold rounded-full hover:opacity-90 active:scale-95 transition-all">Contact Support</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-24 pb-12 px-6 lg:px-12 max-w-6xl mx-auto">
+<!-- Header & Progress Tracker -->
+<header class="mb-10 text-center md:text-left">
+<h1 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface mb-2">Payout Onboarding</h1>
+<p class="text-on-surface-variant max-w-2xl">Complete your professional profile to start receiving earnings from your premium curated content and expert sports insights.</p>
+</header>
+<!-- Progress Tracker Bento Item -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0px_20px_40px_rgba(15,23,42,0.04)] mb-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex items-center gap-4 w-full">
+<!-- Step 1: Complete -->
+<div class="flex flex-col items-center gap-2 flex-1">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Start</span>
+</div>
+<div class="h-[2px] flex-1 bg-primary mb-6"></div>
+<!-- Step 2: Active -->
+<div class="flex flex-col items-center gap-2 flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-primary flex items-center justify-center text-primary bg-primary/10">
+<span class="font-headline font-bold">2</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Verify Identity</span>
+</div>
+<div class="h-[2px] flex-1 bg-surface-container-highest mb-6"></div>
+<!-- Step 3: Inactive -->
+<div class="flex flex-col items-center gap-2 flex-1 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="font-headline font-bold">3</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest">Connect Payout</span>
+</div>
+<div class="h-[2px] flex-1 bg-surface-container-highest mb-6"></div>
+<!-- Step 4: Inactive -->
+<div class="flex flex-col items-center gap-2 flex-1 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="font-headline font-bold">4</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest">Ready</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+<!-- Verification State Card (Primary Column) -->
+<div class="lg:col-span-2 space-y-8">
+<!-- Pending/Not Started State Card -->
+<section class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0px_20px_40px_rgba(15,23,42,0.04)]">
+<div class="h-2 signature-glow-button w-full"></div>
+<div class="p-8">
+<div class="flex items-start justify-between mb-6">
+<div>
+<h2 class="text-2xl font-headline font-bold text-on-surface mb-1">Verify Your Identity</h2>
+<p class="text-on-surface-variant">Step 2 of 4: Federal regulations require us to confirm your identity before processing payments.</p>
+</div>
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Not Started</div>
+</div>
+<div class="relative rounded-2xl overflow-hidden mb-8 group">
+<img class="w-full h-48 object-cover opacity-90 grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A clean, minimalist composition of a sleek modern laptop displaying a financial dashboard with secure encryption icons. The scene is illuminated by soft, professional office lighting, emphasizing a high-end, trustworthy atmosphere with deep violet accents. The composition is balanced and editorial, suggesting a professional workspace focused on security and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDthfgfp8Ibl0MjFtctLIuhCECpmhJOj-Dpn8oZCCPWJHvet-pzv5sderL4YVnXp0_HZxtI6rU7NtQsovyoU5E5UDMQMEeaGRg3-fby8viGX9P0nhjCbSZkblDTsaYhuhv8RGkNWxf3p0r4nzyVvN_OQh_Bwft1a2rBZ7YeEq_xC_TUR9GMj8W0gaq_wX7FA1J2_tfwDX3YfnKirqW7PpRj3eg1OjNP0PKIWWdp5Lpe405EZPuvHmU5JuApaM-ysOC0vSabYD4gVGo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/60 to-transparent flex items-end p-6">
+<div class="flex items-center gap-3 text-white">
+<span class="material-symbols-outlined text-3xl">verified_user</span>
+<div>
+<p class="font-bold">Identity Verification</p>
+<p class="text-xs opacity-80">Powered by Stripe Connect</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<button class="w-full signature-glow-button text-white font-headline font-bold uppercase tracking-widest py-4 rounded-full shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Connect Payout Account</button>
+<div class="flex items-center justify-center gap-2 text-on-surface-variant text-xs">
+<span class="material-symbols-outlined text-sm">lock</span>
+                                Secure Stripe Integration • Encrypted End-to-End
+                            </div>
+</div>
+</div>
+</section>
+<!-- Error State Example (Failed Verification) -->
+<section class="bg-error-container/20 rounded-2xl p-6 border-2 border-error/10">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h3 class="text-lg font-headline font-bold text-on-error-container mb-1">Verification Attempt Failed</h3>
+<p class="text-sm text-on-error-container/80 mb-4 leading-relaxed">The identification documents provided could not be validated. Please ensure your legal name matches your tax records and your ID is clearly visible without glare.</p>
+<button class="text-error text-xs font-bold uppercase tracking-widest hover:underline">Retry Documentation Upload</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar Information (Secondary Column) -->
+<aside class="space-y-8">
+<!-- Required Information Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0px_20px_40px_rgba(15,23,42,0.04)]">
+<h3 class="text-[10px] uppercase font-bold tracking-[0.2em] text-primary mb-6">Required Information</h3>
+<ul class="space-y-6">
+<li class="flex gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant flex-shrink-0">
+<span class="material-symbols-outlined text-lg">badge</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Government ID</p>
+<p class="text-xs text-on-surface-variant">Passport or Driver's License</p>
+</div>
+</li>
+<li class="flex gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant flex-shrink-0">
+<span class="material-symbols-outlined text-lg">account_balance</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Bank Details</p>
+<p class="text-xs text-on-surface-variant">Checking account or debit card</p>
+</div>
+</li>
+<li class="flex gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant flex-shrink-0">
+<span class="material-symbols-outlined text-lg">description</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Tax ID / SSN</p>
+<p class="text-xs text-on-surface-variant">Required for annual earnings reporting</p>
+</div>
+</li>
+</ul>
+<div class="mt-8 pt-6 border-t border-surface-container-highest">
+<p class="text-xs text-on-surface-variant leading-relaxed">
+<span class="font-bold text-on-surface">Important:</span> Your data is transmitted directly to our financial partner. EdgePicks never stores your sensitive identification or banking credentials.
+                        </p>
+</div>
+</section>
+<!-- Status Legend -->
+<section class="bg-surface-container-high rounded-2xl p-6">
+<h3 class="text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant mb-4">Verification Legend</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-400"></div>
+<span class="text-xs font-medium text-on-surface-variant">Not Started</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-amber-500"></div>
+<span class="text-xs font-medium text-on-surface-variant">Under Review (2-3 days)</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-xs font-medium text-on-surface-variant">Verified &amp; Active</span>
+</div>
+</div>
+</section>
+</aside>
+</div>
+</main>
+<!-- Contextual FAB (Mobile) -->
+<button class="md:hidden fixed bottom-8 right-8 w-14 h-14 signature-glow-button rounded-full shadow-2xl flex items-center justify-center text-white z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</body></html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Refunds &amp; Disputes Review | EdgePicks Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-secondary-container": "#5c647a",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-container-low": "#f2f4f6",
+                        "error-container": "#ffdad6",
+                        "outline": "#7b7486",
+                        "secondary-fixed": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface": "#f7f9fb",
+                        "primary-container": "#8455ef",
+                        "inverse-surface": "#2d3133",
+                        "inverse-on-surface": "#eff1f3",
+                        "inverse-primary": "#d0bcff",
+                        "on-primary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-primary-fixed": "#23005c",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#a76500",
+                        "on-tertiary-container": "#fffbff",
+                        "primary": "#6b38d4",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-bright": "#f7f9fb",
+                        "secondary": "#565e74",
+                        "outline-variant": "#cbc3d7",
+                        "surface-tint": "#6d3bd7",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "secondary-container": "#dae2fd",
+                        "background": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#855000",
+                        "surface-dim": "#d8dadc",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#494454",
+                        "primary-fixed": "#e9ddff",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition { transition: background-color 0.3s ease; }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-background min-h-screen">
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full w-64 z-50 bg-zinc-50 dark:bg-zinc-900 flex flex-col p-4 gap-2 no-border shadow-none">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+<div>
+<h1 class="text-lg font-black text-zinc-900 dark:text-white leading-none">Elite Curator</h1>
+<p class="font-['Manrope'] font-semibold tracking-wide text-[10px] uppercase text-zinc-500">Operational Hub</p>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="sports_handball">sports_handball</span>
+<span>Creators</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="video_library">video_library</span>
+<span>Content</span>
+</a>
+<!-- Active State: Finance -->
+<a class="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-violet-600 to-violet-400 text-white rounded-xl shadow-lg font-['Manrope'] font-semibold tracking-wide text-xs uppercase translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="payments" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span>Finance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span>Analytics</span>
+</a>
+</div>
+<div class="mt-auto border-t border-zinc-200 dark:border-zinc-800 pt-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help_center">help_center</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-['Manrope'] font-semibold tracking-wide text-xs uppercase hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 z-40 w-full bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-6 py-3 h-16 ml-64 shadow-[0px_20px_40px_rgba(15,23,42,0.06)] border-none">
+<div class="flex items-center gap-8 ml-64">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-zinc-100 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search transactions, users, or case IDs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-zinc-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-zinc-900">Admin Staff</p>
+<p class="text-[10px] text-zinc-500 uppercase tracking-tighter">Finance Desk</p>
+</div>
+<img alt="Administrator Profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary/20" data-alt="A professional headshot of a male administrative executive in a minimalist studio setting. He wears a neutral-toned business-casual shirt. The background is a clean, bright, off-white with soft directional lighting that emphasizes clarity and authority. The aesthetic is modern and high-key, reflecting a premium fintech corporate environment with high-contrast sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCstmlPjFd267kShMk3kVsAn-7NSe8evWgv0WRIk0grEUibpJDTLm2husMldLUezuLoCG03wZCXKOmXyCp4iFnJ6LVfQOcM5_J_mk0rr3nK8mULI_7gWZ7zT7aJvGXXH3Ej7ndhpm6Dfuu4HFRxUw-0WHYqP9m3zKPQANQV3CFT1SWHDLqCBOIYHLiJr0OO7b5kDoJ5yXD_3wxo7FT9YqvSPyT-dxTTVVXk5H7qUNbwrKRV6tNxMFCNZjoNcUxQci_Hxbv5qodqrkI"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-20 p-8 space-y-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-4">
+<div>
+<h2 class="text-3xl font-extrabold text-zinc-900 tracking-tight font-display mb-1 uppercase">Refunds &amp; Disputes Review</h2>
+<p class="text-zinc-500 font-medium text-sm">Reviewing financial integrity and user protection cases.</p>
+</div>
+<div class="flex gap-2">
+<button class="px-5 py-2 bg-surface-container-high text-on-surface text-xs font-bold uppercase tracking-wider rounded-full hover:shadow-lg transition-all">Export CSV</button>
+<button class="px-5 py-2 bg-gradient-to-br from-violet-600 to-violet-400 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-lg hover:translate-y-[-2px] transition-all">Generate Report</button>
+</div>
+</div>
+<!-- Summary Cards: Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border-l-4 border-error">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-error-container rounded-lg">
+<span class="material-symbols-outlined text-error" data-icon="emergency_home">emergency_home</span>
+</div>
+<span class="bg-error/10 text-error px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">High Priority</span>
+</div>
+<p class="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Open Disputes</p>
+<h3 class="text-3xl font-black text-zinc-900">24</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-container rounded-lg">
+<span class="material-symbols-outlined text-secondary" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+</div>
+<p class="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Refunds this Month</p>
+<h3 class="text-3xl font-black text-zinc-900">$1,240.50</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-fixed rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+</div>
+<span class="text-primary text-[10px] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="arrow_upward">arrow_upward</span> 12%
+                    </span>
+</div>
+<p class="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Active Chargebacks</p>
+<h3 class="text-3xl font-black text-zinc-900">3</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-zinc-600" data-icon="task_alt">task_alt</span>
+</div>
+</div>
+<p class="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Resolved Cases</p>
+<h3 class="text-3xl font-black text-zinc-900">182</h3>
+</div>
+</div>
+<!-- Main Case List Section -->
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+<!-- Table Container -->
+<div class="flex-1 bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
+<div class="p-6 flex items-center justify-between border-b border-zinc-100">
+<div class="flex gap-4">
+<button class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">All Cases</button>
+<button class="text-zinc-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-zinc-50">Under Review</button>
+<button class="text-zinc-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-zinc-50">Escalated</button>
+</div>
+<div class="flex items-center gap-2 text-zinc-500 text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+<span class="font-medium">Filter by Issue Type</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-zinc-50/50">
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Case ID</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">User</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Creator</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Amount</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Issue Type</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
+<th class="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Created</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-zinc-50">
+<tr class="hover:bg-zinc-50/80 transition-colors cursor-pointer group bg-primary/5">
+<td class="px-6 py-5 font-bold text-zinc-900 text-sm">#EP-8842</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-zinc-200"></div>
+<span class="text-sm font-medium text-zinc-700">James Wilson</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-600 font-medium">Elite Analyst</td>
+<td class="px-6 py-5 font-bold text-zinc-900">$49.99</td>
+<td class="px-6 py-5">
+<span class="bg-zinc-100 text-zinc-600 px-3 py-1 rounded-full text-[11px] font-semibold">Content Issue</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+<span class="text-amber-600 font-bold text-xs uppercase tracking-tight">Under Review</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-400">Oct 12, 2023</td>
+</tr>
+<tr class="hover:bg-zinc-50/80 transition-colors cursor-pointer group">
+<td class="px-6 py-5 font-bold text-zinc-900 text-sm">#EP-8839</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-zinc-200"></div>
+<span class="text-sm font-medium text-zinc-700">Sarah Chen</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-600 font-medium">DFS Master</td>
+<td class="px-6 py-5 font-bold text-zinc-900">$120.00</td>
+<td class="px-6 py-5">
+<span class="bg-zinc-100 text-zinc-600 px-3 py-1 rounded-full text-[11px] font-semibold">Accidental Purchase</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+<span class="text-blue-600 font-bold text-xs uppercase tracking-tight">Pending Finance</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-400">Oct 11, 2023</td>
+</tr>
+<tr class="hover:bg-zinc-50/80 transition-colors cursor-pointer group">
+<td class="px-6 py-5 font-bold text-zinc-900 text-sm">#EP-8835</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-zinc-200"></div>
+<span class="text-sm font-medium text-zinc-700">Mike Rossi</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-600 font-medium">Odds Shark</td>
+<td class="px-6 py-5 font-bold text-zinc-900">$29.99</td>
+<td class="px-6 py-5">
+<span class="bg-zinc-100 text-zinc-600 px-3 py-1 rounded-full text-[11px] font-semibold">Subscription Error</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span class="text-green-600 font-bold text-xs uppercase tracking-tight">Refunded</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-zinc-400">Oct 11, 2023</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-zinc-50 flex justify-center">
+<button class="text-primary text-xs font-bold uppercase tracking-widest hover:underline">View All History</button>
+</div>
+</div>
+<!-- Case Detail Drawer (Sidebar Style) -->
+<aside class="w-full lg:w-96 bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden self-start sticky top-24">
+<div class="bg-gradient-to-br from-zinc-900 to-zinc-800 p-6 text-white">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 text-primary-fixed">Reviewing Case</span>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#6b38d4]"></div>
+</div>
+</div>
+<h3 class="text-2xl font-black font-display tracking-tight">#EP-8842</h3>
+<div class="flex items-center gap-2 mt-4">
+<span class="bg-error text-[10px] font-bold px-2 py-0.5 rounded uppercase">Urgent</span>
+<span class="text-zinc-400 text-xs font-medium">Stripe ID: ch_3N8xYp...</span>
+</div>
+</div>
+<div class="p-6 space-y-6">
+<!-- User Context -->
+<div>
+<p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">User History</p>
+<div class="space-y-2">
+<div class="flex items-center gap-3 bg-zinc-50 p-3 rounded-xl">
+<span class="material-symbols-outlined text-zinc-400" data-icon="calendar_today">calendar_today</span>
+<div>
+<p class="text-xs font-bold text-zinc-900">Subscriber since Jan 2024</p>
+<p class="text-[10px] text-zinc-500">High engagement score</p>
+</div>
+</div>
+<div class="flex justify-between px-3">
+<span class="text-xs text-zinc-500 font-medium">Active Subs</span>
+<span class="text-xs text-zinc-900 font-bold">3</span>
+</div>
+<div class="flex justify-between px-3">
+<span class="text-xs text-zinc-500 font-medium">Prior Disputes</span>
+<span class="text-xs text-green-600 font-bold">0 (Safe)</span>
+</div>
+</div>
+</div>
+<!-- Creator Context -->
+<div>
+<p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Creator Analysis</p>
+<div class="bg-surface-container rounded-xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-8 h-8 rounded-lg bg-zinc-300"></div>
+<div>
+<p class="text-xs font-bold text-zinc-900">Elite Analyst</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[10px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-[10px] font-bold text-primary uppercase">Verified Partner</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 border-t border-zinc-200 pt-3">
+<div>
+<p class="text-[10px] text-zinc-500 uppercase font-bold">Rating</p>
+<p class="text-xs font-bold text-zinc-900">4.9/5.0</p>
+</div>
+<div>
+<p class="text-[10px] text-zinc-500 uppercase font-bold">Refund Rate</p>
+<p class="text-xs font-bold text-zinc-900">1.2%</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Notes -->
+<div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-amber-600 text-sm" data-icon="description">description</span>
+<p class="text-[10px] font-bold text-amber-800 uppercase tracking-widest">Internal Insights</p>
+</div>
+<p class="text-xs text-amber-900/80 leading-relaxed font-medium">
+                            "User claims content was not accessible after payment. Webhook logs confirm entitlement was delayed by 5 minutes due to API latency."
+                        </p>
+</div>
+<!-- Actions -->
+<div class="space-y-3 pt-4">
+<button class="w-full bg-gradient-to-br from-violet-600 to-violet-400 text-white font-bold text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                            Approve Refund ($49.99)
+                        </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="bg-zinc-100 text-zinc-600 font-bold text-[10px] uppercase tracking-widest py-3 rounded-xl hover:bg-zinc-200 transition-colors">Deny Refund</button>
+<button class="bg-zinc-100 text-zinc-600 font-bold text-[10px] uppercase tracking-widest py-3 rounded-xl hover:bg-zinc-200 transition-colors">Escalate</button>
+</div>
+<button class="w-full border-2 border-dashed border-zinc-200 text-zinc-400 font-bold text-[10px] uppercase tracking-widest py-3 rounded-xl hover:border-zinc-300 hover:text-zinc-500 transition-all">
+                            + Add Internal Note
+                        </button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Global "Insight Glow" for selected item -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-zinc-900 text-white rounded-full shadow-2xl flex items-center gap-4 z-50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<p class="text-xs font-bold uppercase tracking-widest">Case EP-8842 Selected</p>
+</div>
+<div class="h-4 w-[1px] bg-zinc-700"></div>
+<div class="flex gap-4">
+<button class="text-[10px] font-black text-primary uppercase hover:text-white transition-colors">Quick Approve</button>
+<button class="text-[10px] font-black text-zinc-400 uppercase hover:text-white transition-colors">Dismiss</button>
+</div>
+</div>
+</body></html>

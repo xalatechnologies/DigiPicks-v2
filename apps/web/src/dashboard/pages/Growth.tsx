@@ -2,8 +2,8 @@
 // mocked. Referral block is wired to api.referrals.{mintMyCode, myCodes}.
 import React from 'react';
 import { useMutation, useQuery } from 'convex/react';
+import { useNavigate } from 'react-router-dom';
 import {
-  PageHeader,
   Container,
   Stack,
   Row,
@@ -12,7 +12,8 @@ import {
   CardHead,
   Button,
   Icon,
-  PageHead,
+  StudioPageHeader,
+  QuickActionGrid,
   MetricGrid,
   Mono,
   Badge,
@@ -23,6 +24,7 @@ import {
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 interface Opportunity {
   id: string;
@@ -80,75 +82,91 @@ const CAMPAIGNS: CampaignDef[] = [
 ];
 
 export function Growth() {
+  const navigate = useNavigate();
+
   return (
-    <>
-      <PageHeader
-        title="Growth Manager"
-        crumbs={[{ label: 'Growth' }, { label: 'Manager' }]}
-        actions={
-          <Button variant="primary" size="sm">
-            <Icon name="megaphone" size={13} />
-            New campaign
-          </Button>
-        }
-      />
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Growth"
+          title="Move the needle this week"
+          sub="Promotions, referrals, and funnels — pick a lever and run with it."
+          actions={
+            <Button variant="primary" size="sm">
+              <Icon name="megaphone" size={13} />
+              New campaign
+            </Button>
+          }
+        />
 
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Growth"
-            title="Move the needle this week"
-            sub="Promotions, referrals, and funnels — pick a lever and run with it."
-          />
+        <MetricGrid
+          items={[
+            {
+              id: 'views',
+              label: 'Profile views · 30d',
+              value: <Mono>4,820</Mono>,
+              delta: { value: '+12%', dir: 'up' },
+            },
+            {
+              id: 'checkout',
+              label: 'Started checkout',
+              value: <Mono>612</Mono>,
+              delta: { value: '+8%', dir: 'up' },
+            },
+            {
+              id: 'new',
+              label: 'New subscribers',
+              value: <Mono>142</Mono>,
+              delta: { value: '+34', dir: 'up' },
+            },
+            {
+              id: 'trial',
+              label: 'Trial → paid',
+              value: <Mono>67%</Mono>,
+              delta: { value: '+2.4 pts', dir: 'up' },
+            },
+          ]}
+        />
 
-          <MetricGrid
-            items={[
-              { id: 'views', label: 'Profile views · 30d', value: <Mono>4,820</Mono>, delta: { value: '+12%', dir: 'up' } },
-              { id: 'checkout', label: 'Started checkout', value: <Mono>612</Mono>, delta: { value: '+8%', dir: 'up' } },
-              { id: 'new', label: 'New subscribers', value: <Mono>142</Mono>, delta: { value: '+34', dir: 'up' } },
-              { id: 'trial', label: 'Trial → paid', value: <Mono>67%</Mono>, delta: { value: '+2.4 pts', dir: 'up' } },
-            ]}
-          />
+        <Row gap={5} wrap>
+          <Col gap={4}>
+            <Card>
+              <CardHead title="Opportunities" sub="3 new this week, ranked by expected impact" />
+              <Stack gap={3}>
+                {OPPORTUNITIES.map((o) => (
+                  <FeatureCard
+                    key={o.id}
+                    icon={<Icon name={o.icon} size={18} />}
+                    title={o.title}
+                    body={o.body}
+                  />
+                ))}
+              </Stack>
+            </Card>
+          </Col>
 
-          <Row gap={5} wrap>
-            <Col gap={4}>
-              <Card>
-                <CardHead title="Opportunities" sub="3 new this week, ranked by expected impact" />
-                <Stack gap={3}>
-                  {OPPORTUNITIES.map((o) => (
-                    <FeatureCard
-                      key={o.id}
-                      icon={<Icon name={o.icon} size={18} />}
-                      title={o.title}
-                      body={o.body}
-                    />
-                  ))}
-                </Stack>
-              </Card>
-            </Col>
+          <Col gap={4}>
+            <ReferralsCard />
 
-            <Col gap={4}>
-              <ReferralsCard />
+            <Card>
+              <CardHead title="Active campaigns" />
+              <Stack gap={2}>
+                {CAMPAIGNS.map((c) => (
+                  <Row key={c.id} gap={3} between>
+                    <TitleSub title={c.title} sub={c.meta} />
+                    <Badge tone={CAMPAIGN_TONE[c.status]} dot={c.status === 'Live'}>
+                      {c.status}
+                    </Badge>
+                  </Row>
+                ))}
+              </Stack>
+            </Card>
+          </Col>
+        </Row>
 
-
-              <Card>
-                <CardHead title="Active campaigns" />
-                <Stack gap={2}>
-                  {CAMPAIGNS.map((c) => (
-                    <Row key={c.id} gap={3} between>
-                      <TitleSub title={c.title} sub={c.meta} />
-                      <Badge tone={CAMPAIGN_TONE[c.status]} dot={c.status === 'Live'}>
-                        {c.status}
-                      </Badge>
-                    </Row>
-                  ))}
-                </Stack>
-              </Card>
-            </Col>
-          </Row>
-        </Stack>
-      </Container>
-    </>
+        <QuickActionGrid title="Related" items={studioCrossLinks('growth', navigate)} />
+      </Stack>
+    </Container>
   );
 }
 
@@ -164,10 +182,7 @@ function ReferralsCard() {
 
   const live = codes?.find((c) => !c.convertedAt) ?? null;
   const conversions = codes?.filter((c) => c.convertedAt).length ?? 0;
-  const lifetimeCents = (codes ?? []).reduce(
-    (sum, c) => sum + (c.payoutCents ?? 0),
-    0,
-  );
+  const lifetimeCents = (codes ?? []).reduce((sum, c) => sum + (c.payoutCents ?? 0), 0);
 
   async function handleShare() {
     setBusy(true);
@@ -180,9 +195,7 @@ function ReferralsCard() {
   }
 
   const shareUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/`
-      : 'https://digipicks.com/';
+    typeof window !== 'undefined' ? `${window.location.origin}/` : 'https://digipicks.com/';
 
   return (
     <Card>
@@ -190,10 +203,7 @@ function ReferralsCard() {
       <Stack gap={2}>
         <KV k="Live code" v={<Mono>{live?.code ?? '—'}</Mono>} />
         <KV k="Conversions" v={<Mono>{conversions}</Mono>} />
-        <KV
-          k="Lifetime earned"
-          v={<Mono>{`$${(lifetimeCents / 100).toFixed(2)}`}</Mono>}
-        />
+        <KV k="Lifetime earned" v={<Mono>{`$${(lifetimeCents / 100).toFixed(2)}`}</Mono>} />
         <Row gap={2}>
           <Button variant="primary" size="sm" onClick={handleShare} disabled={busy}>
             <Icon name="link" size={13} />

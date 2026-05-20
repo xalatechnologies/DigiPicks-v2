@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-primary-fixed-variant": "#5516be",
+                        "outline-variant": "#cbc3d7",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "primary": "#6b38d4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface-variant": "#494454",
+                        "on-secondary-container": "#5c647a",
+                        "inverse-primary": "#d0bcff",
+                        "on-tertiary-fixed": "#2c1700",
+                        "primary-fixed": "#e9ddff",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-primary-container": "#fffbff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdcbb",
+                        "secondary": "#565e74",
+                        "surface-container-low": "#f2f4f6",
+                        "primary-container": "#8455ef",
+                        "surface-dim": "#d8dadc",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#23005c",
+                        "primary-fixed-dim": "#d0bcff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface-container-high": "#e6e8ea",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#dae2fd",
+                        "outline": "#7b7486",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-surface": "#191c1e",
+                        "on-background": "#191c1e",
+                        "tertiary": "#855000",
+                        "secondary-container": "#dae2fd",
+                        "error": "#ba1a1a",
+                        "surface": "#f7f9fb",
+                        "tertiary-container": "#a76500",
+                        "surface-tint": "#6d3bd7",
+                        "on-secondary-fixed": "#131b2e",
+                        "background": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition { transition: background-color 0.3s ease; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-72 flex-col fixed left-0 top-0 overflow-y-auto bg-white dark:bg-slate-900 z-50 hidden md:flex">
+<div class="flex flex-col gap-1 py-6 h-full px-4">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_graph</span>
+</div>
+<div>
+<h1 class="text-lg font-extrabold tracking-tighter text-[#191C1E] dark:text-white">EdgePicks</h1>
+<p class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px] text-slate-500">Creator Management</p>
+</div>
+</div>
+<nav class="space-y-1">
+<!-- Active Item: Overview -->
+<a class="flex items-center gap-3 px-3 py-2.5 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300 rounded-lg translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Overview</span>
+</a>
+<!-- Inactive Items -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Creator Applications</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Creators</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Content Moderation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Subscriptions &amp; Billing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Payouts &amp; Finance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Notifications &amp; Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">e911_emergency</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Support &amp; Disputes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Analytics &amp; Platform Health</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">System Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="font-['Manrope'] font-semibold tracking-wide uppercase text-[10px]">Audit Logs</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 px-2">
+<div class="p-4 bg-surface-container rounded-2xl flex items-center gap-3">
+<img alt="Admin Profile Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A professional studio portrait of a modern technology administrator, featuring a clean-shaven man with short hair, wearing a high-quality dark grey wool sweater. The lighting is bright and even, casting soft shadows against a minimalist, slightly blurred office background. The overall aesthetic is professional, sharp, and confident, perfectly fitting a high-end SaaS platform interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxOl9mVI0Vrw3-nVOxUAwKb2TrXpKQsd2JMkRJkb1EArOgc0Uf7XqXfz6YS_7RvZeHn5d0W_VrvO8xunM-MZJWdi926deCduPSCwDDfbEVyt3E3Db566dMawpYa02QMp1ZvKwEkxyfPQWGP42_-vflWicd7U5Z_Z4FUPpiVFrhgw9EFi0EnYhnk9C2drcl9VMwAqpeP1Y0uctrINAKEMFAs0YAmoR1AfdocufkcpYd6RIyf3rCILdESBd2UTr4AtITKhEKKMzN6F8"/>
+<div>
+<p class="text-sm font-bold text-on-surface">EdgePicks Admin</p>
+<p class="text-[11px] text-on-surface-variant font-medium">Super Admin</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-72 min-h-screen bg-background p-4 md:p-8 space-y-8">
+<!-- Header / TopNavBar Content -->
+<header class="flex justify-between items-center w-full mb-8">
+<div class="space-y-1">
+<h2 class="text-3xl font-extrabold tracking-tighter text-on-surface font-headline">Dashboard Overview</h2>
+<p class="text-on-surface-variant text-sm font-medium">Monitoring platform health and creator performance in real-time.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2.5 rounded-full bg-white shadow-sm text-slate-600 hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Export Report
+                </button>
+</div>
+</header>
+<!-- Metrics Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+<!-- Total Users -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Total Users</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">12,450</p>
+<p class="text-[11px] font-bold text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +4.2%
+                    </p>
+</div>
+</div>
+<!-- Active Subscribers -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Active Subs</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">3,280</p>
+<p class="text-[11px] font-bold text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +2.1%
+                    </p>
+</div>
+</div>
+<!-- Active Creators -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Creators</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">142</p>
+<p class="text-[11px] font-bold text-primary mt-1">+3 new today</p>
+</div>
+</div>
+<!-- Pending Applications -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Applications</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">28</p>
+<span class="inline-flex mt-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[9px] font-extrabold uppercase">Urgent</span>
+</div>
+</div>
+<!-- MRR -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">MRR</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">$142k</p>
+<p class="text-[11px] font-bold text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +8.5%
+                    </p>
+</div>
+</div>
+<!-- Churn Rate -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Churn</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">1.2%</p>
+<p class="text-[11px] font-bold text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+                        -0.2%
+                    </p>
+</div>
+</div>
+<!-- Flagged Content -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Flagged</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">14</p>
+<p class="text-[11px] font-bold text-on-surface-variant mt-1">Review Needed</p>
+</div>
+</div>
+<!-- Open Support Tickets -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col justify-between min-h-[140px]">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Tickets</span>
+<div class="mt-4">
+<p class="text-2xl font-extrabold text-on-surface font-headline">32</p>
+<p class="text-[11px] font-bold text-error mt-1">5 High Priority</p>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Analytics & Activity -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Revenue Analytics Chart Area -->
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h3 class="text-xl font-extrabold text-on-surface font-headline tracking-tight">Revenue Growth</h3>
+<p class="text-on-surface-variant text-sm">Trailing 30-day performance overview</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">Weekly</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-[10px] font-bold uppercase cursor-pointer hover:bg-surface-variant transition-colors">Monthly</span>
+</div>
+</div>
+<!-- Simplified Visual Graph Placeholder -->
+<div class="h-64 relative flex items-end justify-between px-2">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+<div class="w-full border-t border-on-surface"></div>
+<div class="w-full border-t border-on-surface"></div>
+<div class="w-full border-t border-on-surface"></div>
+<div class="w-full border-t border-on-surface"></div>
+</div>
+<!-- Area Chart Visual Representation -->
+<div class="w-full h-full relative overflow-hidden flex items-end">
+<svg class="w-full h-full preserve-aspect-ratio-none" viewbox="0 0 1000 200">
+<defs>
+<lineargradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:rgba(107, 56, 212, 0.4)"></stop>
+<stop offset="100%" style="stop-color:rgba(107, 56, 212, 0)"></stop>
+</lineargradient>
+</defs>
+<path d="M0,180 Q100,140 200,160 T400,100 T600,120 T800,40 T1000,60 V200 H0 Z" fill="url(#gradient)"></path>
+<path d="M0,180 Q100,140 200,160 T400,100 T600,120 T800,40 T1000,60" fill="none" stroke="#6B38D4" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+</div>
+</div>
+<div class="flex justify-between mt-6 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+<span>Day 1</span>
+<span>Day 10</span>
+<span>Day 20</span>
+<span>Today</span>
+</div>
+</div>
+<!-- Platform Activity Stream -->
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<h3 class="text-xl font-extrabold text-on-surface font-headline tracking-tight mb-8">System Activity Logs</h3>
+<div class="space-y-6">
+<div class="flex gap-6 items-start pb-6 border-b border-surface-container last:border-0 last:pb-0">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-on-surface">Alex Rivers approved as Creator</p>
+<p class="text-xs text-on-surface-variant mt-1">Application verified by Senior Admin. Creator dashboard activated.</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter shrink-0 mt-1">2 mins ago</span>
+</div>
+<div class="flex gap-6 items-start pb-6 border-b border-surface-container last:border-0 last:pb-0">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/10 flex items-center justify-center text-tertiary shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">paid</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-on-surface">Payout of $2,100 processed for Marcus Thorne</p>
+<p class="text-xs text-on-surface-variant mt-1">Scheduled bi-weekly settlement completed via Stripe Connect.</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter shrink-0 mt-1">45 mins ago</span>
+</div>
+<div class="flex gap-6 items-start pb-6 border-b border-surface-container last:border-0 last:pb-0">
+<div class="w-12 h-12 rounded-xl bg-error-container/20 flex items-center justify-center text-error shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_delete</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-on-surface">5 Flagged posts removed by System</p>
+<p class="text-xs text-on-surface-variant mt-1">Automated moderation policy applied to content violating Section 4.2.</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter shrink-0 mt-1">3 hours ago</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Operational Alerts -->
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)] border-l-4 border-error/40">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-error">warning</span>
+<h3 class="text-lg font-extrabold text-on-surface font-headline tracking-tight">Critical Alerts</h3>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-surface-container-low rounded-2xl">
+<p class="text-xs font-bold text-error uppercase tracking-widest mb-1">Anomaly Detected</p>
+<p class="text-sm font-semibold text-on-surface">Abnormal churn in NFL category</p>
+<p class="text-xs text-on-surface-variant mt-2">Retention dropped by 12% in the last 48 hours for football niche creators.</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl">
+<p class="text-xs font-bold text-on-surface uppercase tracking-widest mb-1">Infrastructure</p>
+<p class="text-sm font-semibold text-on-surface">Stripe Webhook delay detected</p>
+<p class="text-xs text-on-surface-variant mt-2">Latency in event delivery may affect subscription status updates.</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl">
+<p class="text-xs font-bold text-on-surface uppercase tracking-widest mb-1">Financial</p>
+<p class="text-sm font-semibold text-on-surface">Payout verification pending</p>
+<p class="text-xs text-on-surface-variant mt-2">12 creators require manual ID verification before next payout cycle.</p>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<h3 class="text-lg font-extrabold text-on-surface font-headline tracking-tight mb-6">Administrative Actions</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all group">
+<span class="text-sm font-bold text-on-surface">Review Applications</span>
+<span class="material-symbols-outlined text-primary text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all group">
+<span class="text-sm font-bold text-on-surface">Suspend Creator</span>
+<span class="material-symbols-outlined text-slate-400 text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all group">
+<span class="text-sm font-bold text-on-surface">Broadcast Announcement</span>
+<span class="material-symbols-outlined text-slate-400 text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all group">
+<span class="text-sm font-bold text-on-surface">Review Flagged Content</span>
+<span class="material-symbols-outlined text-slate-400 text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.01] transition-all group">
+<span class="text-sm font-bold uppercase tracking-widest">Financial Report</span>
+<span class="material-symbols-outlined text-white text-xl">analytics</span>
+</button>
+</div>
+</div>
+<!-- Branding Illustration / Decorative Element -->
+<div class="relative overflow-hidden rounded-3xl bg-primary h-48 group">
+<img alt="Analytics Illustration" class="w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000" data-alt="A sophisticated abstract 3D visualization of data streams and glowing geometric structures, rendered in a palette of deep electric violet and bright white. The scene features light-trails moving through a transparent digital grid, conveying a sense of speed, precision, and high-level platform health. The lighting is crisp and cinematic, emphasizing the elite editorial aesthetic of the EdgePicks platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsLNPmLk4gJP594VC5tuP-663PmFCK7PNSZgVLPK0vXv4Q7jYo4ik3acCCLIBn7Elayfne6Sn6hAxY3n2GwZ3rIhTENNke0OPhpkUA2CUUSW6scIAQIGtqS3Z15PNdyE7tL9LmF01sCbp9-tHXgfXl_vD317q3-eaiy0XjdL8AksCNGVjyhE21jpBDb89KnoxL4Dn3cwt-Cu0F_QMrNsWc46fyUqJGmVIFpfdf_NAfTQUgyDNKFRvB4Kn6dTvMQld1bWgPV_UrUsg"/>
+<div class="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-primary/80 to-transparent">
+<p class="text-white font-extrabold text-xl font-headline tracking-tighter">Peak Performance</p>
+<p class="text-primary-fixed/80 text-xs font-medium">Platform up-time: 99.98%</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

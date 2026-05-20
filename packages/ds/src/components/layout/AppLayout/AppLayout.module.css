@@ -35,6 +35,10 @@
   padding-bottom: var(--space-8);
 }
 
+.mainStudio {
+  background: var(--bg-2);
+}
+
 @media (max-width: 768px) {
   .main {
     padding-top: var(--space-6);

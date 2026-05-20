@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Settings | The Elite Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        
+        /* Custom scroll behavior for the internal navigation */
+        .settings-container {
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .signature-glow {
+            background: linear-gradient(135deg, #6b38d4 0%, #8455ef 100%);
+        }
+
+        .ghost-border {
+            outline: 1px solid rgba(203, 195, 215, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#e6e8ea",
+                      "surface": "#f7f9fb",
+                      "on-surface-variant": "#494454",
+                      "tertiary-fixed-dim": "#ffb869",
+                      "outline": "#7b7486",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-primary-fixed": "#23005c",
+                      "tertiary": "#855000",
+                      "secondary-container": "#dae2fd",
+                      "outline-variant": "#cbc3d7",
+                      "inverse-surface": "#2d3133",
+                      "primary-container": "#8455ef",
+                      "error": "#ba1a1a",
+                      "on-secondary-container": "#5c647a",
+                      "inverse-on-surface": "#eff1f3",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "on-error": "#ffffff",
+                      "background": "#f7f9fb",
+                      "on-primary": "#ffffff",
+                      "surface-dim": "#d8dadc",
+                      "on-primary-container": "#fffbff",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "surface-container": "#eceef0",
+                      "tertiary-fixed": "#ffdcbb",
+                      "on-primary-fixed-variant": "#5516be",
+                      "tertiary-container": "#a76500",
+                      "secondary": "#565e74",
+                      "primary-fixed-dim": "#d0bcff",
+                      "primary-fixed": "#e9ddff",
+                      "on-tertiary-container": "#fffbff",
+                      "secondary-fixed": "#dae2fd",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "surface-variant": "#e0e3e5",
+                      "on-tertiary-fixed": "#2c1700",
+                      "error-container": "#ffdad6",
+                      "surface-tint": "#6d3bd7",
+                      "on-tertiary-fixed-variant": "#673d00",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#d0bcff",
+                      "on-surface": "#191c1e",
+                      "on-background": "#191c1e",
+                      "surface-container-low": "#f2f4f6",
+                      "primary": "#6b38d4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "display": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- TopNavBar -->
+<header class="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-sm docked full-width top-0 sticky z-50 flex justify-between items-center px-6 py-3 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-['Manrope']">The Elite Editorial</span>
+<div class="relative hidden md:block w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">search</span>
+<input class="w-full bg-surface-container border-none rounded-full py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Search system settings..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-zinc-50 transition-colors relative">
+<span class="material-symbols-outlined text-zinc-600">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold text-on-surface">Admin User</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Super Admin</p>
+</div>
+<span class="material-symbols-outlined text-3xl text-zinc-400">account_circle</span>
+</div>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar -->
+<aside class="h-screen w-72 flex-col fixed left-0 top-0 pt-20 bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex">
+<div class="flex flex-col gap-1 p-4 h-full">
+<!-- Navigation Items -->
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Manrope'] text-sm">Overview</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">assignment_ind</span>
+<span class="font-['Manrope'] text-sm">Creator Applications</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-['Manrope'] text-sm">Creators</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-sm">Users</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-['Manrope'] text-sm">Content Moderation</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-['Manrope'] text-sm">Subscriptions &amp; Billing</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-['Manrope'] text-sm">Payouts &amp; Finance</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-['Manrope'] text-sm">Notifications &amp; Campaigns</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">help_center</span>
+<span class="font-['Manrope'] text-sm">Support &amp; Disputes</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-['Manrope'] text-sm">Analytics &amp; Health</span>
+</a>
+<a class="flex items-center gap-3 text-violet-600 dark:text-violet-400 font-semibold bg-violet-50 dark:bg-violet-900/20 rounded-lg px-4 py-3" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Manrope'] text-sm">System Settings</span>
+</a>
+<a class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Manrope'] text-sm">Audit Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 min-h-screen">
+<div class="max-w-6xl mx-auto px-8 py-12">
+<!-- Page Header -->
+<div class="mb-12">
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">Control Center</span>
+<h1 class="text-5xl font-extrabold text-on-surface tracking-tight mb-4">System Settings</h1>
+<p class="text-on-surface-variant max-w-2xl text-lg leading-relaxed">
+                        Configure the global core infrastructure of EdgePicks. These adjustments impact creator workflows, financial logic, and platform-wide user experience.
+                    </p>
+</div>
+<!-- Settings Grid Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Side In-Page Nav (Sticky) -->
+<nav class="col-span-12 lg:col-span-3">
+<div class="sticky top-24 space-y-1">
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container-lowest shadow-sm text-primary font-bold transition-all" href="#general">
+<span class="text-sm">General Platform</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#creators">
+<span class="text-sm">Creator Config</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#billing">
+<span class="text-sm">Subscription &amp; Billing</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#content">
+<span class="text-sm">Content Policies</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#notifications">
+<span class="text-sm">Notification System</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#legal">
+<span class="text-sm">Compliance &amp; Legal</span>
+</a>
+<a class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant transition-all" href="#feature-flags">
+<span class="text-sm">Feature Flags</span>
+</a>
+</div>
+</nav>
+<!-- Main Form Area -->
+<div class="col-span-12 lg:col-span-9 space-y-16 pb-24">
+<!-- Section: General Platform -->
+<section class="scroll-mt-24" id="general">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                General Platform Settings
+                            </h2>
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Platform Name</label>
+<input class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="The Elite Editorial"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Support Email Address</label>
+<input class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 transition-all" type="email" value="support@edgepicks.com"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">System Timezone</label>
+<select class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">UTC (Coordinated Universal Time)</option>
+<option>EST (Eastern Standard Time)</option>
+<option>PST (Pacific Standard Time)</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Default Currency</label>
+<select class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">USD ($) - United States Dollar</option>
+<option>EUR (€) - Euro</option>
+<option>GBP (£) - British Pound</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Creator Configurations -->
+<section class="scroll-mt-24" id="creators">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Creator Configurations
+                            </h2>
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm space-y-6">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+<div>
+<h3 class="font-bold text-on-surface">Accepting New Applications</h3>
+<p class="text-sm text-on-surface-variant">Globally enable or disable the public creator application form.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Auto-Verification Rule</label>
+<p class="text-xs text-on-surface-variant mb-2">Requirements for automatic status approval.</p>
+<select class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20">
+<option>Manual Review Only</option>
+<option selected="">Identity Verified + Social Link</option>
+<option>External Platform Affiliate</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Default Revenue Share (%)</label>
+<input class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" type="number" value="85"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Subscription & Billing Rules -->
+<section class="scroll-mt-24" id="billing">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Subscription &amp; Billing Rules
+                            </h2>
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-5 bg-surface-container-low rounded-2xl border-l-4 border-primary">
+<label class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 block">Grace Period</label>
+<div class="flex items-center gap-2">
+<input class="w-16 bg-transparent border-none p-0 text-2xl font-bold focus:ring-0" type="text" value="3"/>
+<span class="text-sm font-medium text-on-surface-variant">Days</span>
+</div>
+<p class="text-[10px] text-on-surface-variant mt-2 leading-tight">Access allowed after payment failure.</p>
+</div>
+<div class="md:col-span-2 space-y-6">
+<div class="flex items-start gap-4">
+<div class="mt-1">
+<input checked="" class="text-primary focus:ring-primary" id="end-period" name="cancellation" type="radio"/>
+</div>
+<label class="cursor-pointer" for="end-period">
+<span class="block font-bold text-on-surface">End of Period Cancellation</span>
+<span class="block text-sm text-on-surface-variant">Users keep access until the current billing cycle expires.</span>
+</label>
+</div>
+<div class="flex items-start gap-4">
+<div class="mt-1">
+<input class="text-primary focus:ring-primary" id="instant" name="cancellation" type="radio"/>
+</div>
+<label class="cursor-pointer" for="instant">
+<span class="block font-bold text-on-surface">Instant Cancellation</span>
+<span class="block text-sm text-on-surface-variant">Revoke access and trigger prorated refund logic immediately.</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Content & Moderation -->
+<section class="scroll-mt-24" id="content">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Content &amp; Moderation Policies
+                            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm col-span-1">
+<h3 class="font-bold text-lg mb-4">Auto-Flagging Thresholds</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-2">
+<span class="font-bold text-on-surface-variant uppercase">User Reports</span>
+<span class="font-bold text-primary">5 Reports</span>
+</div>
+<input class="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" max="50" min="1" type="range" value="5"/>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-2">
+<span class="font-bold text-on-surface-variant uppercase">AI Toxicity Score</span>
+<span class="font-bold text-primary">0.85</span>
+</div>
+<input class="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" max="100" min="0" type="range" value="85"/>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm col-span-1">
+<h3 class="font-bold text-lg mb-4">Preview 'Lock' Behavior</h3>
+<div class="space-y-4">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Blur Intensity (px)</label>
+<input class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" type="number" value="24"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Free Preview Snippet (Char)</label>
+<input class="w-full bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" type="number" value="120"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Notification System -->
+<section class="scroll-mt-24" id="notifications">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Notification System
+                            </h2>
+<div class="bg-surface-container-lowest rounded-[24px] overflow-hidden shadow-sm">
+<div class="p-8 border-b border-surface-container">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-lg">Infrastructure Providers</h3>
+<p class="text-sm text-on-surface-variant">Connected APIs for platform-wide alerts.</p>
+</div>
+<button class="bg-surface-container-high text-on-surface px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all">Add Provider</button>
+</div>
+</div>
+<div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex items-center justify-between p-4 bg-surface rounded-2xl border border-primary/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">SendGrid</p>
+<p class="text-[10px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1">
+<span class="w-1 h-1 bg-green-600 rounded-full"></span> Operational
+                                                </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">settings</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface rounded-2xl border border-transparent">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">sms</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Twilio SMS</p>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-1">
+                                                    Inactive
+                                                </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">settings</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Compliance & Legal -->
+<section class="scroll-mt-24" id="legal">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Compliance &amp; Legal
+                            </h2>
+<div class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Terms of Service</label>
+<span class="text-[10px] font-bold text-primary">v2.4.1 Last Updated Oct 23</span>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-low border-none ghost-border rounded-2xl p-4 text-xs font-mono text-on-surface-variant resize-none" rows="4">Our Terms of Service define the relationship between the platform and its users...</textarea>
+<div class="absolute bottom-4 right-4">
+<button class="bg-white px-3 py-1 rounded-lg shadow-sm border border-zinc-100 text-[10px] font-bold">Manage Versions</button>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">GDPR Data Retention</label>
+<div class="flex items-center gap-4">
+<select class="flex-1 bg-surface-container-low border-none ghost-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20">
+<option>2 Years (Standard)</option>
+<option>5 Years (Extended)</option>
+<option>7 Years (Financial Audit)</option>
+</select>
+</div>
+<p class="text-[10px] text-on-surface-variant italic mt-2">Automatically purges inactive user data after specified period.</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-orange-600">policy</span>
+<p class="text-xs font-bold text-orange-800">Privacy Policy Audit Pending</p>
+</div>
+<button class="text-[10px] font-bold text-orange-600 underline uppercase tracking-widest">Review Now</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Feature Flags / Experiments -->
+<section class="scroll-mt-24" id="feature-flags">
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<span class="w-1 h-8 bg-primary rounded-full"></span>
+                                Feature Flags &amp; Experiments
+                            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Flag Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm flex items-center justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">share</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Referral System</h4>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">Beta Mode</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Flag Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm flex items-center justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-zinc-100 text-zinc-400 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Smart Pricing AI</h4>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Disabled</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Flag Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm flex items-center justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">chat_bubble</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Creator Messaging</h4>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">Internal Only</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Flag Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm flex items-center justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-zinc-100 text-zinc-400 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">star</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Public User Ratings</h4>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">In Design</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Final Action Bar (Persistent) -->
+<div class="sticky bottom-8 bg-white/80 backdrop-blur-md p-4 rounded-full shadow-xl ghost-border flex items-center justify-between max-w-2xl mx-auto z-40">
+<div class="flex items-center gap-3 pl-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+<span class="text-sm font-bold text-on-surface">Changes auto-saved in draft.</span>
+</div>
+<div class="flex gap-2">
+<button class="px-6 py-2 rounded-full font-bold text-sm text-on-surface hover:bg-surface-container transition-all">Discard</button>
+<button class="signature-glow text-white px-8 py-2 rounded-full font-bold text-sm uppercase tracking-wider shadow-lg hover:scale-[1.02] active:scale-95 transition-all">Deploy Changes</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

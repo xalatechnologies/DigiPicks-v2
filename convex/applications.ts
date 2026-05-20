@@ -74,6 +74,55 @@ export const submit = mutation({
 });
 
 // Admin-only.
+/** Fetch a single application by id. Admin-only. */
+export const get = query({
+  args: { id: v.id('applications') },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    return await ctx.db.get(args.id);
+  },
+});
+
+// Admin-only.
+/** Queue counts for admin header, nav badge, and overview KPIs. Admin-only. */
+export const queueCounts = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const countStatus = async (
+      status: 'submitted' | 'review' | 'more_info' | 'flagged' | 'approved' | 'rejected',
+    ) => {
+      const rows = await ctx.db
+        .query('applications')
+        .withIndex('by_status', (q) => q.eq('status', status))
+        .take(500);
+      return rows.length;
+    };
+
+    const submitted = await countStatus('submitted');
+    const review = await countStatus('review');
+    const flagged = await countStatus('flagged');
+    const moreInfo = await countStatus('more_info');
+    const approved = await countStatus('approved');
+    const rejected = await countStatus('rejected');
+
+    return {
+      submitted,
+      review,
+      flagged,
+      moreInfo,
+      approved,
+      rejected,
+      /** Submitted + in-review — “new requests” in Stitch header. */
+      newRequests: submitted + review,
+      /** Pending tab workload (submitted + flagged). */
+      pending: submitted + flagged,
+    };
+  },
+});
+
+// Admin-only.
 /** List applications by status. Admin-only. */
 export const listByStatus = query({
   args: {
@@ -88,12 +137,49 @@ export const listByStatus = query({
         .query('applications')
         .withIndex('by_status', (q) => q.eq('status', args.status!))
         .order('desc')
-        .take(args.limit ?? 50);
+        .take(args.limit ?? 200);
     }
     return await ctx.db
       .query('applications')
       .order('desc')
-      .take(args.limit ?? 50);
+      .take(args.limit ?? 200);
+  },
+});
+
+// Admin-only.
+/** Append an internal admin note without changing application status. Admin-only. */
+export const appendAdminNote = mutation({
+  args: {
+    id: v.id('applications'),
+    body: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx);
+    await gateOnMfaIfEnrolled(ctx, user._id);
+
+    const app = await ctx.db.get(args.id);
+    if (!app) throw new Error('Application not found');
+
+    const trimmed = args.body.trim();
+    if (!trimmed) throw new Error('Note cannot be empty');
+
+    const stamped = `[${new Date().toISOString()}] ${trimmed}`;
+    const reviewNotes = app.reviewNotes ? `${app.reviewNotes}\n\n${stamped}` : stamped;
+
+    await ctx.db.patch(args.id, {
+      reviewNotes,
+      reviewedBy: user._id,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+      actorUserId: user._id,
+      entityType: 'application',
+      entityId: args.id,
+      action: 'application.note',
+      metadata: { handle: app.handle, email: app.email },
+    });
+
+    return args.id;
   },
 });
 
@@ -104,7 +190,7 @@ export const listByStatus = query({
  * On approval we synchronously:
  *   1. Create the creator profile (returns the new creatorId).
  *   2. Patch the applicant's `users` row (by email) with creatorId +
- *      role='creator', so they pass requireCreator on next mutation.
+ *      creatorId set so they pass requireCreator on next mutation.
  *   3. Audit-log the transition.
  *
  * Doing this inline (rather than through the scheduler) keeps the user-side
@@ -124,10 +210,15 @@ export const review = mutation({
     const app = await ctx.db.get(args.id);
     if (!app) throw new Error('Application not found');
 
+    const nextNotes =
+      args.reviewNotes?.trim() && args.reviewNotes.trim() !== (app.reviewNotes ?? '').trim()
+        ? args.reviewNotes.trim()
+        : app.reviewNotes;
+
     await ctx.db.patch(args.id, {
       status: args.status,
       reviewedBy: user._id,
-      reviewNotes: args.reviewNotes,
+      reviewNotes: nextNotes,
       reviewedAt: Date.now(),
     });
 
@@ -158,7 +249,6 @@ export const review = mutation({
       if (applicant) {
         await ctx.db.patch(applicant._id, {
           creatorId,
-          role: 'user',
         });
       }
     }

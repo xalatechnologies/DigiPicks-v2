@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Billing History | Elite Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e9ddff",
+                        "surface": "#f7f9fb",
+                        "inverse-primary": "#d0bcff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-variant": "#e0e3e5",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "primary": "#6b38d4",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dae2fd",
+                        "tertiary-container": "#a76500",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-container": "#dae2fd",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface-tint": "#6d3bd7",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#565e74",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#855000",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary-fixed-variant": "#5516be",
+                        "inverse-surface": "#2d3133",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#494454",
+                        "outline-variant": "#cbc3d7",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-primary-container": "#fffbff",
+                        "surface-dim": "#d8dadc",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdcbb",
+                        "primary-container": "#8455ef",
+                        "surface-container-low": "#f2f4f6",
+                        "background": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "on-secondary-container": "#5c647a",
+                        "outline": "#7b7486"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<header class="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl docked full-width top-0 z-50 no-border shadow-[0px_20px_40px_rgba(15,23,42,0.06)] flex justify-between items-center w-full px-6 h-16 fixed">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Elite Editorial</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-['Manrope'] font-medium tracking-tight" href="#">Explore</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-['Manrope'] font-medium tracking-tight" href="#">Insights</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-['Manrope'] font-medium tracking-tight" href="#">Live</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors rounded-full">
+<span class="material-symbols-outlined">help</span>
+</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-surface-container" data-alt="A professional headshot of a young adult male with a neutral expression, photographed against a minimalist grey studio background. The lighting is soft and flattering, emphasizing a clean and premium aesthetic that aligns with a high-end digital editorial platform. The overall color palette is muted and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf1gitzcy0FDhGS2drY0xoOkqxaadCk6k65E2LR73OEcEOBk62glmdcTKywfC9qki8pMbcrW8pmvqmtjD8y2tTD7UGSVdp-Emw9c3I74WFuQ8N7jpWb_9aTCmO5yOJFSFCZsT_iqVUp12z-zhuxbHZ1TqXQKndBsPuuN54lCSFGwKuelFKEljzHTgar6eNZ-wh6RMigqC5pUFK98Chq138flYyWEKjA36HpJCJwQPGNmvyij2e0hbucYv79nabhSnzxgr4e5vWgh4"/>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="bg-slate-50 dark:bg-slate-900 h-screen w-64 fixed left-0 top-0 pt-20 flex flex-col gap-2 z-40 hidden md:flex">
+<div class="px-8 py-4 mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold">TC</div>
+<div>
+<p class="font-['Manrope'] text-sm font-semibold uppercase tracking-widest text-on-surface">The Curator</p>
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Premium Tier</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="text-slate-500 dark:text-slate-400 pl-8 py-3 flex items-center gap-3 hover:text-violet-500 dark:hover:text-violet-300 transition-all font-['Manrope'] text-sm font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="text-slate-500 dark:text-slate-400 pl-8 py-3 flex items-center gap-3 hover:text-violet-500 dark:hover:text-violet-300 transition-all font-['Manrope'] text-sm font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">group</span> Subscribers
+            </a>
+<a class="text-slate-500 dark:text-slate-400 pl-8 py-3 flex items-center gap-3 hover:text-violet-500 dark:hover:text-violet-300 transition-all font-['Manrope'] text-sm font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">star</span> Creators
+            </a>
+<a class="bg-white dark:bg-slate-950 text-violet-600 dark:text-violet-400 rounded-l-full ml-4 pl-4 py-3 shadow-sm flex items-center gap-3 font-['Manrope'] text-sm font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">receipt_long</span> Billing
+            </a>
+<a class="text-slate-500 dark:text-slate-400 pl-8 py-3 flex items-center gap-3 hover:text-violet-500 dark:hover:text-violet-300 transition-all font-['Manrope'] text-sm font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+<div class="mt-auto px-6 pb-8 flex flex-col gap-4">
+<button class="w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg hover:translate-y-[-2px] transition-transform">
+                Upgrade Plan
+            </button>
+<a class="text-slate-500 dark:text-slate-400 pl-2 py-2 flex items-center gap-3 hover:text-violet-500 dark:hover:text-violet-300 transition-all font-['Manrope'] text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">support_agent</span> Help Center
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-24 px-6 pb-12 min-h-screen">
+<div class="max-w-6xl mx-auto">
+<!-- Header Section -->
+<section class="mb-10">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-1">Billing History</h1>
+<p class="text-secondary font-medium">View and download your platform invoices.</p>
+</section>
+<!-- Filters Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="md:col-span-1">
+<div class="bg-surface-container-lowest p-1 rounded-2xl flex items-center gap-2 group transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-outline ml-3">calendar_today</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium py-3 text-on-surface" placeholder="Date range" type="text" value="Last 12 Months"/>
+</div>
+</div>
+<div class="md:col-span-1">
+<div class="bg-surface-container-lowest p-1 rounded-2xl flex items-center gap-2 group transition-all duration-300">
+<span class="material-symbols-outlined text-outline ml-3">person</span>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium py-3 text-on-surface appearance-none">
+<option>All Creators</option>
+<option>Alex Rivers</option>
+<option>NBA Props</option>
+<option>Soccer Sharp</option>
+</select>
+</div>
+</div>
+<div class="md:col-span-1">
+<div class="bg-surface-container-lowest p-1 rounded-2xl flex items-center gap-2 group transition-all duration-300">
+<span class="material-symbols-outlined text-outline ml-3">payments</span>
+<select class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium py-3 text-on-surface appearance-none">
+<option>All Status</option>
+<option>Paid</option>
+<option>Pending</option>
+<option>Failed</option>
+</select>
+</div>
+</div>
+<div class="md:col-span-1">
+<div class="bg-surface-container-lowest p-1 rounded-2xl flex items-center gap-2 group transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-outline ml-3">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium py-3 text-on-surface" placeholder="Search invoices..." type="text"/>
+</div>
+</div>
+</section>
+<!-- Invoice Table Card -->
+<section class="bg-surface-container-lowest rounded-[24px] overflow-hidden shadow-[0px_20px_40px_rgba(15,23,42,0.06)] transition-all">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-none">
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500">Date</th>
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500">Creator</th>
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500">Plan</th>
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500">Amount</th>
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500">Status</th>
+<th class="px-6 py-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-500 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-6 text-sm font-semibold text-on-surface">Oct 24, 2023</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<img alt="Alex Rivers" class="w-8 h-8 rounded-full" data-alt="Close-up portrait of a sharp, professional man with a confident gaze, representing a sports industry expert. The style is editorial, with high contrast and natural lighting. He is set against a blurred city backdrop, maintaining a premium and credible aesthetic consistent with a luxury analytics platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpoORxiCUyZbero4_ao8BmRIew5Jz-77EJ5LWnnHVCuA04fKTythQBLvYZaFZv1GXajMt2F5e8046wLO0-Z8fc9xBTTZ3J0WoyQ84CN06Gi_w_x0BBtTGqPmkJpiH-3VadDi5SlyFbep-e4qmqX1sdo4rACBMASV2xsJdWVCLxDuedDeC3yESAVLNNjFdirXbKZ0hHM9VHURHzrZqIubro-jmUx0hlxvrVf74aqfJ24NZpyjRJFhnmvgS7XVc-rPyYQc1MQvN6QOs"/>
+<span class="text-sm font-bold text-on-surface">Alex Rivers</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="text-xs font-bold px-2 py-1 bg-primary/10 text-primary rounded-md uppercase tracking-tight">Pro VIP</span>
+</td>
+<td class="px-6 py-6 text-sm font-extrabold text-on-surface">$49.99</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-1.5 text-emerald-600 font-bold text-xs uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Paid
+                                    </div>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-white rounded-lg text-primary transition-colors flex items-center justify-center" title="Download PDF">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center" title="View Details">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-6 text-sm font-semibold text-on-surface">Sep 24, 2023</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<img alt="NBA Props" class="w-8 h-8 rounded-full" data-alt="High-quality portrait of a female sports analyst with a focused and intelligent expression. She is framed in a modern office with sleek tech elements in the background. The lighting is bright and clean, reflecting an 'Elite Editorial' style with sophisticated violet and white tones throughout the composition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiNCftMupQXWT4bPwnyPTRj-IYm4_JkkXg51K7Zm5FWVJTgo4gOpbWdcC193GGchAViAuLEyPLNI_5hQeg9eHmx-CmQypRm_fC8433r7S6AtPhP_vmy1UVNMChks55kJ6jG8cq9rnO62XzP0ZOogTJ5GIRdiq-V3sh-22smQ8mLeL7RI2TbQEWypgxS5dWIlgL5RD2ZJGyA7r7XS0ymzXe9oFw_CKEJJaO-Uc9Ume8bKrOpqMjSaTKAtlk-FTZzJxBbXJMtZuP5eI"/>
+<span class="text-sm font-bold text-on-surface">NBA Props</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="text-xs font-bold px-2 py-1 bg-surface-container text-secondary rounded-md uppercase tracking-tight">Monthly</span>
+</td>
+<td class="px-6 py-6 text-sm font-extrabold text-on-surface">$29.00</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-1.5 text-emerald-600 font-bold text-xs uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Paid
+                                    </div>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-white rounded-lg text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-6 text-sm font-semibold text-on-surface">Aug 24, 2023</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">SS</div>
+<span class="text-sm font-bold text-on-surface">Soccer Sharp</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="text-xs font-bold px-2 py-1 bg-surface-container text-secondary rounded-md uppercase tracking-tight">Standard</span>
+</td>
+<td class="px-6 py-6 text-sm font-extrabold text-on-surface">$15.00</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-1.5 text-amber-600 font-bold text-xs uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Pending
+                                    </div>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-white rounded-lg text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-6 text-sm font-semibold text-on-surface">Jul 24, 2023</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<img alt="Alex Rivers" class="w-8 h-8 rounded-full" data-alt="Close-up of a stylish male sports analyst looking thoughtfully off-camera. The lighting is dramatic but clean, with deep shadows and soft highlights on his face. The background is a minimalist, modern office space with subtle tech textures, reflecting a high-end financial and editorial atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmZJnS4ILQqbtYhcuH569ZZx7xp4DaaHnxci68mYQHEGZY-NL4gnA8wStoWxSJo07QsZEmpyeYS-TQtfFXU4XgaBO3tgPddKtVOK6d-9Zmgksvd8RIz7xTgHh9Q5iBLrsYiLiGn0z3r3JgCcihSib9AmQTP9D1cwM3zBUvzhAdnjYxcEZQDU1AnJFMfJ3rrL1C_sAGHWUanpUea-uQzNhn3dDYCdEc3Oo2850Oz1xGFZcENSkxJs9xwwgZUc5anIzJyF-GiSStfJQ"/>
+<span class="text-sm font-bold text-on-surface">Alex Rivers</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="text-xs font-bold px-2 py-1 bg-primary/10 text-primary rounded-md uppercase tracking-tight">Pro VIP</span>
+</td>
+<td class="px-6 py-6 text-sm font-extrabold text-on-surface">$49.99</td>
+<td class="px-6 py-6">
+<div class="flex items-center gap-1.5 text-error font-bold text-xs uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                        Failed
+                                    </div>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-widest">Retry</button>
+<button class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 bg-surface-container-low/50 flex items-center justify-between">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Showing 4 of 28 invoices</p>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border-none shadow-sm text-slate-400 cursor-not-allowed">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white shadow-sm font-bold text-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-50 shadow-sm font-bold text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-slate-600 hover:bg-slate-50 shadow-sm font-bold text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border-none shadow-sm text-slate-600 hover:bg-slate-50">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Bottom Note Section -->
+<section class="mt-12 p-8 rounded-[24px] bg-gradient-to-r from-primary-fixed to-secondary-fixed flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="max-w-md">
+<h3 class="text-xl font-bold text-on-primary-fixed tracking-tight mb-2">Manage Your Subscriptions</h3>
+<p class="text-sm text-on-primary-fixed-variant leading-relaxed">Adjust your payment methods, change billing cycles, or cancel active subscriptions from your global settings.</p>
+</div>
+<button class="px-8 py-3 bg-on-primary-fixed text-white rounded-full font-bold uppercase tracking-widest text-xs hover:shadow-xl transition-all whitespace-nowrap">
+                    Subscription Settings
+                </button>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-none flex justify-around items-center py-3 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined text-[24px]">dashboard</span>
+<span class="text-[10px] font-bold uppercase">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined text-[24px]">star</span>
+<span class="text-[10px] font-bold uppercase">Creators</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]">receipt_long</span>
+<span class="text-[10px] font-bold uppercase">Billing</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-bold uppercase">Settings</span>
+</a>
+</nav>
+</body></html>

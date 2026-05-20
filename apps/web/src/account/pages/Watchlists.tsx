@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
   Row,
-  PageHead,
   Card,
   CardHead,
   Button,
@@ -18,15 +18,30 @@ import {
   Badge,
   Switch,
   TitleSub,
+  StudioPageHeader,
+  AccountRefineCard,
+  StudioFilterPills,
+  StudioDashLayout,
+  StudioDashCol,
+  AccountSidebarPanel,
+  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 type ConfidenceLevel = 'Low' | 'Medium' | 'High';
+type StatusFilter = 'all' | 'active' | 'paused';
 
 const SPORTS = ['', 'Soccer', 'Cricket', 'Tennis', 'Basketball', 'Football', 'Baseball'];
 const CONFIDENCE: Array<'' | ConfidenceLevel> = ['', 'Low', 'Medium', 'High'];
 const ACCESS = ['', 'free', 'premium', 'vip'];
+
+const STATUS_PILLS = [
+  { id: 'all', label: 'All' },
+  { id: 'active', label: 'Active' },
+  { id: 'paused', label: 'Paused' },
+] as const;
 
 interface DraftFilter {
   sport: string;
@@ -63,21 +78,25 @@ function toFilter(d: DraftFilter) {
   };
 }
 
-/**
- * Subscriber-side watchlist manager. Lists existing watchlists with
- * inline toggles, plus an add form. Wired to api.watchlists.{listMine,
- * create, update, remove}.
- */
 export function Watchlists() {
+  const navigate = useNavigate();
   const watchlists = useQuery(api.watchlists.listMine);
   const create = useMutation(api.watchlists.create);
   const update = useMutation(api.watchlists.update);
   const remove = useMutation(api.watchlists.remove);
 
-  const [name, setName] = React.useState('');
-  const [draft, setDraft] = React.useState<DraftFilter>(EMPTY_DRAFT);
-  const [busy, setBusy] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [draft, setDraft] = useState<DraftFilter>(EMPTY_DRAFT);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    if (!watchlists) return undefined;
+    if (statusFilter === 'active') return watchlists.filter((w) => w.isActive);
+    if (statusFilter === 'paused') return watchlists.filter((w) => !w.isActive);
+    return watchlists;
+  }, [watchlists, statusFilter]);
 
   async function handleCreate() {
     if (!name.trim()) {
@@ -114,64 +133,79 @@ export function Watchlists() {
     }
   }
 
+  const listPane = (
+    <Card>
+      <CardHead title="Your watchlists" sub={`${filtered?.length ?? 0} shown`} />
+      {watchlists === undefined ? (
+        <EmptyState icon="bell" title="Loading…" />
+      ) : filtered!.length === 0 ? (
+        <EmptyState
+          icon="bell"
+          title={watchlists.length === 0 ? 'No watchlists yet' : 'No watchlists in this view'}
+          subtitle="Create one below — matching picks trigger alerts across every channel you have enabled."
+        />
+      ) : (
+        <Stack gap={2}>
+          {filtered!.map((w) => (
+            <Card key={w._id} pad="sm">
+              <Row gap={3} between>
+                <Stack gap={1}>
+                  <Row gap={2}>
+                    <TitleSub title={w.name} sub={summarizeFilter(w.filter)} />
+                    {!w.isActive ? <Badge tone="mute">Paused</Badge> : null}
+                  </Row>
+                </Stack>
+                <Row gap={2}>
+                  <Switch checked={w.isActive} onChange={(next) => handleToggle(w._id, next)} />
+                  <Button variant="ghost" size="sm" onClick={() => handleRemove(w._id)}>
+                    <Icon name="trash" size={13} />
+                  </Button>
+                </Row>
+              </Row>
+            </Card>
+          ))}
+        </Stack>
+      )}
+    </Card>
+  );
+
+  const tipsSidebar = (
+    <AccountSidebarPanel title="How alerts work">
+      <Stack gap={3}>
+        <Muted>Empty fields are wildcards — all set criteria must match.</Muted>
+        <Muted>Pause a watchlist anytime without deleting its rules.</Muted>
+        <Muted>Matches fire push, Telegram, and in-app notifications.</Muted>
+      </Stack>
+    </AccountSidebarPanel>
+  );
+
   return (
-    <Container size="xl">
-      <Stack gap={5}>
-        <PageHead
-          eyebrow="Alerts"
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Account · Alerts"
           title="Watchlists"
-          sub="Custom alert rules that fire push / Telegram / in-app notifications when a matching pick is published or a line moves."
+          sub="Custom alert rules that fire push, Telegram, and in-app notifications when a matching pick is published or a line moves."
         />
 
-        <Card>
-          <CardHead title="Your watchlists" sub={`${watchlists?.length ?? 0} active`} />
-          {watchlists === undefined ? (
-            <EmptyState icon="bell" title="Loading…" />
-          ) : watchlists.length === 0 ? (
-            <EmptyState
-              icon="bell"
-              title="No watchlists yet"
-              subtitle="Create one below — anything matching the filter will trigger an alert across every channel you have enabled."
-            />
-          ) : (
-            <Stack gap={2}>
-              {watchlists.map((w) => (
-                <Card key={w._id} pad="sm">
-                  <Row gap={3} between>
-                    <Stack gap={1}>
-                      <Row gap={2}>
-                        <TitleSub
-                          title={w.name}
-                          sub={summarizeFilter(w.filter)}
-                        />
-                        {!w.isActive && <Badge tone="mute">Paused</Badge>}
-                      </Row>
-                    </Stack>
-                    <Row gap={2}>
-                      <Switch
-                        checked={w.isActive}
-                        onChange={(next) => handleToggle(w._id, next)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemove(w._id)}
-                      >
-                        <Icon name="trash" size={13} />
-                      </Button>
-                    </Row>
-                  </Row>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Card>
-
-        <Card>
-          <CardHead
-            title="New watchlist"
-            sub="Empty fields act as wildcards. Combine criteria — alerts fire when ALL set fields match."
-          />
+        <AccountRefineCard
+          title="New watchlist"
+          sub="Empty fields act as wildcards. Combine criteria — alerts fire when ALL set fields match."
+          summary={
+            watchlists === undefined
+              ? 'Loading…'
+              : `${watchlists.length} saved · ${watchlists.filter((w) => w.isActive).length} active`
+          }
+          onReset={
+            name || Object.values(draft).some(Boolean)
+              ? () => {
+                  setName('');
+                  setDraft(EMPTY_DRAFT);
+                  setError(null);
+                }
+              : undefined
+          }
+        >
           <Stack gap={3}>
             <Field label="Name" required>
               <Input
@@ -244,9 +278,7 @@ export function Watchlists() {
               <Field label="Body contains" help="Case-insensitive substring.">
                 <Input
                   value={draft.bodyContains}
-                  onChange={(e) =>
-                    setDraft({ ...draft, bodyContains: e.target.value })
-                  }
+                  onChange={(e) => setDraft({ ...draft, bodyContains: e.target.value })}
                   placeholder="e.g. CLV"
                 />
               </Field>
@@ -262,14 +294,12 @@ export function Watchlists() {
                 max={100}
                 step={0.5}
                 value={draft.lineMoveAbovePercent}
-                onChange={(e) =>
-                  setDraft({ ...draft, lineMoveAbovePercent: e.target.value })
-                }
+                onChange={(e) => setDraft({ ...draft, lineMoveAbovePercent: e.target.value })}
                 placeholder="e.g. 5"
               />
             </Field>
 
-            {error && <Muted>{error}</Muted>}
+            {error ? <Muted>{error}</Muted> : null}
 
             <Row gap={2}>
               <Button
@@ -283,7 +313,27 @@ export function Watchlists() {
               </Button>
             </Row>
           </Stack>
-        </Card>
+        </AccountRefineCard>
+
+        <AccountRefineCard
+          title="Refine list"
+          sub="Show active, paused, or all saved watchlists."
+          summary={`${filtered?.length ?? 0} watchlist${(filtered?.length ?? 0) === 1 ? '' : 's'}`}
+          onReset={statusFilter !== 'all' ? () => setStatusFilter('all') : undefined}
+        >
+          <StudioFilterPills
+            options={STATUS_PILLS.map((p) => ({ value: p.id, label: p.label }))}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as StatusFilter)}
+          />
+        </AccountRefineCard>
+
+        <StudioDashLayout>
+          <StudioDashCol span={8}>{listPane}</StudioDashCol>
+          <StudioDashCol span={4}>{tipsSidebar}</StudioDashCol>
+        </StudioDashLayout>
+
+        <QuickActionGrid title="Related" items={accountCrossLinks('watchlists', navigate)} />
       </Stack>
     </Container>
   );

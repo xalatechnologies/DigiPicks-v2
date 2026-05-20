@@ -10,7 +10,7 @@
   padding: 0 0 var(--space-1);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  color: var(--t-3);
+  color: var(--t-2);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition:

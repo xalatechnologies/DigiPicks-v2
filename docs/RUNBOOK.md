@@ -36,15 +36,23 @@ Set every key via `npx convex env set <KEY> <VALUE>` (or the Convex
 dashboard → Settings → Environment Variables). The code **gracefully
 degrades** when a key is missing — the relevant phase just no-ops.
 
-| Key | Required for | Format |
-|---|---|---|
-| `THE_ODDS_API_KEY` | Phase 6 odds + base events polling | The Odds API key |
-| `ODDS_SNAPSHOTS_ENABLED` | Phase 6 line-movement snapshots | literal string `true` to enable |
-| `STRIPE_SECRET_KEY` | Phase 3 Checkout | `sk_test_...` (test) or `sk_live_...` |
-| `STRIPE_WEBHOOK_SECRET` | Phase 3 webhook signature verification | `whsec_...` |
-| `WEB_BASE_URL` | Phase 3 success / cancel redirects | e.g. `https://app.digipicks.com` (no trailing slash) |
-| `ANTHROPIC_API_KEY` | Phase 5 AI pick analysis | `sk-ant-...` |
-| `SEED_TOKEN` | `/seed-events` HTTP route | any random string; pass as `Authorization: Bearer <token>` |
+| Key                      | Required for                                                   | Format                                                     |
+| ------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| `THE_ODDS_API_KEY`       | Phase 6 odds + base events polling                             | The Odds API key                                           |
+| `ODDS_SNAPSHOTS_ENABLED` | Phase 6 line-movement snapshots                                | literal string `true` to enable                            |
+| `STRIPE_SECRET_KEY`      | Phase 3 Checkout                                               | `sk_test_...` (test) or `sk_live_...`                      |
+| `STRIPE_WEBHOOK_SECRET`  | Phase 3 webhook signature verification                         | `whsec_...`                                                |
+| `WEB_BASE_URL`           | Phase 3 success / cancel redirects                             | e.g. `https://app.digipicks.com` (no trailing slash)       |
+| `ANTHROPIC_API_KEY`      | Phase 5 AI pick analysis + M20 inbound summaries + M24 Copilot | `sk-ant-...`                                               |
+| `SEED_TOKEN`             | `/seed-events` HTTP route                                      | any random string; pass as `Authorization: Bearer <token>` |
+| `DISCORD_BOT_TOKEN`      | M20 outbound + inbound Bot API                                 | Discord developer portal → Bot token                       |
+| `DISCORD_CLIENT_ID`      | M20 OAuth install                                              | Application ID                                             |
+| `DISCORD_CLIENT_SECRET`  | M20 OAuth token exchange                                       | Client secret                                              |
+| `DISCORD_PUBLIC_KEY`     | `/discord/interactions` Ed25519 verify                         | Application → General → Public Key                         |
+| `DISCORD_AUTHOR_SALT`    | M20 inbound author hashing (privacy)                           | Random string; never rotate without GDPR review            |
+| `DISCORD_TOKEN_ENC_KEY`  | OAuth token encryption at rest                                 | 32-byte hex or per `convex/discord/oauth.ts`               |
+| `CONVEX_SITE_URL`        | Discord OAuth callback base                                    | `https://<deployment>.convex.site`                         |
+| `TELEGRAM_BOT_TOKEN`     | M21 Telegram delivery                                          | BotFather token                                            |
 
 Quickstart for a clean dev environment:
 
@@ -72,7 +80,7 @@ federated fields populated. Idempotent and safe to re-run.
    ```ts
    // Console: should print 0 once the backfill completes.
    const all = await ctx.db.query('events').take(10000);
-   all.filter(e => e.sourceType === undefined).length
+   all.filter((e) => e.sourceType === undefined).length;
    ```
 
 4. The 60-second `liveScores.upsertEvent` cron self-heals any rows the
@@ -92,7 +100,7 @@ federated fields populated. Idempotent and safe to re-run.
      `customer.subscription.deleted`, `invoice.paid`
    - Copy the signing secret → `STRIPE_WEBHOOK_SECRET`.
 3. **Products + prices:** for each pricing tier you want creators to
-   sell, create a *Product* with two recurring prices (Premium + VIP).
+   sell, create a _Product_ with two recurring prices (Premium + VIP).
    Copy the price IDs (`price_...`).
 
 ### Per-creator price configuration
@@ -106,7 +114,7 @@ runs through the Convex dashboard:
 4. Adjust `startingPrice` (a number, not a string) so the displayed
    `$X/mo` matches the actual Stripe price.
 
-Until both fields are set, the *Premium / VIP* tiers in the
+Until both fields are set, the _Premium / VIP_ tiers in the
 `PricingModal` show as **Not configured** and the buttons are disabled.
 
 ### Smoke test
@@ -181,46 +189,56 @@ with bookmaker rows.
 
 ---
 
-## 6. Phase 7 — Optional integrations
+## 6. Integrations (M20 Discord, M21 Telegram, web push)
 
-Phase 7 ships the surfaces; outbound integrations are deferred.
+### Discord (M20) — shipped
+
+**Creator UI:** `/dashboard/settings/discord` — OAuth guild connect, channel mapping (inbound / outbound / two-way), alert rules, delivery log, discussions sentiment.
+
+**HTTP routes** (Convex site URL):
+
+| Route                                  | Purpose                            |
+| -------------------------------------- | ---------------------------------- |
+| `GET /discord/oauth/start?creatorId=…` | Start bot + OAuth install          |
+| `GET/POST /discord/oauth/callback`     | Complete connect → redirect studio |
+| `POST /discord/interactions`           | Discord app interactions (signed)  |
+
+**Crons** (`convex/crons.ts`): `discord-import-messages` (5 min), `discord-recompute-sentiment` (hourly), `discord-retry-failed-deliveries`, `discord-purge-webhook-events`.
+
+**Env:** see §1 (`DISCORD_*`, `ANTHROPIC_API_KEY` for summaries). Without `DISCORD_BOT_TOKEN`, inbound import no-ops; outbound uses per-creator webhooks where configured.
+
+**Smoke test:**
+
+1. Creator → Settings → Discord → Connect guild.
+2. Map a channel to **Inbound** or **Two-way**.
+3. Post a message in Discord; within ~5 minutes check **Inbound sync** panel on the same page (last import timestamp).
+4. Publish a pick → verify **Delivery log** row (or legacy webhook on `creators.discordWebhookUrl`).
+
+### Telegram (M21)
+
+Set `TELEGRAM_BOT_TOKEN`. User links via account notification prefs; `convex/telegram.ts` delivers on publish when enabled.
 
 ### Web push notifications
 
-Not yet wired. The `notifications` table is the local source of truth
-and the `/notifications` page reads it correctly. To add real web push:
-implement `Notification` API service-worker registration in `apps/web`,
-post the subscription endpoint to a new Convex mutation, and call out
-from a notification-create internal mutation. Schema is ready; UI is
-ready.
+Partial: in-app notifications ship; browser push requires service-worker + `pushSubscriptions` wiring (see M13 backlog in traceability matrix).
 
-### Discord / Telegram pick delivery
+### Stripe Connect (creator payouts)
 
-Not yet wired. When ready: store a webhook URL on the creator record
-(or a per-subscriber preference), and have a new internal action POST
-to that URL whenever a pick is published. The Stripe webhook code in
-`http.ts` is a working pattern for outbound HTTP from Convex.
-
-### Stripe Connect (real creator payouts)
-
-Today payouts are tracked in the `payouts` table from the platform
-Stripe account. Real direct-deposit to creators requires Stripe Connect
-onboarding per creator. The Earnings page shows a disabled **Connect
-with Stripe** button as the entry point for that future work.
+Connect onboarding ships at `/dashboard/earnings/onboarding` when `STRIPE_SECRET_KEY` and Connect are configured. See §3 for Checkout; Connect status via `api.connect.*`.
 
 ---
 
 ## 7. Day-2 operations
 
-| Task | Where |
-|---|---|
-| Approve a creator-submitted event | `/admin/events/review` |
-| Review creator applications | Convex dashboard → `applications` table → `applications.review` mutation |
-| Inspect Stripe webhook activity | `audit` table, filter `entityType = 'stripe_webhook'` |
-| Re-run AI analysis on a pick | Convex dashboard → `ai:analyzePick` → `{ pickId }` |
-| Force-backfill federated events | Convex dashboard → `migrations:backfillFederatedEvents` |
-| Trigger an immediate odds-snapshot poll | Convex dashboard → `oddsApi:pollOddsSnapshots` |
-| Force a logo backfill for a team | Convex dashboard → `teamLogos:resolveOne` |
+| Task                                    | Where                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| Approve a creator-submitted event       | `/admin/events/review`                                                   |
+| Review creator applications             | Convex dashboard → `applications` table → `applications.review` mutation |
+| Inspect Stripe webhook activity         | `audit` table, filter `entityType = 'stripe_webhook'`                    |
+| Re-run AI analysis on a pick            | Convex dashboard → `ai:analyzePick` → `{ pickId }`                       |
+| Force-backfill federated events         | Convex dashboard → `migrations:backfillFederatedEvents`                  |
+| Trigger an immediate odds-snapshot poll | Convex dashboard → `oddsApi:pollOddsSnapshots`                           |
+| Force a logo backfill for a team        | Convex dashboard → `teamLogos:resolveOne`                                |
 
 ---
 

@@ -1,25 +1,26 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
-  PageHeader,
   Container,
   Stack,
-  Row,
-  Col,
   Card,
   CardHead,
-  Button,
-  Icon,
-  PageHead,
   Muted,
   Search,
   EmptyState,
   PersonRow,
   Badge,
   ChatPanel,
+  StudioPageHeader,
+  StudioRefineCard,
+  StudioDashLayout,
+  StudioDashCol,
+  QuickActionGrid,
   type ChatPanelMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 function fmtTime(ms: number): string {
@@ -39,16 +40,17 @@ function monogram(name: string | undefined): string {
 }
 
 export function Messages() {
+  const navigate = useNavigate();
   const me = useQuery(api.users.me);
   const threads = useQuery(
     api.dmThreads.threadsForMyCreator,
     me?.creatorId ? { creatorId: me.creatorId } : 'skip',
   );
-  const [activeId, setActiveId] = React.useState<Id<'dmThreads'> | null>(null);
-  const [draft, setDraft] = React.useState('');
-  const [sending, setSending] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [search, setSearch] = React.useState('');
+  const [activeId, setActiveId] = useState<Id<'dmThreads'> | null>(null);
+  const [draft, setDraft] = useState('');
+  const [search, setSearch] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const messages = useQuery(
     api.dmThreads.messagesIn,
@@ -58,36 +60,35 @@ export function Messages() {
   const markRead = useMutation(api.dmThreads.markRead);
   const toggleReaction = useMutation(api.messages.toggleReaction);
 
-  // Auto-pick the first thread once data lands.
-  React.useEffect(() => {
-    if (!activeId && threads && threads.length > 0) {
-      setActiveId(threads[0]!.thread._id);
-    }
-  }, [activeId, threads]);
+  const filtered = useMemo(() => {
+    if (!threads) return undefined;
+    if (!search.trim()) return threads;
+    const q = search.toLowerCase();
+    return threads.filter(
+      ({ subscriber }) =>
+        subscriber?.name?.toLowerCase().includes(q) || subscriber?.email?.toLowerCase().includes(q),
+    );
+  }, [threads, search]);
 
-  // Mark as read when the active thread changes — fire-and-forget.
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!activeId && filtered && filtered.length > 0) {
+      setActiveId(filtered[0]!.thread._id);
+    }
+  }, [activeId, filtered]);
+
+  useEffect(() => {
     if (activeId) {
       void markRead({ threadId: activeId }).catch(() => {});
     }
   }, [activeId, markRead]);
 
-  const filtered = (threads ?? []).filter(({ subscriber }) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return Boolean(
-      subscriber?.name?.toLowerCase().includes(q) ||
-        subscriber?.email?.toLowerCase().includes(q),
-    );
-  });
-
-  const active = threads?.find((t) => t.thread._id === activeId) ?? null;
+  const active = filtered?.find((t) => t.thread._id === activeId) ?? null;
 
   const chatMessages: ChatPanelMessage[] = (messages ?? []).map((m) => {
     const isOwn = m.senderUserId === me?._id;
     return {
       id: m._id,
-      senderName: isOwn ? me?.name ?? 'You' : active?.subscriber?.name ?? 'Subscriber',
+      senderName: isOwn ? (me?.name ?? 'You') : (active?.subscriber?.name ?? 'Subscriber'),
       senderMono: isOwn ? monogram(me?.name) : monogram(active?.subscriber?.name),
       senderColor: isOwn ? '#1c9cf0' : '#3A4F7A',
       body: m.body,
@@ -126,113 +127,116 @@ export function Messages() {
     }
   }
 
-  return (
-    <>
-      <PageHeader
-        title="Messages"
-        crumbs={[{ label: 'Audience' }, { label: 'Messages' }]}
+  const unreadTotal = threads?.reduce((n, t) => n + t.unread, 0) ?? 0;
+
+  const threadList =
+    threads === undefined ? (
+      <EmptyState icon="message" title="Loading threads…" />
+    ) : filtered!.length === 0 ? (
+      <EmptyState
+        icon="message"
+        title={threads.length === 0 ? 'No subscriber DMs yet' : 'No threads match'}
+        subtitle={
+          threads.length === 0
+            ? "When a subscriber opens a DM with you it'll appear here."
+            : 'Try another search term.'
+        }
       />
+    ) : (
+      <Stack gap={1}>
+        {filtered!.map(({ thread, subscriber, unread }) => (
+          <Card key={thread._id} hover pad="sm" onClick={() => setActiveId(thread._id)}>
+            <PersonRow
+              name={subscriber?.name ?? 'Subscriber'}
+              sub={thread.lastMessageAt ? fmtTime(thread.lastMessageAt) : 'No messages yet'}
+              mono={monogram(subscriber?.name)}
+              color="#3A4F7A"
+              trailing={
+                unread > 0 ? (
+                  <Badge tone="blue" dot>
+                    {unread}
+                  </Badge>
+                ) : null
+              }
+            />
+          </Card>
+        ))}
+      </Stack>
+    );
 
-      <Container size="2xl">
-        <Stack gap={5}>
-          <PageHead
-            eyebrow="Audience"
-            title="Subscriber DMs"
-            sub="Direct conversations with active subscribers. New replies trigger a push notification on the subscriber side."
+  const chatPane = !active ? (
+    <Card>
+      <EmptyState
+        icon="message"
+        title="Pick a thread"
+        subtitle="Select a conversation on the left to read and reply."
+      />
+    </Card>
+  ) : (
+    <Card>
+      <CardHead
+        title={active.subscriber?.name ?? 'Subscriber'}
+        sub={
+          active.thread.lastMessageAt
+            ? `Last activity ${fmtTime(active.thread.lastMessageAt)}`
+            : 'No messages yet'
+        }
+      />
+      {error ? <Muted>{error}</Muted> : null}
+      <ChatPanel
+        messages={chatMessages}
+        loading={messages === undefined}
+        draft={draft}
+        onDraftChange={setDraft}
+        onSend={handleSend}
+        onToggleReaction={handleToggleReaction}
+        sending={sending}
+        placeholder="Reply to subscriber…"
+        emptyTitle="No messages yet"
+        emptySubtitle="Send the first message to start this thread."
+      />
+    </Card>
+  );
+
+  return (
+    <Container size="2xl">
+      <Stack gap={6}>
+        <StudioPageHeader
+          eyebrow="Studio · Audience"
+          title="Subscriber DMs"
+          sub="Direct conversations with active subscribers. New replies trigger a push notification on the subscriber side."
+        />
+
+        <StudioRefineCard
+          title="Refine inbox"
+          sub="Search subscribers by name or email."
+          summary={
+            threads === undefined
+              ? 'Loading threads…'
+              : `${filtered?.length ?? 0} thread${(filtered?.length ?? 0) === 1 ? '' : 's'}${unreadTotal > 0 ? ` · ${unreadTotal} unread` : ''}`
+          }
+          onReset={search.trim() ? () => setSearch('') : undefined}
+        >
+          <Search
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search subscribers"
+            aria-label="Search subscriber threads"
           />
+        </StudioRefineCard>
 
-          <Row gap={4} wrap>
-            <Col gap={3}>
-              <Search
-                placeholder="Search subscribers"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <Card pad="sm">
-                {threads === undefined ? (
-                  <EmptyState icon="message" title="Loading threads…" />
-                ) : filtered.length === 0 ? (
-                  <EmptyState
-                    icon="message"
-                    title="No subscriber DMs yet"
-                    subtitle="When a subscriber opens a DM with you it'll appear here."
-                  />
-                ) : (
-                  <Stack gap={1}>
-                    {filtered.map(({ thread, subscriber, unread }) => (
-                      <Card
-                        key={thread._id}
-                        hover
-                        pad="sm"
-                        onClick={() => setActiveId(thread._id)}
-                      >
-                        <PersonRow
-                          name={subscriber?.name ?? 'Subscriber'}
-                          sub={
-                            thread.lastMessageAt
-                              ? fmtTime(thread.lastMessageAt)
-                              : 'No messages yet'
-                          }
-                          mono={monogram(subscriber?.name)}
-                          color="#3A4F7A"
-                          trailing={
-                            unread > 0 ? (
-                              <Badge tone="blue" dot>
-                                {unread}
-                              </Badge>
-                            ) : null
-                          }
-                        />
-                      </Card>
-                    ))}
-                  </Stack>
-                )}
-              </Card>
-            </Col>
+        <StudioDashLayout>
+          <StudioDashCol span={4}>
+            <Card pad="sm">
+              <CardHead title="Threads" sub="Most recent first" />
+              {threadList}
+            </Card>
+          </StudioDashCol>
+          <StudioDashCol span={8}>{chatPane}</StudioDashCol>
+        </StudioDashLayout>
 
-            <Col gap={3}>
-              {!active ? (
-                <Card>
-                  <EmptyState
-                    icon="message"
-                    title="Pick a thread"
-                    subtitle="Select a conversation on the left to read and reply."
-                  />
-                </Card>
-              ) : (
-                <Card>
-                  <CardHead
-                    title={active.subscriber?.name ?? 'Subscriber'}
-                    sub={
-                      active.thread.lastMessageAt
-                        ? `Last activity ${fmtTime(active.thread.lastMessageAt)}`
-                        : 'No messages yet'
-                    }
-                    action={
-                      <Button variant="ghost" size="sm" iconOnly aria-label="More">
-                        <Icon name="more" size={14} />
-                      </Button>
-                    }
-                  />
-                  {error && <Muted>{error}</Muted>}
-                  <ChatPanel
-                    messages={chatMessages}
-                    loading={messages === undefined}
-                    draft={draft}
-                    onDraftChange={setDraft}
-                    onSend={handleSend}
-                    onToggleReaction={handleToggleReaction}
-                    sending={sending}
-                    placeholder="Reply to subscriber…"
-                    emptyTitle="No messages yet"
-                    emptySubtitle="Send the first message to start this thread."
-                  />
-                </Card>
-              )}
-            </Col>
-          </Row>
-        </Stack>
-      </Container>
-    </>
+        <QuickActionGrid title="Related" items={studioCrossLinks('messages', navigate)} />
+      </Stack>
+    </Container>
   );
 }

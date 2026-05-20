@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdgePicks Admin - Support &amp; Disputes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-dim": "#d8dadc",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary": "#855000",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#494454",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#23005c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-background": "#191c1e",
+                        "inverse-primary": "#d0bcff",
+                        "tertiary-container": "#a76500",
+                        "surface-container-high": "#e6e8ea",
+                        "tertiary-fixed": "#ffdcbb",
+                        "surface": "#f7f9fb",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "primary": "#6b38d4",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-tertiary-fixed": "#2c1700",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f7f9fb",
+                        "surface-tint": "#6d3bd7",
+                        "primary-fixed": "#e9ddff",
+                        "primary-container": "#8455ef",
+                        "outline": "#7b7486",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-container": "#5c647a",
+                        "outline-variant": "#cbc3d7",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary-container": "#dae2fd",
+                        "secondary": "#565e74",
+                        "inverse-on-surface": "#eff1f3",
+                        "background": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F7F9FB; color: #191C1E; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-50 bg-white dark:bg-slate-900 flex flex-col py-6 space-y-1 font-['Manrope'] text-sm font-medium tracking-wide">
+<div class="text-xl font-black text-slate-900 dark:text-white mb-6 px-4">EdgePicks Admin</div>
+<div class="px-4 mb-8">
+<div class="text-xs uppercase tracking-widest text-slate-400 font-bold mb-2">Elite Editorial Control</div>
+<div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg">
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="A professional close-up of a diverse administrator avatar with a clean, minimalist background. The lighting is bright and high-key, reflecting an elite editorial corporate environment. The aesthetic is modern and sharp, using the primary violet brand colors in the background gradients to ensure visual consistency with the sports analytics platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEXtKnOcctuJXyRTrVDeQ2aY3eR_wVq4IGKLnZH57G3I3DO-KVGOHfUquDM_nhvb3pq8spmDGvbp40qxI6SIGFoBTsh7fSjPwHpS--_R2dj_9Lp3SLlbIkcftqzj5-ACWobvNAo3pDJ_mkvURe2-FZuwsOBExJAtT5QsJ2p9PNnfJLy1vLLHkcRaeWPp9vsly9UCkn2cA3bjrLvGN9kjEAZuYQKwCKTWdP6vt_BamO95DI5wA1IohNQ9mEvs1v-avbGkw1lVw2uCI"/>
+<div>
+<p class="text-xs font-bold text-on-surface">Admin Lead</p>
+<p class="text-[10px] text-slate-500">Superuser Access</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Overview
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span> Creator Applications
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span> Creators
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span> Users
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span> Content Moderation
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span> Subscriptions &amp; Billing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span> Payouts &amp; Finance
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span> Notifications &amp; Campaigns
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-[#8B5CF6] dark:text-violet-300 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span> Support &amp; Disputes
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span> Analytics &amp; Platform Health
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> System Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span> Audit Logs
+            </a>
+</nav>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex items-center justify-between px-8 w-full shadow-[0px_20px_40px_rgba(15,23,42,0.06)]">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-xl">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 focus:ring-primary rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search users, creators, subscriptions, tickets" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="flex items-center gap-2 p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+<!-- Header -->
+<div class="mb-8">
+<h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Support &amp; Disputes</h1>
+<p class="text-secondary font-medium mt-1">Manage and resolve platform issues and disputes.</p>
+</div>
+<!-- Summary Cards Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Open Tickets</p>
+<p class="text-3xl font-headline font-black text-on-surface">142</p>
+</div>
+<div class="bg-error-container p-6 rounded-xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-wider text-error mb-1">High Priority</p>
+<p class="text-3xl font-headline font-black text-error">12</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Billing Disputes</p>
+<p class="text-3xl font-headline font-black text-on-surface">8</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Content Disputes</p>
+<p class="text-3xl font-headline font-black text-on-surface">5</p>
+</div>
+<div class="bg-tertiary-fixed p-6 rounded-xl shadow-sm">
+<p class="text-xs font-bold uppercase tracking-wider text-on-tertiary-fixed-variant mb-1">SLA at Risk</p>
+<div class="flex items-center justify-between">
+<p class="text-3xl font-headline font-black text-on-tertiary-fixed">3</p>
+<span class="material-symbols-outlined text-on-tertiary-fixed" data-icon="warning">warning</span>
+</div>
+</div>
+</div>
+<div class="flex gap-6 items-start">
+<!-- Left Side: List & Filters -->
+<div class="flex-1 space-y-6">
+<!-- Filter Tabs -->
+<div class="flex gap-2 p-1 bg-surface-container-low rounded-xl w-fit">
+<button class="px-6 py-2 rounded-lg text-sm font-bold bg-white shadow-sm text-primary">All</button>
+<button class="px-6 py-2 rounded-lg text-sm font-medium text-secondary hover:bg-white/50 transition-colors">Support tickets</button>
+<button class="px-6 py-2 rounded-lg text-sm font-medium text-secondary hover:bg-white/50 transition-colors">Billing disputes</button>
+<button class="px-6 py-2 rounded-lg text-sm font-medium text-secondary hover:bg-white/50 transition-colors">Content disputes</button>
+<button class="px-6 py-2 rounded-lg text-sm font-medium text-secondary hover:bg-white/50 transition-colors">Creator issues</button>
+</div>
+<!-- Ticket Table -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">Ticket ID</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">User/Creator</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">Issue Type</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">Priority</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">Status</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-secondary">Created</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-slate-50 transition-colors cursor-pointer group bg-primary-container/5 border-l-4 border-primary">
+<td class="px-6 py-5 font-bold text-sm">#TK-9921</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">JM</div>
+<div>
+<p class="text-sm font-bold">James Miller</p>
+<p class="text-[10px] text-secondary">User</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium">Billing Dispute</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-error-container text-error text-[10px] font-black rounded-full uppercase">High</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-sm font-bold text-primary">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                                        In Progress
+                                    </span>
+</td>
+<td class="px-6 py-5 text-sm text-secondary">2h ago</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors cursor-pointer">
+<td class="px-6 py-5 font-bold text-sm">#TK-9918</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full" data-alt="A portrait of a verified sports content creator, looking professional with a modern studio background. The lighting is crisp and detailed, with subtle violet highlights consistent with the brand's aesthetic. The shot is framed tightly to focus on a friendly, approachable yet authoritative expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCiZwIOIdrswMMwNPyBeVw_F_2njDHsEv6FhRT05Q8emzYXxqiALx6GNh7eCtjLc5nPkskVkDeyKCW1waFqLbGI9IR9nGaO6pxyVLy8JWAMsLiKLQctAKAjniF60YbF9aVwCMWONqkKqGaJ63NSWJnxbdRQZyUrnq8EFBgJUe4t-fzKVZGwnP4p9ffTjq9BT7M1mf1em3Ici9saPGh629ysETuJzFz0upL3aXk1wKjy6PGwyRbOtg1f5L6YReThO7FmkQwfWCjUHA"/>
+<div>
+<p class="text-sm font-bold">Sarah Chen</p>
+<p class="text-[10px] text-secondary">Creator</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium">Payout Issue</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-secondary-container text-secondary text-[10px] font-black rounded-full uppercase">Medium</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-sm font-bold text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                                        Open
+                                    </span>
+</td>
+<td class="px-6 py-5 text-sm text-secondary">5h ago</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors cursor-pointer">
+<td class="px-6 py-5 font-bold text-sm">#TK-9915</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">RK</div>
+<div>
+<p class="text-sm font-bold">Robert King</p>
+<p class="text-[10px] text-secondary">User</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium">Access Issue</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-black rounded-full uppercase">Low</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-sm font-bold text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                                        Open
+                                    </span>
+</td>
+<td class="px-6 py-5 text-sm text-secondary">1d ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Side: Ticket Detail Panel -->
+<div class="w-96 shrink-0 space-y-6">
+<!-- Detail Main Card -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden border border-outline-variant/10">
+<!-- Detail Header -->
+<div class="p-6 border-b border-surface-container bg-surface-container-lowest">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline font-black text-xl text-on-surface">#TK-9921</h2>
+<p class="text-xs font-bold text-primary uppercase tracking-widest mt-1">Billing Dispute</p>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-1 text-error animate-pulse">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span class="text-sm font-black font-headline">02:45:10</span>
+</div>
+<p class="text-[10px] font-bold text-secondary uppercase">SLA Remaining</p>
+</div>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-low p-3 rounded-xl">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">JM</div>
+<div class="flex-1">
+<p class="text-sm font-bold">James Miller</p>
+<p class="text-xs text-secondary">james.miller@email.com</p>
+</div>
+<button class="p-2 hover:bg-white rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-400" data-icon="open_in_new">open_in_new</span>
+</button>
+</div>
+</div>
+<!-- Conversation Context -->
+<div class="p-6 h-[400px] overflow-y-auto space-y-6 bg-surface-container-low/30">
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-secondary uppercase">James Miller</span>
+<span class="text-[10px] text-slate-400">10:24 AM</span>
+</div>
+<div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed">
+                                I was charged twice for the Gold Monthly subscription this month. I only authorized one transaction. Please refund the $29.00 duplicate charge.
+                            </div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-primary uppercase text-right w-full">Support (Admin Lead)</span>
+<span class="text-[10px] text-slate-400 ml-2">10:45 AM</span>
+</div>
+<div class="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-sm text-sm leading-relaxed">
+                                Hello James, I see both transactions in our log. I am currently verifying the payment gateway status for the duplicate entry. One moment please.
+                            </div>
+</div>
+<!-- System Context -->
+<div class="bg-surface-container-high/50 p-4 rounded-xl border border-dashed border-outline-variant">
+<h4 class="text-[10px] font-black uppercase text-secondary mb-3 tracking-widest">Moderation Context</h4>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-secondary">Linked Subscription:</span>
+<span class="text-xs font-bold text-on-surface">Gold Monthly - $29/mo</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-secondary">Violations:</span>
+<span class="text-xs font-bold text-tertiary">No prior violations</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-secondary">Last Active:</span>
+<span class="text-xs font-bold text-on-surface">Today, 10:20 AM</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Internal Notes -->
+<div class="p-4 bg-surface-container-lowest border-t border-surface-container">
+<div class="relative">
+<textarea class="w-full bg-surface-container-low border-none focus:ring-primary rounded-xl text-xs py-3 px-4 resize-none h-20 placeholder:italic" placeholder="Add internal note..."></textarea>
+<button class="absolute bottom-2 right-2 p-1.5 bg-primary text-white rounded-lg shadow-lg">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<!-- Resolution Actions -->
+<div class="p-4 bg-white space-y-2">
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl text-xs font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span> Refund
+                            </button>
+<button class="flex items-center justify-center gap-2 py-3 bg-surface-container-high text-on-surface rounded-xl text-xs font-bold hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="settings_backup_restore">settings_backup_restore</span> Restore Access
+                            </button>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center justify-center gap-2 py-3 bg-surface-container-high text-on-surface rounded-xl text-xs font-bold hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="forward_to_inbox">forward_to_inbox</span> Escalate Finance
+                            </button>
+<button class="flex items-center justify-center gap-2 py-3 bg-surface-container-high text-on-surface rounded-xl text-xs font-bold hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="shield">shield</span> Escalate Trust
+                            </button>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-error text-white rounded-xl text-xs font-bold mt-2 shadow-lg hover:shadow-error/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="block">block</span> Suspend User
+                        </button>
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-on-surface text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span> Close Ticket
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

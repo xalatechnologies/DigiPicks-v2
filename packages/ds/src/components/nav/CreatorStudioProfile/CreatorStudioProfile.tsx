@@ -8,6 +8,7 @@ export interface CreatorStudioProfileProps {
   planLabel?: string;
   monogram?: string;
   color?: string;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -16,15 +17,26 @@ export function CreatorStudioProfile({
   planLabel = 'Pro Account',
   monogram,
   color,
+  onClick,
   className,
 }: CreatorStudioProfileProps) {
-  return (
-    <div className={cx(s.card, className)}>
+  const body = (
+    <>
       <Avatar mono={monogram ?? name.slice(0, 2).toUpperCase()} color={color} size={40} />
       <div className={s.text}>
         <p className={s.name}>{name}</p>
         <p className={s.plan}>{planLabel}</p>
       </div>
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button type="button" className={cx(s.card, s.clickable, className)} onClick={onClick}>
+        {body}
+      </button>
+    );
+  }
+
+  return <div className={cx(s.card, className)}>{body}</div>;
 }

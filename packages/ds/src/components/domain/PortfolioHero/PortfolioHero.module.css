@@ -3,63 +3,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
-  padding: var(--space-9) var(--space-9) var(--space-8);
-  background:
-    radial-gradient(
-      ellipse 80% 60% at 8% 0%,
-      color-mix(in srgb, var(--blue) 14%, transparent) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 70% 50% at 100% 100%,
-      color-mix(in srgb, var(--green) 10%, transparent) 0%,
-      transparent 55%
-    ),
-    var(--bg-1);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.aurora {
-  position: absolute;
-  inset: -20% -10%;
-  background: radial-gradient(
-    circle at 30% 20%,
-    color-mix(in srgb, var(--primary) 10%, transparent) 0%,
-    transparent 40%
-  );
-  filter: blur(var(--blur-xl));
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: 0;
-  animation: dp-hero-drift var(--dur-ambient-aurora) var(--ease-in-out) infinite alternate;
-}
-
-@keyframes dp-hero-drift {
-  0% {
-    transform: translate3d(-2%, -1%, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(2%, 1%, 0) scale(1.03);
-  }
-}
-
-.grain {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(
-    transparent 0%,
-    color-mix(in srgb, var(--t-1) 1.5%, transparent) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-8);
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
 }
 
 .head {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -124,8 +77,6 @@
 }
 
 .actions {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -133,8 +84,6 @@
 }
 
 .body {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -218,7 +167,7 @@
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--space-6);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--line-soft);
+  border-top: 1px solid var(--line);
 }
 
 .kpi {
@@ -277,8 +226,6 @@
 }
 
 .emptyState {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
