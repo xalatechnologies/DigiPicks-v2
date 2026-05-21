@@ -11,7 +11,6 @@ import {
   Icon,
   FilterChips,
   EmptyState,
-  ResponsibleSection,
   Heading,
   StudioDashLayout,
   StudioDashCol,
@@ -23,11 +22,11 @@ import {
   CreatorExploreCard,
   CreatorProfileStickyAside,
   ActivityFeed,
-  CreatorsPromoCard,
   type CreatorExploreBadgeTone,
   type ActivityFeedItemData,
 } from '@digipicks/ds';
-import { becomeCreatorCtaLabel } from '../lib/becomeCreator';
+import { useConvexAuth } from '../auth/convexAuth';
+import { isOwnCreator } from '../lib/creatorSelf';
 
 type CreatorRow = NonNullable<ReturnType<typeof useQuery<typeof api.creators.list>>>[number];
 
@@ -154,6 +153,8 @@ function buildActivityItems(list: CreatorRow[]): ActivityFeedItemData[] {
 
 export function Creators() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
   const creators = useQuery(api.creators.list, {});
   const promoted = useQuery(api.creators.promoted, { limit: 4 });
 
@@ -182,7 +183,7 @@ export function Creators() {
 
   return (
     <main>
-      <Container size="2xl">
+      <Container size="2xl" pad="page">
         <Stack gap={8}>
           <CreatorsDirectoryHero
             searchValue={search}
@@ -201,28 +202,33 @@ export function Creators() {
           />
 
           <StudioDashLayout>
-            <StudioDashCol span={8}>
+            <StudioDashCol span={activityItems.length > 0 ? 8 : 12}>
               <Stack gap={10}>
                 {!isEmpty && featured.length > 0 ? (
                   <CreatorsHorizontalRail eyebrow="Editors choice" title="Featured analysts">
-                    {featured.map((c, index) => (
-                      <CreatorsHorizontalRailItem key={c._id}>
-                        <CreatorFeaturedCard
-                          name={c.name}
-                          handle={c.handle}
-                          mono={c.avatarMono}
-                          color={c.avatarColor}
-                          verified={c.verified}
-                          niche={c.niche}
-                          bio={c.bio}
-                          units={c.units}
-                          startingPrice={c.startingPrice}
-                          featured={index === 0}
-                          onProfile={() => openProfile(c.handle)}
-                          onSubscribe={() => openProfile(c.handle)}
-                        />
-                      </CreatorsHorizontalRailItem>
-                    ))}
+                    {featured.map((c, index) => {
+                      const own = isOwnCreator(c._id, me?.creatorId);
+                      return (
+                        <CreatorsHorizontalRailItem key={c._id}>
+                          <CreatorFeaturedCard
+                            name={c.name}
+                            handle={c.handle}
+                            mono={c.avatarMono}
+                            color={c.avatarColor}
+                            verified={c.verified}
+                            niche={c.niche}
+                            bio={c.bio}
+                            units={c.units}
+                            startingPrice={c.startingPrice}
+                            featured={index === 0}
+                            isOwnProfile={own}
+                            onProfile={own ? undefined : () => openProfile(c.handle)}
+                            onSubscribe={own ? undefined : () => openProfile(c.handle)}
+                            onManageStudio={own ? () => navigate('/dashboard') : undefined}
+                          />
+                        </CreatorsHorizontalRailItem>
+                      );
+                    })}
                   </CreatorsHorizontalRail>
                 ) : null}
 
@@ -309,27 +315,15 @@ export function Creators() {
               </Stack>
             </StudioDashCol>
 
-            <StudioDashCol span={4}>
-              <CreatorProfileStickyAside>
-                <Stack gap={6}>
-                  {activityItems.length > 0 ? (
-                    <ActivityFeed title="Live activity" items={activityItems} />
-                  ) : null}
-                  <CreatorsPromoCard
-                    title="Become a DigiPicks creator."
-                    body="Publish graded picks, grow subscribers, and keep 87% of subscription revenue."
-                    actions={
-                      <Button variant="primary" block onClick={() => navigate('/apply')}>
-                        {becomeCreatorCtaLabel()}
-                      </Button>
-                    }
-                  />
-                </Stack>
-              </CreatorProfileStickyAside>
-            </StudioDashCol>
+            {activityItems.length > 0 ? (
+              <StudioDashCol span={4}>
+                <CreatorProfileStickyAside>
+                  <ActivityFeed title="Live activity" items={activityItems} />
+                </CreatorProfileStickyAside>
+              </StudioDashCol>
+            ) : null}
           </StudioDashLayout>
 
-          <ResponsibleSection />
           <Spacer />
         </Stack>
       </Container>

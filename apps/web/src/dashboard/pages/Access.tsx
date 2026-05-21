@@ -10,7 +10,6 @@ import {
   Button,
   Icon,
   StudioPageHeader,
-  QuickActionGrid,
   Table,
   THead,
   TBody,
@@ -24,7 +23,6 @@ import {
   EmptyState,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { useStudioContext } from '../useStudioContext';
 type PickAccess = 'free' | 'premium' | 'vip';
 type IntegrationAccess = 'public' | 'subscriber' | 'vip';
@@ -189,8 +187,6 @@ export function Access() {
           <AccessBadge access="free" />
           <Muted>Public funnel content</Muted>
         </Row>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('access', navigate)} />
       </Stack>
     </Container>
   );

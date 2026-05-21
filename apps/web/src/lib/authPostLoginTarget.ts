@@ -89,10 +89,9 @@ export function clearAuthRedirectState(): void {
   clearCreatorApplyIntent();
 }
 
-/** Subscriber email sign-ups must land in the member hub, not studio/apply,
- * unless they explicitly chose Subscriber while in the creator-apply flow. */
+/** Default subscriber sign-up lands in the member hub (not studio). */
 function subscriberSignupLanding(resolvedSafeTarget: string): string {
-  if (resolvedSafeTarget.startsWith('/dashboard') || resolvedSafeTarget.startsWith('/apply')) {
+  if (resolvedSafeTarget.startsWith('/dashboard')) {
     return '/account';
   }
   return resolvedSafeTarget;
@@ -115,9 +114,6 @@ export function resolvePostAuthDestination(opts: {
   if (opts.creatorId) return '/dashboard';
 
   if (applyIntent) {
-    if (opts.flow === 'signUp' && opts.signupPersona === 'subscriber') {
-      return '/account';
-    }
     return '/apply';
   }
 

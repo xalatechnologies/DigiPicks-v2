@@ -22,10 +22,8 @@ import {
   AccountSidebarPanel,
   RowList,
   NextStepsPanel,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 function fmtDate(ms: number): string {
   return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -339,8 +337,6 @@ export function Results() {
             </StudioDashLayout>
           </>
         ) : null}
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('results', navigate)} />
       </Stack>
     </Container>
   );

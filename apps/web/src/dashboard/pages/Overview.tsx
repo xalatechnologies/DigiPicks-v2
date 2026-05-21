@@ -17,7 +17,6 @@ import {
   StudioDashCol,
   ActivityFeed,
   NextStepsPanel,
-  QuickActionGrid,
   StudioPageHeader,
   CardHead,
   Muted,
@@ -25,7 +24,6 @@ import {
 import { useStudioContext } from '../useStudioContext';
 import { buildOverviewSummary, chartHighlightForPeriod } from '../studioMetrics';
 import { STUDIO } from '../../lib/studioRoutes';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 const PERIOD_OPTIONS = [
   { label: '7D', value: '7d' },
@@ -203,10 +201,6 @@ export function Overview() {
                 title="Next steps"
                 sub="Complete these tasks to optimize your revenue."
                 items={nextSteps}
-              />
-              <QuickActionGrid
-                title="Quick actions"
-                items={studioCrossLinks('overview', navigate)}
               />
             </Stack>
           </StudioDashCol>

@@ -31,6 +31,24 @@ export const list = query({
   },
 });
 
+export const couponsSummary = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const all = await ctx.db.query('couponCodes').take(500);
+    const active = all.filter((c) => !c.archived);
+    const nearCap = active.filter(
+      (c) => c.maxRedemptions > 0 && c.redemptionCount >= c.maxRedemptions * 0.9,
+    ).length;
+    return {
+      activeCount: active.length,
+      archivedCount: all.filter((c) => c.archived).length,
+      nearCapCount: nearCap,
+      totalRedemptions: active.reduce((s, c) => s + c.redemptionCount, 0),
+    };
+  },
+});
+
 /** Public — resolve a code. Returns null when missing / expired / fully redeemed. */
 export const lookup = query({
   args: { code: v.string() },

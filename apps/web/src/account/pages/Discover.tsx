@@ -25,12 +25,12 @@ import {
   CreatorProfileStickyAside,
   ActivityFeed,
   CreatorsPromoCard,
-  QuickActionGrid,
   type CreatorExploreBadgeTone,
   type ActivityFeedItemData,
 } from '@digipicks/ds';
+import { useConvexAuth } from '../../auth/convexAuth';
 import { becomeCreatorCtaLabel } from '../../lib/becomeCreator';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
+import { isOwnCreator } from '../../lib/creatorSelf';
 
 type CreatorRow = NonNullable<ReturnType<typeof useQuery<typeof api.creators.list>>>[number];
 
@@ -145,6 +145,8 @@ function clearFilters(
 
 export function Discover() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
   const creators = useQuery(api.creators.list, {});
   const promoted = useQuery(api.creators.promoted, { limit: 4 });
 
@@ -273,24 +275,29 @@ export function Discover() {
               {showFeaturedRail ? (
                 <StudioDashCol span={12}>
                   <CreatorsHorizontalRail eyebrow="Featured" title="Editors' choice">
-                    {featured.map((c, index) => (
-                      <CreatorsHorizontalRailItem key={c._id}>
-                        <CreatorFeaturedCard
-                          name={c.name}
-                          handle={c.handle}
-                          mono={c.avatarMono}
-                          color={c.avatarColor}
-                          verified={c.verified}
-                          niche={c.niche}
-                          bio={c.bio}
-                          units={c.units}
-                          startingPrice={c.startingPrice}
-                          featured={index === 0}
-                          onProfile={() => openProfile(c.handle)}
-                          onSubscribe={() => openProfile(c.handle)}
-                        />
-                      </CreatorsHorizontalRailItem>
-                    ))}
+                    {featured.map((c, index) => {
+                      const own = isOwnCreator(c._id, me?.creatorId);
+                      return (
+                        <CreatorsHorizontalRailItem key={c._id}>
+                          <CreatorFeaturedCard
+                            name={c.name}
+                            handle={c.handle}
+                            mono={c.avatarMono}
+                            color={c.avatarColor}
+                            verified={c.verified}
+                            niche={c.niche}
+                            bio={c.bio}
+                            units={c.units}
+                            startingPrice={c.startingPrice}
+                            featured={index === 0}
+                            isOwnProfile={own}
+                            onProfile={own ? undefined : () => openProfile(c.handle)}
+                            onSubscribe={own ? undefined : () => openProfile(c.handle)}
+                            onManageStudio={own ? () => navigate('/dashboard') : undefined}
+                          />
+                        </CreatorsHorizontalRailItem>
+                      );
+                    })}
                   </CreatorsHorizontalRail>
                 </StudioDashCol>
               ) : null}
@@ -353,8 +360,6 @@ export function Discover() {
             </>
           )}
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('discover', navigate)} />
       </Stack>
     </Container>
   );

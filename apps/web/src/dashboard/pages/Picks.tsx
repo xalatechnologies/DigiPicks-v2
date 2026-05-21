@@ -13,13 +13,11 @@ import {
   StudioFilterBar,
   StudioMetaChip,
   StudioPicksTable,
-  QuickActionGrid,
   type StudioPickRowData,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { useStudioContext } from '../useStudioContext';
 import { demoPickRows } from '../picksDemo';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
 const FILTER_OPTIONS = [
@@ -322,8 +320,6 @@ export function Picks() {
             onPageChange={setPage}
           />
         )}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('picks', navigate)} />
       </Stack>
     </Container>
   );

@@ -27,14 +27,12 @@ import {
   StudioAreaChart,
   InsightCard,
   KV,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { useStudioContext } from '../useStudioContext';
 import { chartHighlightForPeriod } from '../studioMetrics';
 import { StudioDevHint } from '../StudioDevHint';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 import { INVOICES } from '../data/studio';
 
@@ -345,8 +343,6 @@ export function Earnings() {
             )}
           </Card>
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('payouts', navigate)} />
       </Stack>
     </Container>
   );

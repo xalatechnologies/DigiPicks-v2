@@ -11,11 +11,9 @@ import {
   StudioFilterBar,
   StudioMetaChip,
   StudioSubscribersTable,
-  QuickActionGrid,
   type StudioSubscriberRowData,
 } from '@digipicks/ds';
 import { useStudioContext } from '../useStudioContext';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
 const PLAN_FILTERS = [
@@ -320,8 +318,6 @@ export function Subscribers() {
             onPageChange={setPage}
           />
         )}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('subscribers', navigate)} />
       </Stack>
     </Container>
   );

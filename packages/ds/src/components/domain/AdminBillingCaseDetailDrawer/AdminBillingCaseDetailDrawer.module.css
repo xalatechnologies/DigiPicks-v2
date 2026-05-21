@@ -1,0 +1,67 @@
+.drawerWide {
+  width: min(100%, var(--container-md));
+}
+
+.panelHost {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.metaLabel {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--t-3);
+}
+
+.metaValue {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--t-1);
+}
+
+.noteCard {
+  padding: var(--space-3);
+  background: var(--bg-2);
+  border-radius: var(--r-lg);
+}
+
+.noteTime {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-2xs);
+  color: var(--t-3);
+}
+
+.noteBody {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--t-1);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--danger);
+}

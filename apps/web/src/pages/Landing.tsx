@@ -1,7 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
+import { useConvexAuth } from '../auth/convexAuth';
 import { api } from '../../../../convex/_generated/api';
+import { becomeCreatorCtaLabel, navigateBecomeCreator } from '../lib/becomeCreator';
+import { buildLandingProofMetrics, pickSpotlightCreators } from '../lib/landingMetrics';
 import {
   Container,
   Section,
@@ -9,38 +12,26 @@ import {
   Stack,
   Row,
   Grid,
-  Muted,
-  Serif,
   Button,
   Badge,
   Icon,
-  CreatorCard,
+  CreatorDirectoryCompactCard,
   EventCard,
-  BigStat,
   FAQList,
   HeroLivePanel,
-  TrustMarquee,
   PriceCard,
   Heading,
   Eyebrow,
   StepCard,
   Testimonial,
   SplitCTA,
-  ResponsibleSection,
   TrendingCarousel,
+  MarketingProofStrip,
+  LandingLiveChapter,
+  CreatorsHorizontalRail,
+  CreatorsHorizontalRailItem,
   type TrendingItem,
 } from '@digipicks/ds';
-
-const TRUST_BRANDS = [
-  'Action Network',
-  'The Athletic',
-  'Vegas Stats',
-  'OddsJam',
-  'Pinnacle Edge',
-  'Bet Labs',
-  'Sharper Edge',
-  'BetIQ',
-];
 
 const STEPS: Array<{
   step: number;
@@ -61,7 +52,7 @@ const STEPS: Array<{
   {
     step: 2,
     title: 'Subscribe and unlock their picks.',
-    body: 'Pay once, monthly, or by season. Get full reasoning, units, and confidence — delivered the moment a pick goes live.',
+    body: 'Pay monthly or by season. Get full reasoning, units, and confidence — delivered when a pick goes live.',
     iconName: 'card',
     tone: 'violet',
     hint: 'Cancel anytime',
@@ -69,7 +60,7 @@ const STEPS: Array<{
   {
     step: 3,
     title: 'Track every play, transparently.',
-    body: 'Wins, losses, and pushes are graded by the platform. Your portfolio, ROI, and CLV are tracked automatically.',
+    body: 'Wins, losses, and pushes are graded by the platform. Portfolio, ROI, and CLV update automatically.',
     iconName: 'chart',
     tone: 'green',
     hint: 'Independent grading',
@@ -79,7 +70,7 @@ const STEPS: Array<{
 const TESTIMONIALS = [
   {
     quote:
-      "First platform where my real CLV-tracked record actually matters. The grading is independent — my numbers can't be massaged. Subscribers know exactly what they're paying for.",
+      "First platform where my real CLV-tracked record actually matters. The grading is independent — my numbers can't be massaged.",
     name: 'CourtVision Pro',
     role: 'Soccer props · Creator since Mar 2025',
     mono: 'CV',
@@ -90,7 +81,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      'Two creators, $48 a month, and I finally stopped chasing Discord screenshots. Picks land before kick, units are sized, and the live tracker is genuinely useful for in-play.',
+      'Two creators, $48 a month, and I finally stopped chasing Discord screenshots. Picks land before kick with sized units.',
     name: 'Daniel R.',
     role: 'Subscriber · Atlanta, GA',
     mono: 'DR',
@@ -101,7 +92,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I came over from a private Telegram with 4,000 followers. Migration was a Sunday afternoon — and I'm finally keeping more than a takerate. The dashboard is the cleanest in the space.",
+      'I came over from a private Telegram with 4,000 followers. Migration was a Sunday afternoon — the dashboard is the cleanest in the space.',
     name: 'SharpEdge Bets',
     role: 'Tennis sides · Creator since Jan 2026',
     mono: 'SE',
@@ -123,7 +114,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I cancel any time?',
-    a: 'Yes. Cancellations are immediate. You keep access until the end of your current billing period — no haggling, no retention loops.',
+    a: 'Yes. Cancellations are immediate. You keep access until the end of your current billing period.',
   },
   {
     q: 'Is this gambling?',
@@ -131,7 +122,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the creator revenue split?",
-    a: 'Creators keep 87% of subscription revenue. The platform takes 10%. Stripe processing is roughly 3%. No hidden fees and no upsell games.',
+    a: 'Creators keep 87% of subscription revenue. The platform takes 10%. Stripe processing is roughly 3%.',
   },
 ];
 
@@ -146,7 +137,7 @@ const PRICING_TIERS = [
       "Tonight's slate visibility",
       'Notification preferences',
     ],
-    cta: 'Sign up',
+    cta: 'Sign up free',
     featured: false,
   },
   {
@@ -179,10 +170,6 @@ const PRICING_TIERS = [
   },
 ];
 
-/**
- * Trending picks rail — sources from api.trending.trending (Phase 12).
- * Lives next to Landing rather than inline so the header stays terse.
- */
 function TrendingPicksRail() {
   const navigate = useNavigate();
   const data = useQuery(api.trending.trending, { limit: 12 });
@@ -194,27 +181,29 @@ function TrendingPicksRail() {
     score: pick.trendingScore,
     onClick: () => navigate(creator ? `/creators/${creator.handle}` : '/feed'),
   }));
-  return (
-    <TrendingCarousel items={items} loading={data === undefined} sub="Updated every 12 hours" />
-  );
+  return <TrendingCarousel items={items} loading={data === undefined} hideHeader />;
 }
 
 export function Landing() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+
   const creators = useQuery(api.creators.list, {});
   const allEvents = useQuery(api.events.today, {});
   const featuredEvents = useQuery(api.events.featured, {});
+  const trendingData = useQuery(api.trending.trending, { limit: 12 });
+  const liveEvents = useQuery(api.events.live, {});
+  const upcomingEvents = useQuery(api.events.featured, {});
 
-  const topCreators = (creators ?? []).slice(0, 4);
-  const heroCreators = topCreators.map((c) => ({
+  const creatorList = creators ?? [];
+  const heroCreators = creatorList.slice(0, 4).map((c) => ({
     mono: c.avatarMono,
     color: c.avatarColor,
   }));
   const featuredEvent = (featuredEvents ?? [])[0] ?? (allEvents ?? [])[0];
-  const otherEvents = (allEvents ?? []).filter((e) => e._id !== featuredEvent?._id).slice(0, 6);
+  const otherEvents = (allEvents ?? []).filter((e) => e._id !== featuredEvent?._id).slice(0, 4);
 
-  const liveEvents = useQuery(api.events.live, {});
-  const upcomingEvents = useQuery(api.events.featured, {});
   const hasLive = (liveEvents ?? []).length > 0;
   const panelEvents = hasLive ? liveEvents! : (upcomingEvents ?? []);
   const heroLiveEvents = panelEvents.slice(0, 3).map((e) => ({
@@ -226,10 +215,23 @@ export function Landing() {
     status: e.gameStatus ?? e.time,
   }));
 
+  const proof = buildLandingProofMetrics({
+    creators,
+    allEvents,
+    liveEvents,
+    trendingCount: trendingData?.length,
+  });
+
+  const spotlight = pickSpotlightCreators(creatorList, 6);
+
   return (
     <main>
-      {/* ── 01 · Hero — single confident lead-in with live signal ──────── */}
       <Hero
+        eyebrow={
+          <Badge tone="violet" dot>
+            Creator network · Independently graded
+          </Badge>
+        }
         title={
           <>
             Follow verified <em>sports creators.</em>
@@ -239,8 +241,8 @@ export function Landing() {
         }
         subtitle={
           <>
-            Every pick published with verified records and fully graded transparency.{' '}
-            <em>Follow the sharpest minds in sports</em> — for free or premium.
+            Every pick ships with platform-graded records and transparent units.{' '}
+            <em>Subscribe to the sharpest minds in sports</em> — or apply to publish your own edge.
           </>
         }
         actions={
@@ -251,51 +253,139 @@ export function Landing() {
               iconRight="arrow-right"
               onClick={() => navigate('/creators')}
             >
-              Discover creators
+              Browse creators
             </Button>
-            <Button variant="outline" size="lg" onClick={() => navigate('/apply')}>
-              Apply as a creator
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() =>
+                navigateBecomeCreator(navigate, {
+                  isAuthenticated,
+                  creatorId: me?.creatorId ?? null,
+                })
+              }
+            >
+              {becomeCreatorCtaLabel(me?.creatorId ?? null)}
             </Button>
           </>
         }
         trust={[
-          { icon: <Icon name="verified" size={14} />, label: '142 verified creators' },
-          { icon: <Icon name="chart" size={14} />, label: '58.4% network win rate' },
-          { icon: <Icon name="shield" size={14} />, label: 'Stripe-backed · 21+ only' },
+          {
+            icon: <Icon name="verified" size={14} />,
+            label: proof.loading
+              ? 'Loading network stats…'
+              : `${proof.verifiedCreators} verified creators`,
+          },
+          {
+            icon: <Icon name="chart" size={14} />,
+            label: proof.loading ? '—' : `${proof.networkWinRate} network win rate`,
+          },
+          {
+            icon: <Icon name="calendar" size={14} />,
+            label: proof.loading
+              ? '—'
+              : hasLive
+                ? `${proof.liveEvents} live now`
+                : `${proof.eventsTonight} events tonight`,
+          },
         ]}
         panel={
           <HeroLivePanel
             events={heroLiveEvents}
             live={hasLive}
             creators={heroCreators}
-            creatorsCount={28}
+            creatorsCount={creatorList.length > 0 ? creatorList.length : undefined}
             ctaLabel={hasLive ? 'Open live tracker' : 'View all events'}
             onCta={() => navigate('/events')}
           />
         }
       />
 
-      {/* ── 02 · Brand trust marquee ───────────────────────────────────── */}
-      <TrustMarquee
-        items={TRUST_BRANDS.map((b) => (
-          <Serif as="span">{b}</Serif>
-        ))}
+      <MarketingProofStrip
+        loading={proof.loading}
+        items={[
+          {
+            label: 'Verified creators',
+            value: proof.loading ? '—' : proof.verifiedCreators,
+            sub: proof.loading ? 'Syncing directory…' : `${proof.totalCreators} on the network`,
+          },
+          {
+            label: 'Network win rate',
+            value: proof.networkWinRate,
+            sub: 'Rolling average, units-weighted',
+          },
+          {
+            label: hasLive ? 'Live right now' : 'Events tonight',
+            value: proof.loading ? '—' : hasLive ? proof.liveEvents : proof.eventsTonight,
+            sub: hasLive ? 'Tracked on the live board' : 'Across all major leagues',
+          },
+          {
+            label: 'Trending picks',
+            value: proof.loading ? '—' : proof.trendingPicks,
+            sub: 'Hot on the network today',
+          },
+        ]}
+        footnote="Independent grading · Stripe-backed billing"
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            iconRight="arrow-right"
+            onClick={() => navigate('/creators')}
+          >
+            Explore the directory
+          </Button>
+        }
       />
 
-      <Container size="xl">
-        {/* ── Trending now — top picks across the platform ───────────── */}
-        <Section>
-          <TrendingPicksRail />
-        </Section>
+      <LandingLiveChapter
+        live={hasLive}
+        eyebrow="Live network"
+        title="What's moving right now."
+        sub="Trending picks from verified creators, plus tonight's marquee on the board."
+        trendingSub="Updated every 12 hours · independently graded"
+        headerAction={
+          <Button variant="outline" iconRight="arrow-right" onClick={() => navigate('/events')}>
+            Full slate
+          </Button>
+        }
+        trending={<TrendingPicksRail />}
+        featuredLabel={hasLive ? 'Live on the board' : "Tonight's marquee"}
+        featuredLoading={allEvents === undefined}
+        featured={
+          featuredEvent ? (
+            <EventCard
+              featured
+              sport={featuredEvent.sport}
+              league={featuredEvent.league}
+              time={featuredEvent.time}
+              home={featuredEvent.home}
+              away={featuredEvent.away}
+              homeLogo={featuredEvent.homeLogo}
+              awayLogo={featuredEvent.awayLogo}
+              creators={featuredEvent.creatorCount}
+              picks={featuredEvent.pickCount}
+              sourceType={featuredEvent.sourceType}
+              creatorsAvatars={heroCreators}
+              onClick={() => navigate('/events')}
+            />
+          ) : null
+        }
+        featuredAction={
+          <Button variant="ghost" block iconRight="arrow-right" onClick={() => navigate('/events')}>
+            {hasLive ? 'Open live tracker' : "See tonight's slate"}
+          </Button>
+        }
+      />
 
-        {/* ── 03 · How it works (narrative bridge) ─────────────────────── */}
+      <Container size="2xl">
         <Section
           eyebrow="How it works"
           title="Three steps to your edge."
-          sub="No Discord screenshots, no parlays-as-content, no hidden upsells — just a focused product for the people who do the research and the ones who follow them."
+          sub="No Discord screenshots or hidden upsells — a focused product for researchers and the people who follow them."
           action={
             <Badge tone="blue" dot>
-              Avg. setup &lt; 5 min
+              Avg. setup under 5 min
             </Badge>
           }
         >
@@ -319,168 +409,120 @@ export function Landing() {
           </Grid>
         </Section>
 
-        {/* ── 04 · By the numbers (was floating BigStats) ──────────────── */}
-        <Section
-          eyebrow="By the numbers"
-          title="Numbers that earn the network."
-          action={
-            <Badge tone="blue" dot>
-              Updated weekly
-            </Badge>
-          }
-        >
-          <Grid cols={4} gap={5}>
-            <BigStat label="Verified creators" value="142" sub="across 7 major sports" />
-            <BigStat label="Network win rate" value="58.4%" sub="rolling 90-day, units-weighted" />
-            <BigStat
-              label="Active subscribers"
-              value="38,420"
-              sub="paying for premium picks this week"
-            />
-            <BigStat label="Tracked plays" value="2.1M" sub="graded by the platform since launch" />
-          </Grid>
-        </Section>
-
-        {/* ── 05 · Featured creators (spotlight pair) ─────────────────── */}
         <Section
           eyebrow="Featured creators"
-          title="Verified, transparent, and actually good."
-          sub="Two of the network's standout operators. Win rates are independently graded — every record is real, every line has CLV behind it."
+          title="Verified, transparent, and worth following."
+          sub="A sample of the network — win rates and units are graded independently, not self-reported."
           action={
             <Button variant="outline" iconRight="arrow-right" onClick={() => navigate('/creators')}>
-              Browse all 142 creators
+              {proof.loading ? 'View creators' : `View all ${proof.totalCreators} creators`}
             </Button>
           }
         >
-          <Grid cols={2} gap={6}>
-            {(creators ?? []).slice(0, 2).map((c) => (
-              <CreatorCard
-                key={c._id}
-                name={c.name}
-                handle={c.handle}
-                mono={c.avatarMono}
-                color={c.avatarColor}
-                verified={c.verified}
-                bio={c.bio}
-                winRate={c.winRate}
-                record={c.record}
-                units={c.units}
-                subs={c.subscriberCount}
-                last10={c.last10}
-                streak={c.streak}
-                trending={c.trending}
-                startingPrice={c.startingPrice}
-                tags={c.tags}
-                onClick={() => navigate(`/creators/${c.handle}`)}
-              />
+          <CreatorsHorizontalRail eyebrow="Spotlight" title="Top operators this week">
+            {spotlight.map((c) => (
+              <CreatorsHorizontalRailItem key={c._id}>
+                <CreatorDirectoryCompactCard
+                  name={c.name}
+                  handle={c.handle}
+                  mono={c.avatarMono}
+                  color={c.avatarColor}
+                  verified={c.verified}
+                  bio={c.bio}
+                  units={c.units}
+                  startingPrice={c.startingPrice}
+                  onClick={() => navigate(`/creators/${c.handle}`)}
+                />
+              </CreatorsHorizontalRailItem>
             ))}
-          </Grid>
+          </CreatorsHorizontalRail>
         </Section>
 
-        {/* ── 06 · Tonight's slate ────────────────────────────────────── */}
         <Section
+          tone="inset"
           eyebrow="Tonight's slate"
-          title="Tonight's biggest plays."
-          sub="The marquee games on tonight's board — every creator covering them, every pick they're calling."
+          title="Games on the board tonight."
+          sub="Every matchup creators are covering — picks and reasoning land before kickoff."
           action={
             <Button variant="ghost" iconRight="arrow-right" onClick={() => navigate('/events')}>
               See full slate
             </Button>
           }
         >
-          <Stack gap={4}>
-            {featuredEvent && (
+          <Grid cols={2} gap={4}>
+            {otherEvents.map((ev) => (
               <EventCard
-                featured
-                sport={featuredEvent.sport}
-                league={featuredEvent.league}
-                time={featuredEvent.time}
-                home={featuredEvent.home}
-                away={featuredEvent.away}
-                homeLogo={featuredEvent.homeLogo}
-                awayLogo={featuredEvent.awayLogo}
-                creators={featuredEvent.creatorCount}
-                picks={featuredEvent.pickCount}
-                sourceType={featuredEvent.sourceType}
-                creatorsAvatars={heroCreators}
+                key={ev._id}
+                sport={ev.sport}
+                league={ev.league}
+                time={ev.time}
+                home={ev.home}
+                away={ev.away}
+                homeLogo={ev.homeLogo}
+                awayLogo={ev.awayLogo}
+                creators={ev.creatorCount}
+                picks={ev.pickCount}
+                sourceType={ev.sourceType}
                 onClick={() => navigate('/events')}
               />
-            )}
-
-            <Grid cols={2} gap={4}>
-              {otherEvents.map((ev) => (
-                <EventCard
-                  key={ev._id}
-                  sport={ev.sport}
-                  league={ev.league}
-                  time={ev.time}
-                  home={ev.home}
-                  away={ev.away}
-                  homeLogo={ev.homeLogo}
-                  awayLogo={ev.awayLogo}
-                  creators={ev.creatorCount}
-                  picks={ev.pickCount}
-                  sourceType={ev.sourceType}
-                  onClick={() => navigate('/events')}
-                />
-              ))}
-            </Grid>
-          </Stack>
-        </Section>
-
-        {/* ── 07 · Testimonials (social proof) ────────────────────────── */}
-        <Section
-          eyebrow="What people say"
-          title="Both sides, winning."
-          sub="From the creators publishing the picks and the subscribers backing them."
-        >
-          <Grid cols={3} gap={5}>
-            {TESTIMONIALS.map((t) => (
-              <Testimonial
-                key={t.name}
-                quote={t.quote}
-                authorName={t.name}
-                authorRole={t.role}
-                authorMono={t.mono}
-                authorColor={t.color}
-                authorVerified={t.verified}
-                statValue={t.statValue}
-                statLabel={t.statLabel}
-              />
             ))}
           </Grid>
         </Section>
+      </Container>
 
-        {/* ── 08 · Pricing ────────────────────────────────────────────── */}
-        <Section
-          eyebrow="Simple pricing"
-          title="Plans that fit your edge."
-          sub="Cancel anytime. No retention loops. No hidden fees."
-        >
-          <Grid cols={3} gap={5}>
-            {PRICING_TIERS.map((t) => (
-              <PriceCard
-                key={t.name}
-                name={t.name}
-                price={t.price}
-                period={t.period}
-                features={t.features}
-                featured={t.featured}
-                cta={
-                  <Button
-                    variant={t.featured ? 'primary' : 'outline'}
-                    size="md"
-                    onClick={() => navigate('/apply')}
-                  >
-                    {t.cta}
-                  </Button>
-                }
-              />
-            ))}
-          </Grid>
-        </Section>
+      <Section
+        tone="elevated"
+        eyebrow="What people say"
+        title="Both sides, winning."
+        sub="From the creators publishing picks and the subscribers backing them."
+      >
+        <Grid cols={3} gap={5}>
+          {TESTIMONIALS.map((t) => (
+            <Testimonial
+              key={t.name}
+              quote={t.quote}
+              authorName={t.name}
+              authorRole={t.role}
+              authorMono={t.mono}
+              authorColor={t.color}
+              authorVerified={t.verified}
+              statValue={t.statValue}
+              statLabel={t.statLabel}
+            />
+          ))}
+        </Grid>
+      </Section>
 
-        {/* ── 09 · Split CTA — creator vs subscriber path ─────────────── */}
+      <Section
+        tone="elevated"
+        eyebrow="Simple pricing"
+        title="Plans that fit your edge."
+        sub="Cancel anytime. No retention loops. No hidden fees."
+      >
+        <Grid cols={3} gap={5}>
+          {PRICING_TIERS.map((t) => (
+            <PriceCard
+              key={t.name}
+              name={t.name}
+              price={t.price}
+              period={t.period}
+              features={t.features}
+              featured={t.featured}
+              cta={
+                <Button
+                  variant={t.featured ? 'primary' : 'outline'}
+                  size="md"
+                  onClick={() => navigate('/auth')}
+                >
+                  {t.cta}
+                </Button>
+              }
+            />
+          ))}
+        </Grid>
+      </Section>
+
+      <Container size="2xl">
         <Section eyebrow="Two ways in" title="Pick your side.">
           <SplitCTA
             panels={[
@@ -489,7 +531,7 @@ export function Landing() {
                 icon: <Icon name="sparkles" size={22} />,
                 eyebrow: 'For creators',
                 title: 'Bring your edge — keep more of it.',
-                body: 'Apply once, get verified, start publishing. Stripe-backed weekly payouts and real records that build your audience.',
+                body: 'Apply once, get verified, start publishing. Stripe-backed weekly payouts and records that build your audience.',
                 bullets: [
                   '87% revenue share, no tiered take-rate',
                   'Independent grading and CLV tracking',
@@ -497,7 +539,16 @@ export function Landing() {
                 ],
                 actions: (
                   <>
-                    <Button variant="primary" size="lg" onClick={() => navigate('/apply')}>
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={() =>
+                        navigateBecomeCreator(navigate, {
+                          isAuthenticated,
+                          creatorId: me?.creatorId ?? null,
+                        })
+                      }
+                    >
                       Apply for access
                     </Button>
                     <Button variant="ghost" size="lg" onClick={() => navigate('/creators')}>
@@ -510,8 +561,8 @@ export function Landing() {
                 variant: 'subscribers',
                 icon: <Icon name="bookmark" size={22} />,
                 eyebrow: 'For subscribers',
-                title: 'Follow the sharps you actually trust.',
-                body: 'Subscribe to up to 5 creators on Premium, unlimited on VIP. Your portfolio, ROI, and CLV are tracked automatically.',
+                title: 'Follow the sharps you trust.',
+                body: 'Subscribe to creators on Premium or VIP. Your portfolio, ROI, and CLV are tracked automatically.',
                 bullets: [
                   'Picks delivered before the line moves',
                   "Live tracker for tonight's slate",
@@ -532,10 +583,6 @@ export function Landing() {
           />
         </Section>
 
-        {/* ── 10 · Responsible-gambling notice (legally important, modern card) ── */}
-        <ResponsibleSection noReveal pad={false} />
-
-        {/* ── 11 · FAQ (2-col split) ──────────────────────────────────── */}
         <Section>
           <Grid cols={2} gap={10}>
             <Stack gap={5}>
@@ -543,19 +590,15 @@ export function Landing() {
               <Heading level={2} size="3xl" balance>
                 Questions, answered straight.
               </Heading>
-              <Muted>
-                No fine-print games. If something is unclear, the answer is here — or one click away
-                in our docs.
-              </Muted>
               <Row gap={3} wrap>
                 <Button
                   variant="outline"
                   iconRight="arrow-right"
-                  onClick={() => navigate('/apply')}
+                  onClick={() => navigate('/trust/verification')}
                 >
-                  Read full docs
+                  How we verify creators
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/apply')}>
+                <Button variant="ghost" onClick={() => navigate('/contact')}>
                   Contact support
                 </Button>
               </Row>

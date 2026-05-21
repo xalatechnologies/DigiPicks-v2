@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import { Avatar } from '../../atoms/Avatar/Avatar';
 import { VerifiedMark } from '../../atoms/VerifiedMark/VerifiedMark';
 import s from './CreatorDirectoryCompactCard.module.css';
@@ -40,7 +41,7 @@ export function CreatorDirectoryCompactCard({
   return (
     <Tag
       type={onClick ? 'button' : undefined}
-      className={cx(s.card, onClick && s.interactive, className)}
+      className={cx(s.card, lift.surface, onClick && s.interactive, className)}
       style={cssVars}
       onClick={onClick}
     >

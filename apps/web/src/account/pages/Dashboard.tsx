@@ -1,19 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import {
   Container,
   Stack,
   Grid,
   Button,
-  PickCard,
   EmptyState,
   StudioPageHeader,
-  StudioDashLayout,
-  StudioDashCol,
-  AccountRefineCard,
-  StudioFilterPills,
-  CreatorProfileStickyAside,
   AccountStatCard,
   AccountDashboardSection,
   AccountLiveEventCard,
@@ -22,19 +16,11 @@ import {
   AccountSavedPreview,
   AccountTopicChips,
   Heading,
-  QuickActionGrid,
+  StudioDashLayout,
+  StudioDashCol,
+  CreatorProfileStickyAside,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
-import type { Id } from '../../../../../convex/_generated/dataModel';
-
-const FEED_FILTERS = [
-  { label: 'All', value: 'all' },
-  { label: 'Following', value: 'following' },
-  { label: 'Live now', value: 'live' },
-  { label: 'Locked', value: 'locked' },
-  { label: 'Free', value: 'free' },
-];
 
 const TRENDING_TOPICS = ['NBA props', 'NFL spreads', 'Soccer value', 'Tennis ML', 'Cricket tips'];
 
@@ -42,16 +28,6 @@ function greeting(name: string): string {
   const hour = new Date().getHours();
   const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   return `Good ${period}, ${name}`;
-}
-
-function timeAgo(ms: number): string {
-  const diff = Date.now() - ms;
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
 }
 
 function isToday(ms: number): boolean {
@@ -77,7 +53,6 @@ function scoreDisplay(ev: {
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [feedFilter, setFeedFilter] = useState('all');
 
   const me = useQuery(api.users.meSafe);
   const subs = useQuery(api.subscriptions.mySubscriptions);
@@ -85,8 +60,6 @@ export function Dashboard() {
   const liveEvents = useQuery(api.events.live, {});
   const upcomingEvents = useQuery(api.events.today, {});
   const saved = useQuery(api.savedPicks.list, { limit: 5 });
-  const save = useMutation(api.savedPicks.save);
-  const unsave = useMutation(api.savedPicks.unsave);
 
   const displayName = me?.name?.split(' ')[0] ?? 'there';
   const activeSubs = subs?.filter((sub) => sub.status === 'active') ?? [];
@@ -101,58 +74,11 @@ export function Dashboard() {
     [feedItems],
   );
 
-  const pickIds = useMemo(() => feedItems.map((i) => i.pick._id), [feedItems]);
-  const savedMap = useQuery(
-    api.savedPicks.savedIdsBatch,
-    pickIds.length > 0 ? { pickIds } : 'skip',
-  );
-
-  const filteredFeed = useMemo(() => {
-    let list = feedItems;
-    switch (feedFilter) {
-      case 'following':
-        list = feed?.personalized ? list : [];
-        break;
-      case 'live':
-        list = list.filter(
-          (item) =>
-            item.pick.eventName &&
-            (liveEvents ?? []).some(
-              (ev) =>
-                item.pick.eventName!.includes(ev.home) || item.pick.eventName!.includes(ev.away),
-            ),
-        );
-        break;
-      case 'locked':
-        list = list.filter((item) => item.pick.access !== 'free');
-        break;
-      case 'free':
-        list = list.filter((item) => item.pick.access === 'free');
-        break;
-      case 'all':
-      default:
-        break;
-    }
-    return list;
-  }, [feedItems, feedFilter, feed?.personalized, liveEvents]);
-
   const eventRail = useMemo(() => {
     const live = liveEvents ?? [];
     const upcoming = (upcomingEvents ?? []).filter((e) => e.status === 'upcoming').slice(0, 4);
     return [...live, ...upcoming.filter((e) => !live.some((l) => l._id === e._id))].slice(0, 6);
   }, [liveEvents, upcomingEvents]);
-
-  async function toggleSave(pickId: Id<'picks'>, currentlySaved: boolean) {
-    try {
-      if (currentlySaved) await unsave({ pickId });
-      else await save({ pickId });
-    } catch {
-      /* useQuery recovers */
-    }
-  }
-
-  const isLoading = feed === undefined;
-  const isEmpty = !isLoading && filteredFeed.length === 0;
 
   return (
     <Container size="2xl">
@@ -160,7 +86,7 @@ export function Dashboard() {
         <StudioPageHeader
           eyebrow="Account · Dashboard"
           title="Dashboard"
-          sub="Your feed, subscriptions, and live slate in one place."
+          sub="Stats, subscriptions, and live slate at a glance."
           actions={
             <>
               <Button variant="outline" onClick={() => navigate('/account/subscriptions')}>
@@ -169,9 +95,9 @@ export function Dashboard() {
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate('/account/feed')}
               >
-                Discover
+                My feed
               </Button>
             </>
           }
@@ -186,7 +112,7 @@ export function Dashboard() {
               icon="feed"
               value={picksToday}
               label="New picks today"
-              onClick={() => setFeedFilter('all')}
+              onClick={() => navigate('/account/feed')}
             />
             <AccountStatCard
               icon="card"
@@ -232,106 +158,8 @@ export function Dashboard() {
           </AccountDashboardSection>
         ) : null}
 
-        <AccountRefineCard
-          title="Refine feed"
-          sub="Choose what appears in your personalized pick stream."
-          summary={
-            isLoading
-              ? 'Loading your feed…'
-              : `${filteredFeed.length} pick${filteredFeed.length === 1 ? '' : 's'} in view`
-          }
-          onReset={feedFilter !== 'all' ? () => setFeedFilter('all') : undefined}
-        >
-          <StudioFilterPills
-            options={FEED_FILTERS}
-            value={feedFilter}
-            onChange={setFeedFilter}
-            ariaLabel="Filter your feed"
-            nowrap
-          />
-        </AccountRefineCard>
-
         <StudioDashLayout>
-          <StudioDashCol span={8}>
-            <Stack gap={4}>
-              {feed && !feed.personalized && feedFilter === 'following' ? (
-                <EmptyState
-                  icon="compass"
-                  title="Subscribe to follow creators"
-                  subtitle="Your personalized feed unlocks once you subscribe to at least one creator."
-                  action={
-                    <Button
-                      variant="primary"
-                      iconRight="arrow-right"
-                      onClick={() => navigate('/account/discover')}
-                    >
-                      Discover creators
-                    </Button>
-                  }
-                />
-              ) : null}
-
-              {isLoading ? <EmptyState icon="feed" title="Loading your feed…" /> : null}
-
-              {isEmpty && feedFilter !== 'following' ? (
-                <EmptyState
-                  icon="feed"
-                  title="No picks in this view"
-                  subtitle="Try another filter or check back when your creators publish."
-                  action={
-                    <Button
-                      variant="primary"
-                      iconRight="arrow-right"
-                      onClick={() => navigate('/account/discover')}
-                    >
-                      Discover creators
-                    </Button>
-                  }
-                />
-              ) : null}
-
-              {!isEmpty
-                ? filteredFeed.map(({ pick, creator }) => {
-                    const isSaved = savedMap?.[pick._id] ?? false;
-                    return (
-                      <PickCard
-                        key={pick._id}
-                        creatorName={creator?.name ?? 'Unknown'}
-                        creatorHandle={creator?.handle ?? ''}
-                        creatorMono={creator?.avatarMono ?? ''}
-                        creatorColor={creator?.avatarColor ?? ''}
-                        creatorVerified={creator?.verified ?? false}
-                        access={pick.access}
-                        sport={pick.sport}
-                        event={pick.eventName}
-                        eventTime={pick.eventTime}
-                        posted={
-                          pick.publishedAt ? timeAgo(pick.publishedAt) : timeAgo(pick.createdAt)
-                        }
-                        title={pick.title}
-                        market={pick.market}
-                        selection={pick.selection}
-                        odds={pick.odds}
-                        units={pick.units}
-                        body={pick.body}
-                        teaser={pick.teaser}
-                        status={pick.grade ?? 'pending'}
-                        aiSummary={pick.aiSummary}
-                        aiConfidence={pick.aiConfidence}
-                        aiReasoning={pick.aiReasoning}
-                        aiModel={pick.aiModel}
-                        saved={isSaved}
-                        locked={pick.access !== 'free' && !feed?.personalized}
-                        onSave={() => toggleSave(pick._id, isSaved)}
-                        onOpen={() => creator && navigate(`/creators/${creator.handle}`)}
-                      />
-                    );
-                  })
-                : null}
-            </Stack>
-          </StudioDashCol>
-
-          <StudioDashCol span={4}>
+          <StudioDashCol span={12}>
             <CreatorProfileStickyAside>
               <Stack gap={6}>
                 <AccountSidebarPanel title="Top subscriptions">
@@ -422,8 +250,6 @@ export function Dashboard() {
             </CreatorProfileStickyAside>
           </StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('dashboard', navigate)} />
       </Stack>
     </Container>
   );

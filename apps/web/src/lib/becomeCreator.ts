@@ -2,9 +2,9 @@ import type { NavigateFunction } from 'react-router-dom';
 
 /**
  * Public CTAs for the creator journey:
- * - Guests → creator application (account created on the form)
+ * - Guests → sign up as a subscriber, then `/apply` (via `?next=/apply`)
+ * - Signed-in subscribers → creator application form
  * - Signed-in creators → creator studio
- * - Signed-in applicants → application form
  */
 export function navigateBecomeCreator(
   navigate: NavigateFunction,
@@ -12,6 +12,10 @@ export function navigateBecomeCreator(
 ) {
   if (opts.creatorId) {
     navigate('/dashboard');
+    return;
+  }
+  if (!opts.isAuthenticated) {
+    navigate('/auth?next=/apply');
     return;
   }
   navigate('/apply');

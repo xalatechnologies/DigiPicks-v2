@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useConvexAuth } from '@convex-dev/auth/react';
-import { useQuery } from 'convex/react';
+import { useConvexAuth, useQuery } from './auth/convexAuth';
 import {
   PublicLayout,
   Container,
@@ -19,6 +18,7 @@ import {
 } from '@digipicks/ds';
 import { AccountUserMenu } from './auth/AccountUserMenu';
 import { becomeCreatorCtaLabel, navigateBecomeCreator } from './lib/becomeCreator';
+import { ADMIN_ROUTE_ENTRIES } from './admin/routeManifest';
 import { api } from '../../../convex/_generated/api';
 import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
@@ -41,7 +41,7 @@ const OddsIntel = React.lazy(() =>
   import('./pages/OddsIntel').then((m) => ({ default: m.OddsIntel })),
 );
 const Apply = React.lazy(() => import('./pages/Apply').then((m) => ({ default: m.Apply })));
-const Auth = React.lazy(() => import('./pages/Auth').then((m) => ({ default: m.Auth })));
+import { Auth } from './pages/Auth';
 const Feed = React.lazy(() => import('./pages/Feed').then((m) => ({ default: m.Feed })));
 const Saved = React.lazy(() => import('./pages/Saved').then((m) => ({ default: m.Saved })));
 const Community = React.lazy(() =>
@@ -50,8 +50,8 @@ const Community = React.lazy(() =>
 const Notifications = React.lazy(() =>
   import('./pages/Notifications').then((m) => ({ default: m.Notifications })),
 );
-const AdminRoutes = React.lazy(() =>
-  import('./admin/Routes').then((m) => ({ default: m.AdminRoutes })),
+const AdminGateLayout = React.lazy(() =>
+  import('./admin/AdminGateLayout').then((m) => ({ default: m.AdminGateLayout })),
 );
 const PricingPage = React.lazy(() =>
   import('./pages/trustLegalPages').then((m) => ({ default: m.PricingPage })),
@@ -109,10 +109,9 @@ function PageFallback({ title = 'Loading…' }: { title?: string }) {
 }
 
 const NAV_ITEMS: { to: string; label: string }[] = [
-  { to: '/', label: 'Home' },
-  { to: '/events', label: "Today's Events" },
+  { to: '/events', label: 'Events' },
   { to: '/creators', label: 'Creators' },
-  { to: '/odds', label: 'Odds' },
+  { to: '/odds', label: 'Odds Intel' },
 ];
 
 // AccountUserMenu lives in apps/web/src/auth/AccountUserMenu.tsx so the
@@ -121,10 +120,15 @@ const NAV_ITEMS: { to: string; label: string }[] = [
 
 function NotificationsBell() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useConvexAuth();
-  const unread = useQuery(api.notifications.unreadCount, isAuthenticated ? {} : 'skip');
+  const { pathname } = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const unread = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated && !authLoading && me !== undefined && me !== null ? {} : 'skip',
+  );
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || authLoading || me === undefined || me === null) return null;
 
   return (
     <Button
@@ -151,7 +155,7 @@ function PublicHeader() {
   const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
 
   return (
-    <Container size="xl">
+    <Container size="2xl">
       <Row gap={6}>
         <Logo size={36} showWord onClick={() => navigate('/')} aria-label="DigiPicks home" />
 
@@ -198,6 +202,10 @@ function PublicHeader() {
 }
 
 function PublicFooter() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isHome = pathname === '/';
+
   const columns = [
     {
       title: 'Product',
@@ -237,10 +245,14 @@ function PublicFooter() {
     },
   ];
 
+  const year = new Date().getFullYear();
+
   return (
     <Footer
-      brand={<Logo size={32} showWord />}
-      tagline="A premium network for verified sports creators and the subscribers who back their edge. Bet responsibly."
+      brand={<Logo size={28} showWord onClick={() => navigate('/')} aria-label="DigiPicks home" />}
+      brandEyebrow="Creator network"
+      tagline="Verified creators, transparent results, and subscriber-first billing."
+      bottomLeft={<>© {year} DigiPicks</>}
       social={[
         {
           href: 'https://x.com',
@@ -259,19 +271,23 @@ function PublicFooter() {
         },
         { href: '/contact', label: 'Contact', icon: <Icon name="inbox" size={16} /> },
       ]}
-      newsletter={{
-        title: "Get tonight's slate in your inbox.",
-        sub: "A weekly digest of the network's top picks, win-rate movers, and new creators. No spam — unsubscribe anytime.",
-        form: (
-          <Row gap={2}>
-            <Input type="email" placeholder="you@example.com" aria-label="Email address" />
-            <Button variant="primary" iconRight="arrow-right">
-              Subscribe
-            </Button>
-          </Row>
-        ),
-        fine: 'No spam. Unsubscribe with one click.',
-      }}
+      newsletter={
+        isHome
+          ? {
+              title: "Get tonight's slate in your inbox.",
+              sub: "A weekly digest of the network's top picks, win-rate movers, and new creators. No spam — unsubscribe anytime.",
+              form: (
+                <Row gap={2}>
+                  <Input type="email" placeholder="you@example.com" aria-label="Email address" />
+                  <Button variant="primary" iconRight="arrow-right">
+                    Subscribe
+                  </Button>
+                </Row>
+              ),
+              fine: 'No spam. Unsubscribe with one click.',
+            }
+          : undefined
+      }
       columns={columns}
       trust={[
         { icon: <Icon name="verified" size={14} />, label: 'Manual creator verification' },
@@ -392,23 +408,24 @@ export function App() {
             </AuthGate>
           }
         />
-        <Route
-          path="/admin/*"
-          element={
-            <React.Suspense fallback={<PageFallback title="Loading admin…" />}>
-              <AdminRoutes />
-            </React.Suspense>
-          }
-        />
       </Route>
       <Route
-        path="/auth"
+        path="/admin"
         element={
-          <React.Suspense fallback={<PageFallback title="Loading sign in…" />}>
-            <Auth />
+          <React.Suspense fallback={<PageFallback title="Loading admin…" />}>
+            <AdminGateLayout />
           </React.Suspense>
         }
-      />
+      >
+        {ADMIN_ROUTE_ENTRIES.map(({ path, Component }) =>
+          path ? (
+            <Route key={path} path={path} element={<Component />} />
+          ) : (
+            <Route key="index" index element={<Component />} />
+          ),
+        )}
+      </Route>
+      <Route path="/auth" element={<Auth />} />
       <Route
         path="/account/*"
         element={

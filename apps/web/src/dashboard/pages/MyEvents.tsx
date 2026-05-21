@@ -25,11 +25,9 @@ import {
   EmptyState,
   StudioPageHeader,
   StudioRefineCard,
-  QuickActionGrid,
   type EventSourceType,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 const SPORTS = [
   'Soccer',
@@ -216,7 +214,6 @@ export function MyEvents() {
             </Table>
           </Card>
         )}
-        <QuickActionGrid title="Related" items={studioCrossLinks('events', navigate)} />
       </Stack>
     </Container>
   );

@@ -32,8 +32,14 @@
       color-mix(in srgb, var(--green) 14%, transparent),
       transparent 60%
     );
-  background-size: 200% 200%, 200% 200%, 200% 200%;
-  background-position: 0% 0%, 100% 100%, 50% 50%;
+  background-size:
+    200% 200%,
+    200% 200%,
+    200% 200%;
+  background-position:
+    0% 0%,
+    100% 100%,
+    50% 50%;
   animation: dp-aurora var(--dur-ambient-aurora) var(--ease-in-out) infinite;
   pointer-events: none;
   filter: saturate(115%);
@@ -54,7 +60,7 @@
 
 /* ── Inner two-column grid (with optional right panel) ──────────────── */
 .inner {
-  max-width: var(--container-xl);
+  max-width: var(--container-2xl);
   margin: 0 auto;
   padding-left: var(--space-7);
   padding-right: var(--space-7);
@@ -174,7 +180,9 @@
   margin: var(--space-12) auto 0;
   padding-top: var(--space-7);
   border-top: 1px solid var(--line-soft);
-  max-width: var(--container-xl);
+  max-width: var(--container-2xl);
+  padding-left: var(--space-7);
+  padding-right: var(--space-7);
   width: 100%;
 }
 .marqueeLabel {

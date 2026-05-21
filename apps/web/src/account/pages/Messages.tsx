@@ -19,10 +19,8 @@ import {
   StudioDashLayout,
   StudioDashCol,
   type ChatPanelMessage,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 function fmtTime(ms: number): string {
@@ -219,8 +217,6 @@ export function AccountMessages() {
           </StudioDashCol>
           <StudioDashCol span={8}>{chatPane}</StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('messages', navigate)} />
       </Stack>
     </Container>
   );

@@ -1,0 +1,71 @@
+/** Static overview payload for offline admin preview (no Convex queries). */
+export const ADMIN_OVERVIEW_PREVIEW = {
+  kpis: {
+    totalUsers: 12450,
+    activeSubscribers: 3280,
+    activeCreators: 142,
+    pendingApplications: 28,
+    flaggedApplications: 14,
+    pendingEventReview: 6,
+    openTickets: 32,
+    mrr: 142000,
+    churnRate: 1.2,
+  },
+  capped: {
+    users: true,
+    subscriptions: true,
+    creators: true,
+  },
+  recentActivity: [
+    {
+      id: 'preview-1',
+      action: 'application.approved',
+      entityType: 'application',
+      entityId: null,
+      createdAt: Date.now(),
+      timeLabel: '2 mins ago',
+      title: 'Alex Rivers approved as creator',
+      sub: 'Application verified. Creator dashboard activated.',
+    },
+    {
+      id: 'preview-2',
+      action: 'dispute.opened',
+      entityType: 'dispute',
+      entityId: null,
+      createdAt: Date.now(),
+      timeLabel: '45 mins ago',
+      title: 'Payout of $2,100 processed for Marcus Thorne',
+      sub: 'Scheduled bi-weekly settlement completed via Stripe Connect.',
+    },
+    {
+      id: 'preview-3',
+      action: 'application.submitted',
+      entityType: 'event',
+      entityId: null,
+      createdAt: Date.now(),
+      timeLabel: '3 hours ago',
+      title: '5 flagged posts removed by system',
+      sub: 'Automated moderation policy applied to violating content.',
+    },
+  ],
+  alerts: [
+    {
+      id: 'applications',
+      tone: 'danger' as const,
+      title: '28 creator applications awaiting review',
+      sub: 'Review onboarding requests before they age in the queue.',
+    },
+    {
+      id: 'stripe',
+      tone: 'amber' as const,
+      title: 'Stripe webhook processing delay',
+      sub: 'Latency in event delivery may affect subscription status updates.',
+    },
+    {
+      id: 'disputes',
+      tone: 'danger' as const,
+      title: '32 open support tickets',
+      sub: 'Disputes and cases awaiting admin resolution.',
+    },
+  ],
+};

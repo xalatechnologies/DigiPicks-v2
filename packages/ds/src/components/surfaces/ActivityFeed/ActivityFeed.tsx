@@ -23,6 +23,8 @@ export interface ActivityFeedProps {
   actionLabel?: string;
   onAction?: () => void;
   items: ActivityFeedItemData[];
+  /** `editorial` — admin overview: larger wells, time on the right, elevated card. */
+  variant?: 'default' | 'editorial';
   className?: string;
 }
 
@@ -31,10 +33,11 @@ export function ActivityFeed({
   actionLabel,
   onAction,
   items,
+  variant = 'default',
   className,
 }: ActivityFeedProps) {
   return (
-    <article className={cx(s.card, className)}>
+    <article className={cx(s.card, variant === 'editorial' && s.editorial, className)}>
       <div className={s.head}>
         <h2 className={s.title}>{title}</h2>
         {actionLabel && onAction ? (
@@ -45,31 +48,50 @@ export function ActivityFeed({
       </div>
       <ul className={s.list}>
         {items.map((item) => {
-          const content = (
-            <>
-              <span className={cx(s.iconWrap, item.tone && s[item.tone])}>
-                <Icon name={item.icon} size={18} />
-              </span>
-              <div className={s.copy}>
-                <p className={s.itemTitle}>{item.title}</p>
-                {item.sub ? <p className={s.itemSub}>{item.sub}</p> : null}
-                <p className={s.time}>{item.time}</p>
-              </div>
-              {item.amount ? <span className={s.amount}>{item.amount}</span> : null}
-              {item.trailingIcon ? (
-                <Icon name={item.trailingIcon} size={16} className={s.trailing} />
-              ) : null}
-            </>
-          );
+          const iconSize = variant === 'editorial' ? 22 : 18;
+          const content =
+            variant === 'editorial' ? (
+              <>
+                <span className={cx(s.iconWrap, item.tone && s[item.tone])}>
+                  <Icon name={item.icon} size={iconSize} />
+                </span>
+                <div className={s.copy}>
+                  <p className={s.itemTitle}>{item.title}</p>
+                  {item.sub ? <p className={s.itemSub}>{item.sub}</p> : null}
+                </div>
+                <span className={s.timeEditorial}>{item.time}</span>
+              </>
+            ) : (
+              <>
+                <span className={cx(s.iconWrap, item.tone && s[item.tone])}>
+                  <Icon name={item.icon} size={iconSize} />
+                </span>
+                <div className={s.copy}>
+                  <p className={s.itemTitle}>{item.title}</p>
+                  {item.sub ? <p className={s.itemSub}>{item.sub}</p> : null}
+                  <p className={s.time}>{item.time}</p>
+                </div>
+                {item.amount ? <span className={s.amount}>{item.amount}</span> : null}
+                {item.trailingIcon ? (
+                  <Icon name={item.trailingIcon} size={16} className={s.trailing} />
+                ) : null}
+              </>
+            );
 
           return (
-            <li key={item.id} className={s.item}>
+            <li key={item.id} className={cx(s.item, variant === 'editorial' && s.itemEditorial)}>
               {item.onClick ? (
-                <button type="button" className={s.itemBtn} onClick={item.onClick}>
+                <button
+                  type="button"
+                  className={cx(s.itemBtn, variant === 'editorial' && s.itemBtnEditorial)}
+                  onClick={item.onClick}
+                >
                   {content}
                 </button>
               ) : (
-                content
+                <div className={variant === 'editorial' ? s.itemStaticEditorial : undefined}>
+                  {content}
+                </div>
               )}
             </li>
           );

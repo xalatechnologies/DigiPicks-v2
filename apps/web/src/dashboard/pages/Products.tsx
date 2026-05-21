@@ -17,14 +17,12 @@ import {
   StudioTierCard,
   StudioFeatureCompare,
   StudioPlanConfigurator,
-  QuickActionGrid,
   type StudioTierFeature,
   type StudioTierVariant,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 import { useStudioContext } from '../useStudioContext';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 
 const COMPARE_ROWS = [
@@ -456,8 +454,6 @@ export function Products() {
             />
           </div>
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('products', navigate)} />
       </Stack>
     </Container>
   );

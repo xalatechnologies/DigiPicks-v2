@@ -3,6 +3,33 @@ import { Password } from '@convex-dev/auth/providers/Password';
 import { Email } from '@convex-dev/auth/providers/Email';
 import Discord from '@auth/core/providers/discord';
 import { internal } from './_generated/api';
+import { resolveDevAdminEmail } from './shared/devAdminDefaults';
+
+function devAdminEmailForAuth(): string | undefined {
+  try {
+    return resolveDevAdminEmail();
+  } catch {
+    return process.env.DEV_ADMIN_EMAIL?.trim().toLowerCase();
+  }
+}
+
+function profileEmail(
+  profile: Record<string, unknown> | undefined,
+  fallback?: string | null,
+): string | undefined {
+  const fromProfile = (profile?.email as string | undefined)?.trim().toLowerCase();
+  if (fromProfile) return fromProfile;
+  // Password provider uses account id as the email address on sign-in.
+  const accountId = (profile?.id as string | undefined)?.trim().toLowerCase();
+  if (accountId?.includes('@')) return accountId;
+  const fromFallback = fallback?.trim().toLowerCase();
+  return fromFallback || undefined;
+}
+
+function isDevAdminEmail(email: string | undefined): boolean {
+  const devAdminEmail = devAdminEmailForAuth();
+  return Boolean(devAdminEmail && email && email === devAdminEmail);
+}
 
 // Magic-link email provider — saved-email click on the auth page sends a
 // one-click sign-in URL via Resend. Token verification is handled by
@@ -62,25 +89,72 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       if (args.existingUserId) {
-        // Updating existing user — persist Discord profile if available
+        const existing = await ctx.db.get(args.existingUserId);
+        const email = profileEmail(
+          args.profile as Record<string, unknown> | undefined,
+          existing?.email,
+        );
+        const patch: Record<string, unknown> = {};
         if (args.profile?.discordId) {
-          await ctx.db.patch(args.existingUserId, {
-            discordId: args.profile.discordId as string,
-            discordUsername: args.profile.discordUsername as string | undefined,
-          });
+          patch.discordId = args.profile.discordId as string;
+          patch.discordUsername = args.profile.discordUsername as string | undefined;
+        }
+        if (email && !existing?.email) {
+          patch.email = email;
+        }
+        if (isDevAdminEmail(email)) {
+          patch.role = 'admin';
+          patch.name = existing?.name ?? 'Platform Admin';
+          patch.isActive = true;
+          if (!existing?.email) {
+            patch.email = devAdminEmailForAuth();
+          }
+        }
+        if (Object.keys(patch).length > 0) {
+          await ctx.db.patch(args.existingUserId, patch);
         }
         return args.existingUserId;
       }
-      // Creating a new user — set DigiPicks defaults + Discord fields.
+      const email = profileEmail(args.profile as Record<string, unknown> | undefined);
+      const role = isDevAdminEmail(email) ? 'admin' : 'user';
+      const devAdmin = isDevAdminEmail(email);
+      const profile = args.profile as Record<string, unknown> | undefined;
+
+      // Reuse an existing profile for this email (dev bootstrap, migrations).
+      if (email) {
+        const holder = await ctx.db
+          .query('users')
+          .filter((q) => q.eq(q.field('email'), email))
+          .first();
+        if (holder) {
+          const patch: Record<string, unknown> = { isActive: true };
+          if (devAdmin) {
+            patch.role = 'admin';
+            patch.name = holder.name ?? 'Platform Admin';
+          }
+          if (Object.keys(patch).length > 0) {
+            await ctx.db.patch(holder._id, patch);
+          }
+          return holder._id;
+        }
+      }
+
+      // Creating a new user — set DigiPicks defaults + Discord fields (no legacy spread).
       const userId = await ctx.db.insert('users', {
-        ...args.profile,
-        role: 'user',
+        name: (profile?.name as string | undefined) ?? (devAdmin ? 'Platform Admin' : undefined),
+        image: profile?.image as string | undefined,
+        ...(email ? { email } : {}),
+        emailVerificationTime: profile?.emailVerificationTime as number | undefined,
+        phone: profile?.phone as string | undefined,
+        phoneVerificationTime: profile?.phoneVerificationTime as number | undefined,
+        isAnonymous: profile?.isAnonymous as boolean | undefined,
+        role,
         isActive: true,
-        locale: 'nb',
-        ...(args.profile?.discordId
+        locale: devAdmin ? 'en' : 'nb',
+        ...(profile?.discordId
           ? {
-              discordId: args.profile.discordId as string,
-              discordUsername: args.profile.discordUsername as string | undefined,
+              discordId: profile.discordId as string,
+              discordUsername: profile.discordUsername as string | undefined,
             }
           : {}),
       });

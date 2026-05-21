@@ -1,33 +1,110 @@
 .card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
   padding: var(--space-8);
   background: var(--bg-1);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .title {
-  margin: 0 0 var(--space-6);
+  margin: 0;
   font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-extrabold);
   color: var(--t-1);
+  letter-spacing: var(--tracking-snug);
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.primaryRow {
-  background: color-mix(in srgb, var(--primary) 12%, var(--bg-2));
-  border-radius: var(--r-lg);
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  border: none;
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
-.primaryRow:hover {
-  background: color-mix(in srgb, var(--primary) 18%, var(--bg-2));
+.row:hover:not(:disabled) {
+  background: var(--bg-3);
 }
 
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
+.row:hover:not(:disabled) .arrow {
+  transform: translateX(2px);
+  color: var(--primary);
+}
+
+.row:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.row:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.arrow {
+  color: var(--t-3);
+  flex-shrink: 0;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.primary {
+  margin-top: var(--space-2);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    color-mix(in srgb, var(--primary) 78%, var(--bg-1)) 100%
+  );
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-md);
+}
+
+.primary .label {
+  color: var(--primary-foreground);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-size: var(--text-xs);
+}
+
+.primary .arrow {
+  color: var(--primary-foreground);
+}
+
+.primary:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 92%, var(--bg-1)) 0%,
+    var(--primary) 100%
+  );
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
 }

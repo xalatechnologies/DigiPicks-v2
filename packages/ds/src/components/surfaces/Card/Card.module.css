@@ -12,6 +12,12 @@
     box-shadow var(--dur-base) var(--ease-out),
     transform var(--dur-base) var(--ease-out);
 }
+
+:global([data-theme='light']) .card {
+  background: var(--bg-0);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}
 .padSm {
   padding: var(--space-3);
 }

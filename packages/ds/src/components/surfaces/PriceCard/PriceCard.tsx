@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import { Icon } from '../../atoms/Icon/Icon';
 import s from './PriceCard.module.css';
 
@@ -23,7 +24,7 @@ export function PriceCard({
   className,
 }: PriceCardProps) {
   return (
-    <div className={cx(s.card, featured && s.featured, className)}>
+    <div className={cx(s.card, lift.surface, featured && s.featured, className)}>
       <span className={s.shine} aria-hidden="true" />
       <div className={s.head}>
         <div className={s.name}>{name}</div>

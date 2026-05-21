@@ -21,9 +21,9 @@
   font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wider, 0.04em);
-  color: var(--muted-foreground);
-  border-bottom: 1px solid var(--border);
+  letter-spacing: var(--tracking-wider);
+  color: var(--t-3);
+  border-bottom: 1px solid var(--line);
 }
 
 .bookHead {
@@ -33,15 +33,15 @@
 .rowLabel {
   padding: var(--space-2) var(--space-3);
   white-space: nowrap;
-  color: var(--foreground);
-  border-bottom: 1px solid var(--border);
+  color: var(--t-1);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .cell {
   padding: var(--space-2) var(--space-3);
   text-align: right;
-  border-bottom: 1px solid var(--border);
-  color: var(--foreground);
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--t-1);
 }
 
 .cellBest {
@@ -52,7 +52,37 @@
 
 .point {
   margin-left: var(--space-2);
-  font-family: var(--font-mono);
+  font-family: var(--f-mono);
   font-size: var(--text-2xs);
-  color: var(--muted-foreground);
+  color: var(--t-3);
+}
+
+/* Light canvas: keep original sizing; improve contrast only. */
+:global([data-theme='light']) .table {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+:global([data-theme='light']) .cornerHead,
+:global([data-theme='light']) .bookHead {
+  background: var(--bg-2);
+  border-bottom-color: var(--line-strong);
+  color: var(--t-2);
+}
+
+:global([data-theme='light']) .rowLabel {
+  background: var(--bg-1);
+  border-bottom-color: var(--line);
+}
+
+:global([data-theme='light']) .cell {
+  background: var(--bg-0);
+  border-bottom-color: var(--line-soft);
+}
+
+:global([data-theme='light']) .cellBest {
+  background: var(--green-soft);
+  color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green-line);
 }

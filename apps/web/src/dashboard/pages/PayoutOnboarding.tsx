@@ -5,7 +5,6 @@ import {
   Container,
   Stack,
   StudioPageHeader,
-  QuickActionGrid,
   Card,
   CardHead,
   Button,
@@ -17,7 +16,6 @@ import {
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { STUDIO } from '../../lib/studioRoutes';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { useStudioContext } from '../useStudioContext';
 
 const STEPS = [
@@ -100,8 +98,6 @@ export function PayoutOnboarding() {
             }
           />
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('payoutOnboarding', navigate)} />
       </Stack>
     </Container>
   );

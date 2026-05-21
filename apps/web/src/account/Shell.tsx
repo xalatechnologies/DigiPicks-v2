@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useConvexAuth, useQuery } from '../auth/convexAuth';
 import { AppLayout, AppHeader, Sidebar, NavSection, NavItem, Stack } from '@digipicks/ds';
 import { AccountUserMenu } from '../auth/AccountUserMenu';
 import { api } from '../../../../convex/_generated/api';
@@ -31,9 +31,15 @@ function buildNavSections(unreadLabel: string): AccountNavSection[] {
         {
           to: '/account',
           label: 'Dashboard',
-          sub: 'Feed, stats & analytics',
+          sub: 'Stats & live slate',
           icon: 'home',
           end: true,
+        },
+        {
+          to: '/account/feed',
+          label: 'My Feed',
+          sub: 'Picks from creators you follow',
+          icon: 'feed',
         },
         { to: '/account/discover', label: 'Discover', sub: 'Find new creators', icon: 'compass' },
         {
@@ -73,18 +79,6 @@ function buildNavSections(unreadLabel: string): AccountNavSection[] {
           badge: unreadLabel,
         },
         { to: '/account/messages', label: 'Messages', sub: 'DMs & threads', icon: 'inbox' },
-        {
-          to: '/account/watchlists',
-          label: 'Watchlists',
-          sub: 'Alert rules on the slate',
-          icon: 'eye',
-        },
-        {
-          to: '/account/copilot',
-          label: 'Copilot',
-          sub: 'Ask anything · cited',
-          icon: 'sparkles',
-        },
         { to: '/account/community', label: 'Community', sub: 'Live discussions', icon: 'message' },
         { to: '/account/settings', label: 'Settings', sub: 'Profile & preferences', icon: 'gear' },
       ],
@@ -101,8 +95,12 @@ export function SubscriberShell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const me = useQuery(api.users.meSafe);
-  const unread = useQuery(api.notifications.unreadCount, me ? {} : 'skip');
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const unread = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated && me !== undefined && me !== null ? {} : 'skip',
+  );
 
   const userName = me?.name ?? 'You';
   const userMail = me?.email ?? '';
@@ -118,6 +116,7 @@ export function SubscriberShell() {
       userName={userName}
       userMail={userMail}
       userMonogram={userMonogram}
+      onLogoClick={() => navigate('/')}
       userMenu={<AccountUserMenu align="right" />}
     />
   );

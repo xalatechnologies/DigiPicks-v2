@@ -1,6 +1,6 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import { requireUser } from './shared/permissions';
+import { getCurrentUser, requireUser } from './shared/permissions';
 
 // =============================================================================
 // Notifications Module
@@ -73,12 +73,13 @@ export const listMinePaginated = query({
   },
 });
 
-// Auth-only.
+// Public (returns 0 when logged out — safe for header badges during auth transitions).
 /** Unread badge count — capped at 99 for display. */
 export const unreadCount = query({
   args: {},
   handler: async (ctx) => {
-    const user = await requireUser(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user) return 0;
     const rows = await ctx.db
       .query('notifications')
       .withIndex('by_user', (q) => q.eq('userId', user._id))

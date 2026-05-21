@@ -28,6 +28,132 @@ npx convex deploy
 `convex dev` regenerates `convex/_generated/api.{d.ts,js}`. If your
 typecheck breaks after pulling new backend code, run `convex dev` once.
 
+### Local setup (first time or “Could not find public function”)
+
+You need **two terminals** and a `.env.local` that matches the deployment
+`npx convex dev` syncs to.
+
+**Terminal 1 — Convex (keep running)**
+
+```bash
+cd /path/to/DigiPicks-v2
+npx convex login          # once per machine
+npx convex dev --configure existing --team <your-team-slug>
+```
+
+Pick an existing project or create one. Convex writes/updates `.env.local`:
+
+- `CONVEX_DEPLOYMENT=dev:…`
+- `CONVEX_URL=https://….convex.cloud`
+- `VITE_CONVEX_URL` (same URL — required for the Vite app)
+
+If you see **“You don't have access to the selected project”**, the repo is
+still linked to someone else's deployment (e.g. `info-cb24c`). Either:
+
+- **A)** Re-run `npx convex dev --configure existing --team <your-team-slug>` and
+  choose **your** project (recommended for solo dev), or
+- **B)** Ask the team owner to invite your Convex account to their team, then
+  `npx convex dev` without reconfiguring.
+
+**Terminal 2 — Web**
+
+```bash
+cd /path/to/DigiPicks-v2
+pnpm dev:web
+# or: pnpm dev   (runs Convex + web together)
+```
+
+Open http://localhost:5173/admin — functions like `admin:overview` only exist
+after Terminal 1 has pushed code at least once.
+
+**Schema validation failed on `users` (legacy fields)**
+
+If `npx convex dev` reports extra fields like `displayName` or `passwordHash`
+on `users`, the deployment has rows from an older schema. After the first
+successful push:
+
+```bash
+# Preview — lists sample users, subscription counts, broken creatorId links
+npx convex run migrations:stripLegacyUserFields '{"dryRun": true}'
+npx convex run migrations:stripLegacyUserFields
+```
+
+**Subscriber vs creator data:** personas live on `users` (`role`, optional
+`creatorId`); billing links are in `subscriptions` (`subscriberId` →
+`creatorId`). This migration only strips obsolete columns on `users` (e.g.
+`passwordHash`, legacy `status`). It does **not** touch `creators` or
+`subscriptions`, does not change `role` or `creatorId`, and does not map
+legacy `users.status` to `isActive` (that string is unrelated to
+`creators.status` or `subscriptions.status`). User `_id` values are unchanged
+so subscriber/creator foreign keys stay valid.
+
+Then restart `npx convex dev`.
+
+**“Multiple CONVEX_URL environment variables”**
+
+Ensure only one `CONVEX_URL` is set — check `.env.local` and shell exports
+(`env | grep CONVEX`). Remove duplicates; keep `VITE_CONVEX_URL` aligned with
+`CONVEX_URL`.
+
+**Optional — dev admin password on the deployment**
+
+```bash
+npx convex env set DEV_ADMIN_EMAIL admin@digipicks.com
+npx convex env set DEV_ADMIN_PASSWORD 'AdminDev123!'
+```
+
+Match those in `apps/web/.env.local` only if you override defaults (local
+`pnpm dev` already uses `admin@digipicks.com` / `AdminDev123!`).
+
+**Convex Auth — `JWT_PRIVATE_KEY` missing**
+
+Password/OAuth sign-in needs JWT keys on the **Convex deployment** (not in `.env.local`).
+Local `.env.local` / `apps/web/.env.local` only point the app at your deployment
+(`CONVEX_URL`, `VITE_CONVEX_URL`).
+
+**Stable local dev (Convex + Vite)**
+
+```bash
+pnpm dev                      # convex dev + Vite at http://localhost:5173
+pnpm setup:convex-auth        # once per deployment (SITE_URL + keys if missing)
+pnpm verify:convex-auth       # read-only sanity check
+```
+
+`setup:convex-auth` is **idempotent** by default: it updates `SITE_URL` but keeps
+existing `JWT_PRIVATE_KEY` / `JWKS`. Use `--rotate` only when you intend to
+invalidate all browser sessions:
+
+```bash
+pnpm setup:convex-auth -- --rotate
+# then: restart pnpm dev, clear __convexAuth* in localStorage for :5173, sign in again
+```
+
+Align `SITE_URL` with the Vite port if needed:
+
+```bash
+pnpm setup:convex-auth -- --site-url http://localhost:5173
+```
+
+**Verify**
+
+```bash
+pnpm verify:convex-auth
+npx convex login status
+npx convex env list | grep -E 'JWT_PRIVATE_KEY|JWKS|SITE_URL'
+```
+
+If verify reports **JWKS is not valid JSON** (causes `AuthProviderDiscoveryFailed` /
+“token saved but Convex rejected it”), rotate keys once:
+
+```bash
+pnpm setup:convex-auth -- --rotate
+```
+
+Admin sign-in: `http://localhost:5173/auth?next=%2Fadmin` with
+`admin@digipicks.com` / `AdminDev123!` (see dev defaults in `apps/web`).
+
+Or: `npx @convex-dev/auth` (initial bootstrap alternative — prefer `pnpm setup:convex-auth`).
+
 ---
 
 ## 1. Environment variables
@@ -65,6 +191,40 @@ npx convex env set ANTHROPIC_API_KEY sk-ant-xxxxx
 # Optional, opt-in only:
 # npx convex env set ODDS_SNAPSHOTS_ENABLED true
 ```
+
+### Dev platform admin (no signup)
+
+For local QA, open **`http://localhost:5173/admin`** while `pnpm dev` is running. The app
+signs in (or registers once via Convex Auth) as the dev admin — no manual signup form.
+
+**Defaults** (non-production Convex only): `admin@digipicks.com` / `AdminDev123!`
+
+**Admin login still failing**
+
+1. Split env files (avoids Convex “multiple CONVEX_URL” warnings):
+   - Root `.env.local`: `CONVEX_DEPLOYMENT`, `CONVEX_URL`, `CONVEX_SITE_URL` only
+   - `apps/web/.env.local`: `VITE_CONVEX_URL` (+ optional `VITE_DEV_*`)
+2. Keep `npx convex dev` running, then restart `pnpm dev:web`.
+3. Reset credentials + admin profile on the deployment:
+
+```bash
+npx convex run devProvisionActions:bootstrapDevAdmin
+```
+
+4. Open `/admin` (auto sign-in) or `/auth?next=/admin` with the defaults above.
+5. If you previously clicked **Sign out** on admin, that blocks auto sign-in until you use **Try again** or clear `sessionStorage` key `digipicks_dev_admin_signed_out`.
+6. Legacy DB with one email-less `users` row is upgraded in place by bootstrap (no duplicate subscriber/creator rows).
+
+Keep **`npx convex dev`** running so backend functions stay in sync with the repo. Optional
+one-shot password reset: `npx convex run devProvision:setupAdminForDev` (see `convex/devProvision.ts`).
+
+Optional overrides:
+
+- **Convex:** `npx convex env set DEV_ADMIN_EMAIL …` and `DEV_ADMIN_PASSWORD …`
+- **Vite:** `VITE_DEV_ADMIN_EMAIL` / `VITE_DEV_ADMIN_PASSWORD` in `.env.local` (must match Convex)
+- **Hosted preview:** also set `VITE_DEV_UNLOCK_DASHBOARD=true` (local `pnpm dev` does not need this)
+
+`bootstrapDevAdmin` is disabled on production Convex deployments.
 
 ---
 

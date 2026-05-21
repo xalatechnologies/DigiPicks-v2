@@ -327,7 +327,7 @@ export const onPickPublished = internalAction({
       pickId: args.pickId,
     });
     await Promise.all(
-      matched.map((w) =>
+      matched.map((w: { _id: Id<'watchlists'>; userId: Id<'users'>; name: string }) =>
         ctx.runAction(internal.notify.dispatch, {
           userId: w.userId,
           kind: 'pick_published',

@@ -1,3 +1,4 @@
+/** @refresh reset */
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
@@ -11,9 +12,11 @@ import {
   CreatorStudioProfile,
   Badge,
 } from '@digipicks/ds';
-import { AccountUserMenu } from '../auth/AccountUserMenu';
+import { AdminUserMenu } from '../auth/AdminUserMenu';
 import { api } from '../../../../convex/_generated/api';
 import { ADMIN } from './lib/adminRoutes';
+import { useAdminSession } from './lib/useAdminSession';
+import { RouteErrorBoundary } from '../feedback/RouteErrorBoundary';
 
 const ADMIN_NAV = [
   { to: ADMIN.overview, label: 'Overview', icon: 'home', end: true },
@@ -52,18 +55,18 @@ function formatRole(role: string | undefined): string {
     .join(' ');
 }
 
-export function AdminShell() {
+function AdminShellInner() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const me = useQuery(api.users.me, {});
-  const appCounts = useQuery(api.applications.queueCounts, {});
+  const { me, isAdmin } = useAdminSession();
+  const appCounts = useQuery(api.applications.queueCounts, isAdmin ? {} : 'skip');
 
   const displayName = me?.name ?? me?.email ?? 'Admin';
   const userMonogram = me?.name?.[0]?.toUpperCase() ?? 'A';
 
   const header = (
     <StudioTopBar
-      userMenu={<AccountUserMenu align="right" />}
+      userMenu={<AdminUserMenu align="right" />}
       onSearch={() => navigate(ADMIN.users)}
     />
   );
@@ -79,7 +82,11 @@ export function AdminShell() {
         />
       }
     >
-      <StudioSidebarBrand title="DigiPicks" tagline="Platform operations" />
+      <StudioSidebarBrand
+        title="DigiPicks"
+        tagline="Platform operations"
+        onLogoClick={() => navigate('/')}
+      />
       <Stack gap={1}>
         {ADMIN_NAV.map((item) => (
           <NavItem
@@ -106,7 +113,16 @@ export function AdminShell() {
 
   return (
     <AppLayout header={header} sidebar={sidebar} mainVariant="studio">
-      <Outlet />
+      {/* Remount page content on navigation so a stale route cannot stack under the shell. */}
+      <Outlet key={pathname} />
     </AppLayout>
+  );
+}
+
+export function AdminShell() {
+  return (
+    <RouteErrorBoundary title="Admin portal error">
+      <AdminShellInner />
+    </RouteErrorBoundary>
   );
 }

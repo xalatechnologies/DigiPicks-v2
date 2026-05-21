@@ -13,7 +13,6 @@ import {
   Button,
   Icon,
   StudioPageHeader,
-  QuickActionGrid,
   MetricGrid,
   Mono,
   Badge,
@@ -24,7 +23,6 @@ import {
 } from '@digipicks/ds';
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 interface Opportunity {
   id: string;
@@ -163,8 +161,6 @@ export function Growth() {
             </Card>
           </Col>
         </Row>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('growth', navigate)} />
       </Stack>
     </Container>
   );

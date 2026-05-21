@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import { Avatar } from '../../atoms/Avatar/Avatar';
 import { VerifiedMark } from '../../atoms/VerifiedMark/VerifiedMark';
 import s from './Testimonial.module.css';
@@ -29,8 +30,10 @@ export function Testimonial({
   className,
 }: TestimonialProps) {
   return (
-    <article className={cx(s.card, className)}>
-      <span className={s.quoteMark} aria-hidden="true">"</span>
+    <article className={cx(s.card, lift.surface, className)}>
+      <span className={s.quoteMark} aria-hidden="true">
+        "
+      </span>
       <p className={s.quote}>{quote}</p>
       <div className={s.author}>
         <Avatar mono={authorMono} color={authorColor} size={40} />

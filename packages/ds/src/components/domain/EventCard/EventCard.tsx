@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import { SportTag } from '../../atoms/SportTag/SportTag';
 import { Avatar } from '../../atoms/Avatar/Avatar';
 import { AvatarStack } from '../../atoms/AvatarStack/AvatarStack';
@@ -50,14 +51,22 @@ export interface EventCardProps extends Omit<React.HTMLAttributes<HTMLDivElement
 function initials(name: string): string {
   const words = name.split(/\s+/);
   if (words.length === 1) return name.slice(0, 3).toUpperCase();
-  return words.slice(0, 3).map((w) => w[0]).join('').toUpperCase();
+  return words
+    .slice(0, 3)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
 }
 
 /** Deterministic color from team name. */
 function teamColor(name: string): string {
   const colors = [
-    'var(--primary)', 'var(--violet)', 'var(--green)',
-    'var(--orange)', 'var(--red)', 'var(--blue)',
+    'var(--primary)',
+    'var(--violet)',
+    'var(--green)',
+    'var(--orange)',
+    'var(--red)',
+    'var(--blue)',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -143,7 +152,13 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(functi
   return (
     <div
       ref={ref}
-      className={cx(s.card, featured && s.featured, interactive && s.interactive, className)}
+      className={cx(
+        s.card,
+        lift.surface,
+        featured && s.featured,
+        interactive && s.interactive,
+        className,
+      )}
       onClick={onClick}
       {...rest}
     >

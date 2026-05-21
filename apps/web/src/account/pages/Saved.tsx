@@ -19,10 +19,8 @@ import {
   AccountSavedLibraryFooter,
   CreatorExploreCard,
   Muted,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 type LibraryTab = 'picks' | 'creators' | 'archived';
@@ -435,8 +433,6 @@ export function Saved() {
             tipMeta="Recommended for active subscribers"
           />
         ) : null}
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('saved', navigate)} />
       </Stack>
     </Container>
   );

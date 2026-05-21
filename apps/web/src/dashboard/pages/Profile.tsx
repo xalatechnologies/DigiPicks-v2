@@ -19,11 +19,9 @@ import {
   InsightCard,
   StudioSummaryGrid,
   StudioSubNav,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { STUDIO } from '../../lib/studioRoutes';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { useStudioContext } from '../useStudioContext';
 import { StudioDevHint } from '../StudioDevHint';
 
@@ -270,8 +268,6 @@ export function Profile() {
             </Card>
           </Grid>
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('profile', navigate)} />
       </Stack>
     </Container>
   );

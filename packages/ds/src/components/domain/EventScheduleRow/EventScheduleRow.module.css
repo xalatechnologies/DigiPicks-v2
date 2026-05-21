@@ -154,3 +154,33 @@
 .chevron {
   color: var(--t-4);
 }
+
+.dense {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.dense .left {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.dense .time {
+  width: auto;
+}
+
+.dense .right {
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dense .metaBlock {
+  display: flex;
+  align-items: flex-start;
+}

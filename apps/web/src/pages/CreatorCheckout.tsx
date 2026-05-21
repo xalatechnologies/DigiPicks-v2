@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAction, useQuery } from 'convex/react';
-import { useConvexAuth } from '@convex-dev/auth/react';
+import { useConvexAuth } from '../auth/convexAuth';
 import {
   Container,
   Stack,

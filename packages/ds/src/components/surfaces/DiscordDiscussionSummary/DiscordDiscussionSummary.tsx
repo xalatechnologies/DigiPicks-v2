@@ -1,7 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
 import { Icon } from '../../atoms/Icon/Icon';
-import { ResponsibleNote } from '../../feedback/ResponsibleNote/ResponsibleNote';
 import { Card } from '../Card/Card';
 import s from './DiscordDiscussionSummary.module.css';
 
@@ -39,7 +38,7 @@ function sentimentLabel(v: number): { label: string; tone: 'pos' | 'neu' | 'neg'
 
 /**
  * Sentiment + summary block for a Discord discussion window. Includes a
- * standing `ResponsibleNote` reminding readers that community signals are
+ * Community discussion summary card for Discord thread insights.
  * opinions, not verified facts.
  */
 export function DiscordDiscussionSummary({
@@ -100,13 +99,6 @@ export function DiscordDiscussionSummary({
           ))}
         </ul>
       )}
-
-      <ResponsibleNote
-        className={s.note}
-        title="Community signals — not verified facts."
-        body="Discussion summaries reflect what community members are saying. Treat them as crowd opinion, not as research or betting advice."
-        hideHelpline
-      />
     </Card>
   );
 }

@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query, internalMutation, internalQuery } from './_generated/server';
 import { v } from 'convex/values';
 import { requireUser, getCurrentUser } from './shared/permissions';
@@ -23,6 +24,21 @@ export const meSafe = query({
   args: {},
   handler: async (ctx) => {
     return await getCurrentUser(ctx);
+  },
+});
+
+// Public.
+/** Whether the current request carries a valid Convex Auth identity (no profile join). */
+export const authSessionProbe = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = await getAuthUserId(ctx);
+    return {
+      userId: userId ?? null,
+      hasIdentity: identity !== null,
+      issuer: identity?.issuer ?? null,
+    };
   },
 });
 

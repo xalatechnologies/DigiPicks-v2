@@ -8,10 +8,8 @@ import {
   Muted,
   StudioPageHeader,
   AccountBillingPanel,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { useStripePortal } from '../../lib/useStripePortal';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 export function PaymentMethods() {
   const navigate = useNavigate();
@@ -51,7 +49,6 @@ export function PaymentMethods() {
             {error ? <Muted>{error}</Muted> : null}
           </Stack>
         </Card>
-        <QuickActionGrid title="Related" items={accountCrossLinks('paymentMethods', navigate)} />
       </Stack>
     </Container>
   );

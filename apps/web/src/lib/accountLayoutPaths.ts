@@ -10,7 +10,7 @@ export interface AccountLayoutPaths {
 export function accountLayoutPaths(context: LayoutContext = 'public'): AccountLayoutPaths {
   if (context === 'account') {
     return {
-      feed: '/account',
+      feed: '/account/feed',
       discover: '/account/discover',
       creatorsBrowse: '/account/discover',
     };

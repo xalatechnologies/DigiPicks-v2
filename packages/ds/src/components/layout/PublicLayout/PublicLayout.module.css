@@ -42,6 +42,7 @@
 }
 
 .headerInner {
+  width: 100%;
   height: var(--header-h);
   display: flex;
   align-items: center;

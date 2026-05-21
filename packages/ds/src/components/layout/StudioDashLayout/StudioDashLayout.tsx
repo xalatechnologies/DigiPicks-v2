@@ -14,22 +14,30 @@ export function StudioDashLayout({ children, className }: StudioDashLayoutProps)
 export interface StudioDashColProps {
   children?: React.ReactNode;
   /** 12-column span at large breakpoints (full width on small screens). */
-  span?: 4 | 5 | 6 | 7 | 8 | 12;
+  span?: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 12;
   className?: string;
 }
 
 export function StudioDashCol({ children, span = 12, className }: StudioDashColProps) {
   const spanClass =
-    span === 4
-      ? s.span4
-      : span === 5
-        ? s.span5
-        : span === 6
-          ? s.span6
-          : span === 7
-            ? s.span7
-            : span === 8
-              ? s.span8
-              : s.span12;
+    span === 2
+      ? s.span2
+      : span === 3
+        ? s.span3
+        : span === 4
+          ? s.span4
+          : span === 5
+            ? s.span5
+            : span === 6
+              ? s.span6
+              : span === 7
+                ? s.span7
+                : span === 8
+                  ? s.span8
+                  : span === 9
+                    ? s.span9
+                    : span === 10
+                      ? s.span10
+                      : s.span12;
   return <div className={cx(s.col, spanClass, className)}>{children}</div>;
 }

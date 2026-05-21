@@ -1,0 +1,74 @@
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+@media (min-width: 1024px) {
+  .aside {
+    position: sticky;
+    top: var(--space-4);
+    align-self: start;
+  }
+}
+
+.previewHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.previewEyebrow {
+  font-family: var(--f-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--t-3);
+}
+
+.previewTitle {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.previewSub {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--t-2);
+}
+
+.previewBody {
+  min-width: 0;
+}
+
+.tip {
+  padding: var(--space-5);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-1));
+}
+
+.tipTitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--f-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+}
+
+.tipBody {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--t-2);
+}
+
+.tipIcon {
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+  color: var(--primary);
+}

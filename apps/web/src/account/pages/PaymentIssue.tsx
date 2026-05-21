@@ -12,11 +12,9 @@ import {
   InsightCard,
   Icon,
   EmptyState,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { useStripePortal } from '../../lib/useStripePortal';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 export function PaymentIssue() {
   const navigate = useNavigate();
@@ -79,7 +77,6 @@ export function PaymentIssue() {
             Contact support
           </Button>
         </Card>
-        <QuickActionGrid title="Related" items={accountCrossLinks('paymentIssue', navigate)} />
       </Stack>
     </Container>
   );

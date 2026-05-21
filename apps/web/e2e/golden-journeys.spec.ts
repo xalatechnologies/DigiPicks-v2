@@ -14,9 +14,10 @@ test.describe('J1 — visitor registration (public entry)', () => {
 });
 
 test.describe('J2 — creator apply (public)', () => {
-  test('apply page loads', async ({ page }) => {
+  test('apply page prompts for subscriber account when signed out', async ({ page }) => {
     await page.goto('/apply');
     await expect(page.getByRole('heading', { name: /apply|creator/i })).toBeVisible();
+    await expect(page.getByText(/subscriber account required/i)).toBeVisible();
   });
 });
 

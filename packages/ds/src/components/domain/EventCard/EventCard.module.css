@@ -23,10 +23,25 @@
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(40% 40% at 20% 30%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 60%),
-    radial-gradient(30% 30% at 80% 20%, color-mix(in srgb, var(--violet) 8%, transparent) 0%, transparent 60%),
-    radial-gradient(35% 35% at 60% 80%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 60%);
-  background-size: 200% 200%, 200% 200%, 200% 200%;
+    radial-gradient(
+      40% 40% at 20% 30%,
+      color-mix(in srgb, var(--primary) 10%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      30% 30% at 80% 20%,
+      color-mix(in srgb, var(--violet) 8%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      35% 35% at 60% 80%,
+      color-mix(in srgb, var(--primary) 8%, transparent) 0%,
+      transparent 60%
+    );
+  background-size:
+    200% 200%,
+    200% 200%,
+    200% 200%;
   filter: blur(var(--blur-xl));
   opacity: 0.55;
   pointer-events: none;
@@ -82,12 +97,34 @@
     0 32px 64px -28px color-mix(in srgb, var(--blue) 36%, transparent),
     var(--shadow-md);
 }
+
+:global([data-theme='light']) .featured {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 16%, transparent), transparent 55%),
+    var(--bg-0);
+  border-color: var(--blue-line);
+  box-shadow:
+    0 20px 40px -16px color-mix(in srgb, var(--blue) 30%, transparent),
+    var(--shadow-md);
+}
 .featured .aurora {
   opacity: 0.85;
   background:
-    radial-gradient(40% 40% at 20% 30%, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 60%),
-    radial-gradient(30% 30% at 80% 20%, color-mix(in srgb, var(--violet) 18%, transparent) 0%, transparent 60%),
-    radial-gradient(35% 35% at 60% 80%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 60%);
+    radial-gradient(
+      40% 40% at 20% 30%,
+      color-mix(in srgb, var(--blue) 22%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      30% 30% at 80% 20%,
+      color-mix(in srgb, var(--violet) 18%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      35% 35% at 60% 80%,
+      color-mix(in srgb, var(--blue) 18%, transparent) 0%,
+      transparent 60%
+    );
 }
 .featured .shine {
   background: linear-gradient(
@@ -180,7 +217,8 @@
 }
 
 @keyframes dp-live-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 60%, transparent);
   }
   50% {

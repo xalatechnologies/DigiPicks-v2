@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
-  envDir: path.resolve(__dirname, '../..'),
+  // Vite-only vars live in `apps/web/.env.local`; Convex CLI uses repo-root `.env.local`.
+  envDir: path.resolve(__dirname),
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,

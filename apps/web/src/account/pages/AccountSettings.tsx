@@ -25,10 +25,8 @@ import {
   AccountBillingPanel,
   Eyebrow,
   Muted,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 type Locale = 'en' | 'nb';
 
@@ -372,8 +370,6 @@ export function AccountSettings() {
             </Stack>
           </StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('settings', navigate)} />
       </Stack>
     </Container>
   );

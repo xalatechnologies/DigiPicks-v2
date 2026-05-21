@@ -1,59 +1,170 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
-  Card,
-  Table,
-  THead,
-  TBody,
-  Tr,
-  Th,
-  Td,
   Button,
-  Badge,
   EmptyState,
-  Segmented,
-  Field,
-  TextArea,
-  Muted,
   StudioPageHeader,
-  StudioRefineCard,
-  QuickActionGrid,
+  AdminApplicationsFilterBar,
+  AdminApplicationsTable,
+  ApplicationReviewDrawer,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { adminCrossLinks } from '../lib/adminCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { ADMIN } from '../lib/adminRoutes';
+import {
+  APPLICATION_STATUS_FILTERS,
+  auditToHistory,
+  formatSubmittedLabel,
+  matchesApplicationSearch,
+  nicheChip,
+  parseApplicationStatus,
+  statusDisplay,
+  tableStatusTone,
+  toDrawerApplicant,
+  type ApplicationStatus,
+} from '../lib/applicationReview';
 
-const FILTERS = [
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'review', label: 'In review' },
-  { value: 'flagged', label: 'Flagged' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'rejected', label: 'Rejected' },
-];
+function useApplicationParams() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const status = parseApplicationStatus(searchParams.get('status'));
+  const activeId = searchParams.get('id') as Id<'applications'> | null;
+
+  const setStatus = (next: ApplicationStatus) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('status', next);
+    params.delete('id');
+    setSearchParams(params, { replace: true });
+  };
+
+  const setActiveId = (id: Id<'applications'> | null) => {
+    const params = new URLSearchParams(searchParams);
+    if (id) {
+      params.set('id', id);
+    } else {
+      params.delete('id');
+    }
+    setSearchParams(params, { replace: true });
+  };
+
+  return { status, activeId, setStatus, setActiveId };
+}
 
 export function Applications() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('submitted');
-  const apps = useQuery(api.applications.listByStatus, {
-    status: status as 'submitted' | 'review' | 'more_info' | 'flagged' | 'approved' | 'rejected',
-  });
-  const review = useMutation(api.applications.review);
-  const [activeId, setActiveId] = useState<Id<'applications'> | null>(null);
+  const { status, activeId, setStatus, setActiveId } = useApplicationParams();
+  const [search, setSearch] = useState('');
+  const [niche, setNiche] = useState('all');
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const active = apps?.find((a) => a._id === activeId);
+  const queueCounts = useQuery(api.applications.queueCounts, {});
+  const apps = useQuery(api.applications.listByStatus, { status });
+  const activeApp = useQuery(api.applications.get, activeId ? { id: activeId } : 'skip');
+  const auditRows = useQuery(
+    api.audit.listByEntity,
+    activeId ? { entityType: 'application', entityId: activeId, limit: 20 } : 'skip',
+  );
 
-  async function handleReview(next: 'approved' | 'rejected' | 'review') {
+  const review = useMutation(api.applications.review);
+  const appendNote = useMutation(api.applications.appendAdminNote);
+
+  const nicheOptions = useMemo(() => {
+    const sports = new Set<string>();
+    for (const app of apps ?? []) {
+      if (app.sport) sports.add(app.sport);
+    }
+    return [
+      { value: 'all', label: 'All sports' },
+      ...[...sports].sort().map((sport) => ({ value: sport, label: sport })),
+    ];
+  }, [apps]);
+
+  const filteredApps = useMemo(() => {
+    if (!apps) return undefined;
+    return apps.filter((app) => matchesApplicationSearch(app, search, niche));
+  }, [apps, search, niche]);
+
+  const tableRows = useMemo(() => {
+    if (!filteredApps) return [];
+    return filteredApps.map((app) => {
+      const display = statusDisplay(app.status as ApplicationStatus);
+      return {
+        id: app._id,
+        name: app.name,
+        handle: app.handle,
+        email: app.email,
+        nicheLabel: nicheChip(app.sport, app.niche),
+        submittedLabel: formatSubmittedLabel(app.submittedAt),
+        statusLabel: display.label,
+        statusTone: tableStatusTone(display.tone),
+        proofCount: app.proofCount,
+        hasWinClaim: Boolean(app.winClaim),
+      };
+    });
+  }, [filteredApps]);
+
+  const drawerApplicant = useMemo(() => {
+    if (!activeApp) return null;
+    return toDrawerApplicant(activeApp);
+  }, [activeApp]);
+
+  const history = useMemo(() => auditToHistory(auditRows ?? []), [auditRows]);
+
+  const headerSub = useMemo(() => {
+    if (queueCounts === undefined) {
+      return 'Review onboarding requests before provisioning studio access.';
+    }
+    const n = queueCounts.newRequests;
+    return `Reviewing ${n} new request${n === 1 ? '' : 's'} for creator status`;
+  }, [queueCounts]);
+
+  const filterSummary =
+    filteredApps === undefined
+      ? 'Loading…'
+      : `${filteredApps.length} in ${APPLICATION_STATUS_FILTERS.find((f) => f.value === status)?.label ?? status}`;
+
+  function closeDrawer() {
+    setActiveId(null);
+    setNotes('');
+    setActionError(null);
+  }
+
+  async function runReview(next: ApplicationStatus, withNotes = true) {
     if (!activeId) return;
     setBusy(true);
+    setActionError(null);
     try {
-      await review({ id: activeId, status: next, reviewNotes: notes.trim() || undefined });
-      setActiveId(null);
+      await review({
+        id: activeId,
+        status: next,
+        reviewNotes: withNotes ? notes.trim() || undefined : undefined,
+      });
+      if (next === 'approved') {
+        navigate(ADMIN.creators);
+        return;
+      }
+      closeDrawer();
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Action failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAddNote() {
+    if (!activeId || !notes.trim()) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      await appendNote({ id: activeId, body: notes.trim() });
       setNotes('');
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Could not save note');
     } finally {
       setBusy(false);
     }
@@ -61,92 +172,78 @@ export function Applications() {
 
   return (
     <Container size="2xl">
-      <Stack gap={6}>
+      <Stack gap={8}>
         <StudioPageHeader
-          eyebrow="Admin · Onboarding"
+          eyebrow="Operational hub"
           title="Creator applications"
-          sub="Review onboarding requests before provisioning studio access."
+          sub={headerSub}
+          actions={
+            <Button variant="primary" iconLeft="arrow-right" disabled title="Export coming soon">
+              Export report
+            </Button>
+          }
         />
 
-        <StudioRefineCard
-          title="Refine queue"
-          sub="Filter applications by review status."
-          summary={
-            apps === undefined
-              ? 'Loading…'
-              : `${apps.length} application${apps.length === 1 ? '' : 's'}`
+        <AdminApplicationsFilterBar
+          statusOptions={APPLICATION_STATUS_FILTERS}
+          status={status}
+          onStatusChange={(value) => setStatus(value as ApplicationStatus)}
+          search={search}
+          onSearchChange={setSearch}
+          nicheOptions={nicheOptions}
+          niche={niche}
+          onNicheChange={setNiche}
+          summary={filterSummary}
+        />
+
+        <AdminApplicationsTable
+          rows={tableRows}
+          selectedId={activeId}
+          loading={apps === undefined}
+          emptyTitle="No applications in this queue"
+          emptySubtitle={
+            status === 'submitted'
+              ? 'New submissions will appear here after creators apply.'
+              : 'Try another status filter or clear search.'
           }
-          onReset={status !== 'submitted' ? () => setStatus('submitted') : undefined}
-        >
-          <Segmented options={FILTERS} value={status} onChange={setStatus} ariaLabel="Status" />
-        </StudioRefineCard>
+          onSelect={(id) => {
+            setActiveId(id as Id<'applications'>);
+            setNotes('');
+            setActionError(null);
+          }}
+        />
 
-        <Card pad="sm">
-          {apps === undefined ? (
-            <EmptyState icon="user" title="Loading…" />
-          ) : apps.length === 0 ? (
-            <EmptyState icon="user" title="No applications" subtitle="Nothing in this queue." />
-          ) : (
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>Handle</Th>
-                  <Th>Name</Th>
-                  <Th>Sport</Th>
-                  <Th>Status</Th>
-                  <Th />
-                </Tr>
-              </THead>
-              <TBody>
-                {apps.map((a) => (
-                  <Tr key={a._id}>
-                    <Td>{a.handle}</Td>
-                    <Td>{a.name}</Td>
-                    <Td>{a.sport}</Td>
-                    <Td>
-                      <Badge tone="blue">{a.status}</Badge>
-                    </Td>
-                    <Td>
-                      <Button variant="ghost" size="sm" onClick={() => setActiveId(a._id)}>
-                        Review
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </TBody>
-            </Table>
-          )}
-        </Card>
-
-        {active ? (
-          <Card pad="lg">
-            <StudioPageHeader
-              eyebrow="Review"
-              title={active.name}
-              sub={`@${active.handle} · ${active.email}`}
-            />
-            {active.aiAuthenticityScore != null ? (
-              <Muted>AI authenticity score: {active.aiAuthenticityScore}</Muted>
-            ) : null}
-            <Field label="Review notes">
-              <TextArea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
-            </Field>
-            <Stack gap={2}>
-              <Button variant="primary" disabled={busy} onClick={() => handleReview('approved')}>
-                Approve
+        {activeId && apps && !apps.some((a) => a._id === activeId) ? (
+          <EmptyState
+            icon="user"
+            title="Application not in this queue"
+            subtitle="It may have moved to another status. Clear the selection or switch filters."
+            action={
+              <Button variant="secondary" onClick={closeDrawer}>
+                Close review
               </Button>
-              <Button variant="secondary" disabled={busy} onClick={() => handleReview('review')}>
-                Mark in review
-              </Button>
-              <Button variant="danger" disabled={busy} onClick={() => handleReview('rejected')}>
-                Reject
-              </Button>
-            </Stack>
-          </Card>
+            }
+          />
         ) : null}
-
-        <QuickActionGrid title="Related" items={adminCrossLinks('applications', navigate)} />
       </Stack>
+
+      <ApplicationReviewDrawer
+        open={Boolean(activeId)}
+        onClose={closeDrawer}
+        applicant={drawerApplicant}
+        loading={activeId !== null && activeApp === undefined}
+        history={history}
+        note={notes}
+        onNoteChange={setNotes}
+        busy={busy}
+        error={actionError}
+        onApprove={() => runReview('approved')}
+        onReject={() => runReview('rejected')}
+        onRequestInfo={() => runReview('more_info')}
+        onMarkInReview={() => runReview('review', false)}
+        onFlag={() => runReview('flagged', false)}
+        onAddNote={handleAddNote}
+      />
     </Container>
   );
 }

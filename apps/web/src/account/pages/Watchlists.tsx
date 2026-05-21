@@ -24,10 +24,8 @@ import {
   StudioDashLayout,
   StudioDashCol,
   AccountSidebarPanel,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 type ConfidenceLevel = 'Low' | 'Medium' | 'High';
@@ -332,8 +330,6 @@ export function Watchlists() {
           <StudioDashCol span={8}>{listPane}</StudioDashCol>
           <StudioDashCol span={4}>{tipsSidebar}</StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('watchlists', navigate)} />
       </Stack>
     </Container>
   );

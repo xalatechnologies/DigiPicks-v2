@@ -21,7 +21,6 @@ import {
   Divider,
   SwitchRow,
   PushNotificationPrompt,
-  QuickActionGrid,
   MfaEnrollmentCard,
   type PushPermissionState,
   type MfaEnrollmentSecrets,
@@ -30,7 +29,6 @@ import {
 import { api } from '../../../../../convex/_generated/api';
 import { urlBase64ToUint8Array } from '../../lib/pushKey';
 import { STUDIO } from '../../lib/studioRoutes';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { useStudioContext } from '../useStudioContext';
 import { StudioDevHint } from '../StudioDevHint';
 
@@ -622,8 +620,6 @@ export function Settings() {
             </Card>
           </Stack>
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('settings', navigate)} />
       </Stack>
     </Container>
   );

@@ -16,9 +16,7 @@ import {
   NotificationInboxCard,
   type NotificationInboxIconTone,
   AccountNotificationSidebar,
-  QuickActionGrid,
 } from '@digipicks/ds';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import type { IconName } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
@@ -322,8 +320,6 @@ export function Notifications() {
             />
           </StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('notifications', navigate)} />
       </Stack>
     </Container>
   );

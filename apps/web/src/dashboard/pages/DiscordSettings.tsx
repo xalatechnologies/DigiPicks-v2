@@ -10,7 +10,6 @@ import {
   Button,
   Icon,
   StudioPageHeader,
-  QuickActionGrid,
   Heading,
   Muted,
   EmptyState,
@@ -30,7 +29,6 @@ import {
   type DiscordDeliveryStatus,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 // =============================================================================
@@ -485,8 +483,6 @@ export function DiscordSettings() {
             loading={deliveryStatus === 'LoadingFirstPage'}
           />
         </Card>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('discordSettings', navigate)} />
       </Stack>
     </Container>
   );

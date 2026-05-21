@@ -1,7 +1,96 @@
 import { internalMutation, mutation } from './_generated/server';
 import { internal } from './_generated/api';
 import { v } from 'convex/values';
+import type { Doc } from './_generated/dataModel';
 import { requireAdmin } from './shared/permissions';
+
+/**
+ * Legacy columns on `users` only (pre–Convex Auth). Unrelated to:
+ * - `creators.status` (creator profile lifecycle)
+ * - `subscriptions.status` (billing / entitlement)
+ * - `teamLogos.displayName` (sports metadata)
+ *
+ * Subscriber vs creator personas are NOT separate tables — they share `users`
+ * (`role`, optional `creatorId`) with `subscriptions` linking subscriberId →
+ * creatorId. This migration never touches those tables or rewrites persona keys.
+ */
+const LEGACY_USER_FIELD_KEYS = [
+  'displayName',
+  'emailVerified',
+  'lastLoginAt',
+  'metadata',
+  'mfaEnabled',
+  'passwordHash',
+  'phoneVerified',
+  'status',
+] as const;
+
+type LegacyUserFieldKey = (typeof LEGACY_USER_FIELD_KEYS)[number];
+
+function userHasLegacyFields(user: Record<string, unknown>): boolean {
+  return LEGACY_USER_FIELD_KEYS.some((key) => user[key] !== undefined);
+}
+
+/** Copy only fields on the current `users` validator — omit legacy keys entirely. */
+function sanitizeUserDocument(user: Doc<'users'>): Omit<Doc<'users'>, '_id' | '_creationTime'> {
+  const raw = user as Doc<'users'> & Record<string, unknown>;
+  // Fill display name only when `name` was never set — never overwrite an existing name.
+  const name =
+    user.name ??
+    (typeof raw.displayName === 'string' && raw.displayName.trim() !== ''
+      ? raw.displayName.trim()
+      : undefined);
+
+  return {
+    name,
+    image: user.image,
+    email: user.email,
+    emailVerificationTime: user.emailVerificationTime,
+    phone: user.phone,
+    phoneVerificationTime: user.phoneVerificationTime,
+    isAnonymous: user.isAnonymous,
+    // Persona: pass through exactly — never derive from legacy `status` or `metadata`.
+    role: user.role,
+    locale: user.locale,
+    isActive: user.isActive,
+    creatorId: user.creatorId,
+    stripeCustomerId: user.stripeCustomerId,
+    discordId: user.discordId,
+    discordUsername: user.discordUsername,
+    notifyPrefs: user.notifyPrefs,
+    telegramChatId: user.telegramChatId,
+    telegramLinkCode: user.telegramLinkCode,
+    telegramLinkedAt: user.telegramLinkedAt,
+    mfaSecret: user.mfaSecret,
+    mfaEnrolledAt: user.mfaEnrolledAt,
+    mfaLastVerifiedAt: user.mfaLastVerifiedAt,
+    mfaRecoveryCodes: user.mfaRecoveryCodes,
+    emailVerificationTokenHash: user.emailVerificationTokenHash,
+    emailVerificationSentAt: user.emailVerificationSentAt,
+    emailVerificationExpiresAt: user.emailVerificationExpiresAt,
+  };
+}
+
+/** Abort replace if persona fields would change (should never happen). */
+function personaFieldsMatch(
+  before: Doc<'users'>,
+  after: Omit<Doc<'users'>, '_id' | '_creationTime'>,
+): boolean {
+  const nameOk =
+    before.name == null || before.name === ''
+      ? true // may backfill from legacy displayName only when name was empty
+      : before.name === after.name;
+  return (
+    before.role === after.role &&
+    before.creatorId === after.creatorId &&
+    before.isActive === after.isActive &&
+    nameOk
+  );
+}
+
+function legacyKeysPresent(user: Record<string, unknown>): LegacyUserFieldKey[] {
+  return LEGACY_USER_FIELD_KEYS.filter((key) => user[key] !== undefined);
+}
 
 /**
  * One-off: delete all events so the cron + seed can repopulate.
@@ -398,6 +487,90 @@ export const backfillFederatedEvents = internalMutation({
 // is just deleting the stub rows. Bounded to 500 creators per call to stay
 // inside the per-mutation document budget.
 // =============================================================================
+
+/**
+ * Dev/staging: remove legacy `users` columns from an older DigiPicks schema so
+ * `npx convex dev` can enforce the current validator.
+ *
+ * Scope: `users` rows only. Does not read/write `creators`, `subscriptions`,
+ * `applications`, or any other table. Document `_id` is unchanged so subscriber
+ * and creator foreign keys stay valid.
+ *
+ *   npx convex run migrations:stripLegacyUserFields '{"dryRun": true}'
+ *   npx convex run migrations:stripLegacyUserFields
+ */
+export const stripLegacyUserFields = mutation({
+  args: { dryRun: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    const users = await ctx.db.query('users').collect();
+    const dryRun = args.dryRun ?? false;
+    let scanned = 0;
+    let cleaned = 0;
+    let skipped = 0;
+    const brokenCreatorLinks: string[] = [];
+    const skippedUserIds: string[] = [];
+    const samples: Array<{
+      userId: string;
+      legacyKeys: LegacyUserFieldKey[];
+      role: Doc<'users'>['role'];
+      creatorId?: string;
+      subscriptionCount: number;
+    }> = [];
+
+    const subscriptionCounts = new Map<string, number>();
+    for (const sub of await ctx.db.query('subscriptions').collect()) {
+      const key = sub.subscriberId as string;
+      subscriptionCounts.set(key, (subscriptionCounts.get(key) ?? 0) + 1);
+    }
+
+    for (const user of users) {
+      scanned++;
+      const raw = user as Record<string, unknown>;
+      if (!userHasLegacyFields(raw)) continue;
+
+      if (user.creatorId) {
+        const creator = await ctx.db.get(user.creatorId);
+        if (!creator) {
+          brokenCreatorLinks.push(user._id);
+        }
+      }
+
+      const sanitized = sanitizeUserDocument(user);
+      if (!personaFieldsMatch(user, sanitized)) {
+        skipped++;
+        skippedUserIds.push(user._id);
+        continue;
+      }
+
+      if (samples.length < 10) {
+        samples.push({
+          userId: user._id,
+          legacyKeys: legacyKeysPresent(raw),
+          role: user.role,
+          creatorId: user.creatorId,
+          subscriptionCount: subscriptionCounts.get(user._id) ?? 0,
+        });
+      }
+
+      cleaned++;
+      if (dryRun) continue;
+      await ctx.db.replace(user._id, sanitized);
+    }
+
+    return {
+      scanned,
+      cleaned,
+      skipped,
+      dryRun,
+      brokenCreatorLinks,
+      skippedUserIds,
+      samples,
+      note:
+        'Only legacy keys on users were removed. creators/subscriptions untouched. ' +
+        'Legacy users.status is not mapped to isActive (unrelated to creator or subscription status).',
+    };
+  },
+});
 
 /** Admin-only one-shot migration. Run from the Convex dashboard. */
 export const migrateLegacyDiscordWebhooks = mutation({

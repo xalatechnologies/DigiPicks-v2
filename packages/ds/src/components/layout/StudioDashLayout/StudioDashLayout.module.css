@@ -20,6 +20,14 @@
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
+  .span2 {
+    grid-column: span 2;
+  }
+
+  .span3 {
+    grid-column: span 3;
+  }
+
   .span4 {
     grid-column: span 4;
   }
@@ -38,5 +46,13 @@
 
   .span8 {
     grid-column: span 8;
+  }
+
+  .span9 {
+    grid-column: span 9;
+  }
+
+  .span10 {
+    grid-column: span 10;
   }
 }

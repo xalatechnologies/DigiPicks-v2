@@ -1,0 +1,232 @@
+.wrap {
+  background: var(--bg-1);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.headRow {
+  background: color-mix(in srgb, var(--bg-2) 65%, var(--bg-1));
+}
+
+.th {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--t-3);
+  white-space: nowrap;
+}
+
+.thRight {
+  text-align: right;
+}
+
+.row {
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--bg-2) 50%, transparent);
+}
+
+.rowSelected {
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-1));
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.td {
+  padding: var(--space-4) var(--space-6);
+  vertical-align: middle;
+}
+
+.applicant {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.avatar {
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--r-xl);
+  background: color-mix(in srgb, var(--primary) 14%, var(--bg-2));
+  color: var(--primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.applicantCopy {
+  min-width: 0;
+}
+
+.applicantName {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--t-1);
+  line-height: var(--leading-snug);
+}
+
+.applicantHandle {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--t-2);
+}
+
+.email {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--t-2);
+}
+
+.niche {
+  display: inline-flex;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-2));
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--primary);
+}
+
+.submitted {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--t-2);
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statusDot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+
+.dotAmber {
+  background: var(--amber);
+}
+
+.dotBlue {
+  background: var(--blue);
+}
+
+.dotGreen {
+  background: var(--green);
+}
+
+.dotRed {
+  background: var(--red);
+}
+
+.dotViolet {
+  background: var(--primary);
+}
+
+.dotMute {
+  background: var(--t-3);
+}
+
+.statusLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.statusAmber {
+  color: var(--amber);
+}
+
+.statusBlue {
+  color: var(--blue);
+}
+
+.statusGreen {
+  color: var(--green);
+}
+
+.statusRed {
+  color: var(--red);
+}
+
+.statusViolet {
+  color: var(--primary);
+}
+
+.statusMute {
+  color: var(--t-2);
+}
+
+.evidence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--t-3);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.viewBtn {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--r-lg);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.viewBtn:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.viewBtnSecondary {
+  background: var(--bg-2);
+  color: var(--t-1);
+  box-shadow: none;
+}
+
+.viewBtnSecondary:hover {
+  background: var(--bg-3);
+}
+
+.viewBtn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.empty {
+  padding: var(--space-10);
+}

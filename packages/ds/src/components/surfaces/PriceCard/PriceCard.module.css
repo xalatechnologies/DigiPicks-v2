@@ -57,6 +57,16 @@
     var(--shadow-md);
   transform: scale(1.02);
 }
+
+:global([data-theme='light']) .featured {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 14%, transparent), transparent 55%),
+    var(--bg-0);
+  border-color: var(--blue-line);
+  box-shadow:
+    0 24px 48px -20px color-mix(in srgb, var(--primary) 35%, transparent),
+    var(--shadow-md);
+}
 .featured:hover {
   border-color: var(--blue);
   transform: scale(1.02) translateY(-2px);

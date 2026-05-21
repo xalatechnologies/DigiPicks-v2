@@ -10,6 +10,8 @@ export interface AppHeaderProps {
   userName?: string;
   userMail?: string;
   userMonogram?: string;
+  /** Navigate to marketing home when the brand mark is clicked. */
+  onLogoClick?: () => void;
   onSearch?: (q: string) => void;
   onUserClick?: () => void;
   actions?: React.ReactNode;
@@ -24,6 +26,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   userName,
   userMail,
   userMonogram = 'A',
+  onLogoClick,
   onSearch,
   onUserClick,
   actions,
@@ -38,7 +41,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header className={cx(s.header, className)}>
       <div className={s.brand}>
-        <Logo size={36} />
+        <Logo
+          size={36}
+          onClick={onLogoClick}
+          aria-label={onLogoClick ? 'DigiPicks home' : undefined}
+        />
         <div className={s.brandText}>
           <span className={s.brandName}>DIGIPICKS</span>
           <span className={s.brandSub}>Creator Network</span>

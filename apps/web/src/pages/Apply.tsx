@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react';
-import { useMutation, useQuery } from 'convex/react';
+import { useNavigate } from 'react-router-dom';
+import { useConvexAuth, useMutation, useQuery } from '../auth/convexAuth';
 import { api } from '../../../../convex/_generated/api';
 import {
   Container,
@@ -15,12 +14,10 @@ import {
   Input,
   TextArea,
   Select,
-  PasswordInput,
   Button,
   Icon,
   Badge,
   EmptyState,
-  ResponsibleSection,
   SplitPageLayout,
   ProcessSteps,
   FileUploadZone,
@@ -32,7 +29,6 @@ import {
   Placeholder,
 } from '@digipicks/ds';
 import { formatAuthError } from '../lib/formatAuthError';
-import { DevCreatorStudioButton } from '../lib/DevCreatorStudioButton';
 
 const SPORT_OPTIONS = [
   'NFL',
@@ -91,20 +87,27 @@ function ApplySection({
   );
 }
 
+const PENDING_STATUS_LABEL: Record<string, string> = {
+  submitted: 'Submitted — awaiting review',
+  review: 'In manual review',
+  more_info: 'More information requested',
+  flagged: 'Flagged for additional review',
+  approved: 'Approved',
+};
+
 export function Apply() {
   const navigate = useNavigate();
-  const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const existingApp = useQuery(api.applications.mine, isAuthenticated ? {} : 'skip');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [proofFiles, setProofFiles] = useState<File[]>([]);
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
   const submitApplication = useMutation(api.applications.submit);
   const needsAccount = !isAuthenticated;
+  const pendingApp = existingApp && existingApp.status !== 'rejected' ? existingApp : null;
 
   const profileKey = me?._id ?? 'anon';
 
@@ -144,43 +147,18 @@ export function Apply() {
     const audienceParts = [audienceRange, social].filter(Boolean);
 
     const winClaim = [bio, trackRecord].filter(Boolean).join('\n\n');
-    const email = (data.get('email') as string)?.trim() ?? '';
-    const passwordValue = String(data.get('password') ?? '').trim() || password;
-    const passwordConfirmValue =
-      String(data.get('passwordConfirm') ?? '').trim() || passwordConfirm;
+    const email = (me?.email ?? (data.get('email') as string))?.trim() ?? '';
+    if (!email) {
+      setError('Your account needs an email before you can apply.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      if (needsAccount) {
-        if (passwordValue.length < 8) {
-          setError('Password must be at least 8 characters.');
-          setLoading(false);
-          return;
-        }
-        if (passwordValue !== passwordConfirmValue) {
-          setError('Passwords do not match.');
-          setLoading(false);
-          return;
-        }
-        const authFd = new FormData();
-        authFd.set('email', email);
-        authFd.set('password', passwordValue);
-        authFd.set('flow', 'signUp');
-        try {
-          await signIn('password', authFd);
-        } catch (signUpErr: unknown) {
-          const msg = signUpErr instanceof Error ? signUpErr.message : String(signUpErr);
-          if (!msg.includes('already exists')) {
-            throw signUpErr;
-          }
-          authFd.set('flow', 'signIn');
-          await signIn('password', authFd);
-        }
-      }
-
       await submitApplication({
         name: data.get('name') as string,
         handle: data.get('handle') as string,
-        email: email.trim().toLowerCase(),
+        email: email.toLowerCase(),
         sport: selectedSports.join(', '),
         niche: data.get('niche') as string,
         existingFollowing: audienceParts.length > 0 ? audienceParts.join(' · ') : undefined,
@@ -190,7 +168,7 @@ export function Apply() {
       });
       setSubmitted(true);
     } catch (err) {
-      setError(formatAuthError(err, needsAccount ? 'signUp' : 'signIn'));
+      setError(err instanceof Error ? err.message : 'Could not submit application.');
     } finally {
       setLoading(false);
     }
@@ -201,36 +179,85 @@ export function Apply() {
       <Container size="xl">
         <PageHead
           title="Apply to the Creator Network"
-          sub="We manually review every application to maintain our standard of excellence."
+          sub={
+            needsAccount
+              ? 'Start with a subscriber account, then tell us about your edge — we review every application manually.'
+              : 'Signed in as a subscriber. Complete your creator application below — we review every submission manually.'
+          }
           actions={
-            <Row gap={2} wrap>
-              {needsAccount ? (
-                <Button variant="outline" onClick={() => navigate('/auth?next=/apply')}>
-                  Already have an account? Sign in
+            needsAccount ? (
+              <Row gap={2} wrap>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  iconRight="arrow-right"
+                  onClick={() => navigate('/auth?next=/apply')}
+                >
+                  Create subscriber account
                 </Button>
-              ) : (
-                <Badge tone="green" dot>
-                  Signed in
-                </Badge>
-              )}
-              <DevCreatorStudioButton onDevError={setError} />
-            </Row>
+                <Button variant="outline" size="sm" onClick={() => navigate('/auth?next=/apply')}>
+                  Sign in
+                </Button>
+              </Row>
+            ) : (
+              <Badge tone="green" dot>
+                Subscriber account
+              </Badge>
+            )
           }
         />
 
-        {submitted ? (
+        {needsAccount ? (
+          <SplitPageLayout
+            main={
+              <Card pad="xl" elev>
+                <EmptyState
+                  icon="user"
+                  title="Subscriber account required"
+                  subtitle="Every creator starts as a DigiPicks member. Use the buttons above to create a free subscriber login or sign in — then return here to submit your creator application."
+                />
+              </Card>
+            }
+            aside={
+              <Stack gap={6}>
+                <ProcessSteps steps={[...REVIEW_STEPS]} />
+                <Card pad="xl">
+                  <Stack gap={3}>
+                    <Eyebrow>How it works</Eyebrow>
+                    <Serif>
+                      1. Create your subscriber login · 2. Submit your creator application · 3. Our
+                      team reviews your proof and niche fit · 4. Studio access after approval.
+                    </Serif>
+                  </Stack>
+                </Card>
+              </Stack>
+            }
+          />
+        ) : pendingApp && !submitted ? (
+          <Card pad="xl" elev>
+            <EmptyState
+              icon="inbox"
+              title="Application on file"
+              subtitle={
+                PENDING_STATUS_LABEL[pendingApp.status] ?? 'Your application is being processed.'
+              }
+              action={
+                <Button variant="outline" onClick={() => navigate('/account')}>
+                  Go to member hub
+                </Button>
+              }
+            />
+          </Card>
+        ) : submitted ? (
           <Card pad="xl" elev>
             <EmptyState
               icon="check"
               title="Application received."
               subtitle="Thanks for applying. Our team reviews every submission personally — you'll hear back within 5 business days."
               action={
-                <Row gap={2} wrap>
-                  <Button variant="outline" onClick={() => setSubmitted(false)}>
-                    Submit another
-                  </Button>
-                  <DevCreatorStudioButton variant="primary" />
-                </Row>
+                <Button variant="outline" onClick={() => setSubmitted(false)}>
+                  Submit another
+                </Button>
               }
             />
           </Card>
@@ -255,75 +282,24 @@ export function Apply() {
                           <Input id="apply-handle" name="handle" placeholder="@handle" required />
                         </Field>
                       </Grid>
-                      <Field label="Professional email" required htmlFor="apply-email">
+                      <Field
+                        label="Account email"
+                        required
+                        htmlFor="apply-email"
+                        help="Must match your signed-in subscriber account."
+                      >
                         <Input
                           id="apply-email"
                           name="email"
                           type="email"
                           placeholder="contact@example.com"
                           required
+                          readOnly
                           defaultValue={me?.email ?? ''}
                         />
                       </Field>
                     </Stack>
                   </ApplySection>
-
-                  {needsAccount ? (
-                    <ApplySection icon={<Icon name="key" size={18} />} title="Create your login">
-                      <Stack gap={5}>
-                        <Muted>
-                          Your application and account are created together. Use this email and
-                          password to check status and sign in after approval.
-                        </Muted>
-                        <Grid cols={2} gap={4} stagger={false}>
-                          <Field label="Password" required htmlFor="apply-password">
-                            <PasswordInput
-                              id="apply-password"
-                              name="password"
-                              placeholder="Create a password (min. 8 characters)"
-                              autoComplete="new-password"
-                              minLength={8}
-                              required
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                            />
-                          </Field>
-                          <Field label="Confirm password" required htmlFor="apply-password-confirm">
-                            <PasswordInput
-                              id="apply-password-confirm"
-                              name="passwordConfirm"
-                              placeholder="Re-enter your password"
-                              autoComplete="new-password"
-                              minLength={8}
-                              required
-                              value={passwordConfirm}
-                              onChange={(e) => setPasswordConfirm(e.target.value)}
-                            />
-                          </Field>
-                        </Grid>
-                        <Muted>
-                          Already applied or have an account?{' '}
-                          <Link to="/auth?next=/apply">Sign in here</Link>
-                        </Muted>
-                      </Stack>
-                    </ApplySection>
-                  ) : (
-                    <Card pad="lg">
-                      <Stack gap={2}>
-                        <Muted>
-                          Signed in as {me?.email ?? 'your account'}. Submitting links this
-                          application to your login.
-                        </Muted>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/auth?next=/apply')}
-                        >
-                          Use a different account
-                        </Button>
-                      </Stack>
-                    </Card>
-                  )}
 
                   <ApplySection icon={<Icon name="trophy" size={18} />} title="Coverage & niche">
                     <Stack gap={5}>
@@ -436,11 +412,7 @@ export function Apply() {
                     disabled={loading}
                     iconRight={loading ? undefined : 'arrow-right'}
                   >
-                    {loading
-                      ? 'Submitting…'
-                      : needsAccount
-                        ? 'Create account & submit application'
-                        : 'Submit application'}
+                    {loading ? 'Submitting…' : 'Submit application'}
                   </Button>
                 </Stack>
               </form>
@@ -476,8 +448,6 @@ export function Apply() {
             }
           />
         )}
-
-        <ResponsibleSection />
       </Container>
     </main>
   );

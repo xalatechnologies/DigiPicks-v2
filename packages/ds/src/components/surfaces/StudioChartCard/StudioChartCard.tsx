@@ -11,6 +11,8 @@ export interface StudioChartCardProps {
   onPeriodChange?: (value: string) => void;
   children?: React.ReactNode;
   footer?: React.ReactNode;
+  /** `elevated` — editorial admin surface (no border, deeper shadow). */
+  tone?: 'default' | 'elevated';
   className?: string;
 }
 
@@ -22,10 +24,11 @@ export function StudioChartCard({
   onPeriodChange,
   children,
   footer,
+  tone = 'default',
   className,
 }: StudioChartCardProps) {
   return (
-    <article className={cx(s.card, className)}>
+    <article className={cx(s.card, tone === 'elevated' && s.elevated, className)}>
       <div className={s.head}>
         <div>
           <h2 className={s.title}>{title}</h2>

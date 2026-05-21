@@ -16,8 +16,11 @@ export interface CreatorFeaturedCardProps {
   units?: string;
   startingPrice?: number;
   featured?: boolean;
+  /** Viewer is the creator who owns this listing — hide subscribe, show studio CTA. */
+  isOwnProfile?: boolean;
   onProfile?: () => void;
   onSubscribe?: () => void;
+  onManageStudio?: () => void;
   className?: string;
 }
 
@@ -37,8 +40,10 @@ export function CreatorFeaturedCard({
   units,
   startingPrice,
   featured,
+  isOwnProfile,
   onProfile,
   onSubscribe,
+  onManageStudio,
   className,
 }: CreatorFeaturedCardProps) {
   const cssVars = {
@@ -77,7 +82,9 @@ export function CreatorFeaturedCard({
         </div>
 
         <div className={s.foot}>
-          {startingPrice != null ? (
+          {isOwnProfile ? (
+            <span className={s.niche}>Your public listing</span>
+          ) : startingPrice != null ? (
             <span className={s.price}>
               ${startingPrice}
               <span className={s.pricePeriod}>/mo</span>
@@ -86,12 +93,17 @@ export function CreatorFeaturedCard({
             <span aria-hidden="true" />
           )}
           <div className={s.actions}>
-            {onProfile ? (
+            {isOwnProfile && onManageStudio ? (
+              <Button variant="primary" size="sm" onClick={onManageStudio}>
+                Creator studio
+              </Button>
+            ) : null}
+            {!isOwnProfile && onProfile ? (
               <Button variant="secondary" size="sm" onClick={onProfile}>
                 Profile
               </Button>
             ) : null}
-            {onSubscribe ? (
+            {!isOwnProfile && onSubscribe ? (
               <Button variant="primary" size="sm" onClick={onSubscribe}>
                 Subscribe
               </Button>

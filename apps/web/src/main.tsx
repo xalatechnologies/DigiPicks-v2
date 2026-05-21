@@ -10,6 +10,7 @@ import { Container, Heading, Muted, Stack } from '@digipicks/ds';
 import '@digipicks/ds/styles';
 import { App } from './App';
 import { I18nProvider } from './lib/i18n';
+import { RouteErrorBoundary } from './feedback/RouteErrorBoundary';
 
 // Sentry — opt-in via VITE_SENTRY_DSN. Quiet no-op when unset so dev
 // environments don't ship spurious events.
@@ -25,8 +26,6 @@ if (SENTRY_DSN) {
   });
 }
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
-
 // Register the push service worker on production-grade origins. Vite's dev
 // server serves it from `/sw.js`. The SW registers idempotently — repeated
 // calls return the same registration.
@@ -38,17 +37,45 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+
+const convexClient = convexUrl
+  ? (new ConvexReactClient(convexUrl) as unknown as AnyConvexClient)
+  : null;
+
+function MissingConvexConfig() {
+  return (
+    <main>
+      <Container size="md">
+        <Stack gap={3}>
+          <Heading level={1}>Missing Convex URL</Heading>
+          <Muted>
+            Set VITE_CONVEX_URL in .env.local (run npx convex dev to create one), then restart the
+            Vite dev server.
+          </Muted>
+        </Stack>
+      </Container>
+    </main>
+  );
+}
+
 const Tree = (
   <React.StrictMode>
-    <ConvexAuthProvider client={convex as unknown as AnyConvexClient}>
-      <BrowserRouter>
-        <ThemeProvider>
-          <I18nProvider>
-            <App />
-          </I18nProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </ConvexAuthProvider>
+    <RouteErrorBoundary title="Application error">
+      {!convexClient ? (
+        <MissingConvexConfig />
+      ) : (
+        <ConvexAuthProvider client={convexClient}>
+          <BrowserRouter>
+            <ThemeProvider>
+              <I18nProvider>
+                <App />
+              </I18nProvider>
+            </ThemeProvider>
+          </BrowserRouter>
+        </ConvexAuthProvider>
+      )}
+    </RouteErrorBoundary>
   </React.StrictMode>
 );
 

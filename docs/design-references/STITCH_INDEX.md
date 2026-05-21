@@ -25,5 +25,6 @@ Single source mapping **zip number → archive slug → route → build status**
 | 90  | Refunds & disputes (finance) | `admin-refunds-disputes`      | `/admin/refunds`                    | Shipped                       |
 | 91  | Creator access & permissions | `creator-access-permissions`  | `/dashboard/access`                 | Shipped                       |
 | 92  | Entitlement inspector        | `admin-entitlement-inspector` | `/admin/users/:userId/entitlements` | Shipped                       |
+| 93  | My Feed                      | `account-my-feed`             | `/account/feed`                     | Shipped                       |
 
-**Note:** Pick-grade disputes live at `/admin/disputes` (existing). Billing refund cases are `/admin/refunds` (zip 90).
+**Note:** Pick-grade disputes live at `/admin/disputes` (existing). Billing refund cases are `/admin/refunds` (zip 90). Subscriber Copilot removed from account nav; `/account/copilot` redirects to `/account/feed`.

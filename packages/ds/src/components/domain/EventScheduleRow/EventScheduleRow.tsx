@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import { Icon } from '../../atoms/Icon/Icon';
 import s from './EventScheduleRow.module.css';
 
@@ -14,6 +15,8 @@ export interface EventScheduleRowProps {
   coverageLabel?: string;
   picksLabel?: string;
   selected?: boolean;
+  /** Stack layout for two-column grids (narrow card width). */
+  dense?: boolean;
   onClick?: () => void;
   className?: string;
 }
@@ -76,6 +79,7 @@ export function EventScheduleRow({
   coverageLabel,
   picksLabel,
   selected,
+  dense,
   onClick,
   className,
 }: EventScheduleRowProps) {
@@ -84,7 +88,14 @@ export function EventScheduleRow({
   return (
     <Tag
       type={onClick ? 'button' : undefined}
-      className={cx(s.row, onClick && s.interactive, selected && s.selected, className)}
+      className={cx(
+        s.row,
+        lift.surface,
+        dense && s.dense,
+        onClick && s.interactive,
+        selected && s.selected,
+        className,
+      )}
       onClick={onClick}
     >
       <div className={s.left}>

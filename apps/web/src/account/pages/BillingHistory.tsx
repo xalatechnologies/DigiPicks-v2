@@ -11,11 +11,9 @@ import {
   StudioPageHeader,
   AccountBillingPanel,
   EmptyState,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { useStripePortal } from '../../lib/useStripePortal';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 
 function fmtDate(ms: number): string {
   return new Date(ms).toLocaleDateString(undefined, {
@@ -72,7 +70,6 @@ export function BillingHistory() {
             {history.length === 0 ? <Muted>No subscriptions yet.</Muted> : null}
           </Card>
         )}
-        <QuickActionGrid title="Related" items={accountCrossLinks('billingHistory', navigate)} />
       </Stack>
     </Container>
   );

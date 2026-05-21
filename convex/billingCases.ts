@@ -44,6 +44,49 @@ const caseStatus = v.union(
   v.literal('closed'),
 );
 
+export const billingCaseGet = query({
+  args: { caseId: v.id('billingCases') },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const row = await ctx.db.get(args.caseId);
+    if (!row) return null;
+    const subscriber = await ctx.db.get(row.subscriberId);
+    const creator = await ctx.db.get(row.creatorId);
+    const amountLabel = `$${(row.amountCents / 100).toFixed(2)}`;
+    const statusLabel = row.status
+      .split('_')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    return {
+      case: row,
+      subscriber,
+      creator,
+      amountLabel,
+      statusLabel,
+      issueLabel:
+        row.issueType === 'chargeback'
+          ? 'Chargeback'
+          : row.issueType === 'content'
+            ? 'Content dispute'
+            : row.issueType === 'accidental'
+              ? 'Accidental charge'
+              : 'Subscription issue',
+      createdLabel: new Date(row.createdAt).toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+      updatedLabel: new Date(row.updatedAt).toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+    };
+  },
+});
+
 export const adminQueue = query({
   args: {
     status: v.optional(caseStatus),

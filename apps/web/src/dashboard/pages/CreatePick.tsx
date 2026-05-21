@@ -1,58 +1,76 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
   Row,
-  Col,
   Card,
   CardHead,
   Button,
-  Field,
-  Input,
-  Select,
-  TextArea,
-  Segmented,
+  Badge,
   PickCard,
   StudioPageHeader,
-  QuickActionGrid,
+  StudioDashLayout,
+  StudioDashCol,
+  StudioComposerAside,
+  PickForm,
   Muted,
-  Eyebrow,
-  Divider,
-  Badge,
-  AIAssistPanel,
-  type AISuggestion,
+  type PickFormValue,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { STUDIO } from '../../lib/studioRoutes';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
-const SPORTS = ['Soccer', 'Cricket', 'Tennis'];
-
-type PickAccess = 'free' | 'premium' | 'vip';
-type PickConfidence = 'Low' | 'Medium' | 'High';
-
-const ACCESS_OPTIONS: { label: string; value: PickAccess }[] = [
-  { label: 'Free', value: 'free' },
-  { label: 'Premium', value: 'premium' },
-  { label: 'VIP', value: 'vip' },
-];
-
-const CONFIDENCE_OPTIONS: { value: PickConfidence; label: string }[] = [
-  { value: 'Low', label: 'Low' },
-  { value: 'Medium', label: 'Medium' },
-  { value: 'High', label: 'High' },
-];
+const SPORTS = ['Soccer', 'Cricket', 'Tennis', 'Basketball', 'Football', 'NFL', 'NBA'];
 
 const MARKET_OPTIONS = [
-  '1H Over/Under',
-  'Spread',
   'Moneyline',
+  'Spread',
+  '1H Over/Under',
+  'Total Over/Under',
   'Player Prop',
   'Goalscorer',
-  'Goalie Saves O/U',
+  'Both Teams to Score',
 ];
+
+const ACCESS_OPTIONS = [
+  { label: 'Free', value: 'free' as const },
+  { label: 'Premium', value: 'premium' as const },
+  { label: 'VIP', value: 'vip' as const },
+];
+
+const CONFIDENCE_OPTIONS = [
+  { value: 'Low' as const, label: 'Low' },
+  { value: 'Medium' as const, label: 'Medium' },
+  { value: 'High' as const, label: 'High' },
+];
+
+const INITIAL_VALUE: PickFormValue = {
+  title: '',
+  sport: 'Soccer',
+  league: '',
+  eventName: '',
+  eventTime: '',
+  market: 'Moneyline',
+  selection: '',
+  odds: '-110',
+  units: '1u',
+  confidence: 'Medium',
+  body: '',
+  access: 'premium',
+};
+
+const ACCESS_BADGE: Record<PickFormValue['access'], 'mute' | 'violet' | 'amber'> = {
+  free: 'mute',
+  premium: 'violet',
+  vip: 'amber',
+};
+
+function isPickReady(value: PickFormValue): boolean {
+  return Boolean(
+    value.title.trim() && value.eventName.trim() && value.selection.trim() && value.market,
+  );
+}
 
 export function CreatePick() {
   const navigate = useNavigate();
@@ -61,65 +79,19 @@ export function CreatePick() {
   const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
   const createPick = useMutation(api.picks.create);
 
-  const [sport, setSport] = React.useState('Soccer');
-  const [league, setLeague] = React.useState('Premier League');
-  const [eventName, setEventName] = React.useState('Arsenal vs Chelsea');
-  const [eventTime, setEventTime] = React.useState('Saturday 3:00 PM');
-  const [market, setMarket] = React.useState('1H Over/Under');
-  const [selection, setSelection] = React.useState('Over 112.5');
-  const [odds, setOdds] = React.useState('-110');
-  const [units, setUnits] = React.useState('2u');
-  const [confidence, setConfidence] = React.useState<PickConfidence>('High');
-  const [title, setTitle] = React.useState('Lakers vs Nuggets — First Half Total Over 112.5');
-  const [body, setBody] = React.useState(
-    'Both teams hovering 53–55% pace tier vs quality defenses. Denver on a back-to-back, Murray played 38 minutes Thursday.\n\nLakers 6-1 on H1 over at home this season when line sits 110.5–113.5.',
-  );
-  const [access, setAccess] = React.useState<PickAccess>('premium');
+  const [form, setForm] = React.useState<PickFormValue>(INITIAL_VALUE);
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  const suggestPick = useAction(api.ai.suggestPick);
-  const [aiSuggestion, setAiSuggestion] = React.useState<AISuggestion | null>(null);
-  const [aiBusy, setAiBusy] = React.useState(false);
-  const [aiError, setAiError] = React.useState<string | null>(null);
-
-  async function handleSuggest() {
-    setAiError(null);
-    setAiBusy(true);
-    try {
-      const result = await suggestPick({
-        sport,
-        league,
-        eventName,
-        market,
-        selection,
-        odds,
-        units,
-        body: body || undefined,
-      });
-      setAiSuggestion({
-        summary: result.summary,
-        confidence: result.confidence,
-        reasoning: result.reasoning,
-      });
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : 'Suggest failed.');
-    } finally {
-      setAiBusy(false);
-    }
-  }
-
-  function handleAccept(s: AISuggestion) {
-    // Pre-fill summary into title (or body if title already set) and body
-    // with the reasoning. Confidence maps to creator confidence buckets.
-    if (!body) setBody(s.reasoning);
-    setConfidence(s.confidence >= 75 ? 'High' : s.confidence >= 50 ? 'Medium' : 'Low');
-    setAiSuggestion(null);
-  }
+  const ready = isPickReady(form);
 
   async function handleSubmit(status: 'draft' | 'published') {
     if (!creator?._id) {
       setError('No creator profile is attached to your account yet.');
+      return;
+    }
+    if (!ready) {
+      setError('Add a title, event, market, and selection before saving.');
       return;
     }
     setError(null);
@@ -127,18 +99,18 @@ export function CreatePick() {
     try {
       await createPick({
         creatorId: creator._id,
-        access,
-        sport,
-        league,
-        eventName,
-        eventTime,
-        title,
-        market,
-        selection,
-        odds,
-        units,
-        confidence,
-        body: body || undefined,
+        access: form.access,
+        sport: form.sport,
+        league: form.league,
+        eventName: form.eventName,
+        eventTime: form.eventTime,
+        title: form.title.trim(),
+        market: form.market,
+        selection: form.selection.trim(),
+        odds: form.odds,
+        units: form.units,
+        confidence: form.confidence,
+        body: form.body || undefined,
         status,
       });
       navigate(STUDIO.picks);
@@ -149,17 +121,21 @@ export function CreatePick() {
     }
   }
 
+  const previewTitle = form.title.trim() || 'Your pick headline';
+  const accessLabel =
+    form.access === 'vip' ? 'VIP' : form.access === 'premium' ? 'Premium' : 'Free';
+
   return (
     <Container size="xl">
       <Stack gap={6}>
         <StudioPageHeader
           eyebrow="Studio · Posts"
-          title="Create a pick"
-          sub="Compose, attach analysis, set access — preview live as you write."
+          title="New pick"
+          sub="Build a clear headline, lock in the wager, and preview exactly what subscribers will see before you publish."
           actions={
             <Row gap={2}>
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 onClick={() => navigate(STUDIO.picks)}
                 disabled={submitting}
@@ -167,18 +143,19 @@ export function CreatePick() {
                 Cancel
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => handleSubmit('draft')}
-                disabled={submitting || !creator}
+                disabled={submitting || !creator || !ready}
               >
                 Save draft
               </Button>
               <Button
                 variant="primary"
                 size="sm"
+                iconRight="arrow-right"
                 onClick={() => handleSubmit('published')}
-                disabled={submitting || !creator}
+                disabled={submitting || !creator || !ready}
               >
                 Publish now
               </Button>
@@ -186,8 +163,8 @@ export function CreatePick() {
           }
         />
 
-        {error && (
-          <Card>
+        {error ? (
+          <Card pad="md">
             <Row gap={3}>
               <Badge tone="red" dot>
                 Error
@@ -195,178 +172,67 @@ export function CreatePick() {
               <Muted>{error}</Muted>
             </Row>
           </Card>
-        )}
+        ) : null}
 
-        <Row gap={5} wrap>
-          <Col gap={4}>
-            <Card>
-              <CardHead title="Pick details" sub="The matchup and the wager" />
-              <Stack gap={4}>
-                <Field label="Title" required>
-                  <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="A short, scannable headline"
-                  />
-                </Field>
+        {!ready ? (
+          <Muted>
+            Complete title, event, market, and selection to enable publish. Analysis and league are
+            optional but recommended.
+          </Muted>
+        ) : null}
 
-                <Row gap={3} wrap>
-                  <Col gap={0}>
-                    <Field label="Sport">
-                      <Select value={sport} onChange={(e) => setSport(e.target.value)}>
-                        {SPORTS.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                  </Col>
-                  <Col gap={0}>
-                    <Field label="League">
-                      <Input
-                        value={league}
-                        onChange={(e) => setLeague(e.target.value)}
-                        placeholder="e.g. EPL"
-                      />
-                    </Field>
-                  </Col>
-                  <Col gap={0}>
-                    <Field label="Market">
-                      <Select value={market} onChange={(e) => setMarket(e.target.value)}>
-                        {MARKET_OPTIONS.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                  </Col>
-                </Row>
-
-                <Row gap={3} wrap>
-                  <Col gap={0}>
-                    <Field label="Event" required>
-                      <Input
-                        value={eventName}
-                        onChange={(e) => setEventName(e.target.value)}
-                        placeholder="Lakers vs Nuggets"
-                      />
-                    </Field>
-                  </Col>
-                  <Col gap={0}>
-                    <Field label="Event time">
-                      <Input
-                        value={eventTime}
-                        onChange={(e) => setEventTime(e.target.value)}
-                        placeholder="Tonight 7:30 PM ET"
-                      />
-                    </Field>
-                  </Col>
-                </Row>
-
-                <Row gap={3} wrap>
-                  <Col gap={0}>
-                    <Field label="Selection" required>
-                      <Input
-                        value={selection}
-                        onChange={(e) => setSelection(e.target.value)}
-                        placeholder="e.g. Over 112.5"
-                      />
-                    </Field>
-                  </Col>
-                  <Col gap={0}>
-                    <Field label="Odds">
-                      <Input
-                        value={odds}
-                        onChange={(e) => setOdds(e.target.value)}
-                        placeholder="-110"
-                      />
-                    </Field>
-                  </Col>
-                  <Col gap={0}>
-                    <Field label="Units">
-                      <Input
-                        value={units}
-                        onChange={(e) => setUnits(e.target.value)}
-                        placeholder="2u"
-                      />
-                    </Field>
-                  </Col>
-                </Row>
-
-                <Field label="Confidence">
-                  <Select
-                    value={confidence}
-                    onChange={(e) => setConfidence(e.target.value as PickConfidence)}
-                  >
-                    {CONFIDENCE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </Select>
-                </Field>
-
-                <AIAssistPanel
-                  suggestion={aiSuggestion}
-                  busy={aiBusy}
-                  error={aiError}
-                  onSuggest={handleSuggest}
-                  onAccept={handleAccept}
-                  onDismiss={() => setAiSuggestion(null)}
-                />
-
-                <Field label="Analysis" help="Reasoning subscribers see — markdown supported.">
-                  <TextArea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
-                </Field>
-
-                <Divider />
-
-                <Field
-                  label="Access"
-                  help="Free picks are public. Premium and VIP require an active plan."
-                >
-                  <Segmented
-                    options={ACCESS_OPTIONS}
-                    value={access}
-                    onChange={(v) => setAccess(v as PickAccess)}
-                    ariaLabel="Access level"
-                  />
-                </Field>
-              </Stack>
+        <StudioDashLayout>
+          <StudioDashCol span={8}>
+            <Card pad="xl" elev>
+              <CardHead
+                title="Compose pick"
+                sub="Five steps — subscribers only see what you publish."
+                action={
+                  <Badge tone={ACCESS_BADGE[form.access]} dot>
+                    {accessLabel}
+                  </Badge>
+                }
+              />
+              <PickForm
+                value={form}
+                onChange={setForm}
+                sports={SPORTS}
+                markets={MARKET_OPTIONS}
+                accessOptions={ACCESS_OPTIONS}
+                confidenceOptions={CONFIDENCE_OPTIONS}
+                disabled={submitting}
+              />
             </Card>
-          </Col>
+          </StudioDashCol>
 
-          <Col gap={4}>
-            <Stack gap={2}>
-              <Eyebrow>Live preview</Eyebrow>
-              <Muted>This is what subscribers will see in their feed.</Muted>
-            </Stack>
-
-            <PickCard
-              creatorName={creator?.name ?? me?.name ?? 'You'}
-              creatorHandle={creator?.handle ?? ''}
-              creatorMono={creator?.avatarMono ?? ''}
-              creatorColor={creator?.avatarColor ?? ''}
-              creatorVerified={creator?.verified ?? false}
-              access={access}
-              sport={sport}
-              event={eventName}
-              eventTime={eventTime}
-              posted="just now"
-              title={title || 'Untitled pick'}
-              market={market}
-              selection={selection || '—'}
-              odds={odds || '—'}
-              units={units || '—'}
-              body={body}
-              status="pending"
-            />
-          </Col>
-        </Row>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('createPick', navigate)} />
+          <StudioDashCol span={4}>
+            <StudioComposerAside
+              previewSub="This is how the pick appears in subscriber feeds and on your public profile."
+              tipTitle="Editorial tip"
+              tipBody="Picks with clear matchup context and at least a few sentences of reasoning tend to retain subscribers longer. Call out injuries, line movement, or situational edges."
+            >
+              <PickCard
+                creatorName={creator?.name ?? me?.name ?? 'You'}
+                creatorHandle={creator?.handle ?? ''}
+                creatorMono={creator?.avatarMono ?? ''}
+                creatorColor={creator?.avatarColor ?? ''}
+                creatorVerified={creator?.verified ?? false}
+                access={form.access}
+                sport={form.sport}
+                event={form.eventName || 'Event name'}
+                eventTime={form.eventTime || 'Kickoff TBD'}
+                posted="Preview"
+                title={previewTitle}
+                market={form.market}
+                selection={form.selection || '—'}
+                odds={form.odds || '—'}
+                units={form.units || '—'}
+                body={form.body}
+                status="pending"
+              />
+            </StudioComposerAside>
+          </StudioDashCol>
+        </StudioDashLayout>
       </Stack>
     </Container>
   );

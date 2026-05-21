@@ -1,5 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
+import lift from '../../../utils/lightMarketingSurface.module.css';
 import s from './StepCard.module.css';
 
 export type StepCardTone = 'primary' | 'violet' | 'green' | 'gold';
@@ -25,10 +26,18 @@ const TONE_VAR: Record<StepCardTone, string> = {
   gold: 'var(--gold)',
 };
 
-export function StepCard({ step, title, body, icon, tone = 'primary', hint, className }: StepCardProps) {
+export function StepCard({
+  step,
+  title,
+  body,
+  icon,
+  tone = 'primary',
+  hint,
+  className,
+}: StepCardProps) {
   const cssVars = { '--step-color': TONE_VAR[tone] } as React.CSSProperties;
   return (
-    <article className={cx(s.card, className)} style={cssVars}>
+    <article className={cx(s.card, lift.surface, className)} style={cssVars}>
       <span className={s.shine} aria-hidden="true" />
       <div className={s.head}>
         <span className={s.number} aria-hidden="true">

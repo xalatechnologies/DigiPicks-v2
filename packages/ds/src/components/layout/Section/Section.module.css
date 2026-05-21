@@ -3,6 +3,44 @@
   /* Reveal animation handled by framer-motion <Section> */
 }
 
+.inner {
+  max-width: var(--container-2xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-7);
+  padding-right: var(--space-7);
+}
+
+.elevated {
+  margin-bottom: 0;
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+  background: var(--bg-1);
+}
+
+:global([data-theme='light']) .elevated {
+  background: var(--bg-2);
+}
+
+.elevated .inner {
+  margin-bottom: 0;
+}
+
+.inset {
+  margin-bottom: var(--space-16);
+}
+
+.inset .inner {
+  padding: var(--space-8);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+}
+
+:global([data-theme='light']) .inset .inner {
+  background: var(--bg-2);
+  box-shadow: var(--shadow-xs);
+}
+
 .head {
   display: flex;
   align-items: flex-end;

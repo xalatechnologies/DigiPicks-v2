@@ -1,13 +1,13 @@
 import type {
   ActivityFeedItemData,
   AdminActionPanelItem,
-  InsightTone,
-  StudioSummaryGridItem,
+  AdminCriticalAlertItem,
+  AdminMetricStripItem,
 } from '@digipicks/ds';
 import type { NavigateFunction } from 'react-router-dom';
 import { ADMIN } from './adminRoutes';
 
-type OverviewKpis = {
+export type OverviewKpis = {
   totalUsers: number;
   activeSubscribers: number;
   activeCreators: number;
@@ -48,73 +48,80 @@ function cappedSuffix(capped: OverviewCapped): string {
   return '';
 }
 
-export function buildAdminKpiRows(
+export function buildAdminKpiStrip(
   kpis: OverviewKpis,
   capped: OverviewCapped,
   navigate: NavigateFunction,
-): StudioSummaryGridItem[] {
+): AdminMetricStripItem[] {
   const suffix = cappedSuffix(capped);
 
   return [
     {
       id: 'users',
-      icon: 'users',
-      iconTone: 'primary',
       label: 'Total users',
       value: `${kpis.totalUsers.toLocaleString()}${suffix}`,
     },
     {
       id: 'subs',
-      icon: 'card',
-      iconTone: 'violet',
       label: 'Active subs',
       value: `${kpis.activeSubscribers.toLocaleString()}${capped.subscriptions ? '+' : ''}`,
     },
     {
       id: 'creators',
-      icon: 'verified',
-      iconTone: 'primary',
       label: 'Creators',
       value: `${kpis.activeCreators.toLocaleString()}${capped.creators ? '+' : ''}`,
+      badge:
+        kpis.activeCreators > 0
+          ? { text: 'Active on platform', tone: 'primary' }
+          : { text: 'None live yet', tone: 'muted' },
     },
     {
       id: 'applications',
-      icon: 'user',
-      iconTone: kpis.pendingApplications > 0 ? 'amber' : 'primary',
       label: 'Applications',
       value: String(kpis.pendingApplications),
-      delta: kpis.pendingApplications > 0 ? { value: 'Queue', dir: 'up' as const } : undefined,
-      onClick: () => navigate(`${ADMIN.applications}?status=submitted`),
+      badge:
+        kpis.pendingApplications > 0
+          ? { text: 'Urgent', tone: 'urgent' }
+          : { text: 'Queue clear', tone: 'muted' },
+      onClick:
+        kpis.pendingApplications > 0
+          ? () => navigate(`${ADMIN.applications}?status=submitted`)
+          : undefined,
     },
     {
       id: 'mrr',
-      icon: 'dollar',
-      iconTone: 'amber',
       label: 'MRR',
       value: kpis.mrr === null ? '—' : `$${kpis.mrr.toLocaleString()}`,
+      badge: kpis.mrr === null ? { text: 'Stripe not connected', tone: 'muted' } : undefined,
     },
     {
       id: 'churn',
-      icon: 'chart',
-      iconTone: 'danger',
       label: 'Churn',
       value: kpis.churnRate === null ? '—' : `${kpis.churnRate}%`,
+      badge: kpis.churnRate === null ? { text: 'Needs billing data', tone: 'muted' } : undefined,
     },
     {
       id: 'flagged',
-      icon: 'flag',
-      iconTone: 'danger',
       label: 'Flagged',
       value: String(kpis.flaggedApplications),
-      delta: kpis.flaggedApplications > 0 ? { value: 'Review', dir: 'up' as const } : undefined,
+      badge:
+        kpis.flaggedApplications > 0
+          ? { text: 'Review needed', tone: 'muted' }
+          : { text: 'None flagged', tone: 'muted' },
+      onClick:
+        kpis.flaggedApplications > 0
+          ? () => navigate(`${ADMIN.applications}?status=flagged`)
+          : undefined,
     },
     {
       id: 'tickets',
-      icon: 'inbox',
-      iconTone: kpis.openTickets > 0 ? 'danger' : 'primary',
       label: 'Tickets',
       value: String(kpis.openTickets),
-      onClick: () => navigate(ADMIN.disputes),
+      badge:
+        kpis.openTickets > 0
+          ? { text: 'Open queue', tone: 'priority' }
+          : { text: 'Inbox clear', tone: 'muted' },
+      onClick: kpis.openTickets > 0 ? () => navigate(ADMIN.support) : undefined,
     },
   ];
 }
@@ -124,6 +131,7 @@ const ACTIVITY_ICON: Record<string, ActivityFeedItemData['icon']> = {
   dispute: 'shield',
   pick: 'feed',
   event: 'calendar',
+  user: 'users',
 };
 
 const ACTIVITY_TONE: Record<string, ActivityFeedItemData['tone']> = {
@@ -145,7 +153,7 @@ export function buildAdminActivityItems(
     if (row.entityType === 'application') {
       onClick = () => navigate(ADMIN.applications);
     } else if (row.entityType === 'dispute') {
-      onClick = () => navigate(ADMIN.disputes);
+      onClick = () => navigate(ADMIN.support);
     } else if (row.entityType === 'event') {
       onClick = () => navigate(ADMIN.eventsReview);
     }
@@ -163,24 +171,24 @@ export function buildAdminActivityItems(
   });
 }
 
-const ALERT_TONE: Record<OverviewAlert['tone'], InsightTone> = {
+const ALERT_EYEBROW: Record<string, string> = {
+  applications: 'Onboarding',
+  'flagged-apps': 'Trust & safety',
+  events: 'Content',
+  disputes: 'Support',
+  stripe: 'Infrastructure',
+};
+
+const ALERT_TONE_MAP: Record<OverviewAlert['tone'], AdminCriticalAlertItem['tone']> = {
   amber: 'amber',
-  danger: 'red',
-  primary: 'blue',
+  danger: 'danger',
+  primary: 'primary',
 };
 
-export type AdminAlertView = {
-  id: string;
-  tone: InsightTone;
-  title: string;
-  sub: string;
-  onOpen?: () => void;
-};
-
-export function buildAdminAlerts(
+export function buildAdminCriticalAlerts(
   alerts: OverviewAlert[],
   navigate: NavigateFunction,
-): AdminAlertView[] {
+): AdminCriticalAlertItem[] {
   return alerts.map((alert) => {
     let onOpen: (() => void) | undefined;
     if (alert.id === 'applications' || alert.id === 'flagged-apps') {
@@ -188,14 +196,15 @@ export function buildAdminAlerts(
     } else if (alert.id === 'events') {
       onOpen = () => navigate(ADMIN.eventsReview);
     } else if (alert.id === 'disputes') {
-      onOpen = () => navigate(ADMIN.disputes);
+      onOpen = () => navigate(ADMIN.support);
     }
 
     return {
       id: alert.id,
-      tone: ALERT_TONE[alert.tone],
+      eyebrow: ALERT_EYEBROW[alert.id] ?? 'Operations',
       title: alert.title,
       sub: alert.sub,
+      tone: ALERT_TONE_MAP[alert.tone],
       onOpen,
     };
   });
@@ -207,7 +216,6 @@ export function buildAdminQuickActions(navigate: NavigateFunction): AdminActionP
       id: 'applications',
       label: 'Review applications',
       onClick: () => navigate(`${ADMIN.applications}?status=submitted`),
-      variant: 'primary',
     },
     {
       id: 'events',
@@ -217,7 +225,7 @@ export function buildAdminQuickActions(navigate: NavigateFunction): AdminActionP
     {
       id: 'disputes',
       label: 'Support & disputes',
-      onClick: () => navigate(ADMIN.disputes),
+      onClick: () => navigate(ADMIN.support),
     },
     {
       id: 'coupons',

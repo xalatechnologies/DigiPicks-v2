@@ -10,7 +10,6 @@ import {
   CardHead,
   Button,
   StudioPageHeader,
-  QuickActionGrid,
   EventCard,
   EventForm,
   EventSourceBadge,
@@ -20,7 +19,6 @@ import {
   type EventFormValue,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 
 const SPORTS = [
   'Soccer',
@@ -173,8 +171,6 @@ export function CreateEvent() {
             </Stack>
           </Col>
         </Row>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('createEvent', navigate)} />
       </Stack>
     </Container>
   );

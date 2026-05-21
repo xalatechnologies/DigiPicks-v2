@@ -246,6 +246,5 @@ Authenticated shells (`/account/*`, `/dashboard/*`, `/admin/*`) share a page con
 2. `StudioPageHeader` — `eyebrow: "Account · …"` / `"Studio · …"` / `"Admin · …"`
 3. `AccountRefineCard` (alias `StudioRefineCard`) when the page has search, sort, or filters
 4. Primary content — often `StudioDashLayout` (8/4 split for inbox-style pages)
-5. `QuickActionGrid` — `accountCrossLinks`, `studioCrossLinks`, or `adminCrossLinks`
 
 **Directory-style pages** (e.g. Discover) may insert a full-width featured rail (`span={12}`) between the refine card and results. **Form/settings pages** omit the refine card.

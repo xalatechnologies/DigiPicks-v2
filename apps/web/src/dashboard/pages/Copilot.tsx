@@ -19,11 +19,9 @@ import {
   StudioRefineCard,
   StudioDashLayout,
   StudioDashCol,
-  QuickActionGrid,
   type CopilotMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 export function CreatorCopilot() {
@@ -237,8 +235,6 @@ export function CreatorCopilot() {
           </StudioDashCol>
           <StudioDashCol span={8}>{chatPane}</StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('copilot', navigate)} />
       </Stack>
     </Container>
   );

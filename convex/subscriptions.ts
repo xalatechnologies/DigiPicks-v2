@@ -146,6 +146,10 @@ export const subscribe = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
+    if (user.creatorId === args.creatorId) {
+      throw new Error('You cannot subscribe to your own creator profile.');
+    }
+
     // Check for existing active sub
     const existing = await ctx.db
       .query('subscriptions')

@@ -102,6 +102,17 @@ export default defineSchema({
     emailVerificationTokenHash: v.optional(v.string()),
     emailVerificationSentAt: v.optional(v.number()),
     emailVerificationExpiresAt: v.optional(v.number()),
+    // ── Legacy `users` columns only (pre–Convex Auth). NOT creators.status,
+    //    subscriptions.status, or teamLogos.displayName. Strip via
+    //    migrations:stripLegacyUserFields — never infers role/creatorId from these.
+    displayName: v.optional(v.string()),
+    emailVerified: v.optional(v.boolean()),
+    lastLoginAt: v.optional(v.number()),
+    metadata: v.optional(v.record(v.string(), v.string())),
+    mfaEnabled: v.optional(v.boolean()),
+    passwordHash: v.optional(v.string()),
+    phoneVerified: v.optional(v.boolean()),
+    status: v.optional(v.string()),
   })
     .index('email', ['email'])
     .index('by_role', ['role'])

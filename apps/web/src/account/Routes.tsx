@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthGate } from '../auth/AuthGate';
 import { SubscriberShell } from './Shell';
@@ -16,8 +16,7 @@ import { Discover } from './pages/Discover';
 import { Subscriptions } from './pages/Subscriptions';
 import { Results } from './pages/Results';
 import { AccountSettings } from './pages/AccountSettings';
-import { Watchlists } from './pages/Watchlists';
-import { Copilot } from './pages/Copilot';
+import { MyFeed } from './pages/MyFeed';
 import { AccountMessages } from './pages/Messages';
 import { PaymentMethods } from './pages/PaymentMethods';
 import { BillingHistory } from './pages/BillingHistory';
@@ -32,6 +31,8 @@ export function AccountRoutes() {
       <Routes>
         <Route element={<SubscriberShell />}>
           <Route index element={<Dashboard />} />
+          <Route path="feed" element={<MyFeed />} />
+          <Route path="copilot" element={<Navigate to="/account/feed" replace />} />
           <Route path="discover" element={<Discover />} />
           <Route path="events" element={<AccountEvents />} />
           <Route path="results" element={<Results />} />
@@ -40,8 +41,7 @@ export function AccountRoutes() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="community" element={<AccountCommunity />} />
           <Route path="messages" element={<AccountMessages />} />
-          <Route path="watchlists" element={<Watchlists />} />
-          <Route path="copilot" element={<Copilot />} />
+          <Route path="watchlists" element={<Navigate to="/account/notifications" replace />} />
           <Route path="settings" element={<AccountSettings />} />
           <Route path="payment-methods" element={<PaymentMethods />} />
           <Route path="billing-history" element={<BillingHistory />} />

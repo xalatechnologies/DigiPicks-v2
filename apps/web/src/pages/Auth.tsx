@@ -1,7 +1,6 @@
-import React, { useEffect, useState, FormEvent } from 'react';
+import React, { useEffect, useRef, useState, FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react';
-import { useQuery } from 'convex/react';
+import { useAuthActions, useAction, useConvexAuth, useMutation } from '../auth/convexAuth';
 import {
   AuthLayout,
   AuthAside,
@@ -27,10 +26,23 @@ import {
   isApplyIntentPath,
   persistAuthPostLoginTargetFromParams,
   resolvePostAuthDestination,
-  safeRedirectTarget,
   type SignupPersona,
 } from '../lib/authPostLoginTarget';
 import { formatAuthError } from '../lib/formatAuthError';
+import { passwordSignInWithRetry } from '../lib/authRetry';
+import { resetConvexAuthSession } from '../lib/clearStaleConvexAuth';
+import {
+  fingerprintToken,
+  getStoredConvexAuthToken,
+  waitForConvexAuthSession,
+} from '../lib/waitForConvexAuthSession';
+import { clearDevAdminSignedOut } from '../lib/devAdminSession';
+import {
+  canDevAutoSignInAdmin,
+  DEFAULT_DEV_ADMIN_EMAIL,
+  isDevAdminEmail,
+} from '../lib/devAdminDefaults';
+import { useAuthSession } from '../auth/useAuthSession';
 
 type AuthStep = 'methods' | 'email-password';
 
@@ -38,12 +50,36 @@ function defaultSignupPersonaFromLocation(): SignupPersona {
   return 'subscriber';
 }
 
+function readCredentialsFromForm(form: HTMLFormElement): { email: string; password: string } {
+  const fd = new FormData(form);
+  return {
+    email: String(fd.get('email') ?? '').trim(),
+    password: String(fd.get('password') ?? ''),
+  };
+}
+
 export function Auth() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { signIn } = useAuthActions();
-  const { isAuthenticated } = useConvexAuth();
-  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const { signIn, signOut } = useAuthActions();
+  const { isLoading: convexAuthLoading, isAuthenticated: convexAuthenticated } = useConvexAuth();
+  const { isAuthenticated, me, profileReady, serverAuthUserId } = useAuthSession();
+  const authSnapshot = useRef({
+    convexAuthenticated: false,
+    convexAuthLoading: true,
+    profileReady: false,
+    me: null as typeof me,
+    serverAuthUserId: null as string | null,
+  });
+  authSnapshot.current = {
+    convexAuthenticated,
+    convexAuthLoading,
+    profileReady,
+    me,
+    serverAuthUserId,
+  };
+  const claimDevAdminSession = useMutation(api.devProvision.claimDevAdminSession);
+  const bootstrapDevAdmin = useAction(api.devProvisionActions.bootstrapDevAdmin);
   const [step, setStep] = useState<AuthStep>('methods');
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
   const [signupPersona, setSignupPersona] = useState<SignupPersona>(
@@ -51,86 +87,223 @@ export function Auth() {
   );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [lastFlow, setLastFlow] = useState<'signIn' | 'signUp'>('signIn');
+  const submittingRef = useRef(false);
 
   const nextParam = params.get('next');
   const redirectToParam = params.get('redirectTo');
 
-  // Tab session: OAuth often returns without `?next=`; keep Become a creator intent.
   useEffect(() => {
     persistAuthPostLoginTargetFromParams(nextParam, redirectToParam);
   }, [nextParam, redirectToParam]);
 
   const target = effectivePostAuthTarget(nextParam, redirectToParam);
   const applyIntent = hasCreatorApplyIntent() || isApplyIntentPath(target);
+  const adminIntent = target.startsWith('/admin');
 
-  // Returning applicants should sign in, not re-register on this page.
   useEffect(() => {
     if (applyIntent) setMode('signIn');
   }, [applyIntent]);
 
-  // Already signed in (or OAuth just finished): leave `/auth` immediately.
+  // Admin login: skip the method picker and open the email form directly.
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!adminIntent) return;
+    setStep('email-password');
+    setMode('signIn');
+  }, [adminIntent]);
 
-    const dest = resolvePostAuthDestination({
-      target,
-      flow: 'signIn',
-      creatorId: me?.creatorId ?? null,
-      applyIntent,
-    });
+  useEffect(() => {
+    if (submittingRef.current) return;
+    if (!isAuthenticated || convexAuthLoading || !profileReady || !me) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const dest = resolvePostAuthDestination({
+        target,
+        flow: lastFlow,
+        signupPersona: lastFlow === 'signUp' ? signupPersona : undefined,
+        creatorId: me.creatorId ?? null,
+        applyIntent,
+      });
+
+      if (dest.startsWith('/admin')) {
+        if (!isDevAdminEmail(me.email)) {
+          setError(
+            `Signed in as ${me.email ?? 'this account'}, not the platform admin. Sign out from the header menu, then sign in with ${DEFAULT_DEV_ADMIN_EMAIL}.`,
+          );
+          return;
+        }
+        try {
+          await claimDevAdminSession({});
+        } catch {
+          /* AdminAuthGate surfaces claim errors */
+        }
+      }
+
+      if (cancelled) return;
+      clearAuthRedirectState();
+      navigate(dest, { replace: true });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    applyIntent,
+    claimDevAdminSession,
+    convexAuthLoading,
+    isAuthenticated,
+    lastFlow,
+    me,
+    navigate,
+    profileReady,
+    signupPersona,
+    target,
+  ]);
+
+  async function waitForAuthStatus(predicate: () => boolean, timeoutMs = 12_000): Promise<boolean> {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      if (predicate()) return true;
+      await new Promise((r) => window.setTimeout(r, 80));
+    }
+    return predicate();
+  }
+
+  /** Navigate only after Convex confirms the server-side session. */
+  async function finishAdminSignIn() {
     clearAuthRedirectState();
-    navigate(dest, { replace: true });
-  }, [isAuthenticated, me?.creatorId, navigate, target, applyIntent]);
-
-  const [emailInput, setEmailInput] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
+    clearDevAdminSignedOut();
+    setStatusMessage('Opening admin portal…');
+    navigate('/admin', { replace: true });
+  }
 
   async function runPasswordAuth(
-    formData: FormData,
+    form: HTMLFormElement,
     flow: 'signIn' | 'signUp',
     signupPersonaForRedirect?: SignupPersona,
   ) {
-    formData.set('flow', flow);
+    const { email, password } = readCredentialsFromForm(form);
+    const fd = new FormData(form);
+    fd.set('flow', flow);
+
+    const dest = resolvePostAuthDestination({
+      target,
+      flow,
+      signupPersona: flow === 'signUp' ? signupPersonaForRedirect : undefined,
+      creatorId: me?.creatorId ?? null,
+      applyIntent,
+    });
+    const goingAdmin = dest.startsWith('/admin') || isDevAdminEmail(email);
+
+    if (goingAdmin && !isDevAdminEmail(email)) {
+      setError(`Use the platform admin email (${DEFAULT_DEV_ADMIN_EMAIL}) to open /admin.`);
+      return;
+    }
 
     try {
-      await signIn('password', formData);
+      const tokenBefore = fingerprintToken(getStoredConvexAuthToken());
 
-      const dest = resolvePostAuthDestination({
-        target,
-        flow,
-        signupPersona: signupPersonaForRedirect,
-        creatorId: me?.creatorId ?? null,
-        applyIntent,
-      });
+      if (goingAdmin) {
+        setStatusMessage('Clearing old session…');
+        await resetConvexAuthSession(signOut);
+      }
+
+      if (goingAdmin && canDevAutoSignInAdmin()) {
+        setStatusMessage('Preparing dev admin account…');
+        try {
+          await bootstrapDevAdmin({});
+        } catch {
+          /* bootstrap is best-effort in dev */
+        }
+      }
+
+      setStatusMessage('Signing in…');
+      await passwordSignInWithRetry(signIn, fd);
+      clearDevAdminSignedOut();
+      setLastFlow(flow);
+
+      setStatusMessage('Confirming session…');
+      const session = await waitForConvexAuthSession(
+        35_000,
+        undefined,
+        goingAdmin ? null : tokenBefore,
+      );
+      if (!session.ok) {
+        const base =
+          session.reason === 'no-token'
+            ? 'Sign-in did not finish — no auth token was saved. Wait until the page has fully loaded, then try again.'
+            : session.reason === 'stale-token'
+              ? 'Sign-in did not replace the previous session token. Clear site data for this localhost port and try again.'
+              : 'Sign-in saved a token but Convex rejected it.';
+        const detail = session.detail ? ` ${session.detail}` : '';
+        const hint =
+          session.reason === 'server-rejected'
+            ? ' Run `pnpm verify:convex-auth` from the repo root.'
+            : '';
+        setError(`${base}${detail}${hint}`);
+        return;
+      }
+
+      if (goingAdmin) {
+        await waitForAuthStatus(
+          () => !authSnapshot.current.convexAuthLoading && authSnapshot.current.convexAuthenticated,
+          10_000,
+        );
+        try {
+          await claimDevAdminSession({});
+        } catch {
+          /* AdminAuthGate can claim/repair */
+        }
+        await finishAdminSignIn();
+        return;
+      }
+
+      setStatusMessage('');
       clearAuthRedirectState();
       navigate(dest, { replace: true });
     } catch (err: unknown) {
       setError(formatAuthError(err, flow));
+      setStatusMessage('');
+    }
+  }
+
+  async function submitPasswordForm(
+    form: HTMLFormElement,
+    flow: 'signIn' | 'signUp',
+    signupPersonaForRedirect?: SignupPersona,
+  ) {
+    if (submittingRef.current) return;
+
+    const { email, password } = readCredentialsFromForm(form);
+    if (!email || !password) {
+      setError('Enter your email and password.');
+      return;
+    }
+
+    submittingRef.current = true;
+    setError('');
+    setStatusMessage('');
+    setLoading(true);
+
+    try {
+      await runPasswordAuth(form, flow, signupPersonaForRedirect);
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   }
 
   async function handlePasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const email = emailInput.trim();
-    const fd = new FormData();
-    fd.set('email', email);
-    fd.set('password', passwordInput);
-    fd.set('flow', mode === 'signUp' ? 'signUp' : 'signIn');
-    await runPasswordAuth(fd, mode, mode === 'signUp' ? signupPersona : undefined);
+    await submitPasswordForm(e.currentTarget, mode, mode === 'signUp' ? signupPersona : undefined);
   }
 
   const isSignUp = mode === 'signUp';
 
   function openEmailFlow(nextMode: 'signIn' | 'signUp') {
-    if (applyIntent && nextMode === 'signUp') {
-      navigate('/apply');
-      return;
-    }
     setMode(nextMode);
     setStep('email-password');
     setError('');
@@ -168,7 +341,9 @@ export function Auth() {
       }
       aside={
         <AuthAside
-          brand={<Logo size={36} showWord />}
+          brand={
+            <Logo size={36} showWord onClick={() => navigate('/')} aria-label="DigiPicks home" />
+          }
           eyebrow="Welcome to the network"
           title={
             <>
@@ -189,7 +364,6 @@ export function Auth() {
             { icon: <Icon name="shield" size={14} />, label: 'Stripe-backed billing · 21+ only' },
           ]}
           footerLeft="© 2026 DigiPicks"
-          footerRight="Bet responsibly · 1-800-GAMBLER"
         />
       }
     >
@@ -198,7 +372,7 @@ export function Auth() {
           title={applyIntent ? 'Sign in' : 'Welcome'}
           subtitle={
             applyIntent
-              ? 'Sign in to continue your application, open your creator studio, or access your subscriber hub.'
+              ? 'Sign in with your subscriber account, or create one first — then you can complete your creator application.'
               : 'Sign in if you already have an account — creators, subscribers, and admins.'
           }
           error={error || undefined}
@@ -206,9 +380,9 @@ export function Auth() {
             <Stack gap={4} align="stretch">
               {applyIntent ? (
                 <AuthFooterLink
-                  text="New creator?"
-                  linkText="Start your application"
-                  onClick={() => navigate('/apply')}
+                  text="New to DigiPicks?"
+                  linkText="Create subscriber account"
+                  onClick={() => openEmailFlow('signUp')}
                 />
               ) : (
                 <AuthMethodButton
@@ -282,7 +456,9 @@ export function Auth() {
               ? signupPersona === 'creator'
                 ? 'Create your login, then complete your creator application on the next screen.'
                 : 'Follow creators, save picks, and track your results.'
-              : 'Enter your email and password to continue.'
+              : adminIntent
+                ? `Platform admin sign-in (${DEFAULT_DEV_ADMIN_EMAIL}).`
+                : 'Enter your email and password to continue.'
           }
           error={error || undefined}
           footer={
@@ -291,7 +467,6 @@ export function Auth() {
               linkText={isSignUp ? 'Sign in' : 'Sign up free'}
               onClick={() => {
                 setMode(isSignUp ? 'signIn' : 'signUp');
-                setPasswordInput('');
                 setError('');
                 if (!isSignUp) {
                   setSignupPersona('subscriber');
@@ -300,19 +475,27 @@ export function Auth() {
             />
           }
         >
-          <form onSubmit={handlePasswordSubmit}>
+          <form id="auth-email-form" onSubmit={handlePasswordSubmit} noValidate>
             <Stack gap={4}>
               {isSignUp ? (
                 <Stack gap={2}>
                   <Muted>
-                    Subscriber accounts follow creators and track picks in the member hub.
+                    {applyIntent
+                      ? 'Step 1: create your subscriber login. Step 2: complete the creator application on the next screen.'
+                      : 'Subscriber accounts follow creators and track picks in the member hub.'}
                   </Muted>
-                  <Muted>
-                    Want to publish on DigiPicks?{' '}
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/apply')}>
-                      Apply as a creator
-                    </Button>
-                  </Muted>
+                  {!applyIntent ? (
+                    <Muted>
+                      Want to publish on DigiPicks?{' '}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/auth?next=/apply')}
+                      >
+                        Apply as a creator
+                      </Button>
+                    </Muted>
+                  ) : null}
                 </Stack>
               ) : null}
 
@@ -324,8 +507,7 @@ export function Auth() {
                   placeholder="you@example.com"
                   autoComplete="email"
                   required
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
+                  defaultValue={adminIntent ? DEFAULT_DEV_ADMIN_EMAIL : undefined}
                 />
               </Field>
 
@@ -339,8 +521,6 @@ export function Auth() {
                   autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   minLength={8}
                   required
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
                 />
               </Field>
 
@@ -360,6 +540,8 @@ export function Auth() {
                     ? 'Create account'
                     : 'Sign in'}
               </Button>
+
+              {statusMessage ? <Muted>{statusMessage}</Muted> : null}
             </Stack>
           </form>
         </AuthCard>

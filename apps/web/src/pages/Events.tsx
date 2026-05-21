@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { accountCrossLinks } from '../lib/accountCrossLinks';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import type { Doc, Id } from '../../../../convex/_generated/dataModel';
@@ -13,7 +12,6 @@ import {
   Icon,
   EmptyState,
   FilterChips,
-  ResponsibleSection,
   Heading,
   Search,
   StudioPageHeader,
@@ -30,8 +28,6 @@ import {
   EventsCreatorSpotlight,
   CreatorsHorizontalRail,
   CreatorsHorizontalRailItem,
-  CreatorsPromoCard,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { teamLogo } from '../lib/teamLogo';
 import { accountLayoutPaths, type LayoutContext } from '../lib/accountLayoutPaths';
@@ -262,7 +258,7 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
 
   return (
     <main>
-      <Container size="2xl">
+      <Container size="2xl" pad={isAccount ? 'none' : 'page'}>
         <Stack gap={isAccount ? 6 : 8}>
           {isAccount ? (
             <>
@@ -339,7 +335,7 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
           ) : null}
 
           <StudioDashLayout>
-            <StudioDashCol span={8}>
+            <StudioDashCol span={highlightPick && highlightCreator ? 10 : 12}>
               <Stack gap={10}>
                 {isLoading ? (
                   <EmptyState icon="calendar" title="Loading events…" />
@@ -402,7 +398,7 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                         <Heading level={2} size="lg">
                           {sectionSport}
                         </Heading>
-                        <Stack gap={3}>
+                        <Grid cols={3} gap={4} stagger={false}>
                           {events.map((ev) => {
                             const logos = logoFor(ev);
                             const score = scoreDisplay(ev);
@@ -411,6 +407,7 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                             return (
                               <EventScheduleRow
                                 key={ev._id}
+                                dense
                                 time={ev.time}
                                 away={ev.away}
                                 home={ev.home}
@@ -427,7 +424,7 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                               />
                             );
                           })}
-                        </Stack>
+                        </Grid>
                       </Stack>
                     ))}
                   </>
@@ -438,12 +435,13 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                     <Heading level={2} size="lg">
                       Recently concluded
                     </Heading>
-                    <Stack gap={3}>
+                    <Grid cols={3} gap={4} stagger={false}>
                       {recent.map((ev) => {
                         const logos = logoFor(ev);
                         return (
                           <EventScheduleRow
                             key={ev._id}
+                            dense
                             time="Final"
                             away={ev.away}
                             home={ev.home}
@@ -457,54 +455,39 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                           />
                         );
                       })}
-                    </Stack>
+                    </Grid>
                   </Stack>
                 ) : null}
               </Stack>
             </StudioDashCol>
 
-            <StudioDashCol span={4}>
-              <CreatorProfileStickyAside>
-                <Stack gap={6}>
-                  {highlightPick && highlightCreator ? (
-                    <EventsPickHighlight
-                      creatorName={`@${highlightCreator.handle}`}
-                      creatorSub={`${highlightCreator.name} · ${Math.round(highlightCreator.winRate <= 1 ? highlightCreator.winRate * 100 : highlightCreator.winRate)}% win rate`}
-                      avatarMono={highlightCreator.avatarMono}
-                      avatarColor={highlightCreator.avatarColor}
-                      insight={
-                        highlightPick.aiSummary ??
-                        highlightPick.teaser ??
-                        highlightPick.body ??
-                        'Premium analysis available for this matchup.'
-                      }
-                      pickLabel={`${highlightPick.selection} · ${highlightPick.market}`}
-                      pickOdds={highlightPick.odds}
-                      consensusPercent={highlightPick.aiConfidence ?? 65}
-                      consensusCaption={
-                        highlightPick.aiConfidence != null
-                          ? `${Math.round(highlightPick.aiConfidence)}% model confidence on this angle`
-                          : undefined
-                      }
-                      onCta={() => navigate(paths.feed)}
-                    />
-                  ) : null}
-                  <CreatorsPromoCard
-                    title="Unlock premium insights"
-                    body="Subscribe to verified creators for every locked pick on today's slate."
-                    actions={
-                      <Button
-                        variant="primary"
-                        block
-                        onClick={() => navigate(paths.creatorsBrowse)}
-                      >
-                        Browse creators
-                      </Button>
+            {highlightPick && highlightCreator ? (
+              <StudioDashCol span={2}>
+                <CreatorProfileStickyAside>
+                  <EventsPickHighlight
+                    creatorName={`@${highlightCreator.handle}`}
+                    creatorSub={`${highlightCreator.name} · ${Math.round(highlightCreator.winRate <= 1 ? highlightCreator.winRate * 100 : highlightCreator.winRate)}% win rate`}
+                    avatarMono={highlightCreator.avatarMono}
+                    avatarColor={highlightCreator.avatarColor}
+                    insight={
+                      highlightPick.aiSummary ??
+                      highlightPick.teaser ??
+                      highlightPick.body ??
+                      'Premium analysis available for this matchup.'
                     }
+                    pickLabel={`${highlightPick.selection} · ${highlightPick.market}`}
+                    pickOdds={highlightPick.odds}
+                    consensusPercent={highlightPick.aiConfidence ?? 65}
+                    consensusCaption={
+                      highlightPick.aiConfidence != null
+                        ? `${Math.round(highlightPick.aiConfidence)}% model confidence on this angle`
+                        : undefined
+                    }
+                    onCta={() => navigate(paths.feed)}
                   />
-                </Stack>
-              </CreatorProfileStickyAside>
-            </StudioDashCol>
+                </CreatorProfileStickyAside>
+              </StudioDashCol>
+            ) : null}
           </StudioDashLayout>
 
           {creatorsToday.length > 0 ? (
@@ -524,12 +507,6 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
                 </CreatorsHorizontalRailItem>
               ))}
             </CreatorsHorizontalRail>
-          ) : null}
-
-          <ResponsibleSection />
-
-          {layoutContext === 'account' ? (
-            <QuickActionGrid title="Related" items={accountCrossLinks('events', navigate)} />
           ) : null}
 
           <Spacer />

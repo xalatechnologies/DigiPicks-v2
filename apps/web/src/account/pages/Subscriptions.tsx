@@ -18,10 +18,8 @@ import {
   type SubscriptionMembershipMeta,
   AccountBillingPanel,
   AccountSubscriptionsPromo,
-  QuickActionGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { accountCrossLinks } from '../../lib/accountCrossLinks';
 import { useStripePortal } from '../../lib/useStripePortal';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
@@ -333,8 +331,6 @@ export function Subscriptions() {
             </Stack>
           </StudioDashCol>
         </StudioDashLayout>
-
-        <QuickActionGrid title="Related" items={accountCrossLinks('subscriptions', navigate)} />
       </Stack>
     </Container>
   );

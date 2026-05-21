@@ -1,6 +1,6 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
-import { AccountSettingsActionRow } from '../AccountSettingsActionRow/AccountSettingsActionRow';
+import { Icon } from '../../atoms/Icon/Icon';
 import s from './AdminActionPanel.module.css';
 
 export interface AdminActionPanelItem {
@@ -21,17 +21,26 @@ export function AdminActionPanel({ title, items, className }: AdminActionPanelPr
   return (
     <article className={cx(s.card, className)}>
       <h2 className={s.title}>{title}</h2>
-      <div className={s.list}>
+      <ul className={s.list}>
         {items.map((item) => (
-          <AccountSettingsActionRow
-            key={item.id}
-            label={item.label}
-            trailingTone={item.variant === 'primary' ? 'primary' : 'default'}
-            onClick={item.disabled ? undefined : item.onClick}
-            className={cx(item.variant === 'primary' && s.primaryRow, item.disabled && s.disabled)}
-          />
+          <li key={item.id}>
+            <button
+              type="button"
+              className={cx(s.row, item.variant === 'primary' && s.primary)}
+              onClick={item.disabled ? undefined : item.onClick}
+              disabled={item.disabled || !item.onClick}
+            >
+              <span className={s.label}>{item.label}</span>
+              <Icon
+                name={item.variant === 'primary' ? 'chart' : 'arrow-right'}
+                size={item.variant === 'primary' ? 20 : 18}
+                className={s.arrow}
+                aria-hidden
+              />
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
     </article>
   );
 }

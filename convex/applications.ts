@@ -11,6 +11,21 @@ import { gateOnMfaIfEnrolled } from './mfa';
 // =============================================================================
 
 // Auth-only.
+/** Latest creator application for the signed-in user (by account email). */
+export const mine = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const email = user.email?.trim().toLowerCase();
+    if (!email) return null;
+    return await ctx.db
+      .query('applications')
+      .withIndex('by_email', (q) => q.eq('email', email))
+      .first();
+  },
+});
+
+// Auth-only.
 /** Submit a creator application. Auth-gated. */
 export const submit = mutation({
   args: {
@@ -30,7 +45,15 @@ export const submit = mutation({
       key: user._id,
       throws: true,
     });
-    const email = args.email.trim().toLowerCase();
+    const accountEmail = user.email?.trim().toLowerCase();
+    const submittedEmail = args.email.trim().toLowerCase();
+    const email = accountEmail ?? submittedEmail;
+    if (!email) {
+      throw new Error('Add an email to your DigiPicks account before applying.');
+    }
+    if (accountEmail && accountEmail !== submittedEmail) {
+      throw new Error('Application email must match your signed-in account.');
+    }
 
     // Check for duplicate email
     const existing = await ctx.db

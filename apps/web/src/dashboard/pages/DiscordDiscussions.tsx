@@ -10,16 +10,13 @@ import {
   Button,
   Icon,
   StudioPageHeader,
-  QuickActionGrid,
   Muted,
   EmptyState,
   Heading,
   DiscordDiscussionSummary,
   DiscordThreadLinkBadge,
-  CopilotResponsibleNote,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 // =============================================================================
@@ -191,12 +188,6 @@ export function DiscordDiscussions() {
             </Card>
           ))
         )}
-
-        <Row gap={3}>
-          <CopilotResponsibleNote />
-        </Row>
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('discordDiscussions', navigate)} />
       </Stack>
     </Container>
   );

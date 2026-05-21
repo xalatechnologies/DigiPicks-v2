@@ -3,7 +3,7 @@ import { cx } from '../../../utils/cx';
 import s from './StudioPageHeader.module.css';
 
 export interface StudioPageHeaderProps {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   sub?: React.ReactNode;
   actions?: React.ReactNode;
@@ -21,7 +21,7 @@ export function StudioPageHeader({
     <header className={cx(s.wrap, className)}>
       <div className={s.row}>
         <div className={s.copy}>
-          <p className={s.eyebrow}>{eyebrow}</p>
+          {eyebrow ? <p className={s.eyebrow}>{eyebrow}</p> : null}
           <h1 className={s.title}>{title}</h1>
           {sub ? <p className={s.sub}>{sub}</p> : null}
         </div>

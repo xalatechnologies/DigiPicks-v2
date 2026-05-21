@@ -1,0 +1,9 @@
+/**
+ * Resting-state lift for marketing cards on the light canvas.
+ * Compose `lift.surface` on card roots; keep component-specific :hover rules.
+ */
+:global([data-theme='light']) .surface {
+  background: var(--bg-0);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}

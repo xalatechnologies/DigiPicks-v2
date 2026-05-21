@@ -17,7 +17,25 @@ type Ctx = QueryCtx | MutationCtx;
 export async function getCurrentUser(ctx: Ctx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) return null;
-  return await ctx.db.get(userId);
+
+  const direct = await ctx.db.get(userId);
+  if (direct) return direct;
+
+  // Session `userId` can drift from the profile row after migrations / bootstrap.
+  const account = await ctx.db
+    .query('authAccounts')
+    .filter((q) => q.eq(q.field('userId'), userId))
+    .first();
+  const accountEmail = account?.providerAccountId?.trim().toLowerCase();
+  if (accountEmail?.includes('@')) {
+    const byEmail = await ctx.db
+      .query('users')
+      .filter((q) => q.eq(q.field('email'), accountEmail))
+      .first();
+    if (byEmail) return byEmail;
+  }
+
+  return null;
 }
 
 /**
@@ -35,11 +53,7 @@ export async function requireUser(ctx: Ctx) {
  * Require a specific role within a tenant.
  * super_admin bypasses all tenant checks.
  */
-export async function requireTenantRole(
-  ctx: Ctx,
-  tenantId: Id<'tenants'>,
-  allowedRoles: string[],
-) {
+export async function requireTenantRole(ctx: Ctx, tenantId: Id<'tenants'>, allowedRoles: string[]) {
   const user = await requireUser(ctx);
 
   // super_admin bypasses
@@ -49,9 +63,7 @@ export async function requireTenantRole(
 
   const membership = await ctx.db
     .query('memberships')
-    .withIndex('by_tenant_and_user', (q) =>
-      q.eq('tenantId', tenantId).eq('userId', user._id),
-    )
+    .withIndex('by_tenant_and_user', (q) => q.eq('tenantId', tenantId).eq('userId', user._id))
     .unique();
 
   if (!membership || !membership.isActive) {
@@ -69,10 +81,7 @@ export async function requireTenantRole(
 // =============================================================================
 
 export const ADMIN_ROLES = ['admin', 'tenant_admin', 'super_admin'] as const;
-export const MODERATOR_OR_ADMIN_ROLES = [
-  'moderator',
-  ...ADMIN_ROLES,
-] as const;
+export const MODERATOR_OR_ADMIN_ROLES = ['moderator', ...ADMIN_ROLES] as const;
 
 /** Throws unless the current user has admin-tier role. */
 export async function requireAdmin(ctx: Ctx) {
@@ -88,9 +97,7 @@ export async function requireModerator(ctx: Ctx) {
   const user = await requireUser(ctx);
   if (
     !user.role ||
-    !MODERATOR_OR_ADMIN_ROLES.includes(
-      user.role as (typeof MODERATOR_OR_ADMIN_ROLES)[number],
-    )
+    !MODERATOR_OR_ADMIN_ROLES.includes(user.role as (typeof MODERATOR_OR_ADMIN_ROLES)[number])
   ) {
     throw new Error('Forbidden: moderator role required');
   }
@@ -100,8 +107,7 @@ export async function requireModerator(ctx: Ctx) {
 /** Throws unless the current user has creatorId set OR is an admin. */
 export async function requireCreator(ctx: Ctx) {
   const user = await requireUser(ctx);
-  const userIsAdmin =
-    user.role && ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]);
+  const userIsAdmin = user.role && ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]);
   if (!user.creatorId && !userIsAdmin) {
     throw new Error('Forbidden: creator status required');
   }
@@ -112,13 +118,9 @@ export async function requireCreator(ctx: Ctx) {
  * Throws unless the current user owns the given creator profile or is an admin.
  * Used by per-creator mutations (e.g., publish a pick for *this* creator).
  */
-export async function requireCreatorOwnership(
-  ctx: Ctx,
-  creatorId: Id<'creators'>,
-) {
+export async function requireCreatorOwnership(ctx: Ctx, creatorId: Id<'creators'>) {
   const user = await requireUser(ctx);
-  const userIsAdmin =
-    user.role && ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]);
+  const userIsAdmin = user.role && ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]);
   if (user.creatorId !== creatorId && !userIsAdmin) {
     throw new Error('Forbidden: you do not own this creator profile');
   }
@@ -126,11 +128,6 @@ export async function requireCreatorOwnership(
 }
 
 /** True iff `user` has any admin-tier role. Synchronous helper. */
-export function isAdmin(
-  user: { role?: string | undefined } | null | undefined,
-): boolean {
-  return Boolean(
-    user?.role &&
-      ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]),
-  );
+export function isAdmin(user: { role?: string | undefined } | null | undefined): boolean {
+  return Boolean(user?.role && ADMIN_ROLES.includes(user.role as (typeof ADMIN_ROLES)[number]));
 }

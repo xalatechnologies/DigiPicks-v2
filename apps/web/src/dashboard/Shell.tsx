@@ -67,7 +67,11 @@ export function DashboardShell() {
         />
       }
     >
-      <StudioSidebarBrand title={brandTitle} tagline="Premium Curator" />
+      <StudioSidebarBrand
+        title={brandTitle}
+        tagline="Premium Curator"
+        onLogoClick={() => navigate('/')}
+      />
       <Stack gap={1}>
         {STUDIO_NAV.map((item) => (
           <NavItem

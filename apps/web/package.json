@@ -18,7 +18,7 @@
     "@digipicks/sdk": "workspace:*",
     "@digipicks/shared": "workspace:*",
     "@digipicks/tokens": "workspace:*",
-    "convex": "^1.31.7",
+    "convex": "1.37.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"

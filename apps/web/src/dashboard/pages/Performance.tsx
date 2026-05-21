@@ -17,12 +17,10 @@ import {
   StudioMetaChip,
   StudioChartCard,
   StudioAreaChart,
-  QuickActionGrid,
   TitleSub,
 } from '@digipicks/ds';
 import { useStudioContext } from '../useStudioContext';
 import { chartHighlightForPeriod } from '../studioMetrics';
-import { studioCrossLinks } from '../../lib/studioCrossLinks';
 import { STUDIO } from '../../lib/studioRoutes';
 import { MARKET_PERF } from '../data/studio';
 
@@ -291,8 +289,6 @@ export function Performance() {
             </Stack>
           </Card>
         ) : null}
-
-        <QuickActionGrid title="Related" items={studioCrossLinks('analytics', navigate)} />
       </Stack>
     </Container>
   );

@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as access from '../access.js';
 import type * as admin from '../admin.js';
 import type * as ai from '../ai.js';
 import type * as aiCopilot_mutations from '../aiCopilot/mutations.js';
@@ -16,18 +17,20 @@ import type * as aiCopilot_queries from '../aiCopilot/queries.js';
 import type * as aiCopilot_respond from '../aiCopilot/respond.js';
 import type * as aiCopilot_scrub from '../aiCopilot/scrub.js';
 import type * as aiCopilot_tools from '../aiCopilot/tools.js';
-import type * as access from '../access.js';
 import type * as applications from '../applications.js';
 import type * as audit from '../audit.js';
-import type * as billingCases from '../billingCases.js';
 import type * as auth from '../auth.js';
 import type * as autoGrader from '../autoGrader.js';
+import type * as billingCases from '../billingCases.js';
 import type * as categories from '../categories.js';
 import type * as channels from '../channels.js';
 import type * as connect from '../connect.js';
 import type * as coupons from '../coupons.js';
 import type * as creators from '../creators.js';
 import type * as crons from '../crons.js';
+import type * as devProvision from '../devProvision.js';
+import type * as devProvisionActions from '../devProvisionActions.js';
+import type * as devProvisionTypes from '../devProvisionTypes.js';
 import type * as discord_channels from '../discord/channels.js';
 import type * as discord_delivery from '../discord/delivery.js';
 import type * as discord_events from '../discord/events.js';
@@ -43,8 +46,8 @@ import type * as discordSettings from '../discordSettings.js';
 import type * as disputes from '../disputes.js';
 import type * as dmThreads from '../dmThreads.js';
 import type * as email from '../email.js';
-import type * as entitlements from '../entitlements.js';
 import type * as emailVerification from '../emailVerification.js';
+import type * as entitlements from '../entitlements.js';
 import type * as events from '../events.js';
 import type * as feed from '../feed.js';
 import type * as files from '../files.js';
@@ -72,6 +75,7 @@ import type * as search from '../search.js';
 import type * as seed from '../seed.js';
 import type * as shared_aiParse from '../shared/aiParse.js';
 import type * as shared_circuit from '../shared/circuit.js';
+import type * as shared_devAdminDefaults from '../shared/devAdminDefaults.js';
 import type * as shared_permissions from '../shared/permissions.js';
 import type * as shared_platformFees from '../shared/platformFees.js';
 import type * as shared_rateLimit from '../shared/rateLimit.js';
@@ -96,6 +100,7 @@ import type * as watchlists from '../watchlists.js';
 import type { ApiFromModules, FilterApi, FunctionReference } from 'convex/server';
 
 declare const fullApi: ApiFromModules<{
+  access: typeof access;
   admin: typeof admin;
   ai: typeof ai;
   'aiCopilot/mutations': typeof aiCopilot_mutations;
@@ -104,18 +109,20 @@ declare const fullApi: ApiFromModules<{
   'aiCopilot/respond': typeof aiCopilot_respond;
   'aiCopilot/scrub': typeof aiCopilot_scrub;
   'aiCopilot/tools': typeof aiCopilot_tools;
-  access: typeof access;
   applications: typeof applications;
   audit: typeof audit;
-  billingCases: typeof billingCases;
   auth: typeof auth;
   autoGrader: typeof autoGrader;
+  billingCases: typeof billingCases;
   categories: typeof categories;
   channels: typeof channels;
   connect: typeof connect;
   coupons: typeof coupons;
   creators: typeof creators;
   crons: typeof crons;
+  devProvision: typeof devProvision;
+  devProvisionActions: typeof devProvisionActions;
+  devProvisionTypes: typeof devProvisionTypes;
   'discord/channels': typeof discord_channels;
   'discord/delivery': typeof discord_delivery;
   'discord/events': typeof discord_events;
@@ -131,8 +138,8 @@ declare const fullApi: ApiFromModules<{
   disputes: typeof disputes;
   dmThreads: typeof dmThreads;
   email: typeof email;
-  entitlements: typeof entitlements;
   emailVerification: typeof emailVerification;
+  entitlements: typeof entitlements;
   events: typeof events;
   feed: typeof feed;
   files: typeof files;
@@ -160,6 +167,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   'shared/aiParse': typeof shared_aiParse;
   'shared/circuit': typeof shared_circuit;
+  'shared/devAdminDefaults': typeof shared_devAdminDefaults;
   'shared/permissions': typeof shared_permissions;
   'shared/platformFees': typeof shared_platformFees;
   'shared/rateLimit': typeof shared_rateLimit;

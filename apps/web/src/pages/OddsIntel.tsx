@@ -25,7 +25,6 @@ import {
   Reveal,
   type OddsBook,
   type OddsRow,
-  ResponsibleSection,
 } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
 import type { Doc, Id } from '../../../../convex/_generated/dataModel';
@@ -121,16 +120,11 @@ export function OddsIntel() {
   const [expandedLeagues, setExpandedLeagues] = React.useState<Set<string>>(new Set());
   const featuredRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Mirror /events: load today + featured + live + recent so the page can
-  // narrate the slate (live → featured → by-league → recent) instead of
-  // a left rail.
   const allEvents = useQuery(api.events.today, sport ? { sport } : {});
   const featuredEvents = useQuery(api.events.featured, {});
   const liveEvents = useQuery(api.events.live, {});
   const recentEvents = useQuery(api.events.recent, {});
 
-  // Snapshots are still per-event — odds are heavy. The active event drives
-  // the "Now showing" hero panel.
   const snapshots = useQuery(
     api.odds.byEvent,
     activeId ? { eventId: activeId, limit: 200 } : 'skip',
@@ -143,8 +137,6 @@ export function OddsIntel() {
   );
   const recent = recentEvents ?? [];
 
-  // Default the active event to the first live one, then featured, then
-  // anything on the slate. Re-pick when sport filter clears the current.
   React.useEffect(() => {
     const candidates = [...live, ...featured, ...rest];
     if (candidates.length === 0) return;
@@ -186,9 +178,6 @@ export function OddsIntel() {
   const lastCapturedAt = snapshots?.[0]?.capturedAt;
   const liveSnapshots = Boolean(snapshots && snapshots.length > 0);
 
-  // Prefer the backend-resolved logo URLs (downloaded into Convex storage
-  // by `internal.teamLogos.resolveOne`) and fall back to the synchronous
-  // hand-curated mapping for teams that haven't been resolved yet.
   const logoFor = (ev: {
     sport: string;
     home: string;
@@ -211,8 +200,6 @@ export function OddsIntel() {
 
   const focusFeatured = (id: Id<'events'>) => {
     setActiveId(id);
-    // Smooth scroll into the "Now showing" panel so the user lands on
-    // the OddsGrid they just summoned.
     setTimeout(() => {
       featuredRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
@@ -230,7 +217,7 @@ export function OddsIntel() {
 
   return (
     <main>
-      <Container size="xl" pad="page">
+      <Container size="2xl" pad="page">
         <Reveal direction="up">
           <Section>
             <Row between gap={3}>
@@ -256,7 +243,7 @@ export function OddsIntel() {
                   </Badge>
                 )}
                 <Button variant="secondary" iconLeft="calendar" onClick={() => navigate('/events')}>
-                  Today's events
+                  Today&apos;s events
                 </Button>
               </Row>
             </Row>
@@ -288,7 +275,6 @@ export function OddsIntel() {
           </Section>
         )}
 
-        {/* ── Now showing — the active event's full OddsGrid + line move ─── */}
         {active && (
           <Section eyebrow="Now showing" title={active.title ?? `${active.home} vs ${active.away}`}>
             <div ref={featuredRef}>
@@ -370,9 +356,7 @@ export function OddsIntel() {
                           .slice()
                           .reverse()
                           .map((h) => h.price)}
-                        color={
-                          lineDelta.dir === 'down' ? 'var(--danger)' : 'var(--accent-foreground)'
-                        }
+                        color={lineDelta.dir === 'down' ? 'var(--red)' : 'var(--green)'}
                         width={280}
                         height={56}
                       />
@@ -384,7 +368,6 @@ export function OddsIntel() {
           </Section>
         )}
 
-        {/* ── Live now ─────────────────────────────────────────────── */}
         {live.length > 0 && (
           <Section eyebrow="Live now" title="In progress.">
             <Grid cols={2} gap={4}>
@@ -412,7 +395,6 @@ export function OddsIntel() {
           </Section>
         )}
 
-        {/* ── Featured / marquee ───────────────────────────────────── */}
         {featured.length > 0 && (
           <Section eyebrow="Featured" title="Marquee matchups.">
             <Grid cols={2} gap={4}>
@@ -440,7 +422,6 @@ export function OddsIntel() {
           </Section>
         )}
 
-        {/* ── By league ────────────────────────────────────────────── */}
         {Object.entries(byLeague).map(([league, events]) => {
           const isExpanded = expandedLeagues.has(league);
           const visible = isExpanded ? events : events.slice(0, INITIAL_PER_LEAGUE);
@@ -498,7 +479,6 @@ export function OddsIntel() {
           );
         })}
 
-        {/* ── Recently concluded ───────────────────────────────────── */}
         {recent.length > 0 && !sport && (
           <Section eyebrow="Recently concluded" title="Final scores.">
             <Grid cols={2} gap={4}>
@@ -525,8 +505,6 @@ export function OddsIntel() {
             </Grid>
           </Section>
         )}
-
-        <ResponsibleSection />
       </Container>
     </main>
   );

@@ -196,23 +196,23 @@ export function ApplicationReviewDrawer({
             </Field>
             {error ? <p className={s.error}>{error}</p> : null}
             <div className={s.actions}>
-              <Button variant="primary" size="sm" disabled={busy} onClick={onApprove}>
-                Approve
+              <Button variant="primary" disabled={busy} onClick={onApprove}>
+                Approve creator
               </Button>
-              <Button variant="danger" size="sm" disabled={busy} onClick={onReject}>
+              <Button variant="danger" disabled={busy} onClick={onReject}>
                 Reject
               </Button>
-              <Button variant="secondary" size="sm" disabled={busy} onClick={onRequestInfo}>
+              <Button variant="secondary" disabled={busy} onClick={onRequestInfo}>
                 Request info
+              </Button>
+              <Button variant="secondary" disabled={busy || !note.trim()} onClick={onAddNote}>
+                Add admin note
               </Button>
               <Button variant="ghost" size="sm" disabled={busy} onClick={onMarkInReview}>
                 Mark in review
               </Button>
               <Button variant="ghost" size="sm" disabled={busy} onClick={onFlag}>
-                Flag
-              </Button>
-              <Button variant="ghost" size="sm" disabled={busy || !note.trim()} onClick={onAddNote}>
-                Add note
+                Flag application
               </Button>
             </div>
           </div>

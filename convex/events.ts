@@ -424,3 +424,24 @@ export const pendingReview = query({
       .take(limit);
   },
 });
+
+export const eventsReviewSummary = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const pending = await ctx.db
+      .query('events')
+      .withIndex('by_verificationStatus', (q) => q.eq('verificationStatus', 'creator_submitted'))
+      .take(500);
+    const now = Date.now();
+    const oldest = pending.reduce((min, e) => {
+      const t = e.startsAt ?? e._creationTime;
+      return t < min ? t : min;
+    }, now);
+    const oldestAgeHours = pending.length === 0 ? 0 : Math.floor((now - oldest) / (60 * 60 * 1000));
+    return {
+      pendingCount: pending.length,
+      oldestAgeHours,
+    };
+  },
+});

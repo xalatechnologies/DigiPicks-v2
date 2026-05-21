@@ -90,11 +90,11 @@ export function CreatorProfileHero({
             <Button
               variant="primary"
               size="sm"
-              iconLeft="lock"
+              iconLeft={subscribeLabel === 'Creator studio' ? undefined : 'lock'}
               onClick={onSubscribe}
               disabled={subscribeDisabled}
             >
-              Subscribe
+              {subscribeLabel}
             </Button>
           </div>
         </div>

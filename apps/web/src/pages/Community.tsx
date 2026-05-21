@@ -23,13 +23,11 @@ import {
   AccountRefineCard,
   StudioDashLayout,
   StudioDashCol,
-  QuickActionGrid,
   type ChatPanelMessage,
 } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import { accountLayoutPaths, type LayoutContext } from '../lib/accountLayoutPaths';
-import { accountCrossLinks } from '../lib/accountCrossLinks';
 
 function fmtDate(ms: number): string {
   return new Date(ms).toLocaleDateString(undefined, {
@@ -258,8 +256,6 @@ export function Community({ layoutContext = 'public' }: CommunityProps) {
             </StudioDashCol>
             <StudioDashCol span={8}>{chatPane}</StudioDashCol>
           </StudioDashLayout>
-
-          <QuickActionGrid title="Related" items={accountCrossLinks('community', navigate)} />
         </Stack>
       </Container>
     );

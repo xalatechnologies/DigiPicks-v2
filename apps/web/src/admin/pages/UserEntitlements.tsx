@@ -1,9 +1,10 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
+  Row,
   StudioPageHeader,
   CardHead,
   Card,
@@ -15,15 +16,17 @@ import {
   Td,
   Button,
   EmptyState,
-  StudioSummaryGrid,
+  AdminMetricStrip,
   Field,
   Input,
   Muted,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { ADMIN } from '../lib/adminRoutes';
 
 export function UserEntitlements() {
+  const navigate = useNavigate();
   const { userId } = useParams();
   const data = useQuery(
     api.entitlements.adminByUser,
@@ -59,36 +62,45 @@ export function UserEntitlements() {
     );
   }
 
+  const kpiItems = data
+    ? [
+        { label: 'Subscriptions', value: String(data.subscriptionCount) },
+        { label: 'Entitlements', value: String(data.activeEntitlementCount) },
+        { label: 'Access logs', value: String(data.accessLogs.length) },
+        { label: 'Account', value: 'Active' },
+      ]
+    : [
+        { label: 'Subscriptions', value: '—' },
+        { label: 'Entitlements', value: '—' },
+        { label: 'Access logs', value: '—' },
+        { label: 'Account', value: '—' },
+      ];
+
   return (
     <Container size="2xl">
-      <Stack gap={5}>
+      <Stack gap={10}>
         <StudioPageHeader
-          eyebrow="Entitlements"
-          title={data?.user?.email ?? 'User inspector'}
+          eyebrow="Operational hub"
+          title={data?.user?.email ?? 'User entitlements'}
           sub="Active access across subscriptions and manual overrides."
+          actions={
+            <Button variant="outline" onClick={() => navigate(`${ADMIN.users}?id=${userId}`)}>
+              Back to user
+            </Button>
+          }
         />
-        {data ? (
-          <StudioSummaryGrid
-            items={[
-              {
-                id: 'subs',
-                icon: 'card',
-                label: 'Subscriptions',
-                value: String(data.subscriptionCount),
-              },
-              {
-                id: 'ent',
-                icon: 'lock',
-                label: 'Active entitlements',
-                value: String(data.activeEntitlementCount),
-              },
-              { id: 'acct', icon: 'check', label: 'Account', value: 'Active' },
-            ]}
-          />
-        ) : null}
+
+        <AdminMetricStrip columns={5} items={kpiItems} />
+
         <Card pad="sm">
           {data === undefined ? (
-            <EmptyState icon="lock" title="Loading…" />
+            <EmptyState icon="lock" title="Loading entitlements…" />
+          ) : !data || data.entitlements.length === 0 ? (
+            <EmptyState
+              icon="lock"
+              title="No entitlements"
+              subtitle="Grant a manual override below if needed."
+            />
           ) : (
             <Table>
               <THead>
@@ -112,6 +124,7 @@ export function UserEntitlements() {
             </Table>
           )}
         </Card>
+
         <Card pad="lg">
           <CardHead title="Manual override" sub="Grant pick-feed access outside Stripe." />
           <Stack gap={3}>
@@ -121,11 +134,14 @@ export function UserEntitlements() {
             <Field label="Resource ID">
               <Input value={resourceId} onChange={(e) => setResourceId(e.target.value)} />
             </Field>
-            <Button variant="primary" disabled={busy} onClick={handleGrant}>
-              Grant override
-            </Button>
+            <Row gap={2}>
+              <Button variant="primary" disabled={busy} onClick={handleGrant}>
+                Grant override
+              </Button>
+            </Row>
           </Stack>
         </Card>
+
         <Card pad="sm">
           <CardHead title="Access logs" sub="Recent allow/deny decisions." />
           {data?.accessLogs.length === 0 ? (

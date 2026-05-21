@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAction, useMutation, useQuery } from 'convex/react';
-import { useConvexAuth } from '@convex-dev/auth/react';
+import { useConvexAuth } from '../auth/convexAuth';
 import {
   Container,
   Stack,
@@ -13,7 +13,7 @@ import {
   PickCard,
   PricingModal,
   EmptyState,
-  ResponsibleSection,
+  Muted,
   Breadcrumb,
   Tabs,
   StudioSummaryGrid,
@@ -31,6 +31,7 @@ import {
   type PricingTier,
 } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
+import { isOwnCreator } from '../lib/creatorSelf';
 
 const PROFILE_TABS = [
   { label: 'Overview', value: 'overview' },
@@ -73,6 +74,7 @@ export function CreatorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
   const [tab, setTab] = React.useState('overview');
 
   const creator = useQuery(api.creators.getByHandle, id ? { handle: id } : 'skip');
@@ -96,7 +98,7 @@ export function CreatorDetail() {
   if (id && creator === null) {
     return (
       <main>
-        <Container size="2xl">
+        <Container size="2xl" pad="page">
           <Section>
             <EmptyState
               icon="search"
@@ -121,7 +123,7 @@ export function CreatorDetail() {
   if (!creator) {
     return (
       <main>
-        <Container size="2xl">
+        <Container size="2xl" pad="page">
           <Section>
             <EmptyState icon="user" title="Loading creator…" />
           </Section>
@@ -131,6 +133,8 @@ export function CreatorDetail() {
   }
 
   const profile = creator;
+  const isOwnProfile = isOwnCreator(profile._id, me?.creatorId);
+  const hasFullAccess = isOwnProfile || Boolean(isSubscribed);
 
   const others = (allCreators ?? []).filter((c) => c._id !== profile._id).slice(0, 2);
   const recent = recentPicks ?? [];
@@ -238,6 +242,10 @@ export function CreatorDetail() {
   }
 
   function openSubscribe() {
+    if (isOwnProfile) {
+      navigate('/dashboard');
+      return;
+    }
     if (!isAuthenticated) {
       navigate(`/auth?next=/creators/${profile.handle}`);
       return;
@@ -246,13 +254,15 @@ export function CreatorDetail() {
     setModalOpen(true);
   }
 
-  const subscribeLabel = isSubscribed
-    ? 'Manage subscription'
-    : `Subscribe for $${profile.startingPrice}/mo`;
+  const subscribeLabel = isOwnProfile
+    ? 'Creator studio'
+    : isSubscribed
+      ? 'Manage subscription'
+      : `Subscribe for $${profile.startingPrice}/mo`;
 
   return (
     <main>
-      <Container size="2xl">
+      <Container size="2xl" pad="page">
         <Stack gap={6}>
           <Breadcrumb items={[{ label: 'Creators', href: '/creators' }, { label: profile.name }]} />
 
@@ -265,7 +275,7 @@ export function CreatorDetail() {
             subscribeLabel={subscribeLabel}
             onSubscribe={openSubscribe}
             subscribeDisabled={busyPlan !== null}
-            priceHint={`$${profile.startingPrice}/mo`}
+            priceHint={isOwnProfile ? undefined : `$${profile.startingPrice}/mo`}
           />
 
           <StudioSummaryGrid columns={4} items={summaryItems} />
@@ -311,15 +321,21 @@ export function CreatorDetail() {
                               block
                               iconRight="arrow-right"
                               disabled={t.available === false || busyPlan !== null}
-                              onClick={() => handleSubscribe(t.plan)}
+                              onClick={() =>
+                                isOwnProfile
+                                  ? navigate('/dashboard/products')
+                                  : handleSubscribe(t.plan)
+                              }
                             >
-                              {t.available === false
-                                ? 'Not available'
-                                : t.plan === 'free'
-                                  ? 'Follow free'
-                                  : busyPlan === t.plan
-                                    ? 'Opening checkout…'
-                                    : 'Subscribe'}
+                              {isOwnProfile
+                                ? 'Manage in studio'
+                                : t.available === false
+                                  ? 'Not available'
+                                  : t.plan === 'free'
+                                    ? 'Follow free'
+                                    : busyPlan === t.plan
+                                      ? 'Opening checkout…'
+                                      : 'Subscribe'}
                             </Button>
                           }
                         />
@@ -360,9 +376,9 @@ export function CreatorDetail() {
                             aiConfidence={p.aiConfidence}
                             aiReasoning={p.aiReasoning}
                             aiModel={p.aiModel}
-                            locked={p.access !== 'free' && !isSubscribed}
+                            locked={p.access !== 'free' && !hasFullAccess}
                             onOpen={() =>
-                              p.access !== 'free' && !isSubscribed ? openSubscribe() : undefined
+                              p.access !== 'free' && !hasFullAccess ? openSubscribe() : undefined
                             }
                           />
                         ))}
@@ -371,10 +387,14 @@ export function CreatorDetail() {
                       <EmptyState
                         icon="inbox"
                         title="No public picks yet"
-                        subtitle="Subscribe to see premium picks the moment they go live."
+                        subtitle={
+                          isOwnProfile
+                            ? 'Publish picks from creator studio to show them on your public profile.'
+                            : 'Subscribe to see premium picks the moment they go live.'
+                        }
                         action={
                           <Button variant="primary" iconRight="arrow-right" onClick={openSubscribe}>
-                            {subscribeLabel}
+                            {isOwnProfile ? 'Go to creator studio' : subscribeLabel}
                           </Button>
                         }
                       />
@@ -386,13 +406,33 @@ export function CreatorDetail() {
 
             <StudioDashCol span={4}>
               <CreatorProfileStickyAside>
-                <CreatorSubscribeCard
-                  price={`$${profile.startingPrice}`}
-                  features={SUBSCRIBE_FEATURES}
-                  onSubscribe={openSubscribe}
-                  disabled={busyPlan !== null}
-                  subscribeLabel={isSubscribed ? 'Manage subscription' : 'Get full access now'}
-                />
+                {isOwnProfile ? (
+                  <Stack gap={4}>
+                    <Heading level={3} size="sm">
+                      Your public profile
+                    </Heading>
+                    <Muted>
+                      Subscribers see this page. Manage picks, pricing, and branding in creator
+                      studio.
+                    </Muted>
+                    <Button
+                      variant="primary"
+                      block
+                      iconRight="arrow-right"
+                      onClick={() => navigate('/dashboard')}
+                    >
+                      Open creator studio
+                    </Button>
+                  </Stack>
+                ) : (
+                  <CreatorSubscribeCard
+                    price={`$${profile.startingPrice}`}
+                    features={SUBSCRIBE_FEATURES}
+                    onSubscribe={openSubscribe}
+                    disabled={busyPlan !== null}
+                    subscribeLabel={isSubscribed ? 'Manage subscription' : 'Get full access now'}
+                  />
+                )}
 
                 {performanceItems.length > 0 ? (
                   <CreatorPerformanceHighlights items={performanceItems} />
@@ -424,19 +464,20 @@ export function CreatorDetail() {
 
           {error ? <EmptyState icon="alert" title="Something went wrong" subtitle={error} /> : null}
 
-          <ResponsibleSection />
           <Spacer />
         </Stack>
       </Container>
 
-      <PricingModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        creatorName={profile.name}
-        tiers={tiers}
-        onSubscribe={handleSubscribe}
-        busyPlan={busyPlan}
-      />
+      {!isOwnProfile ? (
+        <PricingModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          creatorName={profile.name}
+          tiers={tiers}
+          onSubscribe={handleSubscribe}
+          busyPlan={busyPlan}
+        />
+      ) : null}
     </main>
   );
 }

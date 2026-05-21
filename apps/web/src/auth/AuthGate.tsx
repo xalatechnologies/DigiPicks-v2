@@ -4,6 +4,8 @@ import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Container, Section, EmptyState, Button } from '@digipicks/ds';
 import { DEV_DEMO_UNLOCK, hasDevStudioPreview } from '../lib/devDemoLogin';
+import { DEV_ADMIN_LOCAL } from '../lib/devAdminDefaults';
+import { hasDevAdminPreview } from '../lib/devAdminPreview';
 
 /**
  * Roles defined in `convex/shared/validators.ts`. Mirrored here as a string
@@ -63,6 +65,11 @@ export function AuthGate({
     return <>{children}</>;
   }
 
+  // QA: local `/admin` when Convex auth is down — UI shell only.
+  if (DEV_ADMIN_LOCAL && hasDevAdminPreview()) {
+    return <>{children}</>;
+  }
+
   // ── Auth resolving (or profile loading) ──────────────────────────────
   if (isLoading || (isAuthenticated && user === undefined)) {
     return (
@@ -87,9 +94,10 @@ export function AuthGate({
   }
 
   // ── RBAC check ───────────────────────────────────────────────────────
-  // Earlier branches narrowed undefined/null, but TS can't follow useQuery's
-  // discriminated union — re-assert the non-null user once.
-  if (!user) return null;
+  if (!user) {
+    const next = encodeURIComponent(`${pathname}${search}`);
+    return <Navigate to={`/auth?next=${next}`} replace />;
+  }
   const noConstraints = !allowedRoles && !requireCreator;
   const roleOk = allowedRoles
     ? Boolean(user.role && allowedRoles.includes(user.role as UserRole))
