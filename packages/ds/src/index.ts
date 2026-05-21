@@ -704,6 +704,8 @@ export type {
 } from './components/domain/CreatorProfileAbout/CreatorProfileAbout';
 export { EventsDirectoryHero } from './components/domain/EventsDirectoryHero/EventsDirectoryHero';
 export type { EventsDirectoryHeroProps } from './components/domain/EventsDirectoryHero/EventsDirectoryHero';
+export { OddsIntelDirectoryHero } from './components/domain/OddsIntelDirectoryHero/OddsIntelDirectoryHero';
+export type { OddsIntelDirectoryHeroProps } from './components/domain/OddsIntelDirectoryHero/OddsIntelDirectoryHero';
 export { EventsLiveStrip } from './components/domain/EventsLiveStrip/EventsLiveStrip';
 export type {
   EventsLiveStripProps,

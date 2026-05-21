@@ -47,25 +47,25 @@ export function CreatorsDirectoryHero({
         <p className={s.sub}>{subtitle}</p>
       </div>
 
-      <form className={s.searchRow} onSubmit={handleSubmit}>
-        <div className={s.searchField}>
-          <Icon name="search" size={20} className={s.searchIcon} />
-          <input
-            type="search"
-            className={s.searchInput}
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            aria-label={searchPlaceholder}
-          />
-        </div>
-        <Button type="submit" variant="primary">
-          Search
-        </Button>
-      </form>
+      <div className={s.controls}>
+        <form className={s.searchRow} onSubmit={handleSubmit}>
+          <div className={s.searchField}>
+            <Icon name="search" size={20} className={s.searchIcon} />
+            <input
+              type="search"
+              className={s.searchInput}
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              aria-label={searchPlaceholder}
+            />
+          </div>
+          <Button type="submit" variant="primary">
+            Search
+          </Button>
+        </form>
 
-      <div className={s.filters}>
-        <div className={s.chipRow}>
+        <div className={s.filterRow}>
           <StudioFilterPills
             options={sortOptions}
             value={sortValue}
@@ -73,8 +73,8 @@ export function CreatorsDirectoryHero({
             ariaLabel="Sort creators"
             nowrap
           />
+          {secondaryFilters ? <div className={s.secondaryFilters}>{secondaryFilters}</div> : null}
         </div>
-        {secondaryFilters ? <div className={s.secondaryFilters}>{secondaryFilters}</div> : null}
       </div>
     </section>
   );

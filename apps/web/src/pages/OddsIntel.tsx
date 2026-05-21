@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
   Container,
-  Section,
-  Row,
   Stack,
+  Row,
   Grid,
   Card,
   CardHead,
@@ -15,14 +14,13 @@ import {
   type IconName,
   Mono,
   Muted,
-  Eyebrow,
   Heading,
   EventCard,
   EmptyState,
   FilterChips,
   OddsGrid,
   Sparkline,
-  Reveal,
+  OddsIntelDirectoryHero,
   type OddsBook,
   type OddsRow,
 } from '@digipicks/ds';
@@ -31,6 +29,7 @@ import type { Doc, Id } from '../../../../convex/_generated/dataModel';
 import { teamLogo } from '../lib/teamLogo';
 
 type OddsSnapshot = Doc<'oddsSnapshots'>;
+type EventDoc = Doc<'events'>;
 
 const SPORT_FILTERS = [
   { label: 'Soccer', value: 'Soccer', icon: <Icon name="soccer" size={14} /> },
@@ -52,6 +51,17 @@ function sportIcon(sport: string): IconName {
   if (key === 'cricket') return 'cricket';
   if (key === 'tennis') return 'tennis';
   return 'calendar';
+}
+
+function matchesSearch(ev: EventDoc, q: string): boolean {
+  const needle = q.toLowerCase();
+  return (
+    ev.home.toLowerCase().includes(needle) ||
+    ev.away.toLowerCase().includes(needle) ||
+    ev.league.toLowerCase().includes(needle) ||
+    ev.sport.toLowerCase().includes(needle) ||
+    (ev.title?.toLowerCase().includes(needle) ?? false)
+  );
 }
 
 function buildGridData(snapshots: OddsSnapshot[] | undefined): {
@@ -115,8 +125,9 @@ function relTime(ms: number): string {
 
 export function OddsIntel() {
   const navigate = useNavigate();
-  const [sport, setSport] = React.useState<string | null>(null);
-  const [activeId, setActiveId] = React.useState<Id<'events'> | null>(null);
+  const [sport, setSport] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [activeId, setActiveId] = useState<Id<'events'> | null>(null);
   const [expandedLeagues, setExpandedLeagues] = React.useState<Set<string>>(new Set());
   const featuredRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -130,12 +141,30 @@ export function OddsIntel() {
     activeId ? { eventId: activeId, limit: 200 } : 'skip',
   );
 
-  const featured = (featuredEvents ?? []).filter((e) => !sport || e.sport === sport);
-  const live = (liveEvents ?? []).filter((e) => !sport || e.sport === sport);
-  const rest = (allEvents ?? []).filter(
-    (e) => !featured.some((f) => f._id === e._id) && !live.some((l) => l._id === e._id),
+  const applySearch = (list: EventDoc[]) => {
+    const q = search.trim();
+    if (!q) return list;
+    return list.filter((e) => matchesSearch(e, q));
+  };
+
+  const featured = useMemo(
+    () => applySearch((featuredEvents ?? []).filter((e) => !sport || e.sport === sport)),
+    [featuredEvents, sport, search],
   );
-  const recent = recentEvents ?? [];
+  const live = useMemo(
+    () => applySearch((liveEvents ?? []).filter((e) => !sport || e.sport === sport)),
+    [liveEvents, sport, search],
+  );
+  const rest = useMemo(() => {
+    const base = (allEvents ?? []).filter(
+      (e) =>
+        !featured.some((f) => f._id === e._id) &&
+        !live.some((l) => l._id === e._id) &&
+        (!sport || e.sport === sport),
+    );
+    return applySearch(base);
+  }, [allEvents, featured, live, sport, search]);
+  const recent = useMemo(() => applySearch(recentEvents ?? []), [recentEvents, search]);
 
   React.useEffect(() => {
     const candidates = [...live, ...featured, ...rest];
@@ -145,7 +174,8 @@ export function OddsIntel() {
     }
   }, [activeId, live, featured, rest]);
 
-  const active = [...(allEvents ?? []), ...(recent ?? [])].find((e) => e._id === activeId) ?? null;
+  const active =
+    [...(allEvents ?? []), ...(recentEvents ?? [])].find((e) => e._id === activeId) ?? null;
 
   const { books, rows } = buildGridData(snapshots ?? undefined);
 
@@ -218,21 +248,21 @@ export function OddsIntel() {
   return (
     <main>
       <Container size="2xl" pad="page">
-        <Reveal direction="up">
-          <Section>
-            <Row between gap={3}>
-              <Stack gap={2} maxWidth="prose">
-                <Eyebrow>Odds intelligence</Eyebrow>
-                <Heading level={1} size="4xl" weight="bold">
-                  Compare the books.
-                </Heading>
-                <Muted>
-                  Live moneyline, spread, and totals across major sportsbooks — sourced from The
-                  Odds API. Best price per row is highlighted; line movement plotted from the
-                  captured snapshot history.
-                </Muted>
-              </Stack>
-              <Row gap={2}>
+        <Stack gap={8}>
+          <OddsIntelDirectoryHero
+            subtitle="Live moneyline, spread, and totals across major sportsbooks — sourced from The Odds API. Best price per row is highlighted; line movement plotted from the captured snapshot history."
+            searchValue={search}
+            onSearchChange={setSearch}
+            filters={
+              <FilterChips
+                options={SPORT_FILTERS}
+                value={sport}
+                onChange={setSport}
+                allLabel="All sports"
+              />
+            }
+            headAside={
+              <>
                 {liveSnapshots ? (
                   <Badge tone="green" dot>
                     Live · {lastCapturedAt ? relTime(lastCapturedAt) : 'now'}
@@ -245,201 +275,209 @@ export function OddsIntel() {
                 <Button variant="secondary" iconLeft="calendar" onClick={() => navigate('/events')}>
                   Today&apos;s events
                 </Button>
-              </Row>
-            </Row>
-          </Section>
-        </Reveal>
-
-        <Section>
-          <FilterChips
-            options={SPORT_FILTERS}
-            value={sport}
-            onChange={setSport}
-            allLabel="All sports"
+              </>
+            }
           />
-        </Section>
 
-        {isLoading && (
-          <Section>
-            <EmptyState icon="chart" title="Loading events…" />
-          </Section>
-        )}
+          {isLoading && <EmptyState icon="chart" title="Loading events…" />}
 
-        {!isLoading && filteredEmpty && (
-          <Section>
+          {!isLoading && filteredEmpty && (
             <EmptyState
               icon="calendar"
               title="Nothing on the slate."
-              subtitle="No events scheduled for this filter — try a different sport or check back when tonight's slate is loaded."
+              subtitle="No events scheduled for this filter — try a different sport, clear search, or check back when tonight's slate is loaded."
+              action={
+                search.trim() || sport ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setSport(null);
+                      setSearch('');
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                ) : undefined
+              }
             />
-          </Section>
-        )}
+          )}
 
-        {active && (
-          <Section eyebrow="Now showing" title={active.title ?? `${active.home} vs ${active.away}`}>
-            <div ref={featuredRef}>
-              <Stack gap={4}>
-                <Card>
-                  <CardHead
-                    title={
-                      <>
-                        {active.home} <Muted>vs</Muted> {active.away}
-                      </>
-                    }
-                    sub={
-                      <>
-                        <Mono>{active.time}</Mono>
-                        {' · '}
-                        {active.sport}
-                        {' · '}
-                        {active.league}
-                      </>
-                    }
-                    action={
-                      snapshots !== undefined && snapshots.length > 0 ? (
-                        <Badge tone="green" dot>
-                          {books.length} books · {snapshots.length} snaps
-                        </Badge>
-                      ) : (
-                        <Badge tone="mute">No odds yet</Badge>
-                      )
-                    }
-                  />
-                  {snapshots === undefined ? (
-                    <EmptyState icon="chart" title="Loading odds…" />
-                  ) : snapshots.length === 0 ? (
-                    <EmptyState
-                      icon="chart"
-                      title="No odds captured yet."
-                      subtitle="Set ODDS_SNAPSHOTS_ENABLED=true in Convex env and run pollOddsSnapshots to start collecting lines for this event."
-                    />
-                  ) : (
-                    <OddsGrid books={books} rows={rows} highlightBest />
-                  )}
-                </Card>
-
-                {homeMoneylineHistory && homeMoneylineHistory.length > 1 && (
+          {active && (
+            <Stack gap={4}>
+              <Heading level={2} size="2xl">
+                {active.title ?? `${active.home} vs ${active.away}`}
+              </Heading>
+              <Muted>Now showing · compare lines across books</Muted>
+              <div ref={featuredRef}>
+                <Stack gap={4}>
                   <Card>
                     <CardHead
-                      title="Line movement"
+                      title={
+                        <>
+                          {active.home} <Muted>vs</Muted> {active.away}
+                        </>
+                      }
                       sub={
                         <>
-                          {active.home} moneyline · {snapshots?.[0]?.bookTitle ?? 'first book'}
+                          <Mono>{active.time}</Mono>
+                          {' · '}
+                          {active.sport}
+                          {' · '}
+                          {active.league}
                         </>
                       }
                       action={
-                        <Badge
-                          tone={
-                            lineDelta.dir === 'up'
-                              ? 'green'
-                              : lineDelta.dir === 'down'
-                                ? 'red'
-                                : 'mute'
-                          }
-                        >
-                          {lineDelta.dir === 'up' ? '▲' : lineDelta.dir === 'down' ? '▼' : '—'}{' '}
-                          {lineDelta.value}
-                        </Badge>
+                        snapshots !== undefined && snapshots.length > 0 ? (
+                          <Badge tone="green" dot>
+                            {books.length} books · {snapshots.length} snaps
+                          </Badge>
+                        ) : (
+                          <Badge tone="mute">No odds yet</Badge>
+                        )
                       }
                     />
-                    <Row between>
-                      <Stack gap={1}>
+                    {snapshots === undefined ? (
+                      <EmptyState icon="chart" title="Loading odds…" />
+                    ) : snapshots.length === 0 ? (
+                      <EmptyState
+                        icon="chart"
+                        title="No odds captured yet."
+                        subtitle="Set ODDS_SNAPSHOTS_ENABLED=true in Convex env and run pollOddsSnapshots to start collecting lines for this event."
+                      />
+                    ) : (
+                      <OddsGrid books={books} rows={rows} highlightBest />
+                    )}
+                  </Card>
+
+                  {homeMoneylineHistory && homeMoneylineHistory.length > 1 && (
+                    <Card>
+                      <CardHead
+                        title="Line movement"
+                        sub={
+                          <>
+                            {active.home} moneyline · {snapshots?.[0]?.bookTitle ?? 'first book'}
+                          </>
+                        }
+                        action={
+                          <Badge
+                            tone={
+                              lineDelta.dir === 'up'
+                                ? 'green'
+                                : lineDelta.dir === 'down'
+                                  ? 'red'
+                                  : 'mute'
+                            }
+                          >
+                            {lineDelta.dir === 'up' ? '▲' : lineDelta.dir === 'down' ? '▼' : '—'}{' '}
+                            {lineDelta.value}
+                          </Badge>
+                        }
+                      />
+                      <Stack gap={3}>
                         <Muted>{homeMoneylineHistory.length} snapshots over time</Muted>
                         <Mono>
                           first{' '}
                           {fmtOdds(homeMoneylineHistory[homeMoneylineHistory.length - 1]!.price)} ·
                           latest {fmtOdds(homeMoneylineHistory[0]!.price)}
                         </Mono>
+                        <Sparkline
+                          values={homeMoneylineHistory
+                            .slice()
+                            .reverse()
+                            .map((h) => h.price)}
+                          color={lineDelta.dir === 'down' ? 'var(--red)' : 'var(--green)'}
+                          width={280}
+                          height={56}
+                        />
                       </Stack>
-                      <Sparkline
-                        values={homeMoneylineHistory
-                          .slice()
-                          .reverse()
-                          .map((h) => h.price)}
-                        color={lineDelta.dir === 'down' ? 'var(--red)' : 'var(--green)'}
-                        width={280}
-                        height={56}
-                      />
-                    </Row>
-                  </Card>
-                )}
-              </Stack>
-            </div>
-          </Section>
-        )}
+                    </Card>
+                  )}
+                </Stack>
+              </div>
+            </Stack>
+          )}
 
-        {live.length > 0 && (
-          <Section eyebrow="Live now" title="In progress.">
-            <Grid cols={2} gap={4}>
-              {live.map((ev) => {
-                const { homeLogo, awayLogo } = logoFor(ev);
-                return (
-                  <EventCard
-                    key={ev._id}
-                    sport={ev.sport}
-                    league={ev.league}
-                    time={ev.gameStatus ?? ev.time}
-                    home={ev.home}
-                    away={ev.away}
-                    homeLogo={homeLogo}
-                    awayLogo={awayLogo}
-                    creators={ev.creatorCount}
-                    picks={ev.pickCount}
-                    sourceType={ev.sourceType}
-                    live
-                    onClick={() => focusFeatured(ev._id)}
-                  />
-                );
-              })}
-            </Grid>
-          </Section>
-        )}
+          {live.length > 0 && (
+            <Stack gap={4}>
+              <Heading level={2} size="2xl">
+                Live now
+              </Heading>
+              <Grid cols={2} gap={4}>
+                {live.map((ev) => {
+                  const { homeLogo, awayLogo } = logoFor(ev);
+                  return (
+                    <EventCard
+                      key={ev._id}
+                      sport={ev.sport}
+                      league={ev.league}
+                      time={ev.gameStatus ?? ev.time}
+                      home={ev.home}
+                      away={ev.away}
+                      homeLogo={homeLogo}
+                      awayLogo={awayLogo}
+                      creators={ev.creatorCount}
+                      picks={ev.pickCount}
+                      sourceType={ev.sourceType}
+                      live
+                      onClick={() => focusFeatured(ev._id)}
+                    />
+                  );
+                })}
+              </Grid>
+            </Stack>
+          )}
 
-        {featured.length > 0 && (
-          <Section eyebrow="Featured" title="Marquee matchups.">
-            <Grid cols={2} gap={4}>
-              {featured.map((ev) => {
-                const { homeLogo, awayLogo } = logoFor(ev);
-                return (
-                  <EventCard
-                    featured
-                    key={ev._id}
-                    sport={ev.sport}
-                    league={ev.league}
-                    time={ev.time}
-                    home={ev.home}
-                    away={ev.away}
-                    homeLogo={homeLogo}
-                    awayLogo={awayLogo}
-                    creators={ev.creatorCount}
-                    picks={ev.pickCount}
-                    sourceType={ev.sourceType}
-                    onClick={() => focusFeatured(ev._id)}
-                  />
-                );
-              })}
-            </Grid>
-          </Section>
-        )}
+          {featured.length > 0 && (
+            <Stack gap={4}>
+              <Heading level={2} size="2xl">
+                Marquee matchups
+              </Heading>
+              <Grid cols={2} gap={4}>
+                {featured.map((ev) => {
+                  const { homeLogo, awayLogo } = logoFor(ev);
+                  return (
+                    <EventCard
+                      featured
+                      key={ev._id}
+                      sport={ev.sport}
+                      league={ev.league}
+                      time={ev.time}
+                      home={ev.home}
+                      away={ev.away}
+                      homeLogo={homeLogo}
+                      awayLogo={awayLogo}
+                      creators={ev.creatorCount}
+                      picks={ev.pickCount}
+                      sourceType={ev.sourceType}
+                      onClick={() => focusFeatured(ev._id)}
+                    />
+                  );
+                })}
+              </Grid>
+            </Stack>
+          )}
 
-        {Object.entries(byLeague).map(([league, events]) => {
-          const isExpanded = expandedLeagues.has(league);
-          const visible = isExpanded ? events : events.slice(0, INITIAL_PER_LEAGUE);
-          const hasMore = events.length > INITIAL_PER_LEAGUE;
-          const sport0 = events[0]?.sport ?? '';
+          {Object.entries(byLeague).map(([league, events]) => {
+            const isExpanded = expandedLeagues.has(league);
+            const visible = isExpanded ? events : events.slice(0, INITIAL_PER_LEAGUE);
+            const hasMore = events.length > INITIAL_PER_LEAGUE;
+            const sport0 = events[0]?.sport ?? '';
 
-          return (
-            <Section
-              key={league}
-              eyebrow={league}
-              title={`${events.length} ${events.length === 1 ? 'match' : 'matches'} scheduled.`}
-              action={
-                <Badge tone="blue" icon={<Icon name={sportIcon(sport0)} size={12} />}>
-                  League
-                </Badge>
-              }
-            >
-              <Stack gap={4}>
+            return (
+              <Stack key={league} gap={4}>
+                <Row between>
+                  <Stack gap={1}>
+                    <Heading level={2} size="2xl">
+                      {league}
+                    </Heading>
+                    <Muted>
+                      {events.length} {events.length === 1 ? 'match' : 'matches'} scheduled
+                    </Muted>
+                  </Stack>
+                  <Badge tone="blue" icon={<Icon name={sportIcon(sport0)} size={12} />}>
+                    League
+                  </Badge>
+                </Row>
                 <Grid cols={2} gap={4}>
                   {visible.map((ev) => {
                     const { homeLogo, awayLogo } = logoFor(ev);
@@ -475,36 +513,39 @@ export function OddsIntel() {
                   </Button>
                 )}
               </Stack>
-            </Section>
-          );
-        })}
+            );
+          })}
 
-        {recent.length > 0 && !sport && (
-          <Section eyebrow="Recently concluded" title="Final scores.">
-            <Grid cols={2} gap={4}>
-              {recent.map((ev) => {
-                const { homeLogo, awayLogo } = logoFor(ev);
-                return (
-                  <EventCard
-                    key={ev._id}
-                    sport={ev.sport}
-                    league={ev.league}
-                    time={ev.gameStatus ?? 'Final'}
-                    home={ev.home}
-                    away={ev.away}
-                    homeLogo={homeLogo}
-                    awayLogo={awayLogo}
-                    creators={ev.creatorCount}
-                    picks={ev.pickCount}
-                    sourceType={ev.sourceType}
-                    compact
-                    onClick={() => focusFeatured(ev._id)}
-                  />
-                );
-              })}
-            </Grid>
-          </Section>
-        )}
+          {recent.length > 0 && !sport && (
+            <Stack gap={4}>
+              <Heading level={2} size="2xl">
+                Final scores
+              </Heading>
+              <Grid cols={2} gap={4}>
+                {recent.map((ev) => {
+                  const { homeLogo, awayLogo } = logoFor(ev);
+                  return (
+                    <EventCard
+                      key={ev._id}
+                      sport={ev.sport}
+                      league={ev.league}
+                      time={ev.gameStatus ?? 'Final'}
+                      home={ev.home}
+                      away={ev.away}
+                      homeLogo={homeLogo}
+                      awayLogo={awayLogo}
+                      creators={ev.creatorCount}
+                      picks={ev.pickCount}
+                      sourceType={ev.sourceType}
+                      compact
+                      onClick={() => focusFeatured(ev._id)}
+                    />
+                  );
+                })}
+              </Grid>
+            </Stack>
+          )}
+        </Stack>
       </Container>
     </main>
   );
