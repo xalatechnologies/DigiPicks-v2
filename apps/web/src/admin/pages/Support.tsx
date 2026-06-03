@@ -32,7 +32,6 @@ import { billingStatusTone, fmtBillingNoteTime } from '../lib/refundAdmin';
 export type AdminSupportHubProps = {
   presetQueue?: SupportQueueFilter;
   title?: string;
-  sub?: string;
 };
 
 function useSupportParams(presetQueue?: SupportQueueFilter) {
@@ -104,7 +103,6 @@ function useSupportParams(presetQueue?: SupportQueueFilter) {
 export function AdminSupportHub({
   presetQueue,
   title = 'Support & disputes',
-  sub = 'Manage and resolve platform issues and disputes.',
 }: AdminSupportHubProps) {
   const {
     queue,
@@ -201,11 +199,6 @@ export function AdminSupportHub({
     ];
   }, [summary, setQueue, setUrgentOnly, setSlaOnly]);
 
-  const headerSub = useMemo(() => {
-    if (!summary) return sub;
-    return `${summary.openTickets} open · ${summary.highPriority} high priority · ${summary.slaAtRisk} SLA at risk`;
-  }, [summary, sub]);
-
   const footerLabel =
     filtered === undefined
       ? undefined
@@ -263,7 +256,7 @@ export function AdminSupportHub({
   return (
     <Container size="2xl">
       <Stack gap={10}>
-        <StudioPageHeader eyebrow="Operational hub" title={title} sub={headerSub} />
+        <StudioPageHeader eyebrow="Operational hub" title={title} />
 
         <AdminMetricStrip columns={5} items={kpiItems} />
 

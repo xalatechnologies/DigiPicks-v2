@@ -23,6 +23,7 @@ import { useStudioContext } from '../useStudioContext';
 import { chartHighlightForPeriod } from '../studioMetrics';
 import { STUDIO } from '../../lib/studioRoutes';
 import { MARKET_PERF } from '../data/studio';
+import { periodStartMs, periodLabel } from '../lib/studioPeriod';
 
 const RANGE_OPTIONS = [
   { label: '7D', value: '7d' },
@@ -79,10 +80,18 @@ export function Performance() {
   const [view, setView] = useState('markets');
   const [search, setSearch] = useState('');
 
+  const picksInRange = useMemo(() => {
+    const start = periodStartMs(range);
+    return ctx.picks.filter((p) => {
+      const at = p.publishedAt ?? p.createdAt ?? 0;
+      return at >= start;
+    });
+  }, [ctx.picks, range]);
+
   const marketPerf = useMemo(() => {
-    const computed = computeMarketPerf(ctx.picks);
+    const computed = computeMarketPerf(picksInRange);
     if (computed.length > 0) return computed;
-    if (ctx.devPreview) {
+    if (ctx.devPreview && !ctx.isLive) {
       return MARKET_PERF.map((m) => ({
         market: m.market,
         picks: m.picks,
@@ -92,7 +101,7 @@ export function Performance() {
       }));
     }
     return [];
-  }, [ctx.picks, ctx.devPreview]);
+  }, [picksInRange, ctx.devPreview, ctx.isLive]);
 
   const filteredMarkets = useMemo(
     () => marketPerf.filter((m) => matchesMarketSearch(m, search)),
@@ -100,11 +109,12 @@ export function Performance() {
   );
 
   const graded = useMemo(
-    () => ctx.picks.filter((p) => p.grade && p.grade !== 'pending').length,
-    [ctx.picks],
+    () => picksInRange.filter((p) => p.grade && p.grade !== 'pending').length,
+    [picksInRange],
   );
 
-  const gradedDisplay = graded > 0 ? graded.toLocaleString() : ctx.devPreview ? '156' : '0';
+  const gradedDisplay =
+    graded > 0 ? graded.toLocaleString() : ctx.devPreview && !ctx.isLive ? '156' : '0';
 
   const winRateLabel = ctx.creator
     ? `${(ctx.creator.winRate * 100).toFixed(1)}%`
@@ -112,17 +122,13 @@ export function Performance() {
       ? '58.2%'
       : '—';
 
-  const chartHighlight = chartHighlightForPeriod(range);
-  const loading = ctx.picksLoading && !ctx.devPreview;
+  const chartHighlight =
+    ctx.devPreview && !ctx.isLive
+      ? chartHighlightForPeriod(range)
+      : { label: periodLabel(range), value: ctx.units };
+  const loading = ctx.picksLoading && ctx.isLive;
 
-  const rangeLabel =
-    range === '7d'
-      ? 'Last 7 days'
-      : range === '90d'
-        ? 'Last 90 days'
-        : range === 'ytd'
-          ? 'Year to date'
-          : 'Last 30 days';
+  const rangeLabel = periodLabel(range);
 
   return (
     <Container size="2xl">
@@ -148,9 +154,10 @@ export function Performance() {
               iconTone: 'primary',
               label: 'Win rate',
               value: winRateLabel,
-              delta: ctx.devPreview
-                ? { value: '+3.1%', dir: 'up' as const }
-                : { value: rangeLabel, dir: 'flat' as const },
+              delta:
+                ctx.devPreview && !ctx.isLive
+                  ? { value: '+3.1%', dir: 'up' as const }
+                  : { value: rangeLabel, dir: 'flat' as const },
               active: view === 'markets',
               onClick: () => setView('markets'),
             },
@@ -272,7 +279,13 @@ export function Performance() {
               <Row gap={6} wrap>
                 <Stack gap={1}>
                   <TitleSub title="Total picks" sub="Published and graded" />
-                  <Mono>{ctx.picks.length > 0 ? ctx.picks.length : ctx.devPreview ? 156 : 0}</Mono>
+                  <Mono>
+                    {picksInRange.length > 0
+                      ? picksInRange.length
+                      : ctx.devPreview && !ctx.isLive
+                        ? 156
+                        : 0}
+                  </Mono>
                 </Stack>
                 <Stack gap={1}>
                   <TitleSub title="Markets tracked" sub="With graded results" />

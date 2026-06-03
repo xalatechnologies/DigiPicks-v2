@@ -1,10 +1,13 @@
 import React from 'react';
-import { cx } from '../../../utils/cx';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
-import s from './AdminAuditDetailDrawer.module.css';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+  AdminDetailSection,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 
 export interface AdminAuditDetailDrawerProps {
   open: boolean;
@@ -29,41 +32,33 @@ export function AdminAuditDetailDrawer({
   timeLabel,
   metadataJson,
 }: AdminAuditDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading audit entry' : (action ?? 'Audit entry');
   const title = loading ? 'Loading entry…' : (action ?? 'Audit entry');
 
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching audit entry…</Muted>
-        ) : (
-          <Stack gap={5}>
-            {entityType ? <Badge tone="blue">{entityType}</Badge> : null}
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={title}
+          badges={entityType ? <Badge tone="blue">{entityType}</Badge> : null}
+        >
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Actor" value={actorLabel ?? 'System'} />
+            <AdminDetailMetaCard label="When" value={timeLabel} />
+            <AdminDetailMetaCard label="Entity ID" value={entityId} />
+          </div>
 
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Actor</p>
-                <p className={s.metaValue}>{actorLabel ?? 'System'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>When</p>
-                <p className={s.metaValue}>{timeLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Entity ID</p>
-                <p className={cx(s.metaValue, s.metaMono)}>{entityId ?? '—'}</p>
-              </div>
-            </div>
-
-            {metadataJson ? (
-              <>
-                <p className={s.metaLabel}>Metadata</p>
-                <pre className={s.metadata}>{metadataJson}</pre>
-              </>
-            ) : null}
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+          {metadataJson ? (
+            <AdminDetailSection title="Metadata">
+              <pre className={bd.metadata}>{metadataJson}</pre>
+            </AdminDetailSection>
+          ) : null}
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

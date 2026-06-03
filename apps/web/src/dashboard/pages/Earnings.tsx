@@ -31,7 +31,7 @@ import {
 import type { BadgeTone } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import { useStudioContext } from '../useStudioContext';
-import { chartHighlightForPeriod } from '../studioMetrics';
+import { chartHighlightForPeriod, chartHighlightFromEarnings } from '../studioMetrics';
 import { StudioDevHint } from '../StudioDevHint';
 import { STUDIO } from '../../lib/studioRoutes';
 import { INVOICES } from '../data/studio';
@@ -77,6 +77,14 @@ export function Earnings() {
 
   const payouts = useQuery(api.payouts.byMe, ctx.creatorId ? { limit: 100 } : 'skip');
   const summary = useQuery(api.payouts.summary, ctx.creatorId ? {} : 'skip');
+  const earningsHistory = useQuery(
+    api.payouts.earningsHistory,
+    ctx.creatorId && ctx.isLive ? { months: 12 } : 'skip',
+  );
+  const connectStatus = useQuery(
+    api.connect.statusByCreator,
+    ctx.creatorId ? { creatorId: ctx.creatorId } : 'skip',
+  );
 
   const activeSubs = ctx.subs.filter((s) => s.status === 'active');
   const startingPrice = ctx.creator?.startingPrice ?? 0;
@@ -97,7 +105,13 @@ export function Earnings() {
     activeSubs.length > 0 ? activeSubs.length : ctx.devPreview ? ctx.activeSubs || 338 : 0;
 
   const showDemoPayouts =
-    ctx.devPreview && (!ctx.creatorId || payouts === undefined || payouts.length === 0);
+    ctx.devPreview &&
+    !ctx.isLive &&
+    (!ctx.creatorId || payouts === undefined || payouts.length === 0);
+
+  const stripeConnected =
+    (connectStatus?.connectStatus ?? ctx.connectStatus) === 'active' ||
+    (connectStatus?.connectStatus ?? ctx.connectStatus) === 'pending';
 
   const loadingPayouts = Boolean(ctx.creatorId) && payouts === undefined && !ctx.devPreview;
 
@@ -115,7 +129,19 @@ export function Earnings() {
     currency,
   );
 
-  const chartHighlight = chartHighlightForPeriod(range);
+  const chartHighlight = useMemo(() => {
+    if (ctx.isLive && earningsHistory?.buckets.length) {
+      return chartHighlightFromEarnings(
+        earningsHistory.buckets,
+        range,
+        earningsHistory.currency,
+        false,
+      );
+    }
+    if (ctx.devPreview) return chartHighlightForPeriod(range);
+    return { label: '—', value: '—' };
+  }, [ctx.isLive, ctx.devPreview, earningsHistory, range]);
+
   const showDevHint = ctx.devPreview && !ctx.creatorId;
 
   return (
@@ -130,8 +156,12 @@ export function Earnings() {
               <Button variant="outline" onClick={() => navigate(STUDIO.products)}>
                 View plans
               </Button>
-              <Button variant="primary" disabled>
-                Withdraw
+              <Button
+                variant="primary"
+                disabled={!stripeConnected || !ctx.creatorId}
+                onClick={() => navigate(STUDIO.earningsOnboarding)}
+              >
+                {stripeConnected ? 'Manage Stripe' : 'Connect Stripe'}
               </Button>
             </>
           }
@@ -234,7 +264,7 @@ export function Earnings() {
                     onClick={() => navigate(STUDIO.earningsOnboarding)}
                     disabled={!ctx.creatorId}
                   >
-                    Connect with Stripe
+                    {stripeConnected ? 'Stripe dashboard' : 'Connect with Stripe'}
                   </Button>
                 </Stack>
               </Card>

@@ -182,11 +182,6 @@ export function Campaigns() {
     ];
   }, [summary, setStatus]);
 
-  const headerSub = useMemo(() => {
-    if (!summary) return 'Broadcast email, push, and in-app campaigns.';
-    return `${summary.draftCount} drafts · ${summary.scheduledCount} scheduled · ${summary.sentCount} sent`;
-  }, [summary]);
-
   const footerLabel =
     filtered === undefined
       ? undefined
@@ -235,7 +230,6 @@ export function Campaigns() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Notifications & campaigns"
-          sub={headerSub}
           actions={
             <Row gap={2} wrap>
               <Button variant="primary" iconLeft="plus" onClick={() => setCompose(true)}>

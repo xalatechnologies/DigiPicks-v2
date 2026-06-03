@@ -20,6 +20,18 @@
   background: var(--bg-1);
 }
 
+.disabled,
+.disabled:hover {
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: var(--line);
+  background: var(--bg-2);
+}
+
+.disabled:hover .icon {
+  color: var(--t-3);
+}
+
 .zone:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);

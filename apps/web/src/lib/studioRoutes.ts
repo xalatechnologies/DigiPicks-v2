@@ -21,3 +21,9 @@ export const STUDIO = {
 } as const;
 
 export type StudioRoute = (typeof STUDIO)[keyof typeof STUDIO];
+
+/** Create or edit pick composer URL. */
+export function studioCreatePickUrl(pickId?: string): string {
+  if (!pickId) return STUDIO.createPick;
+  return `${STUDIO.createPick}?pickId=${encodeURIComponent(pickId)}`;
+}

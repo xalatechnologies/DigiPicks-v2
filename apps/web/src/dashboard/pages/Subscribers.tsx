@@ -147,7 +147,7 @@ export function Subscribers() {
 
   const allRows = useMemo(() => {
     if (ctx.subs.length > 0) return ctx.subs.map(toRow);
-    if (ctx.devPreview) return DEMO_ROWS;
+    if (ctx.devPreview && !ctx.isLive) return DEMO_ROWS;
     return [];
   }, [ctx.subs, ctx.devPreview]);
 

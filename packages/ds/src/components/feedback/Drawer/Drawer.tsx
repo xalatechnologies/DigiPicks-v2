@@ -8,11 +8,26 @@ export interface DrawerProps {
   open: boolean;
   onClose: () => void;
   title?: string;
+  /** Accessible name when the visible title is omitted. */
+  ariaLabel?: string;
+  /** Close-only chrome — content supplies its own heading. */
+  hideHeader?: boolean;
+  /** Remove default body padding for full-bleed panel layouts. */
+  flushBody?: boolean;
   children?: React.ReactNode;
   className?: string;
 }
 
-export const Drawer: React.FC<DrawerProps> = ({ open, onClose, title, children, className }) => {
+export const Drawer: React.FC<DrawerProps> = ({
+  open,
+  onClose,
+  title,
+  ariaLabel,
+  hideHeader = false,
+  flushBody = false,
+  children,
+  className,
+}) => {
   const dialogRef = React.useRef<HTMLElement | null>(null);
 
   React.useEffect(() => {
@@ -45,22 +60,17 @@ export const Drawer: React.FC<DrawerProps> = ({ open, onClose, title, children, 
         className={cx(s.drawer, className)}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={ariaLabel ?? title}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <header className={s.head}>
-          {title && <h2 className={s.title}>{title}</h2>}
-          <button
-            type="button"
-            className={s.close}
-            onClick={onClose}
-            aria-label="Close"
-          >
+        <header className={hideHeader ? s.headMinimal : s.head}>
+          {!hideHeader && title ? <h2 className={s.title}>{title}</h2> : null}
+          <button type="button" className={s.close} onClick={onClose} aria-label="Close">
             <Icon name="x" size={16} />
           </button>
         </header>
-        <div className={s.body}>{children}</div>
+        <div className={cx(s.body, flushBody && s.bodyFlush)}>{children}</div>
       </aside>
     </div>
   );

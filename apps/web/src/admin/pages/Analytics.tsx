@@ -66,11 +66,7 @@ export function Analytics() {
   return (
     <Container size="2xl">
       <Stack gap={10}>
-        <StudioPageHeader
-          eyebrow="Operational hub"
-          title="Analytics & platform health"
-          sub="Operational metrics for the DigiPicks network."
-        />
+        <StudioPageHeader eyebrow="Operational hub" title="Analytics & platform health" />
 
         {data === undefined ? (
           <EmptyState icon="chart" title="Loading analytics…" />

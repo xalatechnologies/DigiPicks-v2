@@ -104,7 +104,6 @@ export function Apply() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [proofFiles, setProofFiles] = useState<File[]>([]);
   const submitApplication = useMutation(api.applications.submit);
   const needsAccount = !isAuthenticated;
   const pendingApp = existingApp && existingApp.status !== 'rejected' ? existingApp : null;
@@ -121,10 +120,6 @@ export function Apply() {
     setSelectedSports((prev) =>
       prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport],
     );
-  }
-
-  function appendProofFiles(files: File[]) {
-    setProofFiles((prev) => [...prev, ...files]);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -163,7 +158,7 @@ export function Apply() {
         niche: data.get('niche') as string,
         existingFollowing: audienceParts.length > 0 ? audienceParts.join(' · ') : undefined,
         priceHint: (data.get('priceHint') as string)?.trim() || undefined,
-        proofCount: proofFiles.length,
+        proofCount: 0,
         winClaim: winClaim || undefined,
       });
       setSubmitted(true);
@@ -396,9 +391,9 @@ export function Apply() {
 
                   <ApplySection icon={<Icon name="inbox" size={18} />} title="Proof of performance">
                     <FileUploadZone
-                      fileCount={proofFiles.length}
-                      onFilesSelected={appendProofFiles}
-                      hint="Upload verified third-party logs, profit/loss statements, or verification profile exports. Files are counted with your application; secure storage ships in a later release."
+                      disabled
+                      fileCount={0}
+                      hint="File upload is temporarily disabled. Describe your track record above; our team may request proof documents by email after submission."
                     />
                   </ApplySection>
 

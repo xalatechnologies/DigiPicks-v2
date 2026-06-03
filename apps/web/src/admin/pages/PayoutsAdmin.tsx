@@ -159,13 +159,6 @@ export function PayoutsAdmin() {
     ];
   }, [summary, setConnect, setIssuesOnly]);
 
-  const headerSub = useMemo(() => {
-    if (!summary) {
-      return 'Creator Connect status and disbursement records across the platform.';
-    }
-    return `${summary.connectActive} Connect active · ${formatPayoutCompact(summary.totalPaid)} paid · ${summary.pendingCount} pending`;
-  }, [summary]);
-
   const footerLabel =
     filtered === undefined
       ? undefined
@@ -188,7 +181,6 @@ export function PayoutsAdmin() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Payouts & finance"
-          sub={headerSub}
           actions={
             <Row gap={2} wrap>
               <Button variant="secondary" onClick={() => navigate(ADMIN.billing)}>

@@ -10,6 +10,8 @@ export interface FileUploadZoneProps {
   multiple?: boolean;
   fileCount?: number;
   onFilesSelected?: (files: File[]) => void;
+  /** When true, browsing is disabled (e.g. storage not wired yet). */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -21,6 +23,7 @@ export function FileUploadZone({
   multiple = true,
   fileCount = 0,
   onFilesSelected,
+  disabled = false,
   className,
 }: FileUploadZoneProps) {
   const inputId = useId();
@@ -35,11 +38,15 @@ export function FileUploadZone({
 
   return (
     <div
-      className={cx(s.zone, className)}
+      className={cx(s.zone, disabled && s.disabled, className)}
       role="button"
-      tabIndex={0}
-      onClick={() => inputRef.current?.click()}
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+      onClick={() => {
+        if (!disabled) inputRef.current?.click();
+      }}
       onKeyDown={(e) => {
+        if (disabled) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           inputRef.current?.click();
@@ -63,6 +70,7 @@ export function FileUploadZone({
         type="file"
         accept={accept}
         multiple={multiple}
+        disabled={disabled}
         onChange={handleChange}
       />
     </div>

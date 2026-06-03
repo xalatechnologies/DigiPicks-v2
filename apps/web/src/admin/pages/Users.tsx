@@ -24,6 +24,7 @@ import {
   formatRole,
   matchesUserFilters,
   monogram,
+  displayUserName,
   parseAccountFilter,
   parseUserType,
   userTypeLabel,
@@ -119,7 +120,7 @@ export function Users() {
     if (!filteredUsers) return [];
     return filteredUsers.map((u) => {
       const status = accountStatus(u);
-      const displayName = u.name ?? u.email ?? 'User';
+      const displayName = displayUserName(u.name, u.email);
       const handleLine = u.creatorHandle
         ? `@${u.creatorHandle}`
         : u.role
@@ -180,13 +181,6 @@ export function Users() {
     ];
   }, [summary, setAccount, setType, setQuick]);
 
-  const headerSub = useMemo(() => {
-    if (summary === undefined) {
-      return 'Search and manage customer accounts across the platform.';
-    }
-    return `${summary.total.toLocaleString()} accounts · ${summary.active.toLocaleString()} active · ${summary.admins.toLocaleString()} admins`;
-  }, [summary]);
-
   const footerLabel =
     filteredUsers === undefined
       ? undefined
@@ -201,7 +195,7 @@ export function Users() {
     });
     return {
       id: u._id,
-      name: u.name ?? u.email ?? 'User',
+      name: displayUserName(u.name, u.email),
       email: u.email ?? '—',
       monogram: monogram(u.name, u.email),
       typeLabel: userTypeLabel(u.role, u.creatorId),
@@ -233,7 +227,6 @@ export function Users() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Users"
-          sub={headerSub}
           actions={
             <Button variant="outline" iconLeft="verified" onClick={() => navigate(ADMIN.creators)}>
               Creators

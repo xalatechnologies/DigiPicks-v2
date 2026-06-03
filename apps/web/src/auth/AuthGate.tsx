@@ -72,15 +72,27 @@ export function AuthGate({
 
   // ── Auth resolving (or profile loading) ──────────────────────────────
   if (isLoading || (isAuthenticated && user === undefined)) {
+    const isStudio = pathname.startsWith('/dashboard');
+    const isAccount = pathname.startsWith('/account');
+    const isAdmin = pathname.startsWith('/admin');
+    const loadingTitle = isStudio
+      ? 'Loading your studio…'
+      : isAccount
+        ? 'Loading your account…'
+        : isAdmin
+          ? 'Loading admin…'
+          : 'Signing you in…';
+    const loadingSubtitle = isStudio
+      ? 'One moment while we verify your creator session.'
+      : isAccount
+        ? 'One moment while we load your subscriber profile.'
+        : 'One moment while we verify your session.';
+
     return (
       <main>
         <Container size="xl">
           <Section noReveal>
-            <EmptyState
-              icon="lock"
-              title="Loading your studio…"
-              subtitle="One moment while we verify your session."
-            />
+            <EmptyState icon="lock" title={loadingTitle} subtitle={loadingSubtitle} />
           </Section>
         </Container>
       </main>

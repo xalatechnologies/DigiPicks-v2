@@ -123,11 +123,7 @@ export function AuditLogs() {
   return (
     <Container size="2xl">
       <Stack gap={10}>
-        <StudioPageHeader
-          eyebrow="Operational hub"
-          title="Audit logs"
-          sub="Append-only platform activity, retention buckets, and auto-grader health."
-        />
+        <StudioPageHeader eyebrow="Operational hub" title="Audit logs" />
 
         <AdminMetricStrip columns={5} items={kpiItems} />
 

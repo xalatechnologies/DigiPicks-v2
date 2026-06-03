@@ -1,29 +1,34 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
-  Row,
   StudioPageHeader,
-  CardHead,
-  Card,
-  Table,
-  THead,
-  TBody,
-  Tr,
-  Th,
-  Td,
   Button,
   EmptyState,
   AdminMetricStrip,
-  Field,
-  Input,
-  Muted,
+  AdminUserEntitlementsPanel,
+  type AdminUserEntitlementsGrantForm,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 import { ADMIN } from '../lib/adminRoutes';
+import {
+  accountStatus,
+  displayUserName,
+  formatAdminDateTime,
+  formatJoinedLabel,
+  monogram,
+  userTypeLabel,
+} from '../lib/userAdmin';
+
+const DEFAULT_GRANT: AdminUserEntitlementsGrantForm = {
+  creatorId: '',
+  resourceType: 'pick_feed',
+  resourceId: '',
+  reason: 'Admin manual override',
+};
 
 export function UserEntitlements() {
   const navigate = useNavigate();
@@ -32,23 +37,96 @@ export function UserEntitlements() {
     api.entitlements.adminByUser,
     userId ? { userId: userId as Id<'users'> } : 'skip',
   );
-  const grant = useMutation(api.entitlements.grantOverride);
-  const [resourceId, setResourceId] = React.useState('');
-  const [creatorId, setCreatorId] = React.useState('');
-  const [busy, setBusy] = React.useState(false);
+  const creators = useQuery(api.creators.list, {});
+  const grantMutation = useMutation(api.entitlements.grantOverride);
+  const revokeMutation = useMutation(api.entitlements.revokeOverride);
+
+  const [grant, setGrant] = useState<AdminUserEntitlementsGrantForm>(DEFAULT_GRANT);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const creatorOptions = useMemo(
+    () =>
+      (creators ?? [])
+        .map((c) => ({
+          id: c._id,
+          name: c.name,
+          handle: c.handle,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [creators],
+  );
+
+  const profile = useMemo(() => {
+    if (!data?.user) {
+      return {
+        name: 'User entitlements',
+        email: '—',
+        monogram: '?',
+        typeLabel: 'Subscriber',
+        statusLabel: '—',
+        statusTone: 'mute' as const,
+      };
+    }
+    const u = data.user;
+    const status = accountStatus({
+      isActive: u.isActive,
+      pastDueCount: 0,
+    });
+    return {
+      name: displayUserName(u.name, u.email),
+      email: u.email ?? '—',
+      monogram: monogram(u.name, u.email),
+      typeLabel: userTypeLabel(u.role, u.creatorId),
+      statusLabel: status.label,
+      statusTone: status.tone,
+    };
+  }, [data]);
+
+  const kpiItems = useMemo(() => {
+    if (!data) {
+      return [
+        { label: 'Subscriptions', value: '—' },
+        { label: 'Active subs', value: '—' },
+        { label: 'Overrides', value: '—' },
+        { label: 'Access logs', value: '—' },
+      ];
+    }
+    return [
+      { label: 'Subscriptions', value: String(data.subscriptionCount) },
+      { label: 'Active subs', value: String(data.activeSubscriptionCount) },
+      { label: 'Overrides', value: String(data.activeOverrideCount) },
+      { label: 'Access logs', value: String(data.accessLogs.length) },
+    ];
+  }, [data]);
 
   async function handleGrant() {
-    if (!userId || !creatorId || !resourceId) return;
+    if (!userId || !grant.creatorId || !grant.resourceId.trim()) return;
     setBusy(true);
+    setError(null);
     try {
-      await grant({
+      await grantMutation({
         userId: userId as Id<'users'>,
-        creatorId: creatorId as Id<'creators'>,
-        resourceType: 'pick_feed',
-        resourceId,
-        reason: 'Admin manual override',
+        creatorId: grant.creatorId as Id<'creators'>,
+        resourceType: grant.resourceType,
+        resourceId: grant.resourceId.trim(),
+        reason: grant.reason.trim() || 'Admin manual override',
       });
-      setResourceId('');
+      setGrant(DEFAULT_GRANT);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not grant access.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRevoke(entitlementId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      await revokeMutation({ entitlementId: entitlementId as Id<'entitlements'> });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not revoke entitlement.');
     } finally {
       setBusy(false);
     }
@@ -62,29 +140,47 @@ export function UserEntitlements() {
     );
   }
 
-  const kpiItems = data
-    ? [
-        { label: 'Subscriptions', value: String(data.subscriptionCount) },
-        { label: 'Entitlements', value: String(data.activeEntitlementCount) },
-        { label: 'Access logs', value: String(data.accessLogs.length) },
-        { label: 'Account', value: 'Active' },
-      ]
-    : [
-        { label: 'Subscriptions', value: '—' },
-        { label: 'Entitlements', value: '—' },
-        { label: 'Access logs', value: '—' },
-        { label: 'Account', value: '—' },
-      ];
+  if (data === null) {
+    return (
+      <Container size="2xl">
+        <Stack gap={8}>
+          <StudioPageHeader
+            eyebrow="Entitlements"
+            title="User not found"
+            actions={
+              <Button variant="outline" onClick={() => navigate(ADMIN.users)}>
+                Back to users
+              </Button>
+            }
+          />
+          <EmptyState
+            icon="user"
+            title="User not found"
+            subtitle="This account may have been removed."
+            action={
+              <Button variant="secondary" onClick={() => navigate(ADMIN.users)}>
+                Return to users
+              </Button>
+            }
+          />
+        </Stack>
+      </Container>
+    );
+  }
 
   return (
     <Container size="2xl">
-      <Stack gap={10}>
+      <Stack gap={8}>
         <StudioPageHeader
-          eyebrow="Operational hub"
-          title={data?.user?.email ?? 'User entitlements'}
-          sub="Active access across subscriptions and manual overrides."
+          eyebrow="Entitlements"
+          title={profile.name}
+          sub="Full-page access overrides for this user. From Users, the lock icon opens this page (not a drawer)."
           actions={
-            <Button variant="outline" onClick={() => navigate(`${ADMIN.users}?id=${userId}`)}>
+            <Button
+              variant="outline"
+              iconLeft="arrow-left"
+              onClick={() => navigate(`${ADMIN.users}?id=${userId}`)}
+            >
               Back to user
             </Button>
           }
@@ -92,81 +188,21 @@ export function UserEntitlements() {
 
         <AdminMetricStrip columns={5} items={kpiItems} />
 
-        <Card pad="sm">
-          {data === undefined ? (
-            <EmptyState icon="lock" title="Loading entitlements…" />
-          ) : !data || data.entitlements.length === 0 ? (
-            <EmptyState
-              icon="lock"
-              title="No entitlements"
-              subtitle="Grant a manual override below if needed."
-            />
-          ) : (
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>Resource</Th>
-                  <Th>Creator</Th>
-                  <Th>Status</Th>
-                  <Th>Source</Th>
-                </Tr>
-              </THead>
-              <TBody>
-                {(data?.entitlements ?? []).map((e, i) => (
-                  <Tr key={e.resourceId ?? i}>
-                    <Td>{e.resourceType}</Td>
-                    <Td>{String(e.creatorName)}</Td>
-                    <Td>{e.status}</Td>
-                    <Td>{e.source}</Td>
-                  </Tr>
-                ))}
-              </TBody>
-            </Table>
-          )}
-        </Card>
-
-        <Card pad="lg">
-          <CardHead title="Manual override" sub="Grant pick-feed access outside Stripe." />
-          <Stack gap={3}>
-            <Field label="Creator ID">
-              <Input value={creatorId} onChange={(e) => setCreatorId(e.target.value)} />
-            </Field>
-            <Field label="Resource ID">
-              <Input value={resourceId} onChange={(e) => setResourceId(e.target.value)} />
-            </Field>
-            <Row gap={2}>
-              <Button variant="primary" disabled={busy} onClick={handleGrant}>
-                Grant override
-              </Button>
-            </Row>
-          </Stack>
-        </Card>
-
-        <Card pad="sm">
-          <CardHead title="Access logs" sub="Recent allow/deny decisions." />
-          {data?.accessLogs.length === 0 ? (
-            <Muted>No access logs yet.</Muted>
-          ) : (
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>Resource</Th>
-                  <Th>Result</Th>
-                  <Th>Time</Th>
-                </Tr>
-              </THead>
-              <TBody>
-                {data?.accessLogs.map((log) => (
-                  <Tr key={log._id}>
-                    <Td>{log.resourceId}</Td>
-                    <Td>{log.result}</Td>
-                    <Td>{new Date(log.createdAt).toLocaleString()}</Td>
-                  </Tr>
-                ))}
-              </TBody>
-            </Table>
-          )}
-        </Card>
+        <AdminUserEntitlementsPanel
+          loading={data === undefined}
+          profile={profile}
+          subscriptions={data?.subscriptions ?? []}
+          entitlements={data?.entitlements ?? []}
+          accessLogs={data?.accessLogs ?? []}
+          creators={creatorOptions}
+          grant={grant}
+          onGrantChange={(patch) => setGrant((prev) => ({ ...prev, ...patch }))}
+          onGrant={handleGrant}
+          onRevoke={handleRevoke}
+          busy={busy}
+          error={error}
+          formatDate={(ms) => (ms > 1e12 ? formatAdminDateTime(ms) : formatJoinedLabel(ms))}
+        />
       </Stack>
     </Container>
   );

@@ -519,6 +519,17 @@ export type {
 } from './components/domain/AdminUserDetailPanel/AdminUserDetailPanel';
 export { AdminUserInspectorDrawer } from './components/domain/AdminUserInspectorDrawer/AdminUserInspectorDrawer';
 export type { AdminUserInspectorDrawerProps } from './components/domain/AdminUserInspectorDrawer/AdminUserInspectorDrawer';
+export { AdminUserEntitlementsPanel } from './components/domain/AdminUserEntitlementsPanel/AdminUserEntitlementsPanel';
+export type {
+  AdminUserEntitlementsPanelProps,
+  AdminUserEntitlementsProfile,
+  AdminUserEntitlementsGrantForm,
+  AdminGrantResourceType,
+  AdminEntitlementRow,
+  AdminSubscriptionRow,
+  AdminAccessLogRow,
+  AdminCreatorOption,
+} from './components/domain/AdminUserEntitlementsPanel/AdminUserEntitlementsPanel';
 export { AdminModerationFilterBar } from './components/domain/AdminModerationFilterBar/AdminModerationFilterBar';
 export type {
   AdminModerationFilterBarProps,

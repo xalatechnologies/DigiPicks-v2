@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
   Container,
@@ -19,6 +19,7 @@ import {
   type PickFormValue,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import type { Id } from '../../../../../convex/_generated/dataModel';
 import { STUDIO } from '../../lib/studioRoutes';
 
 const SPORTS = ['Soccer', 'Cricket', 'Tennis', 'Basketball', 'Football', 'NFL', 'NBA'];
@@ -72,16 +73,60 @@ function isPickReady(value: PickFormValue): boolean {
   );
 }
 
+function pickToFormValue(pick: {
+  title: string;
+  sport: string;
+  league: string;
+  eventName: string;
+  eventTime: string;
+  market: string;
+  selection: string;
+  odds: string;
+  units: string;
+  confidence: 'Low' | 'Medium' | 'High';
+  body?: string;
+  access: 'free' | 'premium' | 'vip';
+}): PickFormValue {
+  return {
+    title: pick.title,
+    sport: pick.sport,
+    league: pick.league,
+    eventName: pick.eventName,
+    eventTime: pick.eventTime,
+    market: pick.market,
+    selection: pick.selection,
+    odds: pick.odds,
+    units: pick.units,
+    confidence: pick.confidence,
+    body: pick.body ?? '',
+    access: pick.access,
+  };
+}
+
 export function CreatePick() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const pickIdParam = searchParams.get('pickId');
+  const pickId = pickIdParam ? (pickIdParam as Id<'picks'>) : null;
 
   const me = useQuery(api.users.meSafe);
   const creator = useQuery(api.creators.get, me?.creatorId ? { id: me.creatorId } : 'skip');
+  const existingPick = useQuery(api.picks.getForStudio, pickId ? { pickId } : 'skip');
   const createPick = useMutation(api.picks.create);
+  const updatePick = useMutation(api.picks.update);
 
   const [form, setForm] = React.useState<PickFormValue>(INITIAL_VALUE);
+  const [hydrated, setHydrated] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+
+  const isEdit = Boolean(pickId && existingPick);
+
+  React.useEffect(() => {
+    if (!pickId || !existingPick || hydrated) return;
+    setForm(pickToFormValue(existingPick));
+    setHydrated(true);
+  }, [pickId, existingPick, hydrated]);
 
   const ready = isPickReady(form);
 
@@ -97,22 +142,41 @@ export function CreatePick() {
     setError(null);
     setSubmitting(true);
     try {
-      await createPick({
-        creatorId: creator._id,
-        access: form.access,
-        sport: form.sport,
-        league: form.league,
-        eventName: form.eventName,
-        eventTime: form.eventTime,
-        title: form.title.trim(),
-        market: form.market,
-        selection: form.selection.trim(),
-        odds: form.odds,
-        units: form.units,
-        confidence: form.confidence,
-        body: form.body || undefined,
-        status,
-      });
+      if (isEdit && pickId) {
+        await updatePick({
+          pickId,
+          access: form.access,
+          sport: form.sport,
+          league: form.league,
+          eventName: form.eventName,
+          eventTime: form.eventTime,
+          title: form.title.trim(),
+          market: form.market,
+          selection: form.selection.trim(),
+          odds: form.odds,
+          units: form.units,
+          confidence: form.confidence,
+          body: form.body || undefined,
+          status,
+        });
+      } else {
+        await createPick({
+          creatorId: creator._id,
+          access: form.access,
+          sport: form.sport,
+          league: form.league,
+          eventName: form.eventName,
+          eventTime: form.eventTime,
+          title: form.title.trim(),
+          market: form.market,
+          selection: form.selection.trim(),
+          odds: form.odds,
+          units: form.units,
+          confidence: form.confidence,
+          body: form.body || undefined,
+          status,
+        });
+      }
       navigate(STUDIO.picks);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save pick.');
@@ -125,13 +189,19 @@ export function CreatePick() {
   const accessLabel =
     form.access === 'vip' ? 'VIP' : form.access === 'premium' ? 'Premium' : 'Free';
 
+  const loadingEdit = Boolean(pickId) && existingPick === undefined;
+
   return (
     <Container size="xl">
       <Stack gap={6}>
         <StudioPageHeader
           eyebrow="Studio · Posts"
-          title="New pick"
-          sub="Build a clear headline, lock in the wager, and preview exactly what subscribers will see before you publish."
+          title={isEdit ? 'Edit pick' : 'New pick'}
+          sub={
+            isEdit
+              ? 'Update the headline, wager, and access tier — subscribers see changes after you publish.'
+              : 'Build a clear headline, lock in the wager, and preview exactly what subscribers will see before you publish.'
+          }
           actions={
             <Row gap={2}>
               <Button
@@ -146,7 +216,7 @@ export function CreatePick() {
                 variant="secondary"
                 size="sm"
                 onClick={() => handleSubmit('draft')}
-                disabled={submitting || !creator || !ready}
+                disabled={submitting || !creator || !ready || loadingEdit}
               >
                 Save draft
               </Button>
@@ -155,13 +225,15 @@ export function CreatePick() {
                 size="sm"
                 iconRight="arrow-right"
                 onClick={() => handleSubmit('published')}
-                disabled={submitting || !creator || !ready}
+                disabled={submitting || !creator || !ready || loadingEdit}
               >
-                Publish now
+                {isEdit ? 'Save changes' : 'Publish now'}
               </Button>
             </Row>
           }
         />
+
+        {loadingEdit ? <Muted>Loading pick…</Muted> : null}
 
         {error ? (
           <Card pad="md">
@@ -185,7 +257,7 @@ export function CreatePick() {
           <StudioDashCol span={8}>
             <Card pad="xl" elev>
               <CardHead
-                title="Compose pick"
+                title={isEdit ? 'Edit pick' : 'Compose pick'}
                 sub="Five steps — subscribers only see what you publish."
                 action={
                   <Badge tone={ACCESS_BADGE[form.access]} dot>
@@ -200,7 +272,7 @@ export function CreatePick() {
                 markets={MARKET_OPTIONS}
                 accessOptions={ACCESS_OPTIONS}
                 confidenceOptions={CONFIDENCE_OPTIONS}
-                disabled={submitting}
+                disabled={submitting || loadingEdit}
               />
             </Card>
           </StudioDashCol>

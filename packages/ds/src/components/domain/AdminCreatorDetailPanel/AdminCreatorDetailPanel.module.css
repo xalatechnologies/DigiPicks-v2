@@ -13,31 +13,9 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
   background: var(--bg-1);
   overflow: hidden;
-}
-
-.wrapDrawer .hero {
-  height: var(--space-12);
-}
-
-.wrapDrawer .profile {
-  padding-top: var(--space-6);
-}
-
-.wrapDrawer .avatarWrap {
-  top: calc(-1 * var(--space-6));
-}
-
-.wrapDrawer .body {
-  flex: 1;
-  min-height: var(--space-24);
-}
-
-.wrapDrawer .footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
 }
 
 .empty {
@@ -49,6 +27,7 @@
   min-height: inherit;
 }
 
+/* ── Sidebar hero band ── */
 .hero {
   position: relative;
   flex-shrink: 0;
@@ -66,81 +45,155 @@
   background: linear-gradient(to top, var(--bg-1), transparent 60%);
 }
 
-.statusPill {
+.statusBadge {
   position: absolute;
   top: var(--space-4);
   right: var(--space-4);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-4);
-  border-radius: var(--r-full);
-  background: color-mix(in srgb, var(--bg-1) 80%, transparent);
-  backdrop-filter: blur(var(--blur-md));
-  font-size: var(--text-2xs);
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
-  color: var(--t-2);
 }
 
-.statusLive {
-  width: var(--space-2);
-  height: var(--space-2);
-  border-radius: var(--r-full);
-  background: var(--success);
-}
-
+/* ── Profile header ── */
 .profile {
   position: relative;
-  padding: var(--space-10) var(--space-6) var(--space-5);
-  flex-shrink: 0;
-}
-
-.avatarWrap {
-  position: absolute;
-  top: calc(-1 * var(--space-8));
-  left: var(--space-6);
-}
-
-.headRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-3);
-  padding-top: var(--space-1);
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6) var(--space-5);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.wrap:not(.wrapDrawer) .profile {
+  padding-top: var(--space-10);
+}
+
+.profileDrawer {
+  padding: var(--space-6);
+  padding-top: var(--space-12);
+  border-bottom: none;
+}
+
+.identity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-width: 0;
+  flex: 1;
+}
+
+.identityCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .title {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-black);
+  font-family: var(--f-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-extrabold);
   color: var(--t-1);
   line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
 }
 
-.sub {
-  margin: var(--space-1) 0 0;
+.handle {
+  margin: 0;
+  font-family: var(--f-mono);
   font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--t-2);
+}
+
+.niche {
+  margin: 0;
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--t-3);
   line-height: var(--leading-snug);
 }
 
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.verifyBtn {
+  flex-shrink: 0;
+}
+
+/* ── Drawer trust highlight ── */
+.trustBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0 var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--r-xl);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 14%, var(--bg-2)),
+    color-mix(in srgb, var(--primary) 6%, var(--bg-1))
+  );
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line-soft));
+  flex-shrink: 0;
+}
+
+.trustCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.trustEyebrow {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--t-3);
+}
+
+.trustValue {
+  font-family: var(--f-sans);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-extrabold);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-none);
+}
+
+.trustIcon {
+  color: color-mix(in srgb, var(--primary) 55%, var(--t-3));
+  flex-shrink: 0;
+}
+
+/* ── Tabs ── */
 .tabs {
   display: flex;
-  gap: var(--space-6);
-  padding: 0 var(--space-6);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-6) 0;
   flex-shrink: 0;
   overflow-x: auto;
-  background: color-mix(in srgb, var(--bg-2) 55%, var(--bg-1));
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .tab {
-  padding: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
   border: none;
   background: transparent;
+  font-family: var(--f-sans);
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   color: var(--t-3);
@@ -148,32 +201,44 @@
   white-space: nowrap;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  border-radius: var(--r-md) var(--r-md) 0 0;
   transition:
     color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
 }
 
 .tab:hover {
   color: var(--t-1);
+  background: color-mix(in srgb, var(--bg-2) 60%, transparent);
 }
 
 .tabActive {
   color: var(--primary);
   border-bottom-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
+/* ── Body ── */
 .body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
   min-height: 0;
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .sectionTitle {
-  margin: 0 0 var(--space-4);
+  margin: 0;
+  font-family: var(--f-sans);
   font-size: var(--text-2xs);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
@@ -188,13 +253,28 @@
 }
 
 .statCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   padding: var(--space-4);
   border-radius: var(--r-lg);
   background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+}
+
+.statIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-1));
+  color: var(--primary);
 }
 
 .statLabel {
-  margin: 0 0 var(--space-1);
+  margin: 0;
   font-size: var(--text-2xs);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
@@ -204,83 +284,150 @@
 
 .statValue {
   margin: 0;
+  font-family: var(--f-sans);
   font-size: var(--text-lg);
+  font-weight: var(--weight-extrabold);
+  color: var(--t-1);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
+}
+
+.recordStrip {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+}
+
+.recordBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.recordLabel {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--t-3);
+}
+
+.recordValue {
+  font-family: var(--f-sans);
+  font-size: var(--text-md);
   font-weight: var(--weight-bold);
   color: var(--t-1);
   font-variant-numeric: tabular-nums;
 }
 
-.recordRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.recordDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line-soft);
+  flex-shrink: 0;
 }
 
-.recordChip {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--r-full);
-  background: color-mix(in srgb, var(--primary) 10%, var(--bg-2));
-  font-size: var(--text-2xs);
-  font-weight: var(--weight-bold);
-  color: var(--primary);
-}
-
-.history {
+/* ── History timeline ── */
+.timeline {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 0;
 }
 
-.historyItem {
+.timelineItem {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-radius: var(--r-md);
-  background: var(--bg-2);
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  position: relative;
 }
 
-.historyLabel {
+.timelineItem:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-2) - 1px);
+  top: var(--space-5);
+  bottom: 0;
+  width: 1px;
+  background: var(--line-soft);
+}
+
+.timelineDot {
+  width: var(--space-4);
+  height: var(--space-4);
+  margin-top: var(--space-1);
+  border-radius: var(--r-full);
+  background: var(--primary);
+  box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--primary) 20%, transparent);
+  flex-shrink: 0;
+}
+
+.timelineBody {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+}
+
+.timelineLabel {
   margin: 0;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   color: var(--t-1);
+  line-height: var(--leading-snug);
 }
 
-.historyAt {
-  margin: 0;
+.timelineAt {
+  margin: var(--space-1) 0 0;
   font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
   color: var(--t-3);
+  font-family: var(--f-mono);
 }
 
 .error {
   margin: 0;
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--r-md);
   background: color-mix(in srgb, var(--danger) 12%, var(--bg-1));
+  border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent);
   font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
   color: var(--danger);
 }
 
+/* ── Footer actions ── */
 .footer {
   flex-shrink: 0;
   padding: var(--space-5) var(--space-6);
-  background: color-mix(in srgb, var(--bg-2) 45%, var(--bg-1));
+  border-top: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--bg-2) 35%, var(--bg-1));
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.footerRow {
-  display: flex;
-  flex-wrap: wrap;
+.footerPrimary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
-.footerRow > * {
-  flex: 1 1 auto;
-  min-width: fit-content;
+.suspendBtn {
+  color: var(--danger);
+}
+
+.suspendBtn:hover {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--bg-2));
 }

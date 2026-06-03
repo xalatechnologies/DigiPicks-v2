@@ -162,7 +162,6 @@ export function Coupons() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Promo coupons"
-          sub="Map Stripe coupons to DigiPicks codes. Stripe enforces the discount; this surface manages issuance, caps, and expiry."
           actions={
             <Button variant="primary" iconLeft="plus" onClick={() => setCompose(true)}>
               New coupon

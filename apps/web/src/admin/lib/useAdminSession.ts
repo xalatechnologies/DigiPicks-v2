@@ -1,7 +1,7 @@
 import { useConvexAuth, useQuery } from '../../auth/convexAuth';
 import { api } from '../../../../../convex/_generated/api';
 
-const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin']);
+const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin', 'moderator']);
 
 /** True when the session user has an admin-tier role (safe to run admin Convex queries). */
 export function useAdminSession() {

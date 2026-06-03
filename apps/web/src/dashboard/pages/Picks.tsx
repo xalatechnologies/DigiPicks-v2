@@ -18,7 +18,7 @@ import {
 import { api } from '../../../../../convex/_generated/api';
 import { useStudioContext } from '../useStudioContext';
 import { demoPickRows } from '../picksDemo';
-import { STUDIO } from '../../lib/studioRoutes';
+import { STUDIO, studioCreatePickUrl } from '../../lib/studioRoutes';
 
 const FILTER_OPTIONS = [
   { label: 'All picks', value: 'all' },
@@ -93,7 +93,7 @@ function toRow(
     access: p.access,
     status: status as StudioPickRowData['status'],
     result,
-    onEdit: () => navigate(STUDIO.createPick),
+    onEdit: () => navigate(studioCreatePickUrl(p._id)),
     onDuplicate: () => navigate(STUDIO.createPick),
   };
 }
@@ -124,7 +124,7 @@ export function Picks() {
 
   const allRows = useMemo(() => {
     if (picks && picks.length > 0) return picks.map((p) => toRow(p, navigate));
-    if (ctx.devPreview) return demoPickRows(navigate);
+    if (ctx.devPreview && !ctx.isLive) return demoPickRows(navigate);
     return [];
   }, [picks, ctx.devPreview, navigate]);
 

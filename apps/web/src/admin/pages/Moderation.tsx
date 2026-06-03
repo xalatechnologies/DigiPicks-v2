@@ -223,7 +223,6 @@ export function Moderation() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Content moderation"
-          sub="Trust & safety queue for events, applications, pick disputes, and billing cases."
           actions={
             <Row gap={2} wrap>
               <Button variant="secondary" onClick={() => navigate(ADMIN.eventsReview)}>

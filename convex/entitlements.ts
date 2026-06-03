@@ -28,39 +28,87 @@ export const adminByUser = query({
       .order('desc')
       .take(30);
 
-    const activeSubs = subs.filter((s) => isAccessActive(s));
-    const derived = await Promise.all(
-      activeSubs.map(async (sub) => {
+    const subscriptions = await Promise.all(
+      subs.map(async (sub) => {
         const creator = await ctx.db.get(sub.creatorId);
         return {
-          resourceType: 'subscription' as const,
-          resourceId: `sub_${sub._id}`,
-          creatorName: creator?.handle ?? '—',
-          status: 'active' as const,
-          source: 'subscription' as const,
-          validUntil: sub.renewsAt,
+          id: sub._id,
+          creatorId: sub.creatorId,
+          creatorName: creator?.name ?? '—',
+          creatorHandle: creator?.handle ?? '—',
+          plan: sub.plan,
+          status: sub.status,
+          accessActive: isAccessActive(sub),
+          renewsAt: sub.renewsAt,
         };
       }),
     );
 
-    return {
-      user,
-      subscriptionCount: subs.length,
-      activeEntitlementCount:
-        derived.length + overrides.filter((e) => e.status === 'active').length,
-      entitlements: [
-        ...derived,
-        ...overrides.map((e) => ({
+    const activeSubs = subscriptions.filter((s) => s.accessActive);
+    const derived = activeSubs.map((sub) => ({
+      id: `sub_${sub.id}`,
+      kind: 'subscription' as const,
+      resourceType: 'subscription' as const,
+      resourceId: `sub_${sub.id}`,
+      creatorId: sub.creatorId,
+      creatorName: sub.creatorName,
+      creatorHandle: sub.creatorHandle,
+      status: 'active' as const,
+      source: 'subscription' as const,
+      validUntil: sub.renewsAt,
+      canRevoke: false,
+    }));
+
+    const overrideRows = await Promise.all(
+      overrides.map(async (e) => {
+        const creator = await ctx.db.get(e.creatorId);
+        return {
+          id: e._id,
+          kind: 'override' as const,
           resourceType: e.resourceType,
           resourceId: e.resourceId,
-          creatorName: e.creatorId,
+          creatorId: e.creatorId,
+          creatorName: creator?.name ?? '—',
+          creatorHandle: creator?.handle ?? '—',
           status: e.status,
           source: e.source,
           validUntil: e.validUntil,
-          id: e._id,
-        })),
-      ],
-      accessLogs: logs,
+          reason: e.reason,
+          canRevoke: e.source === 'manual_override' && e.status === 'active',
+        };
+      }),
+    );
+
+    let creatorHandle: string | undefined;
+    if (user.creatorId) {
+      const creator = await ctx.db.get(user.creatorId);
+      creatorHandle = creator?.handle;
+    }
+
+    return {
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        creatorId: user.creatorId,
+        creatorHandle,
+        isActive: user.isActive !== false,
+      },
+      subscriptionCount: subs.length,
+      activeSubscriptionCount: activeSubs.length,
+      activeOverrideCount: overrides.filter((e) => e.status === 'active').length,
+      activeEntitlementCount:
+        derived.length + overrides.filter((e) => e.status === 'active').length,
+      subscriptions,
+      entitlements: [...derived, ...overrideRows],
+      accessLogs: logs.map((log) => ({
+        id: log._id,
+        resourceId: log.resourceId,
+        result: log.result,
+        reason: log.reason,
+        createdAt: log.createdAt,
+      })),
     };
   },
 });

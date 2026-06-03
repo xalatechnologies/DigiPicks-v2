@@ -115,14 +115,6 @@ export function Applications() {
 
   const history = useMemo(() => auditToHistory(auditRows ?? []), [auditRows]);
 
-  const headerSub = useMemo(() => {
-    if (queueCounts === undefined) {
-      return 'Review onboarding requests before provisioning studio access.';
-    }
-    const n = queueCounts.newRequests;
-    return `Reviewing ${n} new request${n === 1 ? '' : 's'} for creator status`;
-  }, [queueCounts]);
-
   const filterSummary =
     filteredApps === undefined
       ? 'Loading…'
@@ -176,12 +168,7 @@ export function Applications() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Creator applications"
-          sub={headerSub}
-          actions={
-            <Button variant="primary" iconLeft="arrow-right" disabled title="Export coming soon">
-              Export report
-            </Button>
-          }
+          actions={undefined}
         />
 
         <AdminApplicationsFilterBar

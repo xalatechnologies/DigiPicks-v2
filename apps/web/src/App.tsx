@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useConvexAuth, useQuery } from './auth/convexAuth';
 import {
   PublicLayout,
@@ -42,14 +42,6 @@ const OddsIntel = React.lazy(() =>
 );
 const Apply = React.lazy(() => import('./pages/Apply').then((m) => ({ default: m.Apply })));
 import { Auth } from './pages/Auth';
-const Feed = React.lazy(() => import('./pages/Feed').then((m) => ({ default: m.Feed })));
-const Saved = React.lazy(() => import('./pages/Saved').then((m) => ({ default: m.Saved })));
-const Community = React.lazy(() =>
-  import('./pages/Community').then((m) => ({ default: m.Community })),
-);
-const Notifications = React.lazy(() =>
-  import('./pages/Notifications').then((m) => ({ default: m.Notifications })),
-);
 const AdminGateLayout = React.lazy(() =>
   import('./admin/AdminGateLayout').then((m) => ({ default: m.AdminGateLayout })),
 );
@@ -137,7 +129,7 @@ function NotificationsBell() {
       iconOnly
       iconLeft="bell"
       aria-label={unread && unread > 0 ? `${unread} unread notifications` : 'Notifications'}
-      onClick={() => navigate('/notifications')}
+      onClick={() => navigate('/account/notifications')}
     >
       {unread && unread > 0 ? (
         <Badge tone="red" dot>
@@ -308,6 +300,26 @@ function PublicFooter() {
   );
 }
 
+function PublicNotFound() {
+  const navigate = useNavigate();
+  return (
+    <Container size="lg">
+      <Section>
+        <EmptyState
+          icon="compass"
+          title="Page not found"
+          subtitle="That link may be outdated or was moved."
+          action={
+            <Button variant="primary" onClick={() => navigate('/')}>
+              Go home
+            </Button>
+          }
+        />
+      </Section>
+    </Container>
+  );
+}
+
 function PublicShell() {
   return (
     <PublicLayout header={<PublicHeader />} footer={<PublicFooter />}>
@@ -364,50 +376,11 @@ export function App() {
             </React.Suspense>
           }
         />
-        <Route
-          path="/feed"
-          element={
-            <AuthGate
-              forbiddenTitle="Sign in to follow picks"
-              forbiddenSubtitle="Your feed pulls picks from the creators you've subscribed to. Sign in to personalize it."
-            >
-              <Feed />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/saved"
-          element={
-            <AuthGate
-              forbiddenTitle="Sign in to view your library"
-              forbiddenSubtitle="Saved picks are tied to your account. Sign in to bookmark and track picks."
-            >
-              <Saved />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/community"
-          element={
-            <AuthGate
-              forbiddenTitle="Sign in to join community channels"
-              forbiddenSubtitle="Posting in community rooms requires an account. Sign in to read and reply."
-            >
-              <Community />
-            </AuthGate>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <AuthGate
-              forbiddenTitle="Sign in to view notifications"
-              forbiddenSubtitle="Your notification inbox is tied to your account."
-            >
-              <Notifications />
-            </AuthGate>
-          }
-        />
+        <Route path="/feed" element={<Navigate to="/account/feed" replace />} />
+        <Route path="/saved" element={<Navigate to="/account/saved" replace />} />
+        <Route path="/community" element={<Navigate to="/account/community" replace />} />
+        <Route path="/notifications" element={<Navigate to="/account/notifications" replace />} />
+        <Route path="*" element={<PublicNotFound />} />
       </Route>
       <Route
         path="/admin"

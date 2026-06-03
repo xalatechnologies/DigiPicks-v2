@@ -1,11 +1,16 @@
 import React from 'react';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
 import { Button } from '../../atoms/Button/Button';
 import { Field } from '../../forms/Field/Field';
 import { TextArea } from '../../forms/TextArea/TextArea';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+  AdminDetailSection,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 import s from './AdminBillingCaseDetailDrawer.module.css';
 
 export interface AdminBillingCaseNote {
@@ -66,103 +71,100 @@ export function AdminBillingCaseDetailDrawer({
   onDeny,
   onCloseCase,
 }: AdminBillingCaseDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading billing case' : (caseNumber ?? 'Billing case');
   const title = loading ? 'Loading case…' : (caseNumber ?? 'Billing case');
 
+  const footer = (
+    <>
+      {onAddNote ? (
+        <Button variant="outline" size="sm" disabled={busy} onClick={onAddNote}>
+          Add note
+        </Button>
+      ) : null}
+      {onUnderReview ? (
+        <Button variant="outline" size="sm" disabled={busy} onClick={onUnderReview}>
+          Under review
+        </Button>
+      ) : null}
+      {onPendingFinance ? (
+        <Button variant="outline" size="sm" disabled={busy} onClick={onPendingFinance}>
+          Pending finance
+        </Button>
+      ) : null}
+      {onEscalate ? (
+        <Button variant="outline" size="sm" disabled={busy} onClick={onEscalate}>
+          Escalate
+        </Button>
+      ) : null}
+      {onRefund ? (
+        <Button variant="primary" size="sm" disabled={busy} onClick={onRefund}>
+          Mark refunded
+        </Button>
+      ) : null}
+      {onDeny ? (
+        <Button variant="danger" size="sm" disabled={busy} onClick={onDeny}>
+          Deny
+        </Button>
+      ) : null}
+      {onCloseCase ? (
+        <Button variant="ghost" size="sm" disabled={busy} onClick={onCloseCase}>
+          Close
+        </Button>
+      ) : null}
+    </>
+  );
+
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching billing case…</Muted>
-        ) : (
-          <Stack gap={5}>
-            <div className={s.badges}>
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={title}
+          badges={
+            <>
               {statusLabel ? <Badge tone={statusTone}>{statusLabel}</Badge> : null}
               {issueLabel ? <Badge tone="blue">{issueLabel}</Badge> : null}
               {amountLabel ? <Badge tone="mute">{amountLabel}</Badge> : null}
-            </div>
+            </>
+          }
+          footer={footer}
+          footerLayout="row"
+        >
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Subscriber" value={subscriberLabel} />
+            <AdminDetailMetaCard label="Creator" value={creatorLabel} />
+            <AdminDetailMetaCard label="Opened" value={createdLabel} />
+            <AdminDetailMetaCard label="Updated" value={updatedLabel} />
+          </div>
 
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Subscriber</p>
-                <p className={s.metaValue}>{subscriberLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Creator</p>
-                <p className={s.metaValue}>{creatorLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Opened</p>
-                <p className={s.metaValue}>{createdLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Updated</p>
-                <p className={s.metaValue}>{updatedLabel ?? '—'}</p>
-              </div>
-            </div>
+          <Field label="Internal note">
+            <TextArea
+              rows={3}
+              value={noteDraft}
+              onChange={(e) => onNoteDraftChange(e.target.value)}
+              maxLength={2000}
+            />
+          </Field>
 
-            <Field label="Internal note">
-              <TextArea
-                rows={3}
-                value={noteDraft}
-                onChange={(e) => onNoteDraftChange(e.target.value)}
-                maxLength={2000}
-              />
-            </Field>
+          {error ? <p className={bd.error}>{error}</p> : null}
 
-            {error ? <p className={s.error}>{error}</p> : null}
-
-            <div className={s.actions}>
-              {onAddNote ? (
-                <Button variant="outline" size="sm" disabled={busy} onClick={onAddNote}>
-                  Add note
-                </Button>
-              ) : null}
-              {onUnderReview ? (
-                <Button variant="outline" size="sm" disabled={busy} onClick={onUnderReview}>
-                  Under review
-                </Button>
-              ) : null}
-              {onPendingFinance ? (
-                <Button variant="outline" size="sm" disabled={busy} onClick={onPendingFinance}>
-                  Pending finance
-                </Button>
-              ) : null}
-              {onEscalate ? (
-                <Button variant="outline" size="sm" disabled={busy} onClick={onEscalate}>
-                  Escalate
-                </Button>
-              ) : null}
-              {onRefund ? (
-                <Button variant="primary" size="sm" disabled={busy} onClick={onRefund}>
-                  Mark refunded
-                </Button>
-              ) : null}
-              {onDeny ? (
-                <Button variant="danger" size="sm" disabled={busy} onClick={onDeny}>
-                  Deny
-                </Button>
-              ) : null}
-              {onCloseCase ? (
-                <Button variant="ghost" size="sm" disabled={busy} onClick={onCloseCase}>
-                  Close
-                </Button>
-              ) : null}
-            </div>
-
-            {notes.length > 0 ? (
-              <Stack gap={2}>
-                <Muted>Internal notes</Muted>
+          {notes.length > 0 ? (
+            <AdminDetailSection title="Internal notes">
+              <ul className={s.notes}>
                 {notes.map((n, i) => (
-                  <div key={i} className={s.noteCard}>
+                  <li key={i} className={s.noteCard}>
                     <p className={s.noteTime}>{n.createdLabel}</p>
                     <p className={s.noteBody}>{n.body}</p>
-                  </div>
+                  </li>
                 ))}
-              </Stack>
-            ) : null}
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+              </ul>
+            </AdminDetailSection>
+          ) : null}
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

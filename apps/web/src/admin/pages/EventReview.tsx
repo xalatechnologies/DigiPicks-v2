@@ -105,7 +105,6 @@ export function AdminEventReview() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Event review"
-          sub="Creator-submitted events awaiting verification. Approving makes them visible on the public feed."
           actions={
             <Button variant="outline" size="sm" onClick={() => navigate('/events')}>
               Public events

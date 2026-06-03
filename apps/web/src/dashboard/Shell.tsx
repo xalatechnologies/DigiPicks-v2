@@ -5,6 +5,7 @@ import {
   Container,
   Sidebar,
   NavItem,
+  NavSection,
   Stack,
   StudioTopBar,
   StudioSidebarBrand,
@@ -18,19 +19,8 @@ import {
   canDevAutoSignInCreator,
 } from '../lib/devDemoLogin';
 import { STUDIO } from '../lib/studioRoutes';
+import { STUDIO_NAV_SECTIONS } from './studioNav';
 import { useStudioContext } from './useStudioContext';
-
-const STUDIO_NAV = [
-  { to: STUDIO.overview, label: 'Dashboard', icon: 'home', end: true },
-  { to: STUDIO.picks, label: 'Posts / Picks', icon: 'feed' },
-  { to: STUDIO.subscribers, label: 'Subscribers', icon: 'users' },
-  { to: STUDIO.products, label: 'Products / Pricing', icon: 'tag' },
-  { to: STUDIO.access, label: 'Access levels', icon: 'lock' },
-  { to: STUDIO.analytics, label: 'Analytics', icon: 'chart' },
-  { to: STUDIO.payouts, label: 'Payouts', icon: 'dollar' },
-  { to: STUDIO.profile, label: 'Profile', icon: 'user' },
-  { to: STUDIO.settings, label: 'Settings', icon: 'gear' },
-] as const;
 
 function isActive(pathname: string, to: string, end?: boolean): boolean {
   if (end) return pathname === to;
@@ -51,6 +41,7 @@ export function DashboardShell() {
   const header = (
     <StudioTopBar
       userMenu={<AccountUserMenu align="right" />}
+      searchPlaceholder="Search subscribers…"
       onSearch={() => navigate(STUDIO.subscribers)}
     />
   );
@@ -72,18 +63,22 @@ export function DashboardShell() {
         tagline="Premium Curator"
         onLogoClick={() => navigate('/')}
       />
-      <Stack gap={1}>
-        {STUDIO_NAV.map((item) => (
-          <NavItem
-            key={`${item.to}-${item.label}`}
-            as="button"
-            type="button"
-            icon={item.icon}
-            label={item.label}
-            hideChevron
-            active={isActive(pathname, item.to, 'end' in item ? item.end : false)}
-            onClick={() => navigate(item.to)}
-          />
+      <Stack gap={4}>
+        {STUDIO_NAV_SECTIONS.map((section) => (
+          <NavSection key={section.title} title={section.title}>
+            {section.items.map((item) => (
+              <NavItem
+                key={`${item.to}-${item.label}`}
+                as="button"
+                type="button"
+                icon={item.icon}
+                label={item.label}
+                hideChevron
+                active={isActive(pathname, item.to, item.end)}
+                onClick={() => navigate(item.to)}
+              />
+            ))}
+          </NavSection>
         ))}
       </Stack>
     </Sidebar>

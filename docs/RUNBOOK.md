@@ -226,6 +226,12 @@ Optional overrides:
 
 `bootstrapDevAdmin` is disabled on production Convex deployments.
 
+### Creator studio QA path
+
+1. **New creator:** `/apply` → submit application → admin **`/admin/applications`** approve → creator lands on **`/dashboard`**.
+2. **Dev shortcut:** approve an application in admin, or use an account with `users.creatorId` set, then open **`/dashboard`**.
+3. **Smoke walk:** see [STUDIO_E2E_SMOKE.md](./STUDIO_E2E_SMOKE.md) for the full checklist (sidebar, CRUD loops, redirects, build gates).
+
 ---
 
 ## 2. Phase 1 — Federated Event Engine backfill

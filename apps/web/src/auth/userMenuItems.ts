@@ -1,6 +1,6 @@
 import type { UserMenuItem } from '@digipicks/ds';
 
-const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin']);
+const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin', 'moderator']);
 
 export type UserMenuSurface = 'public' | 'account' | 'dashboard' | 'admin';
 
@@ -25,10 +25,18 @@ export interface BuildUserMenuItemsArgs {
 
 /** Public marketing header — full subscriber shortcuts. */
 function publicMenuItems(args: BuildUserMenuItemsArgs): UserMenuItem[] {
-  const { navigate, hasCreator, onSignOut } = args;
+  const { navigate, hasCreator, isAdmin, onSignOut } = args;
   const items: UserMenuItem[] = [
     { label: 'My account', icon: 'user', onClick: () => navigate('/account') },
   ];
+
+  if (isAdmin) {
+    items.push({
+      label: 'Admin',
+      icon: 'shield',
+      onClick: () => navigate('/admin'),
+    });
+  }
 
   if (hasCreator) {
     items.push({

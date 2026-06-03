@@ -62,6 +62,28 @@ export function formatJoinedLabel(ms: number | undefined): string {
   });
 }
 
+export function formatAdminDateTime(ms: number): string {
+  return new Date(ms).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+/** Display name for UI — never duplicates the full email when a real name is missing. */
+export function displayUserName(name: string | undefined, email: string | undefined): string {
+  const trimmed = name?.trim();
+  if (trimmed) return trimmed;
+  const mail = email?.trim();
+  if (mail) {
+    const local = mail.split('@')[0]?.trim();
+    if (local) return local;
+  }
+  return 'Unnamed user';
+}
+
 export function monogram(name: string | undefined, email: string | undefined): string {
   const source = name?.trim() || email?.trim() || '?';
   return source

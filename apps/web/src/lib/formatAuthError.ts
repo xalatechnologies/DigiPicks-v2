@@ -15,7 +15,7 @@ export function formatAuthError(err: unknown, flow: 'signIn' | 'signUp'): string
     }
   }
   if (err instanceof Error) {
-    let msg = err.message;
+    const msg = err.message;
     if (msg.includes('[CONVEX')) {
       if (msg.includes('Unauthorized')) {
         return flow === 'signIn'

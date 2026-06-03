@@ -1,12 +1,16 @@
 import React from 'react';
-import { cx } from '../../../utils/cx';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
 import { Button } from '../../atoms/Button/Button';
 import { Field } from '../../forms/Field/Field';
 import { TextArea } from '../../forms/TextArea/TextArea';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+  AdminDetailSection,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 import s from './AdminDisputeDetailDrawer.module.css';
 
 export interface AdminDisputeNote {
@@ -63,80 +67,80 @@ export function AdminDisputeDetailDrawer({
   onResolve,
   onDismiss,
 }: AdminDisputeDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading dispute' : (pickTitle ?? 'Pick dispute');
   const title = loading ? 'Loading dispute…' : (pickTitle ?? 'Pick dispute');
 
+  const footer = (
+    <>
+      {canReview && onMarkReviewing ? (
+        <Button variant="outline" size="sm" disabled={busy} onClick={onMarkReviewing}>
+          Mark reviewing
+        </Button>
+      ) : null}
+      {canResolve && onResolve ? (
+        <Button variant="primary" size="sm" disabled={busy} onClick={onResolve}>
+          Resolve
+        </Button>
+      ) : null}
+      {canDismiss && onDismiss ? (
+        <Button variant="danger" size="sm" disabled={busy} onClick={onDismiss}>
+          Dismiss
+        </Button>
+      ) : null}
+    </>
+  );
+
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching dispute details…</Muted>
-        ) : (
-          <Stack gap={5}>
-            <div className={s.badges}>
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={title}
+          badges={
+            <>
               {statusLabel ? <Badge tone={statusTone}>{statusLabel}</Badge> : null}
               {reason ? <Badge tone="blue">{reason}</Badge> : null}
-            </div>
+            </>
+          }
+          footer={footer}
+          footerLayout="row"
+        >
+          {detail ? <p className={bd.detail}>{detail}</p> : null}
 
-            {detail ? <p className={s.detail}>{detail}</p> : null}
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Opened by" value={openerLabel} />
+            <AdminDetailMetaCard label="Creator" value={creatorLabel} />
+            <AdminDetailMetaCard label="Opened" value={openedLabel} />
+          </div>
 
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Opened by</p>
-                <p className={s.metaValue}>{openerLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Creator</p>
-                <p className={s.metaValue}>{creatorLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Opened</p>
-                <p className={s.metaValue}>{openedLabel ?? '—'}</p>
-              </div>
-            </div>
+          <Field label="Resolution note" help="Stored on the dispute and audit log.">
+            <TextArea
+              rows={3}
+              value={resolution}
+              onChange={(e) => onResolutionChange(e.target.value)}
+              maxLength={2000}
+            />
+          </Field>
 
-            <Field label="Resolution note" help="Stored on the dispute and audit log.">
-              <TextArea
-                rows={3}
-                value={resolution}
-                onChange={(e) => onResolutionChange(e.target.value)}
-                maxLength={2000}
-              />
-            </Field>
+          {error ? <p className={bd.error}>{error}</p> : null}
 
-            {error ? <p className={s.error}>{error}</p> : null}
-
-            <div className={s.actions}>
-              {canReview && onMarkReviewing ? (
-                <Button variant="outline" size="sm" disabled={busy} onClick={onMarkReviewing}>
-                  Mark reviewing
-                </Button>
-              ) : null}
-              {canResolve && onResolve ? (
-                <Button variant="primary" size="sm" disabled={busy} onClick={onResolve}>
-                  Resolve
-                </Button>
-              ) : null}
-              {canDismiss && onDismiss ? (
-                <Button variant="danger" size="sm" disabled={busy} onClick={onDismiss}>
-                  Dismiss
-                </Button>
-              ) : null}
-            </div>
-
-            {notes.length > 0 ? (
-              <Stack gap={2}>
-                <Muted>Notes</Muted>
+          {notes.length > 0 ? (
+            <AdminDetailSection title="Notes">
+              <ul className={s.notes}>
                 {notes.map((n, i) => (
-                  <div key={i} className={s.noteCard}>
+                  <li key={i} className={s.noteCard}>
                     <p className={s.noteTime}>{n.createdLabel}</p>
                     <p className={s.noteBody}>{n.body}</p>
-                  </div>
+                  </li>
                 ))}
-              </Stack>
-            ) : null}
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+              </ul>
+            </AdminDetailSection>
+          ) : null}
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

@@ -26,19 +26,6 @@ export function AccountUserMenu({
   const { isAuthenticated, authLoading, me, status, profileReady } = useAuthSession();
   const unread = useQuery(api.notifications.unreadCount, profileReady ? {} : 'skip');
 
-  if (surface === 'admin') return null;
-
-  if (authLoading || status === 'profile-loading') return null;
-  if (!isAuthenticated || status === 'orphan') {
-    return (
-      <Button variant={signInVariant} onClick={() => navigate('/auth')}>
-        Sign in
-      </Button>
-    );
-  }
-
-  if (!profileReady || !me) return null;
-
   const onSignOut = useCallback(() => {
     if (pathname.startsWith('/admin') && canDevAutoSignInAdmin()) {
       void devAdminSignOut();
@@ -48,6 +35,7 @@ export function AccountUserMenu({
   }, [pathname, devAdminSignOut, signOut]);
 
   const items = useMemo(() => {
+    if (!me) return [];
     const base = buildUserMenuItems({
       surface,
       navigate,
@@ -68,7 +56,20 @@ export function AccountUserMenu({
           ) : undefined,
       };
     });
-  }, [surface, navigate, me.creatorId, me.role, unread, onSignOut]);
+  }, [surface, navigate, me, unread, onSignOut]);
+
+  if (surface === 'admin') return null;
+
+  if (authLoading || status === 'profile-loading') return null;
+  if (!isAuthenticated || status === 'orphan') {
+    return (
+      <Button variant={signInVariant} onClick={() => navigate('/auth')}>
+        Sign in
+      </Button>
+    );
+  }
+
+  if (!profileReady || !me) return null;
 
   return (
     <UserMenu

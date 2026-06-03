@@ -1,10 +1,9 @@
 import React from 'react';
-import { Drawer } from '../../feedback/Drawer/Drawer';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
 import {
   AdminUserDetailPanel,
   type AdminUserDetailPanelProps,
 } from '../AdminUserDetailPanel/AdminUserDetailPanel';
-import s from './AdminUserInspectorDrawer.module.css';
 
 export interface AdminUserInspectorDrawerProps extends Omit<
   AdminUserDetailPanelProps,
@@ -21,13 +20,15 @@ export function AdminUserInspectorDrawer({
   loading,
   ...panelProps
 }: AdminUserInspectorDrawerProps) {
-  const title = loading ? 'Loading user…' : (user?.name ?? 'User details');
+  const ariaLabel = loading
+    ? 'Loading user details'
+    : user
+      ? `User details: ${user.name}`
+      : 'User details';
 
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        <AdminUserDetailPanel variant="drawer" user={user} loading={loading} {...panelProps} />
-      </div>
-    </Drawer>
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      <AdminUserDetailPanel variant="drawer" user={user} loading={loading} {...panelProps} />
+    </AdminInspectorDrawerShell>
   );
 }

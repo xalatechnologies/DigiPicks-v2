@@ -30,6 +30,7 @@ async function stripeFetch(
 export const statusByCreator = query({
   args: { creatorId: v.id('creators') },
   handler: async (ctx, args) => {
+    await requireCreatorOwnership(ctx, args.creatorId);
     const creator = await ctx.db.get(args.creatorId);
     if (!creator) return null;
     return {

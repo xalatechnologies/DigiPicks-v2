@@ -134,6 +134,7 @@ export function Products() {
   const tiers = ctx.tiers;
 
   const createTier = useMutation(api.pricingTiers.create);
+  const updateTier = useMutation(api.pricingTiers.update);
   const archiveTier = useMutation(api.pricingTiers.archive);
 
   const [view, setView] = useState('tiers');
@@ -146,6 +147,7 @@ export function Products() {
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [features, setFeatures] = useState(['Daily NBA Props', 'Access to Private Discord']);
   const [selectedAccess, setSelectedAccess] = useState<string[]>(['props', 'discord']);
+  const [editingTierId, setEditingTierId] = useState<Id<'pricingTiers'> | null>(null);
 
   const subsByPlan = useMemo(() => {
     const counts = { free: 0, premium: 0, vip: 0 };
@@ -247,12 +249,73 @@ export function Products() {
   }
 
   function resetForm() {
+    setEditingTierId(null);
     setPlanName('');
     setPrice('');
     setInterval('month');
     setFeatures(['Daily NBA Props', 'Access to Private Discord']);
     setSelectedAccess(['props', 'discord']);
   }
+
+  function loadTierForEdit(tier: TierCardModel) {
+    if (!tier.tierId) return;
+    const src = tiers.find((t) => t._id === tier.tierId);
+    if (!src) return;
+    setEditingTierId(tier.tierId);
+    setPlanName(src.name);
+    setPrice(String(src.priceCents / 100));
+    setInterval(src.interval === 'year' ? 'year' : 'month');
+    setFeatures(src.perks.length > 0 ? [...src.perks] : ['']);
+    setView('configure');
+    scrollToConfigure();
+  }
+
+  const compareRows = useMemo(() => {
+    if (tiers.length === 0) return COMPARE_ROWS;
+    const byPlan = Object.fromEntries(tiers.map((t) => [t.legacyPlan ?? 'premium', t]));
+    const hasPerk = (plan: string, needle: string) => {
+      const tier = byPlan[plan];
+      if (!tier) return false;
+      return tier.perks.join(' ').toLowerCase().includes(needle.toLowerCase());
+    };
+    return [
+      {
+        id: 'articles',
+        label: 'Public Analysis Articles',
+        free: true,
+        premium: true,
+        vip: true,
+      },
+      {
+        id: 'props',
+        label: 'Daily NBA Props',
+        free: hasPerk('free', 'prop'),
+        premium: hasPerk('premium', 'prop') || hasPerk('vip', 'prop'),
+        vip: hasPerk('vip', 'prop'),
+      },
+      {
+        id: 'discord',
+        label: 'Exclusive Discord Channels',
+        free: hasPerk('free', 'discord'),
+        premium: hasPerk('premium', 'discord') || hasPerk('vip', 'discord'),
+        vip: hasPerk('vip', 'discord'),
+      },
+      {
+        id: 'support',
+        label: 'Priority Support',
+        free: hasPerk('free', 'support'),
+        premium: hasPerk('premium', 'support'),
+        vip: hasPerk('vip', 'support'),
+      },
+      {
+        id: 'bankroll',
+        label: 'Bankroll Management Suite',
+        free: hasPerk('free', 'bankroll'),
+        premium: hasPerk('premium', 'bankroll'),
+        vip: hasPerk('vip', 'bankroll'),
+      },
+    ];
+  }, [tiers]);
 
   function scrollToConfigure() {
     setView('configure');
@@ -285,13 +348,23 @@ export function Products() {
     setError(null);
     setBusy(true);
     try {
-      await createTier({
-        creatorId: ctx.me.creatorId,
-        name,
-        priceCents: Math.round(priceUsd * 100),
-        interval,
-        perks,
-      });
+      if (editingTierId) {
+        await updateTier({
+          tierId: editingTierId,
+          name,
+          priceCents: Math.round(priceUsd * 100),
+          interval,
+          perks,
+        });
+      } else {
+        await createTier({
+          creatorId: ctx.me.creatorId,
+          name,
+          priceCents: Math.round(priceUsd * 100),
+          interval,
+          perks,
+        });
+      }
       resetForm();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create tier.');
@@ -421,6 +494,7 @@ export function Products() {
                     features={tier.features}
                     activeSubs={tier.activeSubs}
                     popular={tier.popular}
+                    onEdit={tier.tierId ? () => loadTierForEdit(tier) : undefined}
                     onDelete={tier.tierId ? () => handleArchive(tier.tierId!) : undefined}
                   />
                 ))}
@@ -429,7 +503,7 @@ export function Products() {
           </>
         ) : null}
 
-        {view === 'compare' ? <StudioFeatureCompare rows={COMPARE_ROWS} /> : null}
+        {view === 'compare' ? <StudioFeatureCompare rows={compareRows} /> : null}
 
         {view === 'configure' ? (
           <div id="studio-plan-config">

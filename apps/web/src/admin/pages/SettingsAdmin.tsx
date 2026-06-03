@@ -103,7 +103,6 @@ export function SettingsAdmin() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="System settings"
-          sub="Platform configuration — env-backed values read-only; custom keys editable below."
           actions={
             <Button variant="primary" iconLeft="plus" onClick={() => setEditId('new')}>
               New setting

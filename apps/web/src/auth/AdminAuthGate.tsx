@@ -19,7 +19,7 @@ import { useAuthSession } from './useAuthSession';
 /**
  * Admin route guard with optional dev auto sign-in (no manual registration).
  */
-const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin']);
+const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin', 'moderator']);
 
 /** Server RBAC uses `users.role` — email-only bypass must not mount admin queries. */
 function hasAdminRole(me: { role?: string } | null | undefined): boolean {

@@ -1,10 +1,14 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
 import { Button } from '../../atoms/Button/Button';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 import s from './AdminModerationDetailDrawer.module.css';
 
 export type AdminModerationDetailSeverity = 'critical' | 'high' | 'normal';
@@ -62,70 +66,65 @@ export function AdminModerationDetailDrawer({
   onReject,
   busy,
 }: AdminModerationDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading moderation item' : (subject ?? 'Moderation item');
   const title = loading ? 'Loading item…' : (subject ?? 'Moderation item');
 
+  const footer = (
+    <>
+      {onApprove ? (
+        <Button variant="primary" disabled={busy} onClick={onApprove}>
+          {approveLabel}
+        </Button>
+      ) : null}
+      {onReject ? (
+        <Button variant="outline" disabled={busy} onClick={onReject}>
+          {rejectLabel}
+        </Button>
+      ) : null}
+      {primaryActionLabel && onPrimaryAction ? (
+        <Button variant="primary" disabled={busy} onClick={onPrimaryAction}>
+          {primaryActionLabel}
+        </Button>
+      ) : null}
+      {secondaryActionLabel && onSecondaryAction ? (
+        <Button variant="secondary" disabled={busy} onClick={onSecondaryAction}>
+          {secondaryActionLabel}
+        </Button>
+      ) : null}
+    </>
+  );
+
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching details…</Muted>
-        ) : (
-          <Stack gap={5}>
-            <div className={s.badges}>
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={title}
+          badges={
+            <>
               {typeLabel ? <Badge tone="blue">{typeLabel}</Badge> : null}
               {severityLabel ? (
                 <span className={cx(s.severityBadge, SEVERITY_CLASS[severity])}>
                   {severityLabel}
                 </span>
               ) : null}
-            </div>
-
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Creator</p>
-                <p className={s.metaValue}>{creatorLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Status</p>
-                <p className={s.metaValue}>{statusLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Reason</p>
-                <p className={s.metaValue}>{reason ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Flagged</p>
-                <p className={s.metaValue}>{flaggedAtLabel ?? '—'}</p>
-              </div>
-            </div>
-
-            {detail ? <p className={s.detail}>{detail}</p> : null}
-
-            <div className={s.actions}>
-              {onApprove ? (
-                <Button variant="primary" disabled={busy} onClick={onApprove}>
-                  {approveLabel}
-                </Button>
-              ) : null}
-              {onReject ? (
-                <Button variant="outline" disabled={busy} onClick={onReject}>
-                  {rejectLabel}
-                </Button>
-              ) : null}
-              {primaryActionLabel && onPrimaryAction ? (
-                <Button variant="primary" disabled={busy} onClick={onPrimaryAction}>
-                  {primaryActionLabel}
-                </Button>
-              ) : null}
-              {secondaryActionLabel && onSecondaryAction ? (
-                <Button variant="secondary" disabled={busy} onClick={onSecondaryAction}>
-                  {secondaryActionLabel}
-                </Button>
-              ) : null}
-            </div>
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+            </>
+          }
+          footer={footer}
+          footerLayout="row"
+        >
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Creator" value={creatorLabel} />
+            <AdminDetailMetaCard label="Status" value={statusLabel} />
+            <AdminDetailMetaCard label="Reason" value={reason} />
+            <AdminDetailMetaCard label="Flagged" value={flaggedAtLabel} />
+          </div>
+          {detail ? <p className={bd.detail}>{detail}</p> : null}
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

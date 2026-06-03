@@ -1,10 +1,9 @@
 import React from 'react';
-import { Drawer } from '../../feedback/Drawer/Drawer';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
 import {
   AdminCreatorDetailPanel,
   type AdminCreatorDetailPanelProps,
 } from '../AdminCreatorDetailPanel/AdminCreatorDetailPanel';
-import s from './AdminCreatorInspectorDrawer.module.css';
 
 export interface AdminCreatorInspectorDrawerProps extends Omit<
   AdminCreatorDetailPanelProps,
@@ -21,18 +20,20 @@ export function AdminCreatorInspectorDrawer({
   loading,
   ...panelProps
 }: AdminCreatorInspectorDrawerProps) {
-  const title = loading ? 'Loading creator…' : (creator?.name ?? 'Creator details');
+  const ariaLabel = loading
+    ? 'Loading creator details'
+    : creator
+      ? `Creator details: ${creator.name}`
+      : 'Creator details';
 
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        <AdminCreatorDetailPanel
-          variant="drawer"
-          creator={creator}
-          loading={loading}
-          {...panelProps}
-        />
-      </div>
-    </Drawer>
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      <AdminCreatorDetailPanel
+        variant="drawer"
+        creator={creator}
+        loading={loading}
+        {...panelProps}
+      />
+    </AdminInspectorDrawerShell>
   );
 }

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
 import { Button } from '../../atoms/Button/Button';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
-import s from './AdminCampaignDetailDrawer.module.css';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 
 export interface AdminCampaignDetailDrawerProps {
   open: boolean;
@@ -37,49 +40,42 @@ export function AdminCampaignDetailDrawer({
   createdLabel,
   onCompose,
 }: AdminCampaignDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading campaign' : (title ?? 'Campaign');
   const drawerTitle = loading ? 'Loading campaign…' : (title ?? 'Campaign');
 
   return (
-    <Drawer open={open} onClose={onClose} title={drawerTitle} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching campaign details…</Muted>
-        ) : (
-          <Stack gap={5}>
-            <div className={s.badges}>
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={drawerTitle}
+          badges={
+            <>
               {statusLabel ? <Badge tone={statusTone}>{statusLabel}</Badge> : null}
               {channelLabel ? <Badge tone="blue">{channelLabel}</Badge> : null}
-            </div>
-
-            {body ? <p className={s.body}>{body}</p> : null}
-
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Created by</p>
-                <p className={s.metaValue}>{createdByLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Created</p>
-                <p className={s.metaValue}>{createdLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Scheduled</p>
-                <p className={s.metaValue}>{scheduledLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Sent</p>
-                <p className={s.metaValue}>{sentLabel ?? '—'}</p>
-              </div>
-            </div>
-
-            {onCompose ? (
+            </>
+          }
+          footer={
+            onCompose ? (
               <Button variant="primary" onClick={onCompose}>
                 New campaign
               </Button>
-            ) : null}
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+            ) : null
+          }
+          footerLayout="stack"
+        >
+          {body ? <p className={bd.detail}>{body}</p> : null}
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Created by" value={createdByLabel} />
+            <AdminDetailMetaCard label="Created" value={createdLabel} />
+            <AdminDetailMetaCard label="Scheduled" value={scheduledLabel} />
+            <AdminDetailMetaCard label="Sent" value={sentLabel} />
+          </div>
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

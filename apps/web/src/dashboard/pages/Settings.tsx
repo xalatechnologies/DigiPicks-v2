@@ -377,9 +377,14 @@ export function Settings() {
           title="Settings"
           sub="Notifications, integrations, security, and account data."
           actions={
-            <Button variant="outline" onClick={() => navigate(STUDIO.profile)}>
-              Edit profile
-            </Button>
+            <Row gap={2}>
+              <Button variant="outline" onClick={() => navigate(STUDIO.settingsDiscord)}>
+                Discord integration
+              </Button>
+              <Button variant="outline" onClick={() => navigate(STUDIO.profile)}>
+                Edit profile
+              </Button>
+            </Row>
           }
         />
 
@@ -548,10 +553,15 @@ export function Settings() {
                   The advanced surface uses a full OAuth-installed bot — keep the legacy webhook
                   above active until you migrate.
                 </Muted>
-                <Button variant="secondary" onClick={() => navigate(STUDIO.settingsDiscord)}>
-                  <Icon name="discord" size={13} />
-                  Open advanced
-                </Button>
+                <Row gap={2}>
+                  <Button variant="secondary" onClick={() => navigate(STUDIO.settingsDiscord)}>
+                    <Icon name="discord" size={13} />
+                    Open advanced
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate(STUDIO.discordDiscussions)}>
+                    Discussion insights
+                  </Button>
+                </Row>
               </Stack>
             </Card>
           </Stack>
@@ -603,19 +613,13 @@ export function Settings() {
             </Card>
 
             <Card pad="lg" elev>
-              <CardHead title="Danger zone" />
+              <CardHead title="Studio status" />
               <Stack gap={2}>
                 <Muted>
-                  Pausing hides your profile and stops new sign-ups. Existing subs keep access.
+                  Pausing or closing your studio requires a support request so we can handle active
+                  subscribers and payouts safely. Email support@digipicks.com from your account
+                  email.
                 </Muted>
-                <Row gap={2}>
-                  <Button variant="outline" disabled={!authReady}>
-                    Pause profile
-                  </Button>
-                  <Button variant="danger" disabled={!authReady}>
-                    Close studio
-                  </Button>
-                </Row>
               </Stack>
             </Card>
           </Stack>

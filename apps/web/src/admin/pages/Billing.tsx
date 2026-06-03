@@ -158,11 +158,6 @@ export function Billing() {
     ];
   }, [summary, setStatus, setPaymentIssue, navigate]);
 
-  const headerSub = useMemo(() => {
-    if (!summary) return 'Platform subscription health and MRR signals.';
-    return `${summary.activeCount.toLocaleString()} active · ${formatMrr(summary.mrrCents)} MRR · ${summary.pastDueCount} past due`;
-  }, [summary]);
-
   const footerLabel =
     filtered === undefined
       ? undefined
@@ -203,7 +198,6 @@ export function Billing() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Subscriptions & billing"
-          sub={headerSub}
           actions={
             <Row gap={2} wrap>
               <Button variant="secondary" onClick={() => navigate(ADMIN.refunds)}>

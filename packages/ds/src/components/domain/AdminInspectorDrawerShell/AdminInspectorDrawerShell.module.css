@@ -1,0 +1,11 @@
+.drawerWide {
+  width: min(100vw, calc(var(--drawer-w) + var(--space-16)));
+  max-width: 100vw;
+}
+
+.panelHost {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

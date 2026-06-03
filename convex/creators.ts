@@ -2,7 +2,9 @@ import { mutation, query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { creatorStatus } from './shared/validators';
 import { internal } from './_generated/api';
-import { requireAdmin, requireCreatorOwnership } from './shared/permissions';
+import { getCurrentUser, requireAdmin, requireCreatorOwnership } from './shared/permissions';
+
+const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin']);
 
 // =============================================================================
 // Creator Queries & Mutations
@@ -114,6 +116,123 @@ export const setPromotion = mutation({
     });
 
     return args.creatorId;
+  },
+});
+
+/** Studio dashboard KPIs for the owning creator (or platform admin). */
+export const dashboardSummary = query({
+  args: { creatorId: v.id('creators') },
+  handler: async (ctx, args) => {
+    await requireCreatorOwnership(ctx, args.creatorId);
+    const creator = await ctx.db.get(args.creatorId);
+    if (!creator) return null;
+
+    const subs = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_creator', (q) => q.eq('creatorId', args.creatorId))
+      .take(5000);
+
+    const activeSubs = subs.filter((s) => s.status === 'active');
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const newSubs7d = subs.filter((s) => s.startedAt >= weekAgo).length;
+    const cancelled = subs.filter((s) => s.status === 'cancelled').length;
+    const churnRate = subs.length > 0 ? Number(((cancelled / subs.length) * 100).toFixed(1)) : null;
+
+    const picks = await ctx.db
+      .query('picks')
+      .withIndex('by_creator', (q) => q.eq('creatorId', args.creatorId))
+      .take(500);
+
+    const publishedPicks = picks.filter((p) => p.status === 'published').length;
+    const picksThisWeek = picks.filter((p) => (p.publishedAt ?? p.createdAt) >= weekAgo).length;
+
+    const payouts = await ctx.db
+      .query('payouts')
+      .withIndex('by_creator', (q) => q.eq('creatorId', args.creatorId))
+      .take(200);
+
+    let paidTotal = 0;
+    let pendingTotal = 0;
+    for (const row of payouts) {
+      if (row.status === 'paid') paidTotal += row.amount;
+      if (row.status === 'pending') pendingTotal += row.amount;
+    }
+
+    const mrrEstimateCents = Math.round((creator.startingPrice ?? 0) * 100 * activeSubs.length);
+
+    return {
+      activeSubs: activeSubs.length,
+      totalSubs: subs.length,
+      newSubs7d,
+      churnRate,
+      publishedPicks,
+      picksThisWeek,
+      paidTotal,
+      pendingTotal,
+      mrrEstimateCents,
+      connectStatus: creator.connectStatus ?? 'not_started',
+      winRate: creator.winRate,
+      record: creator.record,
+      units: creator.units,
+    };
+  },
+});
+
+export type StudioActivityKind = 'pick' | 'subscription' | 'payout';
+
+/** Recent studio activity for the dashboard feed (owner-only). */
+export const activityFeed = query({
+  args: {
+    creatorId: v.id('creators'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireCreatorOwnership(ctx, args.creatorId);
+    const limit = Math.min(args.limit ?? 12, 30);
+    const items: Array<{
+      id: string;
+      kind: StudioActivityKind;
+      title: string;
+      sub?: string;
+      at: number;
+      amountLabel?: string;
+    }> = [];
+
+    const picks = await ctx.db
+      .query('picks')
+      .withIndex('by_creator', (q) => q.eq('creatorId', args.creatorId))
+      .order('desc')
+      .take(limit);
+
+    for (const pick of picks) {
+      items.push({
+        id: `pick-${pick._id}`,
+        kind: 'pick',
+        title: pick.title,
+        sub: pick.status === 'published' ? 'Published' : pick.status,
+        at: pick.publishedAt ?? pick.createdAt,
+      });
+    }
+
+    const subs = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_creator', (q) => q.eq('creatorId', args.creatorId))
+      .order('desc')
+      .take(limit);
+
+    for (const sub of subs) {
+      const user = await ctx.db.get(sub.subscriberId);
+      items.push({
+        id: `sub-${sub._id}`,
+        kind: 'subscription',
+        title: user?.name ?? 'New subscriber',
+        sub: `${sub.plan} · ${sub.status}`,
+        at: sub.startedAt,
+      });
+    }
+
+    items.sort((a, b) => b.at - a.at);
+    return items.slice(0, limit);
   },
 });
 

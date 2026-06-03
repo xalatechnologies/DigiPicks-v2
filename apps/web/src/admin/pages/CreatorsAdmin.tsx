@@ -174,13 +174,6 @@ export function CreatorsAdmin() {
     ];
   }, [summary, setStatus]);
 
-  const headerSub = useMemo(() => {
-    if (summary === undefined) {
-      return 'Verify, suspend, and monitor creator accounts across the network.';
-    }
-    return `Managing ${summary.total.toLocaleString()} creator${summary.total === 1 ? '' : 's'} — ${summary.active.toLocaleString()} active on platform`;
-  }, [summary]);
-
   const footerLabel =
     filteredCreators === undefined
       ? undefined
@@ -233,7 +226,6 @@ export function CreatorsAdmin() {
         <StudioPageHeader
           eyebrow="Operational hub"
           title="Creators management"
-          sub={headerSub}
           actions={
             <Button variant="outline" iconLeft="user" onClick={() => navigate(ADMIN.applications)}>
               Applications

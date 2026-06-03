@@ -133,21 +133,7 @@ export function AdminOverview() {
   const overview = useQuery(api.admin.overview, isAdmin && !preview ? {} : 'skip');
 
   const pageHeader = (
-    <StudioPageHeader
-      eyebrow="Operational hub"
-      title="Dashboard overview"
-      sub="Monitoring platform health and creator performance in real time."
-      actions={
-        <Button
-          variant="primary"
-          iconLeft="arrow-right"
-          disabled
-          title="Export reports will ship in a later release."
-        >
-          Export report
-        </Button>
-      }
-    />
+    <StudioPageHeader eyebrow="Operational hub" title="Dashboard overview" actions={undefined} />
   );
 
   if (preview) {

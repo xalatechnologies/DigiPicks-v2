@@ -6,7 +6,6 @@ import {
   Stack,
   Card,
   Button,
-  Icon,
   Tabs,
   Search,
   Table,
@@ -28,6 +27,7 @@ import {
   type EventSourceType,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { STUDIO } from '../../lib/studioRoutes';
 
 const SPORTS = [
   'Soccer',
@@ -111,8 +111,7 @@ export function MyEvents() {
           title="Custom events"
           sub="Events you've authored — pending review, approved, and rejected. Approved events surface on the public feed and can be linked from picks."
           actions={
-            <Button variant="primary" size="sm" onClick={() => navigate('/dashboard/events/new')}>
-              <Icon name="plus" size={13} />
+            <Button variant="primary" iconLeft="plus" onClick={() => navigate(STUDIO.createEvent)}>
               Create event
             </Button>
           }
@@ -165,10 +164,9 @@ export function MyEvents() {
               action={
                 <Button
                   variant="primary"
-                  size="sm"
-                  onClick={() => navigate('/dashboard/events/new')}
+                  iconLeft="plus"
+                  onClick={() => navigate(STUDIO.createEvent)}
                 >
-                  <Icon name="plus" size={13} />
                   Create event
                 </Button>
               }

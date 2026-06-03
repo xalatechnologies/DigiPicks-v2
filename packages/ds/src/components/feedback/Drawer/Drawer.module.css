@@ -11,6 +11,7 @@
 }
 
 .drawer {
+  position: relative;
   width: var(--drawer-w);
   max-width: 100vw;
   height: 100%;
@@ -29,6 +30,30 @@
   gap: var(--space-3);
   padding: var(--space-5);
   border-bottom: 1px solid var(--line-soft);
+}
+
+.headMinimal {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+  border: 0;
+  background: transparent;
+}
+
+.headMinimal .close {
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--bg-1) 85%, transparent);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-full);
 }
 
 .title {
@@ -73,12 +98,28 @@
   line-height: var(--leading-relaxed);
 }
 
+.bodyFlush {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 @keyframes fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }

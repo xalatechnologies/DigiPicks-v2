@@ -1,10 +1,15 @@
 import React from 'react';
 import { cx } from '../../../utils/cx';
-import { Drawer } from '../../feedback/Drawer/Drawer';
 import { Badge } from '../../atoms/Badge/Badge';
 import { Button } from '../../atoms/Button/Button';
-import { Stack } from '../../layout/Stack/Stack';
 import { Muted } from '../../layout/Muted/Muted';
+import { AdminInspectorDrawerShell } from '../AdminInspectorDrawerShell/AdminInspectorDrawerShell';
+import {
+  AdminDetailDrawerBody,
+  AdminDetailMetaCard,
+  AdminDetailSection,
+} from '../AdminDetailDrawerBody/AdminDetailDrawerBody';
+import bd from '../AdminDetailDrawerBody/AdminDetailDrawerBody.module.css';
 import s from './AdminBillingDetailDrawer.module.css';
 
 export interface AdminBillingIncident {
@@ -67,95 +72,96 @@ export function AdminBillingDetailDrawer({
   onOpenSubscriber,
   onOpenCreator,
 }: AdminBillingDetailDrawerProps) {
+  const ariaLabel = loading ? 'Loading subscription' : (subscriberName ?? 'Subscription');
   const title = loading ? 'Loading subscription…' : (subscriberName ?? 'Subscription');
 
+  const subtitle = (
+    <>
+      {subscriberEmail ? <p>{subscriberEmail}</p> : null}
+      {creatorLabel && planLabel ? (
+        <p>
+          {creatorLabel} · {planLabel}
+          {priceLabel ? ` · ${priceLabel}` : ''}
+        </p>
+      ) : null}
+    </>
+  );
+
+  const footer = (
+    <>
+      {onOpenRefunds ? (
+        <Button variant="primary" onClick={onOpenRefunds}>
+          Open refunds queue
+        </Button>
+      ) : null}
+      {onOpenSubscriber ? (
+        <Button variant="secondary" onClick={onOpenSubscriber}>
+          View subscriber
+        </Button>
+      ) : null}
+      {onOpenCreator ? (
+        <Button variant="outline" onClick={onOpenCreator}>
+          View creator
+        </Button>
+      ) : null}
+    </>
+  );
+
   return (
-    <Drawer open={open} onClose={onClose} title={title} className={s.drawerWide}>
-      <div className={s.panelHost}>
-        {loading ? (
+    <AdminInspectorDrawerShell open={open} onClose={onClose} ariaLabel={ariaLabel}>
+      {loading ? (
+        <div className={bd.scroll}>
           <Muted>Fetching subscription details…</Muted>
-        ) : (
-          <Stack gap={6}>
-            <div className={s.hero}>
-              {subscriberEmail ? <p className={s.sub}>{subscriberEmail}</p> : null}
-              {creatorLabel && planLabel ? (
-                <p className={s.sub}>
-                  {creatorLabel} · {planLabel}
-                  {priceLabel ? ` · ${priceLabel}` : ''}
-                </p>
+        </div>
+      ) : (
+        <AdminDetailDrawerBody
+          title={title}
+          subtitle={subtitle}
+          badges={
+            <>
+              {statusLabel ? (
+                <Badge tone={STATUS_TONE[statusTone] ?? 'mute'}>{statusLabel}</Badge>
               ) : null}
-              <div className={s.badges}>
-                {statusLabel ? (
-                  <Badge tone={STATUS_TONE[statusTone] ?? 'mute'}>{statusLabel}</Badge>
-                ) : null}
-                {healthLabel ? <Badge tone="blue">{healthLabel}</Badge> : null}
+              {healthLabel ? <Badge tone="blue">{healthLabel}</Badge> : null}
+            </>
+          }
+          footer={footer}
+          footerLayout="row"
+        >
+          {entitlementLabel ? (
+            <AdminDetailSection title="Current entitlement">
+              <div className={bd.entitlement}>
+                <p className={bd.entitlementLabel}>{entitlementLabel}</p>
+                {entitlementMeta ? <p className={bd.entitlementMeta}>{entitlementMeta}</p> : null}
               </div>
-            </div>
+            </AdminDetailSection>
+          ) : null}
 
-            {entitlementLabel ? (
-              <section>
-                <h4 className={s.sectionHead}>Current entitlement</h4>
-                <div className={s.entitlement}>
-                  <p className={s.entitlementLabel}>{entitlementLabel}</p>
-                  {entitlementMeta ? <p className={s.entitlementMeta}>{entitlementMeta}</p> : null}
-                </div>
-              </section>
+          <div className={bd.metaGrid}>
+            <AdminDetailMetaCard label="Renewal" value={renewsLabel} />
+            <AdminDetailMetaCard label="Started" value={startedLabel} />
+            {stripeSubscriptionId ? (
+              <AdminDetailMetaCard label="Stripe subscription" value={stripeSubscriptionId} />
             ) : null}
+          </div>
 
-            <div className={s.metaGrid}>
-              <div>
-                <p className={s.metaLabel}>Renewal</p>
-                <p className={s.metaValue}>{renewsLabel ?? '—'}</p>
-              </div>
-              <div>
-                <p className={s.metaLabel}>Started</p>
-                <p className={s.metaValue}>{startedLabel ?? '—'}</p>
-              </div>
-              {stripeSubscriptionId ? (
-                <div>
-                  <p className={s.metaLabel}>Stripe subscription</p>
-                  <p className={s.metaValue}>{stripeSubscriptionId}</p>
-                </div>
-              ) : null}
-            </div>
-
-            {incidents.length > 0 ? (
-              <section>
-                <h4 className={s.sectionHead}>Billing incidents ({incidents.length})</h4>
-                <div className={s.incidents}>
-                  {incidents.map((inc) => (
-                    <div key={inc.id} className={cx(s.incident, inc.urgent && s.incidentUrgent)}>
-                      <div className={s.incidentTop}>
-                        <p className={s.incidentTitle}>{inc.title}</p>
-                        <span className={s.incidentAmount}>{inc.amountLabel}</span>
-                      </div>
-                      <p className={s.incidentMeta}>{inc.meta}</p>
+          {incidents.length > 0 ? (
+            <AdminDetailSection title={`Billing incidents (${incidents.length})`}>
+              <div className={s.incidents}>
+                {incidents.map((inc) => (
+                  <div key={inc.id} className={cx(s.incident, inc.urgent && s.incidentUrgent)}>
+                    <div className={s.incidentTop}>
+                      <p className={s.incidentTitle}>{inc.title}</p>
+                      <span className={s.incidentAmount}>{inc.amountLabel}</span>
                     </div>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            <div className={s.actions}>
-              {onOpenRefunds ? (
-                <Button variant="primary" onClick={onOpenRefunds}>
-                  Open refunds queue
-                </Button>
-              ) : null}
-              {onOpenSubscriber ? (
-                <Button variant="secondary" onClick={onOpenSubscriber}>
-                  View subscriber
-                </Button>
-              ) : null}
-              {onOpenCreator ? (
-                <Button variant="outline" onClick={onOpenCreator}>
-                  View creator
-                </Button>
-              ) : null}
-            </div>
-          </Stack>
-        )}
-      </div>
-    </Drawer>
+                    <p className={s.incidentMeta}>{inc.meta}</p>
+                  </div>
+                ))}
+              </div>
+            </AdminDetailSection>
+          ) : null}
+        </AdminDetailDrawerBody>
+      )}
+    </AdminInspectorDrawerShell>
   );
 }

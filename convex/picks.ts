@@ -1,7 +1,18 @@
 import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { pickAccess, pickConfidence, pickStatus, pickGrade } from './shared/validators';
-import { requireCreatorOwnership } from './shared/permissions';
+import { getCurrentUser, requireCreatorOwnership } from './shared/permissions';
+
+const ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin', 'moderator']);
+
+function canManageCreatorPicks(
+  user: { creatorId?: string; role?: string } | null,
+  creatorId: string,
+): boolean {
+  if (!user) return false;
+  if (user.creatorId === creatorId) return true;
+  return Boolean(user.role && ADMIN_ROLES.has(user.role));
+}
 import { gateOnMfaIfEnrolled } from './mfa';
 import { internal } from './_generated/api';
 
@@ -87,15 +98,32 @@ export const gradingHistory = query({
   },
 });
 
-// Public.
+// Public catalog — non-owners only see published picks.
 export const byCreator = query({
   args: { creatorId: v.id('creators'), limit: v.optional(v.number()) },
   handler: async (ctx, { creatorId, limit }) => {
-    return await ctx.db
+    const user = await getCurrentUser(ctx);
+    const rows = await ctx.db
       .query('picks')
       .withIndex('by_creator', (q) => q.eq('creatorId', creatorId))
       .order('desc')
       .take(limit ?? 20);
+    if (canManageCreatorPicks(user, creatorId)) return rows;
+    return rows.filter((p) => p.status === 'published');
+  },
+});
+
+/** Single pick for studio edit — creator owner or platform admin only. */
+export const getForStudio = query({
+  args: { pickId: v.id('picks') },
+  handler: async (ctx, args) => {
+    const pick = await ctx.db.get(args.pickId);
+    if (!pick) return null;
+    const user = await getCurrentUser(ctx);
+    if (!canManageCreatorPicks(user, pick.creatorId)) {
+      throw new Error('Unauthorized');
+    }
+    return pick;
   },
 });
 
@@ -209,6 +237,91 @@ export const create = mutation({
     }
 
     return pickId;
+  },
+});
+
+/** Update an existing pick. Caller must own the creator profile (or be admin). */
+export const update = mutation({
+  args: {
+    pickId: v.id('picks'),
+    access: v.optional(pickAccess),
+    sport: v.optional(v.string()),
+    league: v.optional(v.string()),
+    eventId: v.optional(v.id('events')),
+    eventName: v.optional(v.string()),
+    eventTime: v.optional(v.string()),
+    title: v.optional(v.string()),
+    market: v.optional(v.string()),
+    selection: v.optional(v.string()),
+    odds: v.optional(v.string()),
+    units: v.optional(v.string()),
+    confidence: v.optional(pickConfidence),
+    body: v.optional(v.string()),
+    teaser: v.optional(v.string()),
+    status: v.optional(pickStatus),
+    publishAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const pick = await ctx.db.get(args.pickId);
+    if (!pick) throw new Error('Pick not found');
+
+    const user = await requireCreatorOwnership(ctx, pick.creatorId);
+    await gateOnMfaIfEnrolled(ctx, user._id);
+
+    const now = Date.now();
+    const nextStatus = args.status ?? pick.status;
+
+    if (nextStatus === 'scheduled') {
+      const publishAt = args.publishAt ?? pick.publishAt;
+      if (!publishAt) throw new Error('publishAt is required when status=scheduled');
+      if (publishAt <= now) {
+        throw new Error('publishAt must be in the future for scheduled picks');
+      }
+    }
+
+    const nextAccess = args.access ?? pick.access;
+    const nextEventId = args.eventId !== undefined ? args.eventId : pick.eventId;
+    if ((nextAccess === 'premium' || nextAccess === 'vip') && nextEventId) {
+      const event = await ctx.db.get(nextEventId);
+      if (event && event.verificationStatus !== 'admin_verified') {
+        throw new Error(
+          'Premium / VIP picks require an admin-verified event. ' +
+            'Submit the event for review or publish a free pick.',
+        );
+      }
+    }
+
+    const patch: Record<string, unknown> = {};
+    if (args.access !== undefined) patch.access = args.access;
+    if (args.sport !== undefined) patch.sport = args.sport;
+    if (args.league !== undefined) patch.league = args.league;
+    if (args.eventId !== undefined) patch.eventId = args.eventId;
+    if (args.eventName !== undefined) patch.eventName = args.eventName;
+    if (args.eventTime !== undefined) patch.eventTime = args.eventTime;
+    if (args.title !== undefined) patch.title = args.title;
+    if (args.market !== undefined) patch.market = args.market;
+    if (args.selection !== undefined) patch.selection = args.selection;
+    if (args.odds !== undefined) patch.odds = args.odds;
+    if (args.units !== undefined) patch.units = args.units;
+    if (args.confidence !== undefined) patch.confidence = args.confidence;
+    if (args.body !== undefined) patch.body = args.body;
+    if (args.teaser !== undefined) patch.teaser = args.teaser;
+    if (args.status !== undefined) {
+      patch.status = args.status;
+      if (args.status === 'published' && !pick.publishedAt) {
+        patch.publishedAt = now;
+        patch.publishAt = undefined;
+      }
+      if (args.status === 'scheduled') {
+        patch.publishAt = args.publishAt;
+        patch.publishedAt = undefined;
+      }
+    } else if (args.publishAt !== undefined && pick.status === 'scheduled') {
+      patch.publishAt = args.publishAt;
+    }
+
+    if (Object.keys(patch).length > 0) await ctx.db.patch(args.pickId, patch);
+    return args.pickId;
   },
 });
 

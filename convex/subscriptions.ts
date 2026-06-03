@@ -1,7 +1,7 @@
 import { query, mutation, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import { subscriptionPlan, subscriptionStatus } from './shared/validators';
-import { requireUser } from './shared/permissions';
+import { requireCreatorOwnership, requireUser } from './shared/permissions';
 import { internal } from './_generated/api';
 
 // Grace-period default (3 days). When a subscription flips to past_due we
@@ -108,13 +108,14 @@ export const countByCreator = query({
   },
 });
 
-/** List subscriptions for a creator with subscriber details. */
+/** List subscriptions for a creator with subscriber details (studio owner only). */
 export const byCreator = query({
   args: {
     creatorId: v.id('creators'),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { creatorId, limit }) => {
+    await requireCreatorOwnership(ctx, creatorId);
     const subs = await ctx.db
       .query('subscriptions')
       .withIndex('by_creator', (q) => q.eq('creatorId', creatorId))
