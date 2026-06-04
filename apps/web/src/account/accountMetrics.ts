@@ -1,5 +1,6 @@
 import type { StudioSummaryGridItem } from '@digipicks/ds';
 import type { NavigateFunction } from 'react-router-dom';
+import { ACCOUNT } from '../lib/accountRoutes';
 
 export function buildAccountSummary(
   input: {
@@ -37,7 +38,7 @@ export function buildAccountSummary(
       iconTone: input.netUnits > 0 ? 'primary' : input.netUnits < 0 ? 'danger' : 'amber',
       label: 'Net units',
       value: netDisplay,
-      onClick: () => navigate('/account/results'),
+      onClick: () => navigate(ACCOUNT.results),
     },
     {
       id: 'winrate',
@@ -45,7 +46,7 @@ export function buildAccountSummary(
       iconTone: input.winRate >= 55 ? 'primary' : input.winRate >= 50 ? 'amber' : 'danger',
       label: 'Win rate',
       value: winRateDisplay,
-      onClick: () => navigate('/account/results'),
+      onClick: () => navigate(ACCOUNT.results),
     },
     {
       id: 'subs',
@@ -53,7 +54,7 @@ export function buildAccountSummary(
       iconTone: 'violet',
       label: 'Active subs',
       value: subsDisplay,
-      onClick: () => navigate('/account/subscriptions'),
+      onClick: () => navigate(ACCOUNT.subscriptions),
     },
     {
       id: 'spend',
@@ -61,7 +62,7 @@ export function buildAccountSummary(
       iconTone: 'primary',
       label: 'Monthly spend',
       value: spendDisplay,
-      onClick: () => navigate('/account/subscriptions'),
+      onClick: () => navigate(ACCOUNT.subscriptions),
     },
     {
       id: 'record',
@@ -69,7 +70,7 @@ export function buildAccountSummary(
       iconTone: 'violet',
       label: 'Graded record',
       value: record,
-      onClick: () => navigate('/account/results'),
+      onClick: () => navigate(ACCOUNT.results),
     },
     {
       id: 'saved',
@@ -77,7 +78,7 @@ export function buildAccountSummary(
       iconTone: 'primary',
       label: 'Saved picks',
       value: 'View',
-      onClick: () => navigate('/account/saved'),
+      onClick: () => navigate(ACCOUNT.saved),
     },
   ];
 }

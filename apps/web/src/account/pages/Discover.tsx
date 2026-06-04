@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ACCOUNT } from '../../lib/accountRoutes';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
 import {
@@ -95,39 +96,49 @@ function filterList(
   });
 }
 
-function buildActivityItems(list: CreatorRow[]): ActivityFeedItemData[] {
+function formatRelativeTime(ms: number): string {
+  const diff = Date.now() - ms;
+  if (diff < 86_400_000) {
+    return new Date(ms).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function buildActivityItems(list: CreatorRow[], promoted: CreatorRow[]): ActivityFeedItemData[] {
   const items: ActivityFeedItemData[] = [];
   const newest = [...list].sort((a, b) => b.createdAt - a.createdAt)[0];
   if (newest) {
     items.push({
-      id: 'new',
+      id: `new-${newest._id}`,
       icon: 'user',
       tone: 'success',
       title: 'New creator joined',
       sub: `@${newest.handle} is now on the network.`,
-      time: 'Just now',
+      time: formatRelativeTime(newest.createdAt),
     });
   }
-  const hot = list.find((c) => c.trending);
-  if (hot) {
+  const hot = promoted[0] ?? list.find((c) => c.trending);
+  if (hot && hot._id !== newest?._id) {
     items.push({
-      id: 'trending',
+      id: `trend-${hot._id}`,
       icon: 'flame',
       tone: 'primary',
       title: 'Trending today',
-      sub: `${hot.name} is climbing the win-rate board.`,
-      time: '15 mins ago',
+      sub: `${hot.name} · ${Math.round(hot.winRate * 100)}% win rate`,
+      time: formatRelativeTime(hot.createdAt),
     });
   }
-  const streak = [...list].sort((a, b) => (b.streak?.length ?? 0) - (a.streak?.length ?? 0))[0];
+  const streak = [...list]
+    .filter((c) => c.streak)
+    .sort((a, b) => (b.streak?.length ?? 0) - (a.streak?.length ?? 0))[0];
   if (streak?.streak) {
     items.push({
-      id: 'streak',
+      id: `streak-${streak._id}`,
       icon: 'chart',
       tone: 'info',
       title: 'Record alert',
       sub: `@${streak.handle} is on a ${streak.streak} run.`,
-      time: '1 hour ago',
+      time: formatRelativeTime(streak.createdAt),
     });
   }
   return items.slice(0, 4);
@@ -145,12 +156,14 @@ function clearFilters(
 
 export function Discover() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
   const creators = useQuery(api.creators.list, {});
   const promoted = useQuery(api.creators.promoted, { limit: 4 });
 
-  const [sport, setSport] = useState<string | null>(null);
+  const initialSport = searchParams.get('sport');
+  const [sport, setSport] = useState<string | null>(initialSport);
   const [sort, setSort] = useState('trending');
   const [search, setSearch] = useState('');
 
@@ -174,7 +187,7 @@ export function Discover() {
     return filtered.filter((c) => !featuredIds.has(c._id));
   }, [filtered, featuredIds, isBrowseMode]);
 
-  const activityItems = useMemo(() => buildActivityItems(all), [all]);
+  const activityItems = useMemo(() => buildActivityItems(all, promoted ?? []), [all, promoted]);
 
   const isLoading = creators === undefined;
   const isEmpty = !isLoading && all.length === 0;
@@ -200,7 +213,7 @@ export function Discover() {
             <Button
               variant="outline"
               iconRight="arrow-right"
-              onClick={() => navigate('/account/events')}
+              onClick={() => navigate(ACCOUNT.events)}
             >
               Tonight&apos;s events
             </Button>

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthGate } from '../auth/AuthGate';
 import { SubscriberShell } from './Shell';
+import { ACCOUNT } from '../lib/accountRoutes';
 
 // Existing pages (re-used inside account layout)
 import { Saved } from './pages/Saved';
@@ -32,7 +33,7 @@ export function AccountRoutes() {
         <Route element={<SubscriberShell />}>
           <Route index element={<Dashboard />} />
           <Route path="feed" element={<MyFeed />} />
-          <Route path="copilot" element={<Navigate to="/account/feed" replace />} />
+          <Route path="copilot" element={<Navigate to={ACCOUNT.feed} replace />} />
           <Route path="discover" element={<Discover />} />
           <Route path="events" element={<AccountEvents />} />
           <Route path="results" element={<Results />} />
@@ -41,7 +42,7 @@ export function AccountRoutes() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="community" element={<AccountCommunity />} />
           <Route path="messages" element={<AccountMessages />} />
-          <Route path="watchlists" element={<Navigate to="/account/notifications" replace />} />
+          <Route path="watchlists" element={<Navigate to={ACCOUNT.notifications} replace />} />
           <Route path="settings" element={<AccountSettings />} />
           <Route path="payment-methods" element={<PaymentMethods />} />
           <Route path="billing-history" element={<BillingHistory />} />

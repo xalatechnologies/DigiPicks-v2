@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useConvexAuth, useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import type { Doc, Id } from '../../../../convex/_generated/dataModel';
 import {
@@ -31,6 +31,7 @@ import {
 } from '@digipicks/ds';
 import { teamLogo } from '../lib/teamLogo';
 import { accountLayoutPaths, type LayoutContext } from '../lib/accountLayoutPaths';
+import { ACCOUNT } from '../lib/accountRoutes';
 
 type EventDoc = Doc<'events'>;
 
@@ -128,12 +129,21 @@ function groupBySport(events: EventDoc[]): { sport: string; events: EventDoc[] }
 
 export function Events({ layoutContext = 'public' }: EventsProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useConvexAuth();
   const paths = accountLayoutPaths(layoutContext);
   const isAccount = layoutContext === 'account';
   const [sport, setSport] = useState<string | null>(null);
   const [view, setView] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<Id<'events'> | null>(null);
+
+  React.useEffect(() => {
+    const highlight = searchParams.get('highlight');
+    if (highlight) {
+      setSelectedId(highlight as Id<'events'>);
+    }
+  }, [searchParams]);
 
   const allEvents = useQuery(api.events.today, sport ? { sport } : {});
   const featuredEvents = useQuery(api.events.featured, {});
@@ -305,21 +315,32 @@ export function Events({ layoutContext = 'public' }: EventsProps) {
               </AccountRefineCard>
             </>
           ) : (
-            <EventsDirectoryHero
-              searchValue={search}
-              onSearchChange={setSearch}
-              filterOptions={VIEW_FILTERS}
-              filterValue={view}
-              onFilterChange={setView}
-              secondaryFilters={
-                <FilterChips
-                  options={SPORT_FILTERS}
-                  value={sport}
-                  onChange={setSport}
-                  allLabel="All sports"
-                />
-              }
-            />
+            <>
+              <EventsDirectoryHero
+                searchValue={search}
+                onSearchChange={setSearch}
+                filterOptions={VIEW_FILTERS}
+                filterValue={view}
+                onFilterChange={setView}
+                secondaryFilters={
+                  <FilterChips
+                    options={SPORT_FILTERS}
+                    value={sport}
+                    onChange={setSport}
+                    allLabel="All sports"
+                  />
+                }
+              />
+              {isAuthenticated ? (
+                <Button
+                  variant="outline"
+                  iconRight="arrow-right"
+                  onClick={() => navigate(ACCOUNT.events)}
+                >
+                  View in account
+                </Button>
+              ) : null}
+            </>
           )}
 
           {stripItems.length > 0 ? (

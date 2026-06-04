@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
@@ -29,7 +30,7 @@ export function PaymentIssue() {
     setBusy(true);
     setError(null);
     try {
-      await openPortal('/account/billing/payment-issue');
+      await openPortal(ACCOUNT.paymentIssue);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open billing portal.');
     } finally {
@@ -50,7 +51,7 @@ export function PaymentIssue() {
         ) : pastDue.length === 0 ? (
           <Card pad="lg">
             <Muted>No past-due subscriptions. You're all set.</Muted>
-            <Button variant="secondary" onClick={() => navigate('/account/subscriptions')}>
+            <Button variant="secondary" onClick={() => navigate(ACCOUNT.subscriptions)}>
               View subscriptions
             </Button>
           </Card>

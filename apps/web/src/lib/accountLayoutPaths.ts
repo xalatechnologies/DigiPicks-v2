@@ -1,3 +1,5 @@
+import { ACCOUNT } from './accountRoutes';
+
 export type LayoutContext = 'public' | 'account';
 
 export interface AccountLayoutPaths {
@@ -10,13 +12,13 @@ export interface AccountLayoutPaths {
 export function accountLayoutPaths(context: LayoutContext = 'public'): AccountLayoutPaths {
   if (context === 'account') {
     return {
-      feed: '/account/feed',
-      discover: '/account/discover',
-      creatorsBrowse: '/account/discover',
+      feed: ACCOUNT.feed,
+      discover: ACCOUNT.discover,
+      creatorsBrowse: ACCOUNT.discover,
     };
   }
   return {
-    feed: '/feed',
+    feed: ACCOUNT.feed,
     discover: '/creators',
     creatorsBrowse: '/creators',
   };

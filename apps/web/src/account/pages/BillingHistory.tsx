@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
@@ -40,7 +41,7 @@ export function BillingHistory() {
   async function handlePortal() {
     setBusy(true);
     try {
-      await openPortal('/account/billing-history');
+      await openPortal(ACCOUNT.billingHistory);
     } finally {
       setBusy(false);
     }

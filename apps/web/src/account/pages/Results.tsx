@@ -1,4 +1,5 @@
 import React from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import {
@@ -180,17 +181,17 @@ export function Results() {
           {
             id: 'discover',
             label: 'Discover new creators',
-            onClick: () => navigate('/account/discover'),
+            onClick: () => navigate(ACCOUNT.discover),
           },
           {
             id: 'saved',
             label: 'Review saved picks',
-            onClick: () => navigate('/account/saved'),
+            onClick: () => navigate(ACCOUNT.saved),
           },
           {
             id: 'events',
             label: "Check tonight's slate",
-            onClick: () => navigate('/account/events'),
+            onClick: () => navigate(ACCOUNT.events),
           },
         ]}
       />
@@ -210,17 +211,13 @@ export function Results() {
           }
           actions={
             <>
-              <Button
-                variant="outline"
-                iconLeft="bookmark"
-                onClick={() => navigate('/account/saved')}
-              >
+              <Button variant="outline" iconLeft="bookmark" onClick={() => navigate(ACCOUNT.saved)}>
                 Saved
               </Button>
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate(ACCOUNT.discover)}
               >
                 Discover
               </Button>
@@ -239,7 +236,7 @@ export function Results() {
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate(ACCOUNT.discover)}
               >
                 Discover creators
               </Button>

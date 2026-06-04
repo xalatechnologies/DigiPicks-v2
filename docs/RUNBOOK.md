@@ -232,6 +232,12 @@ Optional overrides:
 2. **Dev shortcut:** approve an application in admin, or use an account with `users.creatorId` set, then open **`/dashboard`**.
 3. **Smoke walk:** see [STUDIO_E2E_SMOKE.md](./STUDIO_E2E_SMOKE.md) for the full checklist (sidebar, CRUD loops, redirects, build gates).
 
+### Subscriber account QA path
+
+1. **New subscriber:** sign in → **`/account`** dashboard.
+2. **Subscribe loop:** **`/account/discover`** → creator profile → Stripe checkout → **`/creators/:handle/subscribed`** → **Go to feed**.
+3. **Smoke walk:** see [ACCOUNT_E2E_SMOKE.md](./ACCOUNT_E2E_SMOKE.md) for sidebar, entitlements, billing, and build gates.
+
 ---
 
 ## 2. Phase 1 — Federated Event Engine backfill

@@ -1,14 +1,10 @@
 import { v } from 'convex/values';
-import {
-  mutation,
-  query,
-  internalMutation,
-  type MutationCtx,
-} from './_generated/server';
+import { mutation, query, internalMutation, type MutationCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { internal } from './_generated/api';
 import { requireUser } from './shared/permissions';
 import { rateLimiter } from './shared/rateLimit';
+import { isAccessActive } from './subscriptions';
 
 // =============================================================================
 // Creator ↔ Subscriber DMs (PRD M12, Phase 10).
@@ -131,9 +127,7 @@ export const messagesIn = query({
     const limit = Math.min(args.limit ?? 100, 500);
     const rows = await ctx.db
       .query('messages')
-      .withIndex('by_dmThread_and_createdAt', (q) =>
-        q.eq('dmThreadId', args.threadId),
-      )
+      .withIndex('by_dmThread_and_createdAt', (q) => q.eq('dmThreadId', args.threadId))
       .order('desc')
       .take(limit);
     return rows.reverse();
@@ -162,6 +156,18 @@ export const send = mutation({
       throw new Error('Forbidden');
     }
 
+    if (isUserSide) {
+      const sub = await ctx.db
+        .query('subscriptions')
+        .withIndex('by_subscriber_and_creator', (q) =>
+          q.eq('subscriberId', user._id).eq('creatorId', thread.creatorId),
+        )
+        .first();
+      if (!sub || !isAccessActive(sub)) {
+        throw new Error('Subscribe to this creator to send messages.');
+      }
+    }
+
     const trimmed = args.body.trim();
     if (!trimmed) throw new Error('Message body required');
     if (trimmed.length > 2000) {
@@ -178,9 +184,7 @@ export const send = mutation({
 
     await ctx.db.patch(args.threadId, {
       lastMessageAt: now,
-      unreadForCreator: isCreatorSide
-        ? thread.unreadForCreator
-        : thread.unreadForCreator + 1,
+      unreadForCreator: isCreatorSide ? thread.unreadForCreator : thread.unreadForCreator + 1,
       unreadForUser: isUserSide ? thread.unreadForUser : thread.unreadForUser + 1,
     });
 

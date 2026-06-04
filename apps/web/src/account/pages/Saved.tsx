@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
@@ -193,7 +194,7 @@ export function Saved() {
     creatorId: Id<'creators'> | undefined,
   ) {
     if (locked && creatorId) {
-      navigate('/account/subscriptions');
+      navigate(ACCOUNT.subscriptions);
       return;
     }
     if (creatorHandle) navigate(`/creators/${creatorHandle}`);
@@ -317,7 +318,7 @@ export function Saved() {
                 variant="primary"
                 size="sm"
                 iconRight="arrow-right"
-                onClick={() => navigate(tab === 'archived' ? '/account' : '/account')}
+                onClick={() => navigate(ACCOUNT.home)}
               >
                 {tab === 'archived' ? 'Back to dashboard' : 'Open dashboard'}
               </Button>
@@ -352,7 +353,7 @@ export function Saved() {
                 />
               );
             })}
-            {tab === 'picks' ? <SavedFindMoreCard onClick={() => navigate('/account')} /> : null}
+            {tab === 'picks' ? <SavedFindMoreCard onClick={() => navigate(ACCOUNT.home)} /> : null}
           </Grid>
         )}
 
@@ -370,7 +371,7 @@ export function Saved() {
                 variant="primary"
                 size="sm"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate(ACCOUNT.discover)}
               >
                 Discover creators
               </Button>
@@ -406,7 +407,7 @@ export function Saved() {
             <SavedFindMoreCard
               title="Find more creators"
               subtitle="Browse Discover to follow analysts you want in your library."
-              onClick={() => navigate('/account/discover')}
+              onClick={() => navigate(ACCOUNT.discover)}
             />
           </Grid>
         )}
@@ -421,10 +422,10 @@ export function Saved() {
             }
             streakActions={
               <>
-                <Button variant="secondary" onClick={() => navigate('/account')}>
+                <Button variant="secondary" onClick={() => navigate(ACCOUNT.home)}>
                   Go to dashboard
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/account/results')}>
+                <Button variant="outline" onClick={() => navigate(ACCOUNT.results)}>
                   View statistics
                 </Button>
               </>

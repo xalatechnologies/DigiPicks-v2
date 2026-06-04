@@ -65,9 +65,7 @@ describe('feed.personalized', () => {
       ctx.db.insert('users', { role: 'user', isActive: true }),
     );
 
-    const result = await t
-      .withIdentity({ subject: subscriberId })
-      .query(api.feed.personalized, {});
+    const result = await t.withIdentity({ subject: subscriberId }).query(api.feed.personalized, {});
     expect(result.personalized).toBe(false);
     expect(result.subscribedCreatorCount).toBe(0);
     expect(result.items.length).toBe(2);
@@ -137,5 +135,73 @@ describe('feed.personalized', () => {
   test('rejects unauthenticated callers', async () => {
     const t = convexTest(schema, modules);
     await expect(t.query(api.feed.personalized, {})).rejects.toThrow();
+  });
+
+  test('redacts premium pick bodies when the user lacks entitlement', async () => {
+    const t = convexTest(schema, modules);
+    const { creatorId: cA, ownerId: oA } = await makeCreator(t, '@a', 'NFL');
+    await t.withIdentity({ subject: oA }).mutation(api.picks.create, {
+      creatorId: cA,
+      access: 'premium',
+      sport: 'NFL',
+      league: 'NFL',
+      eventName: 'NFL game',
+      eventTime: '8 PM ET',
+      title: 'Premium NFL pick',
+      market: 'Spread',
+      selection: 'Home -3',
+      odds: '-110',
+      units: '1u',
+      confidence: 'High',
+      body: 'Secret premium analysis',
+      status: 'published',
+    });
+
+    const subscriberId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { role: 'user', isActive: true }),
+    );
+
+    const result = await t.withIdentity({ subject: subscriberId }).query(api.feed.personalized, {});
+    const item = result.items.find(
+      (i: { pick: { title: string } }) => i.pick.title === 'Premium NFL pick',
+    );
+    expect(item).toBeDefined();
+    expect(item!.canViewBody).toBe(false);
+    expect(item!.pick.body).toBeUndefined();
+  });
+
+  test('subscribed users can view premium bodies for entitled creators', async () => {
+    const t = convexTest(schema, modules);
+    const { creatorId: cA, ownerId: oA } = await makeCreator(t, '@a', 'NFL');
+    await t.withIdentity({ subject: oA }).mutation(api.picks.create, {
+      creatorId: cA,
+      access: 'premium',
+      sport: 'NFL',
+      league: 'NFL',
+      eventName: 'NFL game',
+      eventTime: '8 PM ET',
+      title: 'Premium NFL pick',
+      market: 'Spread',
+      selection: 'Home -3',
+      odds: '-110',
+      units: '1u',
+      confidence: 'High',
+      body: 'Secret premium analysis',
+      status: 'published',
+    });
+
+    const subscriberId = await t.run(async (ctx) =>
+      ctx.db.insert('users', { role: 'user', isActive: true }),
+    );
+    const asUser = t.withIdentity({ subject: subscriberId });
+    await asUser.mutation(api.subscriptions.subscribe, { creatorId: cA, plan: 'free' });
+
+    const result = await asUser.query(api.feed.personalized, {});
+    const item = result.items.find(
+      (i: { pick: { title: string } }) => i.pick.title === 'Premium NFL pick',
+    );
+    expect(item).toBeDefined();
+    expect(item!.canViewBody).toBe(true);
+    expect(item!.pick.body).toBe('Secret premium analysis');
   });
 });

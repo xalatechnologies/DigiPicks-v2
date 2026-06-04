@@ -24,6 +24,7 @@ import { Landing } from './pages/Landing';
 import { Events } from './pages/Events';
 import { Creators } from './pages/Creators';
 import { AuthGate } from './auth/AuthGate';
+import { ACCOUNT } from './lib/accountRoutes';
 
 // Critical-path public pages (Landing, Events, Creators) ship in the main
 // bundle. Everything else is route-level code-split — a first-time visitor
@@ -129,7 +130,7 @@ function NotificationsBell() {
       iconOnly
       iconLeft="bell"
       aria-label={unread && unread > 0 ? `${unread} unread notifications` : 'Notifications'}
-      onClick={() => navigate('/account/notifications')}
+      onClick={() => navigate(ACCOUNT.notifications)}
     >
       {unread && unread > 0 ? (
         <Badge tone="red" dot>

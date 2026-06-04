@@ -17,6 +17,7 @@ import {
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { ACCOUNT } from '../../lib/accountRoutes';
 
 const FEED_FILTERS = [
   { label: 'All', value: 'all' },
@@ -84,17 +85,13 @@ export function MyFeed() {
           sub="Personalized picks and insights from your followed creators."
           actions={
             <>
-              <Button
-                variant="outline"
-                iconLeft="bookmark"
-                onClick={() => navigate('/account/saved')}
-              >
+              <Button variant="outline" iconLeft="bookmark" onClick={() => navigate(ACCOUNT.saved)}>
                 Saved picks
               </Button>
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate(ACCOUNT.discover)}
               >
                 Discover creators
               </Button>
@@ -119,7 +116,7 @@ export function MyFeed() {
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/discover')}
+                onClick={() => navigate(ACCOUNT.discover)}
               >
                 Discover creators
               </Button>
@@ -141,7 +138,7 @@ export function MyFeed() {
                     <Button
                       variant="primary"
                       iconRight="arrow-right"
-                      onClick={() => navigate('/account/discover')}
+                      onClick={() => navigate(ACCOUNT.discover)}
                     >
                       Discover creators
                     </Button>
@@ -150,7 +147,7 @@ export function MyFeed() {
               ) : null}
 
               {!isEmpty
-                ? filteredFeed.map(({ pick, creator }) => {
+                ? filteredFeed.map(({ pick, creator, canViewBody }) => {
                     const isSaved = savedMap?.[pick._id] ?? false;
                     return (
                       <PickCard
@@ -180,7 +177,7 @@ export function MyFeed() {
                         aiReasoning={pick.aiReasoning}
                         aiModel={pick.aiModel}
                         saved={isSaved}
-                        locked={pick.access !== 'free' && !feed?.personalized}
+                        locked={!canViewBody}
                         onSave={() => toggleSave(pick._id, isSaved)}
                         onOpen={() => creator && navigate(`/creators/${creator.handle}`)}
                       />
@@ -201,8 +198,8 @@ export function MyFeed() {
                     action={
                       <Button
                         variant="primary"
-                        size="sm"
-                        onClick={() => navigate('/account/discover')}
+                        iconRight="arrow-right"
+                        onClick={() => navigate(ACCOUNT.discover)}
                       >
                         Browse creators
                       </Button>

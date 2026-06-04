@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -21,7 +22,7 @@ export function PaymentMethods() {
     setBusy(true);
     setError(null);
     try {
-      await openPortal('/account/payment-methods');
+      await openPortal(ACCOUNT.paymentMethods);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open billing portal.');
     } finally {

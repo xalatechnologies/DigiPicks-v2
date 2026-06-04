@@ -19,10 +19,22 @@ import {
   StudioDashLayout,
   StudioDashCol,
   CreatorProfileStickyAside,
+  NextStepsPanel,
+  StudioSummaryGrid,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
+import { ACCOUNT, accountDiscoverUrl, accountEventsUrl } from '../../lib/accountRoutes';
+import { buildAccountSummary } from '../accountMetrics';
 
-const TRENDING_TOPICS = ['NBA props', 'NFL spreads', 'Soccer value', 'Tennis ML', 'Cricket tips'];
+const TOPIC_SPORTS: Record<string, string> = {
+  'NBA props': 'NBA',
+  'NFL spreads': 'NFL',
+  'Soccer value': 'Soccer',
+  'Tennis ML': 'Tennis',
+  'Cricket tips': 'Cricket',
+};
+
+const TRENDING_TOPICS = Object.keys(TOPIC_SPORTS);
 
 function greeting(name: string): string {
   const hour = new Date().getHours();
@@ -57,6 +69,7 @@ export function Dashboard() {
   const me = useQuery(api.users.meSafe);
   const subs = useQuery(api.subscriptions.mySubscriptions);
   const feed = useQuery(api.feed.personalized, {});
+  const portfolio = useQuery(api.subscriberStats.myPortfolio);
   const liveEvents = useQuery(api.events.live, {});
   const upcomingEvents = useQuery(api.events.today, {});
   const saved = useQuery(api.savedPicks.list, { limit: 5 });
@@ -64,6 +77,8 @@ export function Dashboard() {
   const displayName = me?.name?.split(' ')[0] ?? 'there';
   const activeSubs = subs?.filter((sub) => sub.status === 'active') ?? [];
   const feedItems = feed?.items ?? [];
+  const hasSubs = activeSubs.length > 0;
+  const feedPersonalized = feed?.personalized === true;
 
   const picksToday = useMemo(
     () =>
@@ -80,6 +95,63 @@ export function Dashboard() {
     return [...live, ...upcoming.filter((e) => !live.some((l) => l._id === e._id))].slice(0, 6);
   }, [liveEvents, upcomingEvents]);
 
+  const monthlySpend = useMemo(
+    () => activeSubs.reduce((sum, s) => sum + (s.creatorStartingPrice ?? 0), 0),
+    [activeSubs],
+  );
+
+  const portfolioSummary = useMemo(() => {
+    if (!portfolio) return null;
+    return buildAccountSummary(
+      {
+        hasPortfolio: portfolio.totalPicks > 0,
+        netUnits: portfolio.netUnits,
+        winRate: portfolio.winRate,
+        wins: portfolio.wins,
+        losses: portfolio.losses,
+        activeSubs: activeSubs.length,
+        totalMonthly: monthlySpend,
+      },
+      navigate,
+    ).slice(0, 3);
+  }, [portfolio, activeSubs.length, monthlySpend, navigate]);
+
+  const nextSteps = useMemo(
+    () => [
+      {
+        id: 'subscribe',
+        label: 'Subscribe to your first creator',
+        done: hasSubs,
+        onClick: () => navigate(ACCOUNT.discover),
+      },
+      {
+        id: 'feed',
+        label: 'Open your personalized feed',
+        done: feedPersonalized && picksToday > 0,
+        onClick: () => navigate(ACCOUNT.feed),
+      },
+      {
+        id: 'events',
+        label: "Check tonight's events",
+        done: eventRail.length > 0,
+        onClick: () => navigate(ACCOUNT.events),
+      },
+      {
+        id: 'results',
+        label: 'Review your tracked results',
+        done: Boolean(portfolio && portfolio.totalPicks > 0),
+        onClick: () => navigate(ACCOUNT.results),
+      },
+      {
+        id: 'notify',
+        label: 'Enable pick notifications',
+        done: Boolean(me?.notifyPrefs?.email || me?.notifyPrefs?.push),
+        onClick: () => navigate(ACCOUNT.settings),
+      },
+    ],
+    [hasSubs, feedPersonalized, picksToday, eventRail.length, portfolio, me, navigate],
+  );
+
   return (
     <Container size="2xl">
       <Stack gap={6}>
@@ -89,13 +161,13 @@ export function Dashboard() {
           sub="Stats, subscriptions, and live slate at a glance."
           actions={
             <>
-              <Button variant="outline" onClick={() => navigate('/account/subscriptions')}>
-                Manage subs
+              <Button variant="outline" onClick={() => navigate(ACCOUNT.subscriptions)}>
+                Manage billing
               </Button>
               <Button
                 variant="primary"
                 iconRight="arrow-right"
-                onClick={() => navigate('/account/feed')}
+                onClick={() => navigate(ACCOUNT.feed)}
               >
                 My feed
               </Button>
@@ -112,29 +184,37 @@ export function Dashboard() {
               icon="feed"
               value={picksToday}
               label="New picks today"
-              onClick={() => navigate('/account/feed')}
+              onClick={() => navigate(ACCOUNT.feed)}
             />
             <AccountStatCard
               icon="card"
               value={activeSubs.length}
               label="Active subscriptions"
-              onClick={() => navigate('/account/subscriptions')}
+              onClick={() => navigate(ACCOUNT.subscriptions)}
             />
             <AccountStatCard
               icon="flame"
               iconTone="danger"
               value={(liveEvents ?? []).length}
               label="Live events now"
-              onClick={() => navigate('/account/events')}
+              onClick={() => navigate(ACCOUNT.events)}
             />
           </Grid>
         </Stack>
+
+        {portfolioSummary ? <StudioSummaryGrid columns={3} items={portfolioSummary} /> : null}
+
+        <NextStepsPanel
+          title="Get started"
+          sub="Complete these steps to get the most from your account."
+          items={nextSteps}
+        />
 
         {eventRail.length > 0 ? (
           <AccountDashboardSection
             title="Live now & upcoming"
             actionLabel="View schedule"
-            onAction={() => navigate('/account/events')}
+            onAction={() => navigate(ACCOUNT.events)}
             rail
           >
             {eventRail.map((ev) => {
@@ -151,7 +231,7 @@ export function Dashboard() {
                   scoreDisplay={score}
                   statusLabel={!score ? (live ? ev.gameStatus : `Starts ${ev.time}`) : undefined}
                   ctaLabel={live ? 'Watch now' : 'Pre-game picks'}
-                  onCta={() => navigate('/account/events')}
+                  onCta={() => navigate(accountEventsUrl(ev._id))}
                 />
               );
             })}
@@ -171,8 +251,8 @@ export function Dashboard() {
                       action={
                         <Button
                           variant="primary"
-                          size="sm"
-                          onClick={() => navigate('/account/discover')}
+                          iconRight="arrow-right"
+                          onClick={() => navigate(ACCOUNT.discover)}
                         >
                           Browse creators
                         </Button>
@@ -207,11 +287,7 @@ export function Dashboard() {
                       title="Nothing saved"
                       subtitle="Bookmark picks from your feed to track them here."
                       action={
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate('/account/saved')}
-                        >
+                        <Button variant="outline" onClick={() => navigate(ACCOUNT.saved)}>
                           Open saved
                         </Button>
                       }
@@ -224,7 +300,7 @@ export function Dashboard() {
                           key={row.savedId}
                           meta={`${row.pick.sport.toUpperCase()} · saved`}
                           title={row.pick.title}
-                          onClick={() => navigate('/account/saved')}
+                          onClick={() => navigate(ACCOUNT.saved)}
                         />
                       ))
                   )}
@@ -233,7 +309,10 @@ export function Dashboard() {
                 <AccountSidebarPanel title="Trending topics">
                   <AccountTopicChips
                     topics={TRENDING_TOPICS}
-                    onSelect={() => navigate('/account/discover')}
+                    onSelect={(topic) => {
+                      const sport = TOPIC_SPORTS[topic];
+                      navigate(sport ? accountDiscoverUrl(sport) : ACCOUNT.discover);
+                    }}
                   />
                 </AccountSidebarPanel>
 
@@ -243,7 +322,7 @@ export function Dashboard() {
                     sub="Discord and pick notifications"
                     mono="DC"
                     color="var(--primary)"
-                    onClick={() => navigate('/account/notifications')}
+                    onClick={() => navigate(ACCOUNT.notifications)}
                   />
                 </AccountSidebarPanel>
               </Stack>

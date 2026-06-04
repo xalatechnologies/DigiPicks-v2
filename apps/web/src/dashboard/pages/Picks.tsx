@@ -22,6 +22,7 @@ import { STUDIO, studioCreatePickUrl } from '../../lib/studioRoutes';
 
 const FILTER_OPTIONS = [
   { label: 'All picks', value: 'all' },
+  { label: 'Published', value: 'published' },
   { label: 'Free', value: 'free' },
   { label: 'Premium', value: 'premium' },
   { label: 'Drafts', value: 'draft' },
@@ -139,6 +140,8 @@ export function Picks() {
       list = list.filter(
         (r) => r.access === filter || (filter === 'premium' && r.access === 'vip'),
       );
+    } else if (filter === 'published') {
+      list = list.filter((r) => r.status === 'published');
     } else if (filter === 'draft' || filter === 'scheduled') {
       list = list.filter((r) => r.status === filter);
     }
@@ -221,10 +224,10 @@ export function Picks() {
               iconTone: 'violet',
               label: 'Published',
               value: stats.published.toLocaleString(),
-              active: filter === 'all' && view === 'activity',
+              active: filter === 'published' && view === 'activity',
               onClick: () => {
                 setView('activity');
-                setFilter('all');
+                setFilter('published');
               },
             },
             {

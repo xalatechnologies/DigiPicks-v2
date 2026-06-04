@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
+  Row,
   Card,
   CardHead,
   Button,
@@ -22,6 +23,7 @@ import {
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
+import { ACCOUNT } from '../../lib/accountRoutes';
 
 function fmtTime(ms: number): string {
   return new Date(ms).toLocaleString(undefined, {
@@ -34,8 +36,9 @@ function fmtTime(ms: number): string {
 
 export function AccountMessages() {
   const navigate = useNavigate();
-  const me = useQuery(api.users.me);
-  const threads = useQuery(api.dmThreads.myThreads);
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const threads = useQuery(api.dmThreads.myThreads, isAuthenticated ? {} : 'skip');
   const [activeId, setActiveId] = useState<Id<'dmThreads'> | null>(null);
   const [draft, setDraft] = useState('');
   const [search, setSearch] = useState('');
@@ -113,8 +116,24 @@ export function AccountMessages() {
         title={threads.length === 0 ? 'No DMs yet' : 'No threads match'}
         subtitle={
           threads.length === 0
-            ? 'Subscribe to a creator and open a DM thread from their profile.'
+            ? 'Subscribe to a creator to start a private thread from their profile.'
             : 'Try another search term.'
+        }
+        action={
+          threads.length === 0 ? (
+            <Row gap={2}>
+              <Button
+                variant="primary"
+                iconRight="arrow-right"
+                onClick={() => navigate(ACCOUNT.discover)}
+              >
+                Discover creators
+              </Button>
+              <Button variant="outline" onClick={() => navigate(ACCOUNT.subscriptions)}>
+                My subscriptions
+              </Button>
+            </Row>
+          ) : undefined
         }
       />
     ) : (

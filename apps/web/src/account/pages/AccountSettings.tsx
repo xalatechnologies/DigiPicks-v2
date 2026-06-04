@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useConvexAuth, useAction, useMutation, useQuery } from 'convex/react';
 import {
   Container,
   Stack,
@@ -10,8 +11,6 @@ import {
   Field,
   Input,
   Select,
-  Segmented,
-  FilterChips,
   SwitchRow,
   EmptyState,
   StudioPageHeader,
@@ -23,7 +22,6 @@ import {
   AccountSettingsActionRow,
   AccountSidebarPanel,
   AccountBillingPanel,
-  Eyebrow,
   Muted,
 } from '@digipicks/ds';
 import { api } from '../../../../../convex/_generated/api';
@@ -35,30 +33,21 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'nb', label: 'Norsk bokmål' },
 ];
 
-const THEME_OPTIONS = [
-  { label: 'Light', value: 'light' },
-  { label: 'Dark', value: 'dark' },
-  { label: 'System', value: 'system' },
-];
-
-const SPORT_OPTIONS = ['NBA', 'NFL', 'Soccer', 'Tennis', 'Cricket'];
-const MARKET_OPTIONS = ['Props', 'Spreads', 'Parlays', 'Totals'];
-
 const NOTIFY_TRIGGERS = [
   {
     id: 'pickPublished' as const,
-    label: 'New professional picks',
-    sub: 'Get notified instantly when followed creators lock in new insights.',
+    label: 'New picks',
+    sub: 'Fires the moment a followed creator publishes a pick.',
   },
   {
     id: 'pickGraded' as const,
-    label: 'Creator daily posts',
-    sub: 'Analysis, breakdowns, and long-form editorial content.',
+    label: 'Grading results',
+    sub: 'Win, loss, and push outcomes for picks you saved or follow.',
   },
   {
     id: 'lineMoved' as const,
-    label: 'Live event reminders',
-    sub: 'Real-time alerts for betting windows and starting lineups.',
+    label: 'Line movement',
+    sub: 'Significant odds shifts on events you have picks on.',
   },
 ];
 
@@ -78,17 +67,15 @@ function fmtBillingDate(ms?: number): string {
 
 export function AccountSettings() {
   const navigate = useNavigate();
-  const me = useQuery(api.users.me);
-  const subs = useQuery(api.subscriptions.mySubscriptions);
+  const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
+  const subs = useQuery(api.subscriptions.mySubscriptions, isAuthenticated ? {} : 'skip');
   const updateProfile = useMutation(api.users.updateProfile);
   const updatePrefs = useMutation(api.notify.updatePrefs);
   const exportMyData = useAction(api.gdpr.exportMyData);
 
   const [name, setName] = useState('');
   const [locale, setLocale] = useState<Locale>('en');
-  const [theme, setTheme] = useState('light');
-  const [sports, setSports] = useState<string | null>(null);
-  const [markets, setMarkets] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -167,7 +154,7 @@ export function AccountSettings() {
         <StudioPageHeader
           eyebrow="Account · Settings"
           title="Account settings"
-          sub="Profile and notification preferences save to your account. Theme and sport filters are preview-only until personalization sync ships."
+          sub="Profile and notification preferences save to your account."
           actions={
             <Row gap={2}>
               {saved ? (
@@ -266,40 +253,6 @@ export function AccountSettings() {
                 </Stack>
               </AccountSettingsPanel>
 
-              <AccountSettingsPanel title="Personalization" icon="sliders">
-                <Stack gap={6}>
-                  <Muted>Preview only — not saved to your account yet.</Muted>
-                  <Stack gap={3}>
-                    <Eyebrow>Theme visuals</Eyebrow>
-                    <Segmented
-                      options={THEME_OPTIONS}
-                      value={theme}
-                      onChange={setTheme}
-                      ariaLabel="Theme"
-                      fullWidth
-                    />
-                  </Stack>
-                  <Stack gap={3}>
-                    <Eyebrow>Focus sports</Eyebrow>
-                    <FilterChips
-                      options={SPORT_OPTIONS}
-                      value={sports}
-                      onChange={setSports}
-                      allLabel="All"
-                    />
-                  </Stack>
-                  <Stack gap={3}>
-                    <Eyebrow>Market interests</Eyebrow>
-                    <FilterChips
-                      options={MARKET_OPTIONS}
-                      value={markets}
-                      onChange={setMarkets}
-                      allLabel="All markets"
-                    />
-                  </Stack>
-                </Stack>
-              </AccountSettingsPanel>
-
               {!me?.creatorId ? (
                 <AccountSidebarPanel title="Become a creator" variant="accent">
                   <Muted>
@@ -327,9 +280,9 @@ export function AccountSettings() {
                     ? `Next billing ${fmtBillingDate(nextRenewal)}`
                     : 'Manage payment in subscriptions'
                 }
-                onUpdatePayment={() => navigate('/account/payment-methods')}
+                onUpdatePayment={() => navigate(ACCOUNT.paymentMethods)}
                 history={billingHistory}
-                onViewAllHistory={() => navigate('/account/billing-history')}
+                onViewAllHistory={() => navigate(ACCOUNT.billingHistory)}
               />
 
               <AccountSidebarPanel title="Integrations">
@@ -363,7 +316,7 @@ export function AccountSettings() {
                 <Button variant="secondary" block iconLeft="arrow-down" onClick={handleExport}>
                   Download my personal data
                 </Button>
-                <Button variant="ghost" block onClick={() => navigate('/account')}>
+                <Button variant="ghost" block onClick={() => navigate(ACCOUNT.home)}>
                   Delete account
                 </Button>
               </AccountSidebarPanel>

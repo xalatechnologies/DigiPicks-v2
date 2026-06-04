@@ -4,6 +4,7 @@
   gap: var(--space-3);
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   padding: var(--space-5);
   background: var(--bg-1);
   border: 1px solid var(--line-soft);
@@ -21,9 +22,10 @@
 }
 
 .clickable {
+  appearance: none;
+  margin: 0;
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--line-soft);
   text-align: left;
   cursor: pointer;
   font: inherit;

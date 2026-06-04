@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
@@ -209,7 +210,7 @@ export function Subscriptions() {
                 variant="primary"
                 size="sm"
                 block
-                onClick={() => navigate('/account/billing/payment-issue')}
+                onClick={() => navigate(ACCOUNT.paymentIssue)}
               >
                 Update now
               </Button>
@@ -250,7 +251,7 @@ export function Subscriptions() {
             <Button
               variant="primary"
               iconRight="arrow-right"
-              onClick={() => navigate('/account/discover')}
+              onClick={() => navigate(ACCOUNT.discover)}
             >
               Discover creators
             </Button>
@@ -298,7 +299,7 @@ export function Subscriptions() {
                       variant="primary"
                       size="sm"
                       iconRight="arrow-right"
-                      onClick={() => navigate('/account/discover')}
+                      onClick={() => navigate(ACCOUNT.discover)}
                     >
                       Browse creators
                     </Button>
@@ -318,15 +319,15 @@ export function Subscriptions() {
                 paymentBrand="Stripe"
                 paymentLabel="Payment & invoices"
                 paymentSub="Manage cards and download invoices in the Stripe portal."
-                onUpdatePayment={() => navigate('/account/payment-methods')}
+                onUpdatePayment={() => navigate(ACCOUNT.paymentMethods)}
                 history={billingHistory}
-                onViewAllHistory={() => navigate('/account/billing-history')}
+                onViewAllHistory={() => navigate(ACCOUNT.billingHistory)}
               />
               <AccountSubscriptionsPromo
                 title="Go annual. Save 20% today."
                 body="Switch eligible creator plans to yearly billing and keep more of your bankroll working."
                 ctaLabel="Switch to yearly"
-                onCta={() => navigate('/account/discover')}
+                onCta={() => navigate(ACCOUNT.discover)}
               />
             </Stack>
           </StudioDashCol>

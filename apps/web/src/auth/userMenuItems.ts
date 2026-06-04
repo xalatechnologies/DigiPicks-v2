@@ -1,4 +1,5 @@
 import type { UserMenuItem } from '@digipicks/ds';
+import { ACCOUNT } from '../lib/accountRoutes';
 
 const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'tenant_admin', 'admin', 'moderator']);
 
@@ -27,7 +28,7 @@ export interface BuildUserMenuItemsArgs {
 function publicMenuItems(args: BuildUserMenuItemsArgs): UserMenuItem[] {
   const { navigate, hasCreator, isAdmin, onSignOut } = args;
   const items: UserMenuItem[] = [
-    { label: 'My account', icon: 'user', onClick: () => navigate('/account') },
+    { label: 'My account', icon: 'user', onClick: () => navigate(ACCOUNT.home) },
   ];
 
   if (isAdmin) {
@@ -51,44 +52,44 @@ function publicMenuItems(args: BuildUserMenuItemsArgs): UserMenuItem[] {
       label: 'Discover',
       icon: 'compass',
       hint: 'Personalized feed',
-      onClick: () => navigate('/account/discover'),
+      onClick: () => navigate(ACCOUNT.discover),
     },
     {
       label: 'My subscriptions',
       icon: 'card',
-      onClick: () => navigate('/account/subscriptions'),
+      onClick: () => navigate(ACCOUNT.subscriptions),
     },
     {
       label: 'Saved picks',
       icon: 'bookmark',
-      onClick: () => navigate('/account/saved'),
+      onClick: () => navigate(ACCOUNT.saved),
     },
     {
       label: 'Results',
       icon: 'trophy',
-      onClick: () => navigate('/account/results'),
+      onClick: () => navigate(ACCOUNT.results),
     },
     {
       label: 'Notifications',
       icon: 'bell',
-      onClick: () => navigate('/account/notifications'),
+      onClick: () => navigate(ACCOUNT.notifications),
     },
     {
       label: 'Messages',
       icon: 'inbox',
-      onClick: () => navigate('/account/messages'),
+      onClick: () => navigate(ACCOUNT.messages),
     },
     {
       label: 'My feed',
       icon: 'feed',
       hint: 'Personalized picks',
-      onClick: () => navigate('/account/feed'),
+      onClick: () => navigate(ACCOUNT.feed),
     },
     { divider: true },
     {
       label: 'Settings',
       icon: 'gear',
-      onClick: () => navigate('/account/settings'),
+      onClick: () => navigate(ACCOUNT.settings),
     },
     {
       label: 'Sign out',
@@ -143,7 +144,7 @@ function dashboardShellMenuItems(args: BuildUserMenuItemsArgs): UserMenuItem[] {
     {
       label: 'Switch to subscriber',
       icon: 'user',
-      onClick: () => navigate('/account'),
+      onClick: () => navigate(ACCOUNT.home),
     },
   ];
 

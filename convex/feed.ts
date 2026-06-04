@@ -2,6 +2,23 @@ import { v } from 'convex/values';
 import { query } from './_generated/server';
 import { Doc, Id } from './_generated/dataModel';
 import { requireUser } from './shared/permissions';
+import { isAccessActive } from './subscriptions';
+
+function canViewPickBody(
+  pick: Doc<'picks'>,
+  activeSubByCreator: Map<Id<'creators'>, { status: string; gracePeriodEndsAt?: number }>,
+  exploreFallback: boolean,
+): boolean {
+  if (pick.access === 'free') return true;
+  if (exploreFallback) return false;
+  const sub = activeSubByCreator.get(pick.creatorId);
+  return sub ? isAccessActive(sub) : false;
+}
+
+function pickForClient(pick: Doc<'picks'>, canViewBody: boolean): Doc<'picks'> {
+  if (canViewBody) return pick;
+  return { ...pick, body: undefined, teaser: pick.teaser };
+}
 
 // NOTE: rate limiting on `feed.personalized` is intentionally omitted —
 // Convex queries do not have a runMutation ctx and cannot consume bucket
@@ -42,9 +59,9 @@ export const personalized = query({
       .withIndex('by_subscriber_and_creator', (q) => q.eq('subscriberId', user._id))
       .take(500);
 
-    const activeCreatorIds = new Set(
-      subs.filter((s) => s.status === 'active').map((s) => s.creatorId),
-    );
+    const activeSubs = subs.filter((s) => isAccessActive(s));
+    const activeCreatorIds = new Set(activeSubs.map((s) => s.creatorId));
+    const activeSubByCreator = new Map(activeSubs.map((s) => [s.creatorId, s]));
 
     const fallback = activeCreatorIds.size === 0;
 
@@ -72,16 +89,21 @@ export const personalized = query({
     // Join creator profiles for the PickCard surface AND for the AI
     // ranking blend (which needs trustScore).
     const creatorCache = new Map<Id<'creators'>, Doc<'creators'> | null>();
-    async function joinCreator(pick: Doc<'picks'>) {
+    async function joinItem(pick: Doc<'picks'>) {
       let creator = creatorCache.get(pick.creatorId);
       if (creator === undefined) {
         creator = (await ctx.db.get(pick.creatorId)) ?? null;
         creatorCache.set(pick.creatorId, creator);
       }
-      return { pick, creator };
+      const canViewBody = canViewPickBody(pick, activeSubByCreator, fallback);
+      return {
+        pick: pickForClient(pick, canViewBody),
+        creator,
+        canViewBody,
+      };
     }
 
-    let enriched = await Promise.all(filtered.map(joinCreator));
+    let enriched = await Promise.all(filtered.map(joinItem));
 
     if (args.rankByAi) {
       enriched = rankByAiBlend(enriched);
@@ -113,8 +135,12 @@ export const personalized = query({
  *   - 0.15  creator-stated confidence (Low=33, Medium=66, High=100)
  */
 function rankByAiBlend(
-  items: { pick: Doc<'picks'>; creator: Doc<'creators'> | null }[],
-): { pick: Doc<'picks'>; creator: Doc<'creators'> | null }[] {
+  items: {
+    pick: Doc<'picks'>;
+    creator: Doc<'creators'> | null;
+    canViewBody: boolean;
+  }[],
+): { pick: Doc<'picks'>; creator: Doc<'creators'> | null; canViewBody: boolean }[] {
   const now = Date.now();
   const HOUR = 60 * 60 * 1000;
   const DECAY_HALF_LIFE = 24 * HOUR; // 24h → 0.5

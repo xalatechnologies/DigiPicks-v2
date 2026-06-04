@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { ACCOUNT } from '../../lib/accountRoutes';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import {
@@ -119,21 +120,21 @@ function presentation(type: string): {
 function navigateForType(navigate: ReturnType<typeof useNavigate>, type: string): void {
   switch (type) {
     case 'pick_graded':
-      navigate('/account/results');
+      navigate(ACCOUNT.results);
       break;
     case 'pick_published':
     case 'line_moved':
-      navigate('/account');
+      navigate(ACCOUNT.home);
       break;
     case 'subscription_active':
     case 'subscription_cancelled':
-      navigate('/account/subscriptions');
+      navigate(ACCOUNT.subscriptions);
       break;
     case 'subscription_past_due':
-      navigate('/account/billing/payment-issue');
+      navigate(ACCOUNT.paymentIssue);
       break;
     default:
-      navigate('/account/settings');
+      navigate(ACCOUNT.settings);
   }
 }
 
@@ -316,7 +317,7 @@ export function Notifications() {
             <AccountNotificationSidebar
               channels={channels}
               engagementPercent={items.length > 0 ? engagementPercent : undefined}
-              onManagePreferences={() => navigate('/account/settings')}
+              onManagePreferences={() => navigate(ACCOUNT.settings)}
             />
           </StudioDashCol>
         </StudioDashLayout>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { Container, Stack, Card, Button, EmptyState, PageHead, Muted, Icon } from '@digipicks/ds';
 import { api } from '../../../../convex/_generated/api';
+import { ACCOUNT } from '../lib/accountRoutes';
 
 export function CreatorSubscribed() {
   const { id: handle } = useParams();
@@ -50,10 +51,17 @@ export function CreatorSubscribed() {
             <Stack gap={3}>
               <Icon name="check" size={32} />
               <Muted>Manage billing anytime from your account subscriptions page.</Muted>
-              <Button variant="primary" onClick={() => navigate(`/creators/${creator.handle}`)}>
+              <Button
+                variant="primary"
+                iconRight="arrow-right"
+                onClick={() => navigate(ACCOUNT.feed)}
+              >
+                Go to feed
+              </Button>
+              <Button variant="secondary" onClick={() => navigate(`/creators/${creator.handle}`)}>
                 View creator profile
               </Button>
-              <Button variant="secondary" onClick={() => navigate('/account/subscriptions')}>
+              <Button variant="outline" onClick={() => navigate(ACCOUNT.subscriptions)}>
                 Manage subscriptions
               </Button>
             </Stack>
