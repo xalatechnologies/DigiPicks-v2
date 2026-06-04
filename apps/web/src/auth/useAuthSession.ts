@@ -21,7 +21,6 @@ export function useAuthSession() {
   const [allowOrphan, setAllowOrphan] = useState(false);
   const [profileStalled, setProfileStalled] = useState(false);
 
-  const serverProbe = useQuery(api.users.authSessionProbe, isAuthenticated ? {} : 'skip');
   const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
 
   useEffect(() => {
@@ -60,7 +59,8 @@ export function useAuthSession() {
     status = 'ready';
   }
 
-  const serverAuthUserId = serverProbe?.userId ?? null;
+  /** Linked `users` row when the deployment has synced auth → profile (see `users.meSafe`). */
+  const serverAuthUserId = me?._id ?? null;
 
   return {
     isAuthenticated,

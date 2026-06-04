@@ -107,18 +107,34 @@ export async function waitForConvexAuthSession(
       client.setAuth(freshToken);
     }
     try {
-      const probe = await client.query(api.users.authSessionProbe, {});
-      if (probe.userId) {
-        return { ok: true, userId: probe.userId };
-      }
-      if (probe.hasIdentity === false && import.meta.env.DEV) {
-        const preview = decodeJwtPayloadPreview(token);
-        const expected = expectedIssuer(url);
-        if (preview?.iss && preview.iss !== expected) {
-          lastDetail = `JWT issuer "${preview.iss}" does not match deployment "${expected}". Run pnpm verify:convex-auth.`;
-        } else if (preview?.exp && preview.exp * 1000 < Date.now()) {
-          lastDetail = 'JWT is expired. Clear site data and sign in again.';
+      let userId: string | null = null;
+      try {
+        const probe = await client.query(api.users.authSessionProbe, {});
+        userId = probe.userId;
+        if (!userId && probe.hasIdentity === false && import.meta.env.DEV) {
+          const preview = decodeJwtPayloadPreview(token);
+          const expected = expectedIssuer(url);
+          if (preview?.iss && preview.iss !== expected) {
+            lastDetail = `JWT issuer "${preview.iss}" does not match deployment "${expected}". Run pnpm verify:convex-auth.`;
+          } else if (preview?.exp && preview.exp * 1000 < Date.now()) {
+            lastDetail = 'JWT is expired. Clear site data and sign in again.';
+          }
         }
+      } catch (probeErr: unknown) {
+        const msg = probeErr instanceof Error ? probeErr.message : String(probeErr);
+        if (msg.includes('Could not find public function')) {
+          const me = await client.query(api.users.meSafe, {});
+          userId = me?._id ?? null;
+          if (!userId) {
+            lastDetail =
+              'Convex deployment is missing users.authSessionProbe. Run `npx convex deploy` for this project, or set VITE_CONVEX_URL to a deployment with the latest functions.';
+          }
+        } else {
+          throw probeErr;
+        }
+      }
+      if (userId) {
+        return { ok: true, userId };
       }
     } catch (err: unknown) {
       lastDetail = err instanceof Error ? err.message : String(err);

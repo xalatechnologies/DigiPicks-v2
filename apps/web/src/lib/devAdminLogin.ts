@@ -1,10 +1,4 @@
-import {
-  useAuthActions,
-  useAction,
-  useConvexAuth,
-  useMutation,
-  useQuery,
-} from '../auth/convexAuth';
+import { useAuthActions, useAction, useConvexAuth, useMutation } from '../auth/convexAuth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../../../convex/_generated/api';
 import { formatAuthError } from './formatAuthError';
@@ -133,8 +127,7 @@ export function useDevAdminAutoSignIn(): {
 } {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const serverProbe = useQuery(api.users.authSessionProbe, isAuthenticated ? {} : 'skip');
-  const serverAuthed = Boolean(serverProbe?.userId);
+  const serverAuthed = isAuthenticated;
   const bootstrapDevAdmin = useAction(api.devProvisionActions.bootstrapDevAdmin);
   const claimDevAdminSession = useMutation(api.devProvision.claimDevAdminSession);
   const [phase, setPhase] = useState<DevAdminSignInPhase>('idle');
@@ -161,7 +154,7 @@ export function useDevAdminAutoSignIn(): {
       setPhase('done');
       return;
     }
-    if (authLoading || (isAuthenticated && serverProbe === undefined)) {
+    if (authLoading) {
       setPhase((prev) => (prev === 'booting' ? 'booting' : 'waiting_auth'));
       return;
     }
@@ -212,7 +205,6 @@ export function useDevAdminAutoSignIn(): {
     claimDevAdminSession,
     isAuthenticated,
     serverAuthed,
-    serverProbe,
     signIn,
     signOut,
   ]);
