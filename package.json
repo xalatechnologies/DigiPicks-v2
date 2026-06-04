@@ -12,7 +12,7 @@
     "dev:all": "concurrently \"pnpm dev:convex\" \"pnpm dev:web\" \"pnpm dev:api\"",
     "build": "pnpm -r build",
     "build:web": "pnpm --filter @digipicks/web build",
-    "build:vercel": "node scripts/vercel-build.mjs",
+    "build:vercel": "sh -ec 'pnpm --filter @digipicks/web run build && rm -rf dist && cp -r apps/web/dist dist'",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run --config convex/vitest.config.ts convex",

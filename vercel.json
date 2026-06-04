@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "corepack enable && corepack prepare pnpm@9.15.4 --activate && HUSKY=0 pnpm install --frozen-lockfile",
-  "buildCommand": "node scripts/vercel-build.mjs",
+  "buildCommand": "sh -ec 'pnpm --filter @digipicks/web run build && rm -rf dist && cp -r apps/web/dist dist'",
   "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

@@ -421,13 +421,14 @@ The repo includes [`vercel.json`](./vercel.json) for the **pnpm monorepo**:
 root install, `pnpm --filter @digipicks/web build`, output `apps/web/dist`, and
 SPA fallbacks for React Router.
 
-1. Import the GitHub project in Vercel. **Root Directory must be the repo root**
-   (leave empty — not `apps/web`).
+1. Import the GitHub project in Vercel. Use **either**:
+   - **Root Directory empty** (repo root) — uses root [`vercel.json`](./vercel.json), or
+   - **Root Directory `apps/web`** — uses [`apps/web/vercel.json`](./apps/web/vercel.json).
 2. **Settings → General → Node.js Version:** `20.x` (or use repo `.node-version`).
 3. Under **Settings → Environment Variables**, set **`VITE_CONVEX_URL`**
    to your **production** Convex URL (`https://….convex.cloud`).
-4. Leave **Build Command** / **Output Directory** empty so root `vercel.json` applies
-   (`node scripts/vercel-build.mjs` → output `dist`).
+4. Leave **Build Command** / **Output Directory** empty so the matching `vercel.json` applies.
+   Do **not** set Build Command to `node scripts/vercel-build.mjs` unless Root Directory is the repo root.
 5. Deploy the Convex backend separately (`npx convex deploy`) and align
    `CONVEX_SITE_URL` / `WEB_BASE_URL` (Convex) with your real app origin.
 
