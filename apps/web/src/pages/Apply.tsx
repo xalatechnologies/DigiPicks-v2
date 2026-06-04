@@ -29,6 +29,7 @@ import {
   Placeholder,
 } from '@digipicks/ds';
 import { formatAuthError } from '../lib/formatAuthError';
+import { useApplicationsMine } from '../lib/useApplicationsMine';
 
 const SPORT_OPTIONS = [
   'NFL',
@@ -99,7 +100,7 @@ export function Apply() {
   const navigate = useNavigate();
   const { isAuthenticated } = useConvexAuth();
   const me = useQuery(api.users.meSafe, isAuthenticated ? {} : 'skip');
-  const existingApp = useQuery(api.applications.mine, isAuthenticated ? {} : 'skip');
+  const { existingApp, backendStale } = useApplicationsMine(isAuthenticated);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -228,6 +229,14 @@ export function Apply() {
               </Stack>
             }
           />
+        ) : backendStale ? (
+          <Card pad="lg" elev>
+            <EmptyState
+              icon="gear"
+              title="Backend update required"
+              subtitle="This site's Convex deployment is missing creator application APIs. In Vercel, set VITE_CONVEX_URL to your production Convex URL (e.g. https://zealous-hyena-147.convex.cloud), then run npx convex deploy from the repo root."
+            />
+          </Card>
         ) : pendingApp && !submitted ? (
           <Card pad="xl" elev>
             <EmptyState

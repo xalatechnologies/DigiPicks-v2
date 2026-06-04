@@ -426,11 +426,15 @@ SPA fallbacks for React Router.
    - **Root Directory `apps/web`** — uses [`apps/web/vercel.json`](./apps/web/vercel.json).
 2. **Settings → General → Node.js Version:** `20.x` (or use repo `.node-version`).
 3. Under **Settings → Environment Variables**, set **`VITE_CONVEX_URL`**
-   to your **production** Convex URL (`https://….convex.cloud`).
+   to your **production** Convex URL (e.g. `https://zealous-hyena-147.convex.cloud`).
+   **Must match** the deployment you push in step 5 — a dev URL on Vercel causes
+   `Could not find public function for 'applications:mine'` and similar errors.
 4. Leave **Build Command** / **Output Directory** empty so the matching `vercel.json` applies.
-   Do **not** set Build Command to `node scripts/vercel-build.mjs` unless Root Directory is the repo root.
-5. Deploy the Convex backend separately (`npx convex deploy`) and align
-   `CONVEX_SITE_URL` / `WEB_BASE_URL` (Convex) with your real app origin.
+5. Deploy the Convex backend from the repo root (every Vercel release that uses new APIs):
+   ```bash
+   CONVEX_DEPLOYMENT=prod:zealous-hyena-147 npx convex deploy
+   ```
+   Align `WEB_BASE_URL` and `SITE_URL` (via `pnpm setup:convex-auth -- --site-url https://your-vercel-domain`) on that same deployment.
 
 Optional: `VITE_SENTRY_DSN`, `VITE_RELEASE`.
 
