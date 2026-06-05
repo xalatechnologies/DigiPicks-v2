@@ -226,6 +226,53 @@ Optional overrides:
 
 `bootstrapDevAdmin` is disabled on production Convex deployments.
 
+### Vercel production still shows an old build
+
+GitHub **`main`** can be current while the public site is not. Frontend and
+backend are deployed separately.
+
+**1. Confirm GitHub → Vercel is wired**
+
+- Vercel → Project → **Settings → Git** → Production Branch = `main`, repo
+  connected.
+- **Deployments** → latest **Production** row should reference commit
+  `87e22ea` or newer and status **Ready**. If it is **Error** or stuck on an
+  old commit, open the failed build log (common fixes: Node **20.x**, Root
+  Directory either **empty** or **`apps/web`** — not both configs mixed).
+
+**2. Redeploy the frontend**
+
+- Deployments → ⋮ on latest successful `main` build → **Redeploy** → uncheck
+  **Use existing Build Cache** if env vars changed recently.
+- Or locally: `vercel login` then `vercel --prod` from the repo root (CLI
+  token must be valid).
+
+**3. Set production Convex URL on Vercel (build-time)**
+
+- **Settings → Environment Variables** → **`VITE_CONVEX_URL`** =
+  `https://zealous-hyena-147.convex.cloud` (or your prod deployment URL) for
+  **Production** (and Preview if you test previews).
+- Redeploy after changing — Vite bakes this into the bundle.
+
+**4. Push Convex functions to that same deployment**
+
+```bash
+cd /path/to/DigiPicks-v2
+CONVEX_DEPLOYMENT=prod:zealous-hyena-147 npx convex deploy
+```
+
+Without step 4, the new UI can load but the browser still errors with
+`Could not find public function for '…'`.
+
+**5. Verify**
+
+- Production URL shows new account routes (e.g. `/account/discover`).
+- Browser devtools → Network → requests go to the same `*.convex.cloud` host
+  as `VITE_CONVEX_URL`.
+- Hard refresh or incognito to avoid a cached `index.html`.
+
+See also [README § Vercel](../README.md#vercel).
+
 ### Creator studio QA path
 
 1. **New creator:** `/apply` → submit application → admin **`/admin/applications`** approve → creator lands on **`/dashboard`**.
